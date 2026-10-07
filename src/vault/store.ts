@@ -7,14 +7,21 @@ import { KC, RAD, VP } from './constants.ts';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Raw = any;
 
-export function shape(sf: Raw, wallet: Raw, now: number = Math.floor(Date.now() / 1000)): StoreView {
+export function shape(
+  sf: Raw,
+  wallet: Raw,
+  now: number = Math.floor(Date.now() / 1000),
+): StoreView {
   const panel = sf?.SkinsPanelLayout ?? {};
 
   // The rich array carries prices; the bare one is the fallback if Riot ever
   // drops it, so the page shows names rather than nothing.
   const rich = panel.SingleItemStoreOffers ?? [];
   const offers = rich.length
-    ? rich.map((o: Raw) => ({ id: o.Rewards?.[0]?.ItemID ?? o.OfferID, cost: o.Cost?.[VP] ?? null }))
+    ? rich.map((o: Raw) => ({
+        id: o.Rewards?.[0]?.ItemID ?? o.OfferID,
+        cost: o.Cost?.[VP] ?? null,
+      }))
     : (panel.SingleItemOffers ?? []).map((id: string) => ({ id, cost: null }));
 
   const nm = sf?.BonusStore;
@@ -74,7 +81,9 @@ export function shape(sf: Raw, wallet: Raw, now: number = Math.floor(Date.now() 
 
 /** Everything in the view that can carry owned marks. Bundles and the accessory
  *  store only: the daily store never offers you something you already own. */
-export function markable(view: StoreView): Array<{ items: Array<{ id: string; type: string; owned?: boolean }>; allOwned?: boolean }> {
+export function markable(
+  view: StoreView,
+): Array<{ items: Array<{ id: string; type: string; owned?: boolean }>; allOwned?: boolean }> {
   return [...view.bundles, ...(view.accessory ? [view.accessory] : [])];
 }
 

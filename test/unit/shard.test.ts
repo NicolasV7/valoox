@@ -1,6 +1,6 @@
-import { test } from 'node:test';
 import assert from 'node:assert';
-import { UnknownAffinity, shardHost, storeBase } from '../src/vault/shard.ts';
+import { test } from 'vitest';
+import { shardHost, storeBase, UnknownAffinity } from '../../src/vault/shard.ts';
 
 test('latam and br live on the na shard', () => {
   // riot-geo returns an AFFINITY; the storefront host is keyed by SHARD. Sending

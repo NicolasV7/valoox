@@ -1,7 +1,7 @@
-import { test } from 'node:test';
 import assert from 'node:assert';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { test } from 'vitest';
 
 // Two greps that hold the architecture in place. Neither is clever; both catch
 // the specific mistakes that would quietly undo a security property, and a
@@ -11,7 +11,8 @@ function sources(dir = 'src', out: Array<{ path: string; text: string }> = []) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, e.name);
     if (e.isDirectory()) sources(p, out);
-    else if (e.name.endsWith('.ts')) out.push({ path: p.replace(/\\/g, '/'), text: readFileSync(p, 'utf8') });
+    else if (e.name.endsWith('.ts'))
+      out.push({ path: p.replace(/\\/g, '/'), text: readFileSync(p, 'utf8') });
   }
   return out;
 }
@@ -98,7 +99,15 @@ test('the KV namespace holds caches only, never a session', () => {
 // Same idea, other side of the wire: the page can reach a session, so a
 // third-party script or an HTML sink on it is a credential-theft path.
 
-const web = ['public/app.js', 'public/ui.js', 'public/items.js', 'public/catalogs.js', 'public/inventory.js', 'public/favs.js', 'public/index.html'].map((p) => ({
+const web = [
+  'public/app.js',
+  'public/ui.js',
+  'public/items.js',
+  'public/catalogs.js',
+  'public/inventory.js',
+  'public/favs.js',
+  'public/index.html',
+].map((p) => ({
   path: p,
   text: readFileSync(p, 'utf8'),
 }));
@@ -116,7 +125,9 @@ test('no script is loaded from anywhere but this origin', () => {
   // The vendored QR encoder replaced a cdnjs <script> that ran with no SRI on a
   // page that can reach a Riot session. polyfill.io is the precedent.
   for (const f of web) {
-    const srcs = [...code(f.text).matchAll(/(?:src|href)\s*=\s*['"]([^'"]+)['"]/g)].map((m) => m[1]);
+    const srcs = [...code(f.text).matchAll(/(?:src|href)\s*=\s*['"]([^'"]+)['"]/g)].map(
+      (m) => m[1],
+    );
     for (const s of srcs) {
       assert.ok(
         s.startsWith('/') || s.startsWith('#') || s.startsWith('https://valorant-api.com/'),

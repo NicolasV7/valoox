@@ -41,47 +41,47 @@ const ALLOW: Rule[] = [
   // --- authentication handshake -------------------------------------------
   {
     method: 'GET',
-    pattern: new RegExp('^https://auth\\.riotgames\\.com/\\.well-known/openid-configuration$'),
+    pattern: /^https:\/\/auth\.riotgames\.com\/\.well-known\/openid-configuration$/,
     why: 'warms the cookie jar before a QR scan',
   },
   {
     method: 'GET',
-    pattern: new RegExp('^https://auth\\.riotgames\\.com/authorize\\?'),
+    pattern: /^https:\/\/auth\.riotgames\.com\/authorize\?/,
     why: 'reauth: jar in, access_token out of the Location fragment',
   },
   {
     method: 'GET',
-    pattern: new RegExp('^https://auth\\.riotgames\\.com/userinfo$'),
+    pattern: /^https:\/\/auth\.riotgames\.com\/userinfo$/,
     why: 'resolves the puuid once, at sign-in',
   },
   {
     method: 'POST',
-    pattern: new RegExp('^https://auth\\.riotgames\\.com/api/v1/authorization$'),
+    pattern: /^https:\/\/auth\.riotgames\.com\/api\/v1\/authorization$/,
     why: 'issues the ssid cookie at the end of a QR scan',
   },
   {
     method: 'POST',
-    pattern: new RegExp('^https://auth\\.riotgames\\.com/api/v1/login-token$'),
+    pattern: /^https:\/\/auth\.riotgames\.com\/api\/v1\/login-token$/,
     why: 'swaps the scanned login_token for a session',
   },
   {
     method: 'GET',
-    pattern: new RegExp('^https://authenticate\\.riotgames\\.com/api/v1/login$'),
+    pattern: /^https:\/\/authenticate\.riotgames\.com\/api\/v1\/login$/,
     why: 'polls for the scan to be approved in Riot Mobile',
   },
   {
     method: 'POST',
-    pattern: new RegExp('^https://authenticate\\.riotgames\\.com/api/v1/login$'),
+    pattern: /^https:\/\/authenticate\.riotgames\.com\/api\/v1\/login$/,
     why: 'opens a QR session',
   },
   {
     method: 'POST',
-    pattern: new RegExp('^https://entitlements\\.auth\\.riotgames\\.com/api/token/v1$'),
+    pattern: /^https:\/\/entitlements\.auth\.riotgames\.com\/api\/token\/v1$/,
     why: 'mints the entitlements JWT the storefront requires',
   },
   {
     method: 'PUT',
-    pattern: new RegExp('^https://riot-geo\\.pas\\.si\\.riotgames\\.com/pas/v1/product/valorant$'),
+    pattern: /^https:\/\/riot-geo\.pas\.si\.riotgames\.com\/pas\/v1\/product\/valorant$/,
     why: 'resolves the affinity once, at sign-in',
   },
 
@@ -126,7 +126,7 @@ const ALLOW: Rule[] = [
   // --- public, unauthenticated --------------------------------------------
   {
     method: 'GET',
-    pattern: new RegExp('^https://valorant-api\\.com/v1/version$'),
+    pattern: /^https:\/\/valorant-api\.com\/v1\/version$/,
     why: 'the X-Riot-ClientVersion header; public data, no credential sent',
   },
 ];

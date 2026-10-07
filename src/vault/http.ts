@@ -1,7 +1,7 @@
 import type { Jar } from '../types.ts';
 import { UA } from './constants.ts';
-import { assertAllowed } from './upstream.ts';
 import { absorb, serialize } from './jar.ts';
+import { assertAllowed } from './upstream.ts';
 
 interface RiotInit extends RequestInit {
   jar?: Jar;

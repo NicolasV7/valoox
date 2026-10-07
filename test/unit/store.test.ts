@@ -1,6 +1,6 @@
-import { test } from 'node:test';
 import assert from 'node:assert';
-import { markOwned, shape } from '../src/vault/store.ts';
+import { test } from 'vitest';
+import { markOwned, shape } from '../../src/vault/store.ts';
 
 const VP = '85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741';
 const RAD = 'e59aa87c-4cbf-517a-5983-6e81511be9b7';
@@ -30,7 +30,12 @@ const sf = {
   AccessoryStore: {
     AccessoryStoreRemainingDurationInSeconds: 102945,
     AccessoryStoreOffers: [
-      { Offer: { Cost: { [KC]: 5500 }, Rewards: [{ ItemTypeID: SPRAY, ItemID: 'acc-a', Quantity: 2 }] } },
+      {
+        Offer: {
+          Cost: { [KC]: 5500 },
+          Rewards: [{ ItemTypeID: SPRAY, ItemID: 'acc-a', Quantity: 2 }],
+        },
+      },
       { Offer: { Cost: { [KC]: 4000 }, Rewards: [{ ItemTypeID: SPRAY, ItemID: 'acc-b' }] } },
     ],
   },

@@ -1,6 +1,6 @@
-import { test } from 'node:test';
 import assert from 'node:assert';
-import { allowCount, assertAllowed } from '../src/vault/upstream.ts';
+import { test } from 'vitest';
+import { allowCount, assertAllowed } from '../../src/vault/upstream.ts';
 
 const PUUID = '1aefc04b-4455-8b2f-6332-79b4260aaffe';
 const TYPE = 'e7c63390-eda7-46e0-bb7a-a6abdacd2433';

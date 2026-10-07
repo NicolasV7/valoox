@@ -1,11 +1,13 @@
-import { test } from 'node:test';
 import assert from 'node:assert';
-import type { Env } from '../src/types.ts';
-import { SealBroken, open, seal } from '../src/vault/seal.ts';
+import { test } from 'vitest';
+import type { Env } from '../../src/types.ts';
+import { open, SealBroken, seal } from '../../src/vault/seal.ts';
 
 // One key for the whole file: seal.ts caches the derived KEK per isolate, which
 // is the behaviour we want in production and which a second key would defeat.
-const env = { JAR_KEY: Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64') } as Env;
+const env = {
+  JAR_KEY: Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64'),
+} as Env;
 
 const UID_A = 'a'.repeat(32);
 const UID_B = 'b'.repeat(32);

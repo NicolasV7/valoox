@@ -1,14 +1,17 @@
-import { test } from 'node:test';
 import assert from 'node:assert';
-import type { Jar } from '../src/types.ts';
-import { absorb, serialize } from '../src/vault/jar.ts';
+import { test } from 'vitest';
+import type { Jar } from '../../src/types.ts';
+import { absorb, serialize } from '../../src/vault/jar.ts';
 
 const res = (...cookies: string[]) =>
   ({ headers: { getSetCookie: () => cookies } }) as unknown as Response;
 
 test('absorb keeps name=value and drops every attribute', () => {
   assert.deepEqual(
-    absorb({}, res('ssid=abc; Path=/; Secure; HttpOnly; SameSite=Strict', 'tdid=xyz; Max-Age=31536000')),
+    absorb(
+      {},
+      res('ssid=abc; Path=/; Secure; HttpOnly; SameSite=Strict', 'tdid=xyz; Max-Age=31536000'),
+    ),
     { ssid: 'abc', tdid: 'xyz' },
   );
 });
@@ -29,5 +32,3 @@ test('serialize round-trips through absorb', () => {
   const jar: Jar = { ssid: 'a', tdid: 'b' };
   assert.equal(serialize(jar), 'ssid=a; tdid=b');
 });
-
-

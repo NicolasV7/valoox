@@ -32,7 +32,10 @@ export function art(url) {
 export function money({ cost, price, percent, base, currency }) {
   const n = el('div', { class: 'price' });
   if (percent) {
-    n.append(el('s', { text: vp(cost) }), el('span', { class: 'off', text: `${vp(price)} · -${percent}%` }));
+    n.append(
+      el('s', { text: vp(cost) }),
+      el('span', { class: 'off', text: `${vp(price)} · -${percent}%` }),
+    );
   } else {
     if (base != null && price != null && base !== price) n.append(el('s', { text: vp(base) }));
     n.append(document.createTextNode(vp(price ?? cost ?? base)));
@@ -43,7 +46,8 @@ export function money({ cost, price, percent, base, currency }) {
 
 export function label(text, { qty, owned, tag, fav } = {}) {
   const n = el('div', { class: 'name', text: text || 'Desconocido' });
-  if (fav) n.append(el('span', { class: 'tick star-in', title: 'La marcaste como favorita', text: '★' }));
+  if (fav)
+    n.append(el('span', { class: 'tick star-in', title: 'La marcaste como favorita', text: '★' }));
   if (qty > 1) n.append(el('span', { class: 'qty', text: ` ×${qty}` }));
   if (owned) n.append(el('span', { class: 'tick', title: 'Ya lo tenés', text: '✓' }));
   if (tag) n.append(el('span', { class: 'tag', text: tag }));
@@ -60,7 +64,9 @@ export function hms(s) {
 }
 
 export function ticker(node, deadline) {
-  const tick = () => { node.textContent = hms(Math.round(deadline - Date.now() / 1000)); };
+  const tick = () => {
+    node.textContent = hms(Math.round(deadline - Date.now() / 1000));
+  };
   tick();
   setInterval(tick, 1000);
 }
@@ -73,24 +79,40 @@ export async function grid(parent, title, items, lookup, opts = {}) {
   const data = await Promise.all(items.map(lookup));
   items.forEach((it, i) =>
     g.append(
-      el('div', { class: 'card' + (it.owned ? ' owned' : '') + (it.fav ? ' fav' : '') },
+      el(
+        'div',
+        { class: 'card' + (it.owned ? ' owned' : '') + (it.fav ? ' fav' : '') },
         art(data[i]?.displayIcon),
         label(data[i]?.displayName, it),
-        money({ ...it, currency: opts.currency })),
+        money({ ...it, currency: opts.currency }),
+      ),
     ),
   );
 }
 
 /** <details> gives the open/close behaviour for free — no JS, no state to track. */
 export function bundle(bn, b) {
-  const items = el('div', { class: 'items' }, el('span', { class: 'note', text: 'Cargando contenido…' }));
-  const box = el('details', { class: 'bundle' },
-    el('summary', {},
+  const items = el(
+    'div',
+    { class: 'items' },
+    el('span', { class: 'note', text: 'Cargando contenido…' }),
+  );
+  const box = el(
+    'details',
+    { class: 'bundle' },
+    el(
+      'summary',
+      {},
       art(b?.displayIcon),
-      el('div', { class: 'head' },
+      el(
+        'div',
+        { class: 'head' },
         label(b?.displayName ?? 'Bundle', { tag: bn.allOwned ? 'ya lo tenés completo' : null }),
-        money(bn))),
-    items);
+        money(bn),
+      ),
+    ),
+    items,
+  );
 
   // Contents resolve on first open only: most loads never expand a bundle, and
   // that is six image requests nobody asked for.
@@ -101,10 +123,14 @@ export function bundle(bn, b) {
     items.replaceChildren(
       ...(bn.items.length
         ? bn.items.map((it, i) =>
-            el('div', { class: 'item' + (it.owned ? ' owned' : '') },
+            el(
+              'div',
+              { class: 'item' + (it.owned ? ' owned' : '') },
               art(metas[i]?.displayIcon),
               label(metas[i]?.displayName ?? 'Ítem desconocido', { owned: it.owned }),
-              money(it)))
+              money(it),
+            ),
+          )
         : [el('span', { class: 'note', text: 'Riot no detalló el contenido.' })]),
     );
   });

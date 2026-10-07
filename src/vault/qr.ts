@@ -1,7 +1,14 @@
 import type { Env, Jar } from '../types.ts';
-import { rf } from './http.ts';
 import { identify, reauth } from './auth.ts';
-import { clearCache, clearScan, createSession, readScan, saveSession, writeScan } from './session.ts';
+import { rf } from './http.ts';
+import {
+  clearCache,
+  clearScan,
+  createSession,
+  readScan,
+  saveSession,
+  writeScan,
+} from './session.ts';
 
 // Riot Mobile QR sign-in: the only auth path this service has.
 //

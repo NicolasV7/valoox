@@ -38,9 +38,16 @@ function chromaName(raw, skin) {
 const VP_BY_TIER = { Select: 875, Deluxe: 1275, Premium: 1775, Exclusive: 2175, Ultra: 2475 };
 
 let tiersPromise = null;
-const tiers = () => (tiersPromise ??= cached('contenttiers').then((t) =>
-  new Map(t.data.map((x) => [x.uuid, { name: x.devName, colour: '#' + (x.highlightColor ?? '9b9a9633').slice(0, 6) }])),
-));
+const tiers = () =>
+  (tiersPromise ??= cached('contenttiers').then(
+    (t) =>
+      new Map(
+        t.data.map((x) => [
+          x.uuid,
+          { name: x.devName, colour: '#' + (x.highlightColor ?? '9b9a9633').slice(0, 6) },
+        ]),
+      ),
+  ));
 
 /**
  * Weapons: the only catalogue that needs real work. Every id that can appear in
@@ -93,15 +100,21 @@ const levelIndex = (path) => async () => {
   return map;
 };
 
-const flatIndex = (path, icon = 'displayIcon') => async () => {
-  const d = await cached(path);
-  return new Map(d.data.map((x) => [x.uuid, { key: x.uuid, name: x.displayName, icon: x[icon] ?? null }]));
-};
+const flatIndex =
+  (path, icon = 'displayIcon') =>
+  async () => {
+    const d = await cached(path);
+    return new Map(
+      d.data.map((x) => [x.uuid, { key: x.uuid, name: x.displayName, icon: x[icon] ?? null }]),
+    );
+  };
 
 /** Titles have no art at all — the text IS the item. */
 const titleIndex = async () => {
   const d = await cached('playertitles');
-  return new Map(d.data.map((x) => [x.uuid, { key: x.uuid, name: x.titleText || x.displayName, icon: null }]));
+  return new Map(
+    d.data.map((x) => [x.uuid, { key: x.uuid, name: x.titleText || x.displayName, icon: null }]),
+  );
 };
 
 /** Item type ids, measured from a real account's entitlements rather than
@@ -118,7 +131,11 @@ export const KINDS = [
   },
   { type: 'dd3bf334-87f3-40bd-b043-682a57a8dc3a', label: 'Buddies', index: levelIndex('buddies') },
   { type: 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475', label: 'Sprays', index: levelIndex('sprays') },
-  { type: '3f296c07-64c3-494c-923b-fe692a4fa1bd', label: 'Tarjetas', index: flatIndex('playercards', 'largeArt') },
+  {
+    type: '3f296c07-64c3-494c-923b-fe692a4fa1bd',
+    label: 'Tarjetas',
+    index: flatIndex('playercards', 'largeArt'),
+  },
   { type: 'de7caa6b-adf7-4588-bbd1-143831e786c6', label: 'Títulos', index: titleIndex },
 ];
 

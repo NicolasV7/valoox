@@ -3,7 +3,7 @@ import { dataHeaders } from './auth.ts';
 import { rf } from './http.ts';
 import { ownedSet } from './owned.ts';
 import { storeBase } from './shard.ts';
-import { markOwned, markable, shape } from './store.ts';
+import { markable, markOwned, shape } from './store.ts';
 
 /** Tokens + session -> the finished store view. Everything Riot-facing for this
  *  path lives here; the caller handles caching and persistence. */

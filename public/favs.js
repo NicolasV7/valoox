@@ -1,5 +1,5 @@
-import { art, el } from './ui.js';
 import { weaponIndex } from './catalogs.js';
+import { art, el } from './ui.js';
 
 // Favourites.
 //
@@ -41,15 +41,24 @@ function row(entry, state, status, redraw) {
   });
   star.onclick = () => {
     if (on) state.wishlist = state.wishlist.filter((w) => w.id !== id);
-    else if (state.wishlist.length >= MAX) return void (status.textContent = 'Máximo ' + MAX + ' favoritos.');
-    else state.wishlist = [...state.wishlist, { id, name: entry.name }];
+    else if (state.wishlist.length >= MAX) {
+      status.textContent = 'Máximo ' + MAX + ' favoritos.';
+      return;
+    } else state.wishlist = [...state.wishlist, { id, name: entry.name }];
     save(state, status);
     redraw();
   };
-  const card = el('div', { class: 'item tiered' },
+  const card = el(
+    'div',
+    { class: 'item tiered' },
     art(entry.icon),
-    el('div', { class: 'name', text: entry.name }, el('span', { class: 'qty', text: ' ' + (entry.sub ?? '') })),
-    star);
+    el(
+      'div',
+      { class: 'name', text: entry.name },
+      el('span', { class: 'qty', text: ' ' + (entry.sub ?? '') }),
+    ),
+    star,
+  );
   card.style.borderLeftColor = entry.colour ?? '#9b9a96';
   return card;
 }
@@ -60,12 +69,19 @@ export async function renderFavs(app, data) {
   const count = el('span', { class: 'sub' });
   const listBox = el('div', { class: 'items' });
   const resultBox = el('div', { class: 'items' });
-  const search = el('input', { type: 'search', placeholder: 'Buscar una skin…', spellcheck: 'false' });
+  const search = el('input', {
+    type: 'search',
+    placeholder: 'Buscar una skin…',
+    spellcheck: 'false',
+  });
   const hint = el('p', { class: 'note', text: 'Cargando el catálogo…' });
 
   app.replaceChildren(
     el('h2', { text: 'Avisarme' }),
-    el('p', { class: 'note', text: 'Marcá las skins que estás esperando. Cuando alguna aparezca en tu tienda, te la señalamos ahí con una estrella.' }),
+    el('p', {
+      class: 'note',
+      text: 'Marcá las skins que estás esperando. Cuando alguna aparezca en tu tienda, te la señalamos ahí con una estrella.',
+    }),
     status,
     el('h2', {}, document.createTextNode('Tus favoritas '), count),
     listBox,
@@ -78,25 +94,44 @@ export async function renderFavs(app, data) {
   const map = await weaponIndex();
   const owned = new Set();
   for (const ids of Object.values(data.inv.byType ?? {})) {
-    for (const id of ids) { const e = map.get(id); if (e) owned.add(e.key); }
+    for (const id of ids) {
+      const e = map.get(id);
+      if (e) owned.add(e.key);
+    }
   }
   // One entry per skin, and only ones that could actually turn up in a store.
   const all = [...new Set(map.values())].filter((e) => e.levels.length && !owned.has(e.key));
-  hint.textContent = all.length + ' skins que todavía no tenés. Las que ya son tuyas no aparecen: Riot nunca las pone en tu tienda.';
+  hint.textContent =
+    all.length +
+    ' skins que todavía no tenés. Las que ya son tuyas no aparecen: Riot nunca las pone en tu tienda.';
 
   const redraw = () => {
     count.textContent = state.wishlist.length + '/' + MAX;
     listBox.replaceChildren(
       ...(state.wishlist.length
         ? state.wishlist.map((w) =>
-            row(all.find((x) => x.levels[0] === w.id) ?? { name: w.name, levels: [w.id], sub: '', icon: null }, state, status, redraw))
+            row(
+              all.find((x) => x.levels[0] === w.id) ?? {
+                name: w.name,
+                levels: [w.id],
+                sub: '',
+                icon: null,
+              },
+              state,
+              status,
+              redraw,
+            ),
+          )
         : [el('span', { class: 'note', text: 'Todavía no marcaste ninguna.' })]),
     );
     const q = search.value.trim().toLowerCase();
     resultBox.replaceChildren(
       ...(q.length < 2
         ? [el('span', { class: 'note', text: 'Escribí al menos dos letras.' })]
-        : all.filter((e) => e.name.toLowerCase().includes(q)).slice(0, 40).map((e) => row(e, state, status, redraw))),
+        : all
+            .filter((e) => e.name.toLowerCase().includes(q))
+            .slice(0, 40)
+            .map((e) => row(e, state, status, redraw))),
     );
   };
 

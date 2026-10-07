@@ -1,7 +1,7 @@
+import { renderFavs } from './favs.js';
+import { renderInventory } from './inventory.js';
 import { bundleMeta, itemMeta, skin } from './items.js';
 import { bundle, el, grid, ticker, vp } from './ui.js';
-import { renderInventory } from './inventory.js';
-import { renderFavs } from './favs.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -13,35 +13,70 @@ async function render(app, s) {
   app.replaceChildren();
   // One extra call, no Riot contact: it is what turns a favourite into something
   // you actually notice on the day it matters.
-  const fav = new Set((await api('/api/prefs').catch(() => ({})))?.wishlist?.map((w) => w.id) ?? []);
+  const fav = new Set(
+    (await api('/api/prefs').catch(() => ({})))?.wishlist?.map((w) => w.id) ?? [],
+  );
   const hit = s.offers.filter((o) => fav.has(o.id));
   if (hit.length) {
-    app.append(el('p', { class: 'hit' },
-      el('span', { class: 'tick', text: '★' }),
-      document.createTextNode(' Hoy está ' + hit.length + ' de tus favoritas en la tienda.')));
+    app.append(
+      el(
+        'p',
+        { class: 'hit' },
+        el('span', { class: 'tick', text: '★' }),
+        document.createTextNode(' Hoy está ' + hit.length + ' de tus favoritas en la tienda.'),
+      ),
+    );
   }
   const clock = el('div', { id: 'clock' });
-  app.append(el('header', {},
-    el('div', { class: 'wallet' },
-      ...[['vp', 'VP'], ['rad', 'RAD'], ['kc', 'KC']].map(([k, t]) =>
-        el('div', {}, el('b', { text: vp(s.wallet[k]) }), el('span', { text: ' ' + t })))),
-    clock));
+  app.append(
+    el(
+      'header',
+      {},
+      el(
+        'div',
+        { class: 'wallet' },
+        ...[
+          ['vp', 'VP'],
+          ['rad', 'RAD'],
+          ['kc', 'KC'],
+        ].map(([k, t]) =>
+          el('div', {}, el('b', { text: vp(s.wallet[k]) }), el('span', { text: ' ' + t })),
+        ),
+      ),
+      clock,
+    ),
+  );
   ticker(clock, s.fetchedAt + s.remaining);
 
-  await grid(app, 'Tienda diaria', s.offers.map((o) => ({ ...o, fav: fav.has(o.id) })), skin);
+  await grid(
+    app,
+    'Tienda diaria',
+    s.offers.map((o) => ({ ...o, fav: fav.has(o.id) })),
+    skin,
+  );
   if (s.night?.items?.length) {
-    await grid(app, 'Mercado nocturno', s.night.items.map((o) => ({ ...o, fav: fav.has(o.id) })), skin);
+    await grid(
+      app,
+      'Mercado nocturno',
+      s.night.items.map((o) => ({ ...o, fav: fav.has(o.id) })),
+      skin,
+    );
   }
 
   if (s.accessory?.items?.length) {
     // Its own rotation timer, independent of the daily one.
     const c = el('span', { class: 'sub' });
-    await grid(app, 'Tienda de accesorios', s.accessory.items, itemMeta, { currency: 'KC', clock: c });
+    await grid(app, 'Tienda de accesorios', s.accessory.items, itemMeta, {
+      currency: 'KC',
+      clock: c,
+    });
     ticker(c, s.fetchedAt + s.accessory.remaining);
   }
 
   if (s.bundles?.length) {
-    app.append(el('h2', { text: s.bundles.length > 1 ? 'Bundles destacados' : 'Bundle destacado' }));
+    app.append(
+      el('h2', { text: s.bundles.length > 1 ? 'Bundles destacados' : 'Bundle destacado' }),
+    );
     const data = await Promise.all(s.bundles.map(bundleMeta));
     s.bundles.forEach((bn, i) => app.append(bundle(bn, data[i])));
   }
@@ -49,7 +84,10 @@ async function render(app, s) {
   const out = el('button', { class: 'ghost', text: 'Desconectar este dispositivo' });
   out.onclick = () => show('bye');
   const sec = el('a', { href: '#', text: 'Qué guardamos' });
-  sec.onclick = (e) => { e.preventDefault(); show('sec'); };
+  sec.onclick = (e) => {
+    e.preventDefault();
+    show('sec');
+  };
   app.append(el('p', {}, out), el('footer', {}, sec));
 }
 
@@ -71,7 +109,12 @@ function signIn(msg) {
   setNav(null);
   app.replaceChildren(
     el('h2', { text: 'Iniciar sesión' }),
-    el('p', { class: 'note', text: msg ?? 'La sesión caducó. Se renueva desde el celular con Riot Mobile — la contraseña y el 2FA se manejan dentro de la app de Riot.' }),
+    el('p', {
+      class: 'note',
+      text:
+        msg ??
+        'La sesión caducó. Se renueva desde el celular con Riot Mobile — la contraseña y el 2FA se manejan dentro de la app de Riot.',
+    }),
     el('button', { id: 'go', text: 'Generar enlace de Riot Mobile' }),
   );
 
@@ -85,21 +128,35 @@ function signIn(msg) {
     const st = el('p', { class: 'note', text: 'Esperando aprobación…' });
     app.replaceChildren(
       el('h2', { text: 'Aprobar en Riot Mobile' }),
-      el('p', { class: 'note', text: 'Escaneá el código desde Riot Mobile (Cuenta → Escanear código QR). Si ya estás en el celular, tocá el botón y se abre la app.' }),
-      box, el('br'),
+      el('p', {
+        class: 'note',
+        text: 'Escaneá el código desde Riot Mobile (Cuenta → Escanear código QR). Si ya estás en el celular, tocá el botón y se abre la app.',
+      }),
+      box,
+      el('br'),
       el('a', { class: 'qr', href: r.url, text: 'Abrir Riot Mobile' }),
       st,
       // Say what the code points at. This gesture is mechanically QRLjacking
       // minus the intent, and a user who learns to check the destination is
       // harder to phish with a lookalike site later.
-      el('p', { class: 'note', text: 'Este código apunta a riotgames.com. Tiene que hacerlo. Si algún sitio te muestra un QR que no, cerrá la pestaña.' }),
+      el('p', {
+        class: 'note',
+        text: 'Este código apunta a riotgames.com. Tiene que hacerlo. Si algún sitio te muestra un QR que no, cerrá la pestaña.',
+      }),
     );
 
     loadQR()
-      .then(() => new QRCode(box, {
-        text: r.url, width: 232, height: 232,
-        colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M,
-      }))
+      .then(
+        () =>
+          new QRCode(box, {
+            text: r.url,
+            width: 232,
+            height: 232,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M,
+          }),
+      )
       .catch(() => box.remove()); // the link still works without the picture
 
     const timer = setInterval(async () => {
@@ -142,9 +199,19 @@ async function load(which = 'store') {
     app.replaceChildren(el('p', { class: 'note', text: 'Cargando…' }));
     const s = path
       ? await api(path)
-      : await Promise.all([api('/api/prefs'), api('/api/inventory')]).then(([prefs, inv]) => ({ prefs, inv, ...(prefs.needsReseed || inv.needsReseed ? { needsReseed: true } : {}) }));
-    if (s.needsReseed) { setNav(null); return signIn(); }
-    if (s.error) { setNav(null); return signIn('Error: ' + s.error); }
+      : await Promise.all([api('/api/prefs'), api('/api/inventory')]).then(([prefs, inv]) => ({
+          prefs,
+          inv,
+          ...(prefs.needsReseed || inv.needsReseed ? { needsReseed: true } : {}),
+        }));
+    if (s.needsReseed) {
+      setNav(null);
+      return signIn();
+    }
+    if (s.error) {
+      setNav(null);
+      return signIn('Error: ' + s.error);
+    }
     await draw(app, s);
   } catch (e) {
     app.replaceChildren(el('p', { class: 'err', text: 'No se pudo cargar: ' + e.message }));

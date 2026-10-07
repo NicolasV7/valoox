@@ -33,7 +33,9 @@ export async function ownedSet(
 ): Promise<Set<string>> {
   const out = new Set<string>();
   for (let i = 0; i < types.length; i += FANOUT) {
-    const batch = await Promise.all(types.slice(i, i + FANOUT).map((t) => ownedOf(h, base, puuid, t)));
+    const batch = await Promise.all(
+      types.slice(i, i + FANOUT).map((t) => ownedOf(h, base, puuid, t)),
+    );
     for (const ids of batch) for (const id of ids) out.add(id);
   }
   return out;

@@ -1,6 +1,6 @@
-import { test } from 'node:test';
 import assert from 'node:assert';
-import { clear, mint, read, sameOrigin, set } from '../src/app/cookie.ts';
+import { test } from 'vitest';
+import { clear, mint, read, sameOrigin, set } from '../../src/app/cookie.ts';
 
 const req = (h: Record<string, string> = {}) => new Request('https://x/api/store', { headers: h });
 

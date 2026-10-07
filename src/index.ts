@@ -1,13 +1,12 @@
-import type { Env, Session, StoreView, Tokens } from './types.ts';
 import * as cookie from './app/cookie.ts';
-import { identify, reauth } from './vault/auth.ts';
-import { fetchStore } from './vault/storefront.ts';
-import { type Inventory, fetchInventory } from './vault/inventory.ts';
-import * as qr from './vault/qr.ts';
-import { forget, readCache, readSession, saveSession, writeCache } from './vault/session.ts';
+import type { Env, Session, StoreView, Tokens } from './types.ts';
 import { runAlerts } from './vault/alerts.ts';
+import { identify, reauth } from './vault/auth.ts';
+import { fetchInventory, type Inventory } from './vault/inventory.ts';
+import * as qr from './vault/qr.ts';
 import { prune, setAlerts } from './vault/repo.ts';
-
+import { forget, readCache, readSession, saveSession, writeCache } from './vault/session.ts';
+import { fetchStore } from './vault/storefront.ts';
 
 type Body = Record<string, unknown> | StoreView | Inventory | qr.PollResult;
 
@@ -79,7 +78,10 @@ const MAX_WISHLIST = 60;
 
 /** Validated at the edge, before anything is sealed. The topic becomes part of a
  *  URL, so its shape is a security property, not a nicety. */
-function cleanPrefs(body: unknown): { wishlist: Array<{ id: string; name: string }>; notify: Session['notify'] } {
+function cleanPrefs(body: unknown): {
+  wishlist: Array<{ id: string; name: string }>;
+  notify: NonNullable<Session['notify']>;
+} {
   const b = (body ?? {}) as { wishlist?: unknown; notify?: unknown };
   const n = (b.notify ?? {}) as { ntfy?: unknown; ntfyToken?: unknown; discord?: unknown };
   const str = (v: unknown, re: RegExp) => (typeof v === 'string' && re.test(v) ? v : undefined);
@@ -90,10 +92,14 @@ function cleanPrefs(body: unknown): { wishlist: Array<{ id: string; name: string
   };
   const raw = Array.isArray(b.wishlist) ? b.wishlist : [];
   const wishlist = raw
-    .filter((w): w is { id: string; name: string } =>
-      !!w && typeof w === 'object' &&
-      typeof (w as { id?: unknown }).id === 'string' && UUID_RE.test((w as { id: string }).id) &&
-      typeof (w as { name?: unknown }).name === 'string')
+    .filter(
+      (w): w is { id: string; name: string } =>
+        !!w &&
+        typeof w === 'object' &&
+        typeof (w as { id?: unknown }).id === 'string' &&
+        UUID_RE.test((w as { id: string }).id) &&
+        typeof (w as { name?: unknown }).name === 'string',
+    )
     .slice(0, MAX_WISHLIST)
     .map((w) => ({ id: w.id, name: w.name.slice(0, 80) }));
   return { wishlist, notify };

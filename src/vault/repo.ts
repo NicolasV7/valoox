@@ -16,9 +16,7 @@ export interface Row {
 const now = () => Math.floor(Date.now() / 1000);
 
 export async function get(env: Env, uid: string): Promise<Row | null> {
-  return env.DB.prepare('SELECT uid, kid, blob, ver FROM s WHERE uid = ?')
-    .bind(uid)
-    .first<Row>();
+  return env.DB.prepare('SELECT uid, kid, blob, ver FROM s WHERE uid = ?').bind(uid).first<Row>();
 }
 
 /**
@@ -61,7 +59,9 @@ export async function listAlerting(env: Env): Promise<Row[]> {
 }
 
 export async function setAlerts(env: Env, uid: string, on: boolean): Promise<void> {
-  await env.DB.prepare('UPDATE s SET alerts = ? WHERE uid = ?').bind(on ? 1 : 0, uid).run();
+  await env.DB.prepare('UPDATE s SET alerts = ? WHERE uid = ?')
+    .bind(on ? 1 : 0, uid)
+    .run();
 }
 
 export async function remove(env: Env, uid: string): Promise<void> {

@@ -33,8 +33,9 @@ export interface Session {
   notify?: { ntfy?: string; ntfyToken?: string; discord?: string };
 }
 
-/** Headers every authenticated Riot data call must carry. */
-export interface RiotHeaders {
+/** Headers every authenticated Riot data call must carry. Extends Record so it
+ *  can be handed straight to fetch() as a HeadersInit. */
+export interface RiotHeaders extends Record<string, string> {
   Authorization: string;
   'X-Riot-Entitlements-JWT': string;
   'X-Riot-ClientPlatform': string;
@@ -57,7 +58,10 @@ export interface GroupItem {
 export interface StoreView {
   offers: Offer[];
   remaining: number;
-  night: { remaining: number; items: Array<Offer & { price: number | null; percent: number }> } | null;
+  night: {
+    remaining: number;
+    items: Array<Offer & { price: number | null; percent: number }>;
+  } | null;
   bundles: Array<{
     id: string;
     base: number | null;
@@ -75,31 +79,11 @@ export interface StoreView {
   fetchedAt: number;
 }
 
-/** Only the four KV methods this service uses. Declared here rather than pulling
- *  in @cloudflare/workers-types: the vault is exactly where a dependency is not
- *  worth it, and the real binding is a superset of this. */
-export interface KV {
-  get(key: string): Promise<string | null>;
-  put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<void>;
-  delete(key: string): Promise<void>;
-}
-
-/** Only what this service uses of D1. Strongly consistent calls only. */
-export interface D1Stmt {
-  bind(...values: unknown[]): D1Stmt;
-  first<T>(): Promise<T | null>;
-  all<T>(): Promise<{ results?: T[] }>;
-  run(): Promise<{ meta: { changes: number } }>;
-}
-export interface D1 {
-  prepare(sql: string): D1Stmt;
-}
-
-export interface Env {
-  /** Caches only: the public client version, and one store view per uid. */
-  VAL: KV;
-  /** Sessions. One row per signed-in browser. */
-  DB: D1;
+/**
+ * The bindings, from `wrangler types` plus the one secret — secrets do not live
+ * in wrangler.toml, so they are not in the generated Env.
+ */
+export interface Env extends Cloudflare.Env {
   /** 32 random bytes, base64. Set with `wrangler secret put JAR_KEY`. */
   JAR_KEY: string;
 }

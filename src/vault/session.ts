@@ -1,7 +1,7 @@
 import type { Env, Jar, Session } from '../types.ts';
 import { SCAN_TTL } from './constants.ts';
-import { CURRENT_KID, open, seal } from './seal.ts';
 import * as repo from './repo.ts';
+import { CURRENT_KID, open, seal } from './seal.ts';
 
 // Everything that persists, behind one module. Sessions are sealed rows in D1;
 // the two caches are KV, both keyed by uid so nothing is ever shared between
@@ -33,7 +33,12 @@ export async function createSession(env: Env, uid: string, s: Session): Promise<
  * Always re-seals under CURRENT_KID, so a key rotation migrates every active
  * session for free within one session lifetime. No re-encryption job.
  */
-export async function saveSession(env: Env, uid: string, s: Session, ver: number): Promise<boolean> {
+export async function saveSession(
+  env: Env,
+  uid: string,
+  s: Session,
+  ver: number,
+): Promise<boolean> {
   return repo.update(env, uid, await seal(env, uid, CURRENT_KID, s), ver);
 }
 

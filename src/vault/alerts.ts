@@ -2,8 +2,7 @@ import type { Env, Session, StoreView } from '../types.ts';
 import { reauth } from './auth.ts';
 import { rf } from './http.ts';
 import * as repo from './repo.ts';
-import { open, seal } from './seal.ts';
-import { CURRENT_KID } from './seal.ts';
+import { CURRENT_KID, open, seal } from './seal.ts';
 import { fetchStore } from './storefront.ts';
 
 /**
@@ -90,7 +89,9 @@ async function notify(to: Notify, found: Hit[]): Promise<void> {
   // A throttled push counted as delivered is the worst bug a notifier can have:
   // it reports success for something nobody received.
   if (!ok) {
-    const codes = results.map((r) => (r.status === 'fulfilled' ? r.value.status : 'threw')).join('/');
+    const codes = results
+      .map((r) => (r.status === 'fulfilled' ? r.value.status : 'threw'))
+      .join('/');
     throw new Error('no delivery channel accepted: ' + codes);
   }
 }

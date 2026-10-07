@@ -1,7 +1,7 @@
-import { test } from 'node:test';
 import assert from 'node:assert';
-import type { Env } from '../src/types.ts';
-import { SealBroken, open, seal } from '../src/vault/seal.ts';
+import { test } from 'vitest';
+import type { Env } from '../../src/types.ts';
+import { open, SealBroken, seal } from '../../src/vault/seal.ts';
 
 // THE KILL SWITCH.
 //
@@ -12,7 +12,8 @@ import { SealBroken, open, seal } from '../src/vault/seal.ts';
 // `wrangler secret put` against the live Worker) is a separate, deliberate step:
 // it signs out every user, so it is done before there are users, not after.
 
-const key = () => ({ JAR_KEY: Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64') }) as Env;
+const key = () =>
+  ({ JAR_KEY: Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64') }) as Env;
 
 const UID = 'c'.repeat(32);
 const KID = 1;
