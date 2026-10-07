@@ -17,7 +17,7 @@ flowchart LR
   S["Sellado<br/>AES-256-GCM"]
   D["D1<br/>una fila por navegador"]
   C["valorant-api.com<br/>3,5 MB"]
-  N["ntfy"]
+  N["Discord"]
   T["Cron 00:30"]
 
   B -->|GET /api/*| W

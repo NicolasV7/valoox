@@ -31,88 +31,85 @@ function save(state, status) {
 }
 
 /**
- * The alert channel.
+ * The alert channel: a Discord webhook.
  *
- * The topic is minted by the server and shown here, never typed by the user: on
- * ntfy the name of a topic IS its password, so one a person would invent is one a
- * stranger can guess. The one step we cannot do for them is the subscribe, which
- * happens inside another app — hence the test button, which is the only way to
- * find out it worked without waiting for a skin to show up.
+ * ntfy was here first and read better — we minted the topic, the user only had
+ * to subscribe. It had to go: ntfy limits publishing per source IP, a Worker has
+ * no IP of its own, and a free account does not change that. Discord limits per
+ * webhook, and a webhook is a thing each person has one of.
+ *
+ * The field takes the whole URL because that is what Discord's Copy button
+ * gives you. The server keeps only the id and the token.
  */
-function channel(topic) {
-  if (!topic) {
-    return el('p', {
-      class: 'err',
-      text: 'No pudimos crear tu canal de avisos. Recargá la página.',
-    });
-  }
-
-  const name = el('code', { class: 'topic', text: topic });
+function channel(state, status) {
   const said = el('p', { class: 'note' });
   const tell = (text, bad) => {
     said.textContent = text;
     said.className = bad ? 'err' : 'note';
   };
 
-  const copy = el('button', { class: 'ghost tap', type: 'button' });
-  copy.append(icon('copy', { size: 16, title: 'Copiar el nombre del canal' }));
-  copy.onclick = async () => {
-    try {
-      await navigator.clipboard.writeText(topic);
-      tell('Copiado.');
-    } catch {
-      // Clipboard access is refused in plenty of ordinary situations. Selecting
-      // the text leaves them one keystroke away instead of stuck.
-      getSelection()?.selectAllChildren(name);
-      tell('El navegador no nos deja copiar. Te lo dejamos seleccionado.');
-    }
-  };
+  const field = el('input', {
+    type: 'url',
+    value: state.discord,
+    placeholder: 'https://discord.com/api/webhooks/…',
+    spellcheck: 'false',
+    autocapitalize: 'off',
+    'aria-label': 'URL del webhook de Discord',
+  });
 
   const test = el('button', { class: 'ghost', type: 'button', text: 'Enviar una prueba' });
+  test.disabled = !state.discord;
+
+  const save = el('button', { type: 'button', text: 'Guardar' });
+  save.onclick = async () => {
+    save.disabled = true;
+    tell('Guardando…');
+    const r = await api('/api/prefs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wishlist: state.wishlist, notify: { discord: field.value } }),
+    }).catch((err) => ({ error: err.message }));
+    save.disabled = false;
+
+    if (r.error) return tell('No se pudo guardar: ' + r.error, true);
+    state.discord = r.discord ?? '';
+    test.disabled = !state.discord;
+    // The server hands back what it kept. An empty answer to a non-empty field
+    // means it did not recognise the URL, and saying "guardado" would be a lie.
+    if (field.value.trim() && !state.discord) {
+      return tell('Eso no parece un webhook de Discord. Copiá la URL entera.', true);
+    }
+    tell(state.discord ? 'Guardado. Probalo acá abajo.' : 'Listo, sin avisos.');
+  };
+
   test.onclick = async () => {
     test.disabled = true;
     tell('Enviando…');
     const r = await api('/api/test-alert', { method: 'POST' }).catch((e) => ({ error: e.message }));
-    // Name the channel and its status either way. "No salió" alone sent us
-    // measuring the wrong thing for an afternoon; "ntfy 429" is a diagnosis.
-    if (r.ok) {
-      tell('Enviada (' + (r.via ?? []).join(', ') + '). Si no llegó, todavía no estás suscripto.');
-    } else {
-      tell('No salió: ' + (r.error ?? 'el servidor no respondió.'), true);
-    }
+    if (r.ok) tell('Enviada (' + (r.via ?? []).join(', ') + '). Mirá tu Discord.');
+    else tell('No salió: ' + (r.error ?? 'el servidor no respondió.'), true);
     test.disabled = false;
   };
 
   return el(
     'div',
     { class: 'channel' },
-    el('div', { class: 'chan-head' }, icon('bell', { size: 16 }), el('span', { text: 'Tu canal' })),
-    el('div', { class: 'topic-row' }, name, copy),
+    el('div', { class: 'chan-head' }, icon('bell', { size: 16 }), el('span', { text: 'Discord' })),
     el(
       'ol',
       { class: 'steps' },
-      el('li', { text: 'Instalá ntfy en el celular, o abrí ntfy.sh en el navegador.' }),
       el('li', {
-        text: 'Tocá + para suscribirte y pegá ese nombre. El servidor queda como viene, ntfy.sh.',
+        text: 'En un servidor tuyo: Ajustes del canal → Integraciones → Webhooks → Nuevo webhook.',
       }),
+      el('li', { text: 'Copiar URL del webhook, y pegala acá.' }),
       el('li', { text: 'Marcá abajo las skins que esperás. Miramos tu tienda una vez por día.' }),
     ),
-    el(
-      'div',
-      { class: 'chan-actions' },
-      el('a', {
-        class: 'btn ghost',
-        href: 'https://ntfy.sh/' + topic,
-        target: '_blank',
-        rel: 'noreferrer',
-        text: 'Abrir el canal',
-      }),
-      test,
-    ),
+    el('label', { class: 'field' }, field),
+    el('div', { class: 'chan-actions' }, save, test),
     said,
     el('p', {
       class: 'note',
-      text: 'El nombre es la única llave que tiene ese canal: quien lo sepa puede leer tus avisos. No lo publiques.',
+      text: 'Esa URL permite escribir en ese canal: no la publiques. Si se te escapa, borrá el webhook en Discord y creá otro.',
     }),
   );
 }
@@ -150,7 +147,7 @@ function entry(e, state, status, redraw) {
 }
 
 export async function renderFavs(app, data) {
-  const state = { wishlist: data.prefs.wishlist ?? [] };
+  const state = { wishlist: data.prefs.wishlist ?? [], discord: data.prefs.discord ?? '' };
   const status = el('p', { class: 'note' });
   const count = el('span', { class: 'sub' });
   const mine = el('div');
@@ -172,7 +169,7 @@ export async function renderFavs(app, data) {
     }),
     status,
     heading('Cómo te llega el aviso'),
-    channel(data.prefs.ntfy),
+    channel(state, status),
     heading('Tus favoritas', count),
     mine,
     heading('Agregar'),

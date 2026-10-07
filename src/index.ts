@@ -1,6 +1,6 @@
 import * as cookie from './app/cookie.ts';
 import type { Env, Session, StoreView, Tokens } from './types.ts';
-import { deliver, mintTopic, runAlerts } from './vault/alerts.ts';
+import { deliver, runAlerts } from './vault/alerts.ts';
 import { identify, reauth } from './vault/auth.ts';
 import { fetchInventory, type Inventory } from './vault/inventory.ts';
 import * as qr from './vault/qr.ts';
@@ -78,6 +78,23 @@ async function inventory(env: Env, uid: string): Promise<Inventory | { needsRese
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const MAX_WISHLIST = 60;
 
+/**
+ * A Discord webhook, from whatever the user pasted.
+ *
+ * Accepts the whole URL, because that is what the Copy button in Discord gives
+ * you, and keeps only the id and the token. A URL is never stored and never
+ * reaches fetch(): the host is pinned in the allowlist, and these two halves are
+ * the only user-supplied text that gets near it.
+ */
+const HOOK_RE =
+  /^(?:https:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/api\/webhooks\/)?([0-9]{15,25}\/[A-Za-z0-9_-]{50,120})$/;
+
+function cleanHook(body: unknown): string | undefined {
+  const n = ((body ?? {}) as { notify?: { discord?: unknown } }).notify;
+  const raw = typeof n?.discord === 'string' ? n.discord.trim() : '';
+  return HOOK_RE.exec(raw)?.[1];
+}
+
 /** Validated at the edge, before anything is sealed. */
 function cleanWishlist(body: unknown): Array<{ id: string; name: string }> {
   const raw = ((body ?? {}) as { wishlist?: unknown }).wishlist;
@@ -94,41 +111,27 @@ function cleanWishlist(body: unknown): Array<{ id: string; name: string }> {
     .map((w) => ({ id: w.id, name: w.name.slice(0, 80) }));
 }
 
-/**
- * Preferences, and the one place an alert channel comes into existence.
- *
- * No notification target is ever accepted from a request. The topic is minted
- * here, and a Discord hook — where a session has one — could only ever be put
- * there by hand. That is what keeps the allowlist's promise, that nothing
- * user-supplied reaches fetch(), true for the notifier as well as for Riot.
- */
 async function prefs(env: Env, uid: string, body: unknown | null, retry = true): Promise<Body> {
   const held = await readSession(env, uid);
   if (!held) return { needsReseed: true };
   const { session, ver } = held;
-  let dirty = false;
 
-  if (!session.notify?.ntfy) {
-    session.notify = { ...session.notify, ntfy: mintTopic() };
-    dirty = true;
-  }
   if (body !== null) {
+    const discord = cleanHook(body);
     session.wishlist = cleanWishlist(body);
-    dirty = true;
-  }
+    session.notify = discord ? { discord } : {};
 
-  if (dirty) {
-    // Losing the CAS here would hand the browser a topic nobody will ever publish
-    // to, so read what the winner stored and answer with that instead.
     if (!(await saveSession(env, uid, session, ver))) {
+      // Another tab wrote first; theirs is the stored session. Re-read once
+      // rather than overwrite, and say so if it happens twice.
       if (retry) return prefs(env, uid, body, false);
       return { error: 'otra pestaña guardó primero. Recargá y probá de nuevo.' };
     }
     // The only preference kept in the clear, and only so the job can find the
     // rows to poll with one indexed query.
-    await setAlerts(env, uid, (session.wishlist?.length ?? 0) > 0);
+    await setAlerts(env, uid, session.wishlist.length > 0 && !!discord);
   }
-  return { wishlist: session.wishlist ?? [], ntfy: session.notify?.ntfy ?? '' };
+  return { wishlist: session.wishlist ?? [], discord: session.notify?.discord ?? '' };
 }
 
 export default {
@@ -181,15 +184,14 @@ export default {
       if (pathname === '/api/prefs') {
         return json(await prefs(env, uid, post ? await req.json() : null), headers);
       }
-      // Subscribing to a topic is done in another app entirely, so there is no
-      // way to tell from here whether it worked. This is the only honest answer:
-      // send one and let the phone be the proof. A channel that refuses — ntfy
-      // throttles our egress — throws, and the user sees why today.
+      // Whether a webhook actually reaches a phone is not observable from here.
+      // This is the only honest answer: send one and let the phone be the proof.
+      // A channel that refuses throws, and the user sees the status today rather
+      // than on the morning a skin they wanted goes past unannounced.
       if (pathname === '/api/test-alert' && post) {
         const held = await readSession(env, uid);
         if (!held) return json({ needsReseed: true }, headers);
         const via = await deliver(
-          env,
           held.session.notify ?? {},
           'Prueba de valstore. Los avisos te llegan bien.',
         );

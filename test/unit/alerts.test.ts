@@ -1,8 +1,7 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
-import type { Env, StoreView } from '../../src/types.ts';
-import { deliver, hits, message, mintTopic } from '../../src/vault/alerts.ts';
-import { assertAllowed } from '../../src/vault/upstream.ts';
+import type { StoreView } from '../../src/types.ts';
+import { deliver, hits, message } from '../../src/vault/alerts.ts';
 
 // The whole alert engine is this one pure function. It matches on skin LEVEL
 // uuids because that is what the storefront returns — the browser resolved the
@@ -62,51 +61,55 @@ test('the message carries no identifier, only names the user chose', () => {
 
 // --- the channel ------------------------------------------------------------
 
-test('a minted topic is unguessable and survives the egress allowlist', () => {
-  // The two things that can break independently: the alphabet (a topic with a
-  // dot or a slash is blocked before it is sent, silently killing every alert)
-  // and the entropy (on ntfy the name of a topic is the only thing protecting
-  // it, so a guessable one is a public one).
-  const t = mintTopic();
-  assert.match(t, /^val-[0-9a-f]{20}$/);
-  assert.doesNotThrow(() => assertAllowed('POST', 'https://ntfy.sh/' + t));
-  assert.notEqual(t, mintTopic());
-});
+const HOOK = '123456789012345678/' + 'a'.repeat(68);
 
-test('a message with nowhere to go is a failure, not a quiet success', async () => {
-  await assert.rejects(deliver({} as Env, {}, 'hola'), /ningún canal/);
-});
-
-test('a timing-out ntfy is retried, and a late success still counts', async () => {
-  // The failure this exists for: ntfy returns a Cloudflare 522 for roughly one
-  // request in four from a Worker. Without the retry, one alert in four is lost
-  // and nothing anywhere says so.
+/** Swap the global fetch for a scripted one, and always put it back. */
+async function withFetch(reply: (n: number) => Response, body: () => Promise<void>) {
   const real = globalThis.fetch;
   let calls = 0;
-  globalThis.fetch = (async () => {
-    calls++;
-    return new Response(null, { status: calls < 3 ? 522 : 200 });
-  }) as typeof fetch;
+  globalThis.fetch = (async () => reply(++calls)) as typeof fetch;
   try {
-    const report = await deliver({ NTFY_TOKEN: 'tk_x' } as Env, { ntfy: 'val-abc' }, 'hola');
-    assert.deepEqual(report, ['ntfy 200']);
-    assert.equal(calls, 3, 'the first two attempts should have been retried');
+    await body();
   } finally {
     globalThis.fetch = real;
   }
+  return calls;
+}
+
+test('a message with nowhere to go is a failure, not a quiet success', async () => {
+  await assert.rejects(deliver({}, 'hola'), /ningún canal/);
+});
+
+test('a channel that times out is retried, and a late success still counts', async () => {
+  // The failure this exists for: a push that returns 5xx or never connects at
+  // all. Without the retry one alert is simply lost and nothing says so.
+  const calls = await withFetch(
+    (n) => new Response(null, { status: n < 3 ? 522 : 204 }),
+    async () => {
+      assert.deepEqual(await deliver({ discord: HOOK }, 'hola'), ['discord 204']);
+    },
+  );
+  assert.equal(calls, 3, 'the first two attempts should have been retried');
 });
 
 test('a channel that never answers fails loudly, and says which one', async () => {
-  const real = globalThis.fetch;
-  let calls = 0;
-  globalThis.fetch = (async () => {
-    calls++;
-    return new Response(null, { status: 522 });
-  }) as typeof fetch;
-  try {
-    await assert.rejects(deliver({} as Env, { ntfy: 'val-abc' }, 'hola'), /ntfy 522/);
-    assert.equal(calls, 3, 'it should stop at three, not keep going');
-  } finally {
-    globalThis.fetch = real;
-  }
+  const calls = await withFetch(
+    () => new Response(null, { status: 522 }),
+    async () => {
+      await assert.rejects(deliver({ discord: HOOK }, 'hola'), /discord 522/);
+    },
+  );
+  assert.equal(calls, 3, 'it should stop at three, not keep going');
+});
+
+test('a refusal is not retried — a 4xx will stay a 4xx', async () => {
+  // Hammering a webhook Discord has already deleted is how an egress reputation
+  // gets spent. One attempt, one honest answer.
+  const calls = await withFetch(
+    () => new Response(null, { status: 404 }),
+    async () => {
+      await assert.rejects(deliver({ discord: HOOK }, 'hola'), /discord 404/);
+    },
+  );
+  assert.equal(calls, 1, 'a 404 is final');
 });

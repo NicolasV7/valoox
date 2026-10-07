@@ -47,62 +47,29 @@ export function message(found: Hit[]): string {
 type Notify = NonNullable<Session['notify']>;
 
 /**
- * A fresh ntfy topic.
+ * One channel, with a bounded retry.
  *
- * Minted here rather than asked for. A topic is a public mailbox — anyone who
- * knows the name reads everything sent to it — so a name a person would invent is
- * a name a stranger can guess. Eighty bits of randomness behind a prefix that
- * says where it came from, which also makes it typeable into the ntfy app.
+ * A 5xx or a connection that never opens is worth another go; a 4xx is the
+ * channel telling us the request is wrong, and it will stay wrong. The timeout
+ * is the important half: ntfy used to hang 19 to 39 seconds before Cloudflare
+ * gave up on it, and a notifier that blocks for a minute is its own outage.
  */
-export function mintTopic(): string {
-  const b = crypto.getRandomValues(new Uint8Array(10));
-  return 'val-' + [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
-}
+const TRIES = 3;
+const TIMEOUT = 6000;
 
-/**
- * ntfy.sh does not answer reliably from here.
- *
- * MEASURED 2026-10-07, from a deployed Worker, publish and GET /v1/health alike:
- * roughly one request in four never completes a TCP connection and comes back as
- * a Cloudflare 522 after 19 to 39 seconds. It happens with a token and without
- * one, so it is not the rate limit and not the payload — it is the route between
- * Cloudflare's egress and ntfy's origin. The same requests from a laptop are
- * 200 in 300ms.
- *
- * Nothing here can fix that, so this bounds the wait and tries again. Three
- * attempts at six seconds puts the odds of losing an alert near one in sixty,
- * and costs 18 seconds in the worst case — which a job that runs once a day, and
- * a button that says "Enviando…", can both afford.
- */
-const NTFY_TRIES = 3;
-const NTFY_TIMEOUT = 6000;
-
-async function publishNtfy(env: Env, topic: string, text: string): Promise<Response> {
+async function post(url: string, init: RequestInit): Promise<Response> {
   let last: Response | null = null;
-  for (let i = 0; i < NTFY_TRIES; i++) {
+  for (let i = 0; i < TRIES; i++) {
     try {
-      const res = await rf('https://ntfy.sh/' + topic, {
-        method: 'POST',
-        headers: {
-          Title: 'Tienda de VALORANT',
-          Tags: 'dart',
-          'Content-Type': 'text/plain',
-          // Anonymous publishing is limited per source IP, and a Worker has no
-          // IP of its own — it shares Cloudflare's egress with everyone. The
-          // token moves the limit onto this service's own ntfy account.
-          ...(env.NTFY_TOKEN ? { Authorization: 'Bearer ' + env.NTFY_TOKEN } : {}),
-        },
-        body: text,
-        signal: AbortSignal.timeout(NTFY_TIMEOUT),
-      });
-      if (res.ok) return res;
+      const res = await rf(url, { ...init, signal: AbortSignal.timeout(TIMEOUT) });
+      if (res.status < 500) return res;
       last = res;
     } catch {
-      // Aborted, or the connection never opened. Both are worth another go, and
-      // neither is worth logging: the status of the last attempt is the story.
+      // Aborted, or the connection never opened. Neither is worth logging: the
+      // status of the last attempt is the whole story.
     }
   }
-  // Ours, not ntfy's: every attempt timed out before anything answered.
+  // Ours, not the channel's: every attempt timed out before anything answered.
   return last ?? new Response(null, { status: 504 });
 }
 
@@ -110,18 +77,19 @@ async function publishNtfy(env: Env, topic: string, text: string): Promise<Respo
  * Delivery. The payload carries no puuid, no uid and no credential — only skin
  * names the user themselves chose.
  *
- * Both channels are tried when both are set and it counts as delivered if EITHER
- * lands. Discord answers in 7ms and ntfy does not always answer at all, so a
- * second channel is worth more here than it looks.
+ * Shaped as a list of channels, with either one landing counting as delivered,
+ * because the list has been two long and one long and will be again. Today it is
+ * Discord: it throttles per webhook, and a webhook is a thing each user has one
+ * of. ntfy was here until it turned out to throttle per source IP, which a
+ * Worker cannot own at any price below a paid tier.
  */
-export async function deliver(env: Env, to: Notify, text: string): Promise<string[]> {
+export async function deliver(to: Notify, text: string): Promise<string[]> {
   const tries: Array<[string, Promise<Response>]> = [];
 
-  if (to.ntfy) tries.push(['ntfy', publishNtfy(env, to.ntfy, text)]);
   if (to.discord) {
     tries.push([
       'discord',
-      rf('https://discord.com/api/webhooks/' + to.discord, {
+      post('https://discord.com/api/webhooks/' + to.discord, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: text }),
@@ -134,11 +102,10 @@ export async function deliver(env: Env, to: Notify, text: string): Promise<strin
 
   const results = await Promise.allSettled(tries.map(([, p]) => p));
   // Every outcome is named. A bare "429" sent us measuring the wrong thing once;
-  // "ntfy 429" says which door was shut.
-  const report = results.map((r, i) => {
-    const name = tries[i][0];
-    return r.status === 'fulfilled' ? name + ' ' + r.value.status : name + ' sin respuesta';
-  });
+  // "discord 429" says which door was shut.
+  const report = results.map((r, i) =>
+    r.status === 'fulfilled' ? tries[i][0] + ' ' + r.value.status : tries[i][0] + ' sin respuesta',
+  );
 
   // A throttled push counted as delivered is the worst bug a notifier can have:
   // it reports success for something nobody received.
@@ -165,7 +132,7 @@ export async function runAlerts(env: Env): Promise<{ checked: number; sent: numb
     try {
       const session = await open<Session>(env, row.uid, row.kid, row.blob);
       const to = session.notify;
-      if (!session.wishlist?.length || !to || !(to.ntfy || to.discord)) continue;
+      if (!session.wishlist?.length || !to?.discord) continue;
 
       const t = await reauth(session.jar);
       if (!t) {
@@ -179,7 +146,7 @@ export async function runAlerts(env: Env): Promise<{ checked: number; sent: numb
       const view = await fetchStore(env, session, t);
       const found = hits(view, session.wishlist);
       if (found.length) {
-        await deliver(env, to, message(found));
+        await deliver(to, message(found));
         sent++;
       }
       // Persist the rolled-forward jar; a lost CAS just means a tab beat us.

@@ -25,17 +25,17 @@ export interface Session {
    *  3.5 MB catalogue — the browser resolves names once, at save time. */
   wishlist?: Array<{ id: string; name: string }>;
   /**
-   * Where to send a hit. Neither field is ever accepted from a request: the ntfy
-   * topic is minted by mintTopic() on first use, and a Discord hook can only be
-   * put here by hand. The hosts are pinned in the egress allowlist, so this field
-   * cannot turn the notifier into an open proxy.
+   * Where to send a hit: a Discord webhook's `id/token`, never a URL. The host is
+   * pinned in the egress allowlist, so this field cannot turn the notifier into
+   * an open proxy no matter what is pasted into it.
    *
-   * MEASURED 2026-09-14: ntfy.sh rate-limits by source IP, and Cloudflare's egress
-   * is shared and busy, so a Worker can get 429 where a laptop gets 200. Discord
-   * throttles per webhook instead, which is why both are tried and either landing
-   * counts as delivered.
+   * ntfy.sh lived here until 2026-10-07 and was removed, not for taste: it limits
+   * publishing per source IP, a Worker has no IP of its own, and a free account
+   * does not change that — its own API reports `"basis": "ip"` for a registered
+   * user with no paid tier. Discord limits per webhook, which is a thing we have
+   * one of each.
    */
-  notify?: { ntfy?: string; discord?: string };
+  notify?: { discord?: string };
 }
 
 /** Headers every authenticated Riot data call must carry. Extends Record so it
@@ -95,18 +95,4 @@ export interface StoreView {
 export interface Env extends Cloudflare.Env {
   /** 32 random bytes, base64. Set with `wrangler secret put JAR_KEY`. */
   JAR_KEY: string;
-  /**
-   * An ntfy.sh access token, `tk_...`. Optional, and the whole reason alerts
-   * work at all.
-   *
-   * MEASURED 2026-10-07 from a deployed Worker: an anonymous publish to ntfy.sh
-   * is 429 every single time, in 55-103ms, never once a 200. ntfy identifies an
-   * anonymous visitor by source IP, a Worker has no IP of its own, and so every
-   * Worker on Cloudflare shares one bucket that is permanently empty. A token
-   * moves the limit onto the account, which is the fix ntfy itself documents.
-   *
-   * The account belongs to this service, not to the user: subscribing to a topic
-   * needs no login, so nobody but us ever needs one.
-   */
-  NTFY_TOKEN?: string;
 }

@@ -57,23 +57,10 @@ test('no path traversal or host confusion sneaks past', () => {
   no('GET', 'https://pd.na.a.pvp.net/store/v1/wallet/not-a-uuid');
 });
 
-test('the ntfy topic cannot escape its host', () => {
-  // The topic is the ONLY user-influenced text in any URL this service builds.
-  // If it could carry a slash, a dot or an @, this rule would be an open SSRF
-  // with our egress reputation attached to it.
-  ok('POST', 'https://ntfy.sh/a-build-topic');
-  ok('POST', 'https://ntfy.sh/A_b-9');
-  no('POST', 'https://ntfy.sh/topic/../../evil');
-  no('POST', 'https://ntfy.sh/topic?x=1');
-  no('POST', 'https://ntfy.sh/a.b');
-  no('POST', 'https://ntfy.sh/');
-  no('POST', 'https://ntfy.sh/' + 'x'.repeat(65));
-  no('POST', 'https://ntfy.sh@evil.com/topic');
-  no('POST', 'https://ntfyXsh/topic');
-  no('GET', 'https://ntfy.sh/topic');
-});
-
 test('a Discord webhook cannot escape its path either', () => {
+  // The id and the token are the ONLY user-supplied text in any URL this service
+  // builds. If either could carry a slash, a dot or an @, this rule would be an
+  // open SSRF with our egress reputation attached to it.
   const HOOK = '123456789012345678/' + 'a'.repeat(68);
   ok('POST', 'https://discord.com/api/webhooks/' + HOOK);
   no('POST', 'https://discord.com/api/webhooks/' + HOOK + '/extra');
@@ -81,6 +68,9 @@ test('a Discord webhook cannot escape its path either', () => {
   no('POST', 'https://discord.com/api/webhooks/123456789012345678/short');
   no('POST', 'https://discordXcom/api/webhooks/' + HOOK);
   no('GET', 'https://discord.com/api/webhooks/' + HOOK);
+  no('POST', 'https://discord.com/api/webhooks/' + HOOK + '?x=1');
+  no('POST', 'https://discord.com@evil.com/api/webhooks/' + HOOK);
+  no('POST', 'https://ntfy.sh/anything');
 });
 
 test('rank is readable, and only ever for a well-formed puuid', () => {
@@ -106,5 +96,5 @@ test('the loadout is readable but not writable', () => {
 test('the list stays short enough to read in one sitting', () => {
   // If this fails, someone added an endpoint. That is allowed — but it should be
   // a deliberate edit to this number, with a look at what was added.
-  assert.equal(allowCount, 18);
+  assert.equal(allowCount, 17);
 });

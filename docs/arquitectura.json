@@ -133,8 +133,8 @@
     {
       "id": "notify",
       "type": "external",
-      "label": "ntfy · Discord",
-      "sublabel": "canal propio por usuario",
+      "label": "Discord",
+      "sublabel": "webhook por usuario",
       "pos": [
         980,
         90
@@ -372,7 +372,7 @@
       "items": [
         "El navegador solo manda una cookie uid de 16 bytes al azar",
         "Riot autentica por QR en su app: la contraseña no pasa por acá",
-        "Toda salida cruza la allowlist; nada del usuario llega a fetch()"
+        "Toda salida cruza la allowlist; el webhook se guarda como id/token, nunca como URL"
       ]
     },
     {
