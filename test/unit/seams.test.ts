@@ -103,6 +103,7 @@ test('the KV namespace holds caches only, never a session', () => {
 
 const web = [
   'public/app.js',
+  'public/icons.js',
   'public/ui.js',
   'public/items.js',
   'public/catalogs.js',

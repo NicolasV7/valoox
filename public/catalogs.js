@@ -164,4 +164,28 @@ export const ranks = () =>
     );
   }));
 
+/**
+ * Rarity from the price, with no fetch at all.
+ *
+ * Riot prices every tier the same way and the storefront already tells us the
+ * price, so the tier bar on a store row costs nothing. The alternative was the
+ * 3.5 MB weapons catalogue on the one screen whose entire job is to load fast.
+ * Melee skins cost double, hence both columns.
+ */
+const BY_PRICE = new Map([
+  [875, '#5a9fe2'],
+  [1750, '#5a9fe2'], // Select
+  [1275, '#009587'],
+  [2550, '#009587'], // Deluxe
+  [1775, '#d1548d'],
+  [3550, '#d1548d'], // Premium
+  [2175, '#f5955b'],
+  [4350, '#f5955b'], // Exclusive
+  [2475, '#fad663'],
+  [4950, '#fad663'], // Ultra
+]);
+
+/** The neutral bar is honest: an unknown price means we do not know the tier. */
+export const tierByPrice = (cost) => BY_PRICE.get(cost) ?? null;
+
 export { weaponIndex };
