@@ -47,28 +47,37 @@ export function message(found: Hit[]): string {
 type Notify = NonNullable<Session['notify']>;
 
 /**
+ * A fresh ntfy topic.
+ *
+ * Minted here rather than asked for. A topic is a public mailbox — anyone who
+ * knows the name reads everything sent to it — so a name a person would invent is
+ * a name a stranger can guess. Eighty bits of randomness behind a prefix that
+ * says where it came from, which also makes it typeable into the ntfy app.
+ */
+export function mintTopic(): string {
+  const b = crypto.getRandomValues(new Uint8Array(10));
+  return 'val-' + [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+
+/**
  * Delivery. The payload carries no puuid, no uid and no credential — only skin
  * names the user themselves chose.
  *
  * Both are tried when both are configured, and it counts as delivered if EITHER
  * lands: ntfy.sh throttles by source IP and Cloudflare's egress is shared and
  * busy (measured: a consistent 429 from a Worker while the same topic accepts a
- * request from a laptop), so ntfy alone is not dependable from here.
+ * request from a laptop), so ntfy alone is not dependable from here. That is also
+ * why /api/test-alert exists — the user should find out today, not on the morning
+ * a skin they were waiting for goes past unannounced.
  */
-async function notify(to: Notify, found: Hit[]): Promise<void> {
-  const text = message(found);
+export async function deliver(to: Notify, text: string): Promise<void> {
   const tries: Array<Promise<Response>> = [];
 
   if (to.ntfy) {
     tries.push(
       rf('https://ntfy.sh/' + to.ntfy, {
         method: 'POST',
-        headers: {
-          Title: 'Tienda de VALORANT',
-          Tags: 'dart',
-          'Content-Type': 'text/plain',
-          ...(to.ntfyToken ? { Authorization: 'Bearer ' + to.ntfyToken } : {}),
-        },
+        headers: { Title: 'Tienda de VALORANT', Tags: 'dart', 'Content-Type': 'text/plain' },
         body: text,
       }),
     );
@@ -82,7 +91,9 @@ async function notify(to: Notify, found: Hit[]): Promise<void> {
       }),
     );
   }
-  if (!tries.length) return;
+  // Reporting success for a message with nowhere to go is the same bug as
+  // reporting success for a throttled one, so it fails the same way.
+  if (!tries.length) throw new Error('no delivery channel configured');
 
   const results = await Promise.allSettled(tries);
   const ok = results.some((r) => r.status === 'fulfilled' && r.value.ok);
@@ -127,7 +138,7 @@ export async function runAlerts(env: Env): Promise<{ checked: number; sent: numb
       const view = await fetchStore(env, session, t);
       const found = hits(view, session.wishlist);
       if (found.length) {
-        await notify(to, found);
+        await deliver(to, message(found));
         sent++;
       }
       // Persist the rolled-forward jar; a lost CAS just means a tab beat us.

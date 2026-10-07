@@ -20,6 +20,11 @@ const PATHS = {
   key: 'M9.6 6.4a2.6 2.6 0 1 0-2.9 2.57L6.1 9.6v1.3H4.8v1.3H3.5v1.3H2.2v-1.9l4.5-4.5',
   shield: 'M8 2.2l4.8 1.9v3.5c0 2.9-1.9 5.5-4.8 6.4-2.9-.9-4.8-3.5-4.8-6.4V4.1z',
   alert: 'M8 3v6M8 12.2v.6',
+  // A bell with its clapper split off, so the shape still reads at 16px.
+  bell: 'M4.9 7.3a3.1 3.1 0 0 1 6.2 0c0 2.5.8 3.3 1.2 3.7H3.7c.4-.4 1.2-1.2 1.2-3.7zM6.6 13.2a1.6 1.6 0 0 0 2.8 0',
+  // Two sheets, the front one overlapping the back: the only drawing of "copy"
+  // everyone already knows.
+  copy: 'M6.1 2.7h7.2v7.2H6.1zM9.9 9.9v3.4H2.7V6.1h3.4',
 };
 
 /**

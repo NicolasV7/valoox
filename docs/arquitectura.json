@@ -134,7 +134,7 @@
       "id": "notify",
       "type": "external",
       "label": "ntfy · Discord",
-      "sublabel": "aviso de favorita",
+      "sublabel": "canal propio por usuario",
       "pos": [
         980,
         90
@@ -153,7 +153,7 @@
       "id": "worker",
       "type": "backend",
       "label": "Worker  val",
-      "sublabel": "5 rutas /api/*",
+      "sublabel": "6 rutas /api/*",
       "pos": [
         320,
         270

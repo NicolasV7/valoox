@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
 import type { StoreView } from '../../src/types.ts';
-import { hits, message } from '../../src/vault/alerts.ts';
+import { deliver, hits, message, mintTopic } from '../../src/vault/alerts.ts';
+import { assertAllowed } from '../../src/vault/upstream.ts';
 
 // The whole alert engine is this one pure function. It matches on skin LEVEL
 // uuids because that is what the storefront returns — the browser resolved the
@@ -57,4 +58,21 @@ test('the message reads like a sentence in both shapes', () => {
 test('the message carries no identifier, only names the user chose', () => {
   const m = message([{ id: 'e7c63390-eda7-46e0-bb7a-a6abdacd2433', name: 'Sakura Sheriff' }]);
   assert.ok(!m.includes('e7c63390'), 'a uuid in a push would leak through ntfy');
+});
+
+// --- the channel ------------------------------------------------------------
+
+test('a minted topic is unguessable and survives the egress allowlist', () => {
+  // The two things that can break independently: the alphabet (a topic with a
+  // dot or a slash is blocked before it is sent, silently killing every alert)
+  // and the entropy (on ntfy the name of a topic is the only thing protecting
+  // it, so a guessable one is a public one).
+  const t = mintTopic();
+  assert.match(t, /^val-[0-9a-f]{20}$/);
+  assert.doesNotThrow(() => assertAllowed('POST', 'https://ntfy.sh/' + t));
+  assert.notEqual(t, mintTopic());
+});
+
+test('a message with nowhere to go is a failure, not a quiet success', async () => {
+  await assert.rejects(deliver({}, 'hola'), /no delivery channel/);
 });

@@ -25,15 +25,17 @@ export interface Session {
    *  3.5 MB catalogue — the browser resolves names once, at save time. */
   wishlist?: Array<{ id: string; name: string }>;
   /**
-   * Where to send a hit. The user supplies only the identifying part — a topic or
-   * an id/token pair — never a URL: the hosts are pinned in the egress allowlist,
-   * so this field can never turn the notifier into an open proxy.
+   * Where to send a hit. Neither field is ever accepted from a request: the ntfy
+   * topic is minted by mintTopic() on first use, and a Discord hook can only be
+   * put here by hand. The hosts are pinned in the egress allowlist, so this field
+   * cannot turn the notifier into an open proxy.
    *
    * MEASURED 2026-09-14: ntfy.sh rate-limits by source IP, and Cloudflare's egress
-   * is shared and busy, so a Worker gets 429 consistently. Discord throttles per
-   * webhook instead and is the reliable default from here.
+   * is shared and busy, so a Worker can get 429 where a laptop gets 200. Discord
+   * throttles per webhook instead, which is why both are tried and either landing
+   * counts as delivered.
    */
-  notify?: { ntfy?: string; ntfyToken?: string; discord?: string };
+  notify?: { ntfy?: string; discord?: string };
 }
 
 /** Headers every authenticated Riot data call must carry. Extends Record so it

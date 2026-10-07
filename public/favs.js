@@ -30,6 +30,88 @@ function save(state, status) {
   }, 600);
 }
 
+/**
+ * The alert channel.
+ *
+ * The topic is minted by the server and shown here, never typed by the user: on
+ * ntfy the name of a topic IS its password, so one a person would invent is one a
+ * stranger can guess. The one step we cannot do for them is the subscribe, which
+ * happens inside another app — hence the test button, which is the only way to
+ * find out it worked without waiting for a skin to show up.
+ */
+function channel(topic) {
+  if (!topic) {
+    return el('p', {
+      class: 'err',
+      text: 'No pudimos crear tu canal de avisos. Recargá la página.',
+    });
+  }
+
+  const name = el('code', { class: 'topic', text: topic });
+  const said = el('p', { class: 'note' });
+  const tell = (text, bad) => {
+    said.textContent = text;
+    said.className = bad ? 'err' : 'note';
+  };
+
+  const copy = el('button', { class: 'ghost tap', type: 'button' });
+  copy.append(icon('copy', { size: 16, title: 'Copiar el nombre del canal' }));
+  copy.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(topic);
+      tell('Copiado.');
+    } catch {
+      // Clipboard access is refused in plenty of ordinary situations. Selecting
+      // the text leaves them one keystroke away instead of stuck.
+      getSelection()?.selectAllChildren(name);
+      tell('El navegador no nos deja copiar. Te lo dejamos seleccionado.');
+    }
+  };
+
+  const test = el('button', { class: 'ghost', type: 'button', text: 'Enviar una prueba' });
+  test.onclick = async () => {
+    test.disabled = true;
+    tell('Enviando…');
+    const r = await api('/api/test-alert', { method: 'POST' }).catch((e) => ({ error: e.message }));
+    if (r.ok) tell('Enviada. Si no te llegó al celular, todavía no estás suscripto al canal.');
+    else tell('No salió: ' + (r.error ?? 'el servidor no respondió.'), true);
+    test.disabled = false;
+  };
+
+  return el(
+    'div',
+    { class: 'channel' },
+    el('div', { class: 'chan-head' }, icon('bell', { size: 16 }), el('span', { text: 'Tu canal' })),
+    el('div', { class: 'topic-row' }, name, copy),
+    el(
+      'ol',
+      { class: 'steps' },
+      el('li', { text: 'Instalá ntfy en el celular, o abrí ntfy.sh en el navegador.' }),
+      el('li', {
+        text: 'Tocá + para suscribirte y pegá ese nombre. El servidor queda como viene, ntfy.sh.',
+      }),
+      el('li', { text: 'Marcá abajo las skins que esperás. Miramos tu tienda una vez por día.' }),
+    ),
+    el(
+      'div',
+      { class: 'chan-actions' },
+      el('a', {
+        class: 'btn ghost',
+        href: 'https://ntfy.sh/' + topic,
+        target: '_blank',
+        rel: 'noreferrer',
+        text: 'Abrir el canal',
+      }),
+      test,
+    ),
+    said,
+    el('p', {
+      class: 'note',
+      text: 'El nombre es la única llave que tiene ese canal: quien lo sepa puede leer tus avisos. No lo publiques.',
+    }),
+  );
+}
+
 function entry(e, state, status, redraw) {
   const id = e.levels[0];
   const on = state.wishlist.some((w) => w.id === id);
@@ -74,9 +156,11 @@ export async function renderFavs(app, data) {
     heading('Avisarme'),
     el('p', {
       class: 'note',
-      text: 'Marcá las skins que estás esperando. Cuando alguna aparezca en tu tienda te la señalamos ahí, arriba de todo.',
+      text: 'Marcá las skins que estás esperando. Cuando alguna aparezca en tu tienda te la señalamos acá, y te llega una notificación al celular.',
     }),
     status,
+    heading('Cómo te llega el aviso'),
+    channel(data.prefs.ntfy),
     heading('Tus favoritas', count),
     mine,
     heading('Agregar'),

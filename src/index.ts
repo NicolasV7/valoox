@@ -1,6 +1,6 @@
 import * as cookie from './app/cookie.ts';
 import type { Env, Session, StoreView, Tokens } from './types.ts';
-import { runAlerts } from './vault/alerts.ts';
+import { deliver, mintTopic, runAlerts } from './vault/alerts.ts';
 import { identify, reauth } from './vault/auth.ts';
 import { fetchInventory, type Inventory } from './vault/inventory.ts';
 import * as qr from './vault/qr.ts';
@@ -75,28 +75,13 @@ async function inventory(env: Env, uid: string): Promise<Inventory | { needsRese
   return inv;
 }
 
-const TOPIC_RE = /^[A-Za-z0-9_-]{1,64}$/;
-const HOOK_RE = /^[0-9]{15,25}\/[A-Za-z0-9_-]{50,120}$/;
-const NTFY_TOKEN_RE = /^tk_[A-Za-z0-9]{1,60}$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const MAX_WISHLIST = 60;
 
-/** Validated at the edge, before anything is sealed. The topic becomes part of a
- *  URL, so its shape is a security property, not a nicety. */
-function cleanPrefs(body: unknown): {
-  wishlist: Array<{ id: string; name: string }>;
-  notify: NonNullable<Session['notify']>;
-} {
-  const b = (body ?? {}) as { wishlist?: unknown; notify?: unknown };
-  const n = (b.notify ?? {}) as { ntfy?: unknown; ntfyToken?: unknown; discord?: unknown };
-  const str = (v: unknown, re: RegExp) => (typeof v === 'string' && re.test(v) ? v : undefined);
-  const notify = {
-    ntfy: str(n.ntfy, TOPIC_RE),
-    ntfyToken: str(n.ntfyToken, NTFY_TOKEN_RE),
-    discord: str(n.discord, HOOK_RE),
-  };
-  const raw = Array.isArray(b.wishlist) ? b.wishlist : [];
-  const wishlist = raw
+/** Validated at the edge, before anything is sealed. */
+function cleanWishlist(body: unknown): Array<{ id: string; name: string }> {
+  const raw = ((body ?? {}) as { wishlist?: unknown }).wishlist;
+  return (Array.isArray(raw) ? raw : [])
     .filter(
       (w): w is { id: string; name: string } =>
         !!w &&
@@ -107,29 +92,43 @@ function cleanPrefs(body: unknown): {
     )
     .slice(0, MAX_WISHLIST)
     .map((w) => ({ id: w.id, name: w.name.slice(0, 80) }));
-  return { wishlist, notify };
 }
 
-async function prefs(env: Env, uid: string, body: unknown | null): Promise<Body> {
+/**
+ * Preferences, and the one place an alert channel comes into existence.
+ *
+ * No notification target is ever accepted from a request. The topic is minted
+ * here, and a Discord hook — where a session has one — could only ever be put
+ * there by hand. That is what keeps the allowlist's promise, that nothing
+ * user-supplied reaches fetch(), true for the notifier as well as for Riot.
+ */
+async function prefs(env: Env, uid: string, body: unknown | null, retry = true): Promise<Body> {
   const held = await readSession(env, uid);
   if (!held) return { needsReseed: true };
   const { session, ver } = held;
+  let dirty = false;
 
+  if (!session.notify?.ntfy) {
+    session.notify = { ...session.notify, ntfy: mintTopic() };
+    dirty = true;
+  }
   if (body !== null) {
-    const { wishlist, notify } = cleanPrefs(body);
-    session.wishlist = wishlist;
-    session.notify = notify;
-    await saveSession(env, uid, session, ver);
+    session.wishlist = cleanWishlist(body);
+    dirty = true;
+  }
+
+  if (dirty) {
+    // Losing the CAS here would hand the browser a topic nobody will ever publish
+    // to, so read what the winner stored and answer with that instead.
+    if (!(await saveSession(env, uid, session, ver))) {
+      if (retry) return prefs(env, uid, body, false);
+      return { error: 'otra pestaña guardó primero. Recargá y probá de nuevo.' };
+    }
     // The only preference kept in the clear, and only so the job can find the
     // rows to poll with one indexed query.
-    await setAlerts(env, uid, wishlist.length > 0 && !!(notify.ntfy || notify.discord));
+    await setAlerts(env, uid, (session.wishlist?.length ?? 0) > 0);
   }
-  // The ntfy token is write-only: it goes in, it is never handed back out.
-  const n = session.notify ?? {};
-  return {
-    wishlist: session.wishlist ?? [],
-    notify: { ntfy: n.ntfy ?? '', discord: n.discord ?? '', hasToken: !!n.ntfyToken },
-  };
+  return { wishlist: session.wishlist ?? [], ntfy: session.notify?.ntfy ?? '' };
 }
 
 export default {
@@ -181,6 +180,16 @@ export default {
       }
       if (pathname === '/api/prefs') {
         return json(await prefs(env, uid, post ? await req.json() : null), headers);
+      }
+      // Subscribing to a topic is done in another app entirely, so there is no
+      // way to tell from here whether it worked. This is the only honest answer:
+      // send one and let the phone be the proof. A channel that refuses — ntfy
+      // throttles our egress — throws, and the user sees why today.
+      if (pathname === '/api/test-alert' && post) {
+        const held = await readSession(env, uid);
+        if (!held) return json({ needsReseed: true }, headers);
+        await deliver(held.session.notify ?? {}, 'Prueba de valstore. Los avisos te llegan bien.');
+        return json({ ok: true }, headers);
       }
       if (pathname === '/api/logout' && post) {
         await forget(env, uid);
