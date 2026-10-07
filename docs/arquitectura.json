@@ -1,0 +1,388 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "valstore — arquitectura",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1220,
+      700
+    ],
+    "views": [
+      {
+        "id": "pedido",
+        "label": "Un pedido de tienda",
+        "focus": [
+          "browser",
+          "worker",
+          "allow",
+          "riot"
+        ],
+        "note": "Del navegador al Worker, y del Worker a Riot por la única salida que existe."
+      },
+      {
+        "id": "custodia",
+        "label": "Custodia del jar",
+        "focus": [
+          "worker",
+          "seal",
+          "d1",
+          "key"
+        ],
+        "note": "Dónde se guarda sellada la sesión de Riot y dónde se abre."
+      },
+      {
+        "id": "catalogo",
+        "label": "Catálogo en el navegador",
+        "focus": [
+          "browser",
+          "catalog",
+          "kv"
+        ],
+        "note": "Los 3,5 MB de valorant-api se unen en el cliente; el Worker nunca los toca."
+      }
+    ],
+    "repository": {
+      "url": "https://github.com/NicolasV7/valstore",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "965210f439e42db90963bab8ceb3633481901567"
+    }
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Navegador",
+      "sublabel": "cookie uid · public/",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        160,
+        68
+      ],
+      "sources": [
+        {
+          "path": "public/app.js",
+          "label": "vistas"
+        }
+      ]
+    },
+    {
+      "id": "catalog",
+      "type": "external",
+      "label": "valorant-api.com",
+      "sublabel": "3,5 MB · Cache Storage",
+      "pos": [
+        40,
+        580
+      ],
+      "size": [
+        160,
+        68
+      ],
+      "sources": [
+        {
+          "path": "public/catalogs.js",
+          "label": "índices"
+        }
+      ]
+    },
+    {
+      "id": "kv",
+      "type": "database",
+      "label": "KV  VAL",
+      "sublabel": "solo cachés versionadas",
+      "pos": [
+        320,
+        90
+      ],
+      "size": [
+        168,
+        68
+      ],
+      "sources": [
+        {
+          "path": "src/vault/session.ts",
+          "label": "store1: / inv2:"
+        }
+      ]
+    },
+    {
+      "id": "cron",
+      "type": "cloud",
+      "label": "Cron  30 0 * * *",
+      "sublabel": "alertas + prune",
+      "pos": [
+        700,
+        90
+      ],
+      "size": [
+        168,
+        68
+      ],
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "label": "scheduled()"
+        }
+      ]
+    },
+    {
+      "id": "notify",
+      "type": "external",
+      "label": "ntfy · Discord",
+      "sublabel": "aviso de favorita",
+      "pos": [
+        980,
+        90
+      ],
+      "size": [
+        168,
+        68
+      ],
+      "sources": [
+        {
+          "path": "src/vault/alerts.ts"
+        }
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Worker  val",
+      "sublabel": "5 rutas /api/*",
+      "pos": [
+        320,
+        270
+      ],
+      "size": [
+        168,
+        68
+      ],
+      "sources": [
+        {
+          "path": "src/index.ts"
+        }
+      ]
+    },
+    {
+      "id": "allow",
+      "type": "security",
+      "label": "Allowlist de egreso",
+      "sublabel": "17 reglas · único fetch()",
+      "pos": [
+        700,
+        270
+      ],
+      "size": [
+        168,
+        68
+      ],
+      "sources": [
+        {
+          "path": "src/vault/upstream.ts"
+        }
+      ]
+    },
+    {
+      "id": "riot",
+      "type": "external",
+      "label": "Riot",
+      "sublabel": "auth · pd · mmr",
+      "pos": [
+        980,
+        270
+      ],
+      "size": [
+        168,
+        68
+      ]
+    },
+    {
+      "id": "seal",
+      "type": "security",
+      "label": "Sellado",
+      "sublabel": "AES-256-GCM · HKDF por uid",
+      "pos": [
+        320,
+        430
+      ],
+      "size": [
+        168,
+        68
+      ],
+      "sources": [
+        {
+          "path": "src/vault/seal.ts"
+        }
+      ]
+    },
+    {
+      "id": "key",
+      "type": "security",
+      "label": "JAR_KEY",
+      "sublabel": "secret, fuera de la base",
+      "pos": [
+        580,
+        430
+      ],
+      "size": [
+        168,
+        68
+      ]
+    },
+    {
+      "id": "d1",
+      "type": "database",
+      "label": "D1  val-sessions",
+      "sublabel": "una fila sellada por navegador",
+      "pos": [
+        320,
+        580
+      ],
+      "size": [
+        168,
+        68
+      ],
+      "sources": [
+        {
+          "path": "schema.sql"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Cloudflare — plan gratuito",
+      "wraps": [
+        "kv",
+        "cron",
+        "worker",
+        "allow",
+        "seal",
+        "key",
+        "d1"
+      ],
+      "pad": 22
+    },
+    {
+      "kind": "security-group",
+      "label": "el jar existe en claro solo acá, durante el pedido",
+      "wraps": [
+        "worker",
+        "seal"
+      ],
+      "pad": 14
+    }
+  ],
+  "connections": [
+    {
+      "id": "ui-api",
+      "from": "browser",
+      "to": "worker",
+      "label": "GET /api/* + cookie uid",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ui-catalog",
+      "from": "browser",
+      "to": "catalog",
+      "label": "el join pasa acá, no en el Worker",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "worker-kv",
+      "from": "worker",
+      "to": "kv",
+      "label": "caché 60 s, sin credenciales",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDy": -22
+    },
+    {
+      "id": "worker-seal",
+      "from": "worker",
+      "to": "seal",
+      "label": "abre el jar",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "seal-d1",
+      "from": "seal",
+      "to": "d1",
+      "label": "blob + CAS ver",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "key-seal",
+      "from": "key",
+      "to": "seal",
+      "label": "deriva la subclave",
+      "variant": "security",
+      "labelDy": -28
+    },
+    {
+      "id": "worker-allow",
+      "from": "worker",
+      "to": "allow",
+      "label": "toda llamada saliente",
+      "variant": "emphasis",
+      "labelDx": 62,
+      "labelDy": -35
+    },
+    {
+      "id": "allow-riot",
+      "from": "allow",
+      "to": "riot",
+      "label": "solo lectura",
+      "variant": "security"
+    },
+    {
+      "id": "cron-worker",
+      "from": "cron",
+      "to": "worker",
+      "label": "diario",
+      "variant": "dashed"
+    },
+    {
+      "id": "allow-notify",
+      "from": "allow",
+      "to": "notify",
+      "label": "aviso",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Qué entra y qué sale",
+      "items": [
+        "El navegador solo manda una cookie uid de 16 bytes al azar",
+        "Riot autentica por QR en su app: la contraseña no pasa por acá",
+        "Toda salida cruza la allowlist; nada del usuario llega a fetch()"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Custodia de la sesión",
+      "items": [
+        "La fila guarda iv‖ciphertext‖tag; el puuid nunca es columna en claro",
+        "additionalData = kid|uid: una fila cruzada falla cerrada",
+        "Rotar JAR_KEY deja huérfanas todas las filas: es el kill switch"
+      ]
+    }
+  ]
+}
