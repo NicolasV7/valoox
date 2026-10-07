@@ -100,3 +100,11 @@ nav button[aria-current="true"] { background:var(--card); color:var(--txt); bord
 .hit { background:#2a2411; border:1px solid #6b5a1e; border-radius:6px;
        padding:11px 14px; font-size:14px; margin:0 0 4px; }
 details.bundle.tiered { border-left-width:3px; border-left-style:solid; }
+
+/* --- quien sos --- */
+.who { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+.handle { font-weight:600; font-size:15px; letter-spacing:.01em; }
+.rank { display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--dim);
+        border:1px solid var(--line); border-left-width:3px; border-radius:4px; padding:4px 10px; }
+.rank img { width:22px; height:22px; object-fit:contain; }
+.rank b { color:var(--txt); font-weight:600; font-size:13px; }

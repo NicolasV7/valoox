@@ -18,6 +18,9 @@ export interface Session {
   jar: Jar;
   puuid?: string;
   shard?: string;
+  /** game_name#tag_line. userinfo already returns it at sign-in; this just stops
+   *  us throwing it away and asking for it again. */
+  name?: string;
   /** Skin LEVEL uuids with their display name, so the alert job never needs the
    *  3.5 MB catalogue — the browser resolves names once, at save time. */
   wishlist?: Array<{ id: string; name: string }>;
@@ -76,6 +79,9 @@ export interface StoreView {
     allOwned?: boolean;
   } | null;
   wallet: { vp: number; rad: number; kc: number };
+  /** Who you are and where you rank. Not store data, but it shares the header
+   *  with the wallet and the same cache lifetime. */
+  account: { name: string; rank: { tier: number; rr: number } | null };
   fetchedAt: number;
 }
 

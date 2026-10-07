@@ -1,7 +1,8 @@
+import { ranks } from './catalogs.js';
 import { renderFavs } from './favs.js';
 import { renderInventory } from './inventory.js';
 import { bundleMeta, itemMeta, skin } from './items.js';
-import { bundle, el, grid, ticker, vp } from './ui.js';
+import { art, bundle, el, grid, ticker, vp } from './ui.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -27,6 +28,26 @@ async function render(app, s) {
       ),
     );
   }
+  // Who you are, above the money. The name came free with sign-in; the rank is
+  // one extra read of your OWN mmr — never anyone else's.
+  const who = el('div', { class: 'who' });
+  if (s.account?.name) who.append(el('span', { class: 'handle', text: s.account.name }));
+  if (s.account?.rank) {
+    const tier = (await ranks().catch(() => new Map())).get(s.account.rank.tier);
+    if (tier) {
+      const badge = el(
+        'span',
+        { class: 'rank' },
+        art(tier.icon),
+        el('b', { text: tier.name }),
+        el('span', { text: ' ' + s.account.rank.rr + ' RR' }),
+      );
+      badge.style.borderColor = tier.colour;
+      who.append(badge);
+    }
+  }
+  if (who.childNodes.length) app.append(who);
+
   const clock = el('div', { id: 'clock' });
   app.append(
     el(

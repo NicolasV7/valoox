@@ -144,4 +144,24 @@ export const KINDS = [
  *  actually chose. Listed so the footer does not report them as a gap. */
 export const HIDDEN = new Set(['01bb38e1-da47-4e6a-9b3d-945fe4655707']);
 
+/**
+ * Competitive tiers. 78 KB, and the last episode is the live one — Riot keeps the
+ * older episodes in the same payload because tier numbering has shifted over time.
+ */
+let rankPromise = null;
+export const ranks = () =>
+  (rankPromise ??= cached('competitivetiers').then((d) => {
+    const current = d.data[d.data.length - 1];
+    return new Map(
+      (current?.tiers ?? []).map((t) => [
+        t.tier,
+        {
+          name: t.tierName,
+          icon: t.largeIcon ?? null,
+          colour: '#' + (t.color ?? 'ffffffff').slice(0, 6),
+        },
+      ]),
+    );
+  }));
+
 export { weaponIndex };

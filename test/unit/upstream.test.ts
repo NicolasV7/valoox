@@ -83,8 +83,18 @@ test('a Discord webhook cannot escape its path either', () => {
   no('GET', 'https://discord.com/api/webhooks/' + HOOK);
 });
 
+test('rank is readable, and only ever for a well-formed puuid', () => {
+  // The puuid can only come from the sealed session, never off a request — so
+  // there is no path that reads someone else's rank, which Riot calls scouting.
+  ok('GET', 'https://pd.na.a.pvp.net/mmr/v1/players/' + PUUID);
+  no('GET', 'https://pd.na.a.pvp.net/mmr/v1/players/' + PUUID + '/competitiveupdates');
+  no('GET', 'https://pd.na.a.pvp.net/mmr/v1/players/not-a-uuid');
+  no('POST', 'https://pd.na.a.pvp.net/mmr/v1/players/' + PUUID);
+  no('GET', 'https://pd.latam.a.pvp.net/mmr/v1/players/' + PUUID);
+});
+
 test('the list stays short enough to read in one sitting', () => {
   // If this fails, someone added an endpoint. That is allowed — but it should be
   // a deliberate edit to this number, with a look at what was added.
-  assert.equal(allowCount, 16);
+  assert.equal(allowCount, 17);
 });

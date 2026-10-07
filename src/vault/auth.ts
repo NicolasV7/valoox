@@ -45,12 +45,14 @@ export async function entitlements(access: string): Promise<string> {
 }
 
 /** Who this is and where they play. Called once per session, at sign-in. */
-export async function identify(t: Tokens): Promise<{ puuid: string; shard: string }> {
+export async function identify(
+  t: Tokens,
+): Promise<{ puuid: string; shard: string; name: string | null }> {
   const bearer = { Authorization: 'Bearer ' + t.access };
 
   const ui = (await (
     await rf('https://auth.riotgames.com/userinfo', { headers: bearer })
-  ).json()) as { sub?: string };
+  ).json()) as { sub?: string; acct?: { game_name?: string; tag_line?: string } };
 
   const geo = (await (
     await rf('https://riot-geo.pas.si.riotgames.com/pas/v1/product/valorant', {
@@ -64,7 +66,11 @@ export async function identify(t: Tokens): Promise<{ puuid: string; shard: strin
   if (!ui.sub || !shard || !AFFINITIES.includes(shard)) {
     throw new Error('could not resolve puuid/affinity');
   }
-  return { puuid: ui.sub, shard };
+  // The name is a nicety, not a requirement: a missing one must not stop a
+  // sign-in that otherwise worked.
+  const acct = ui.acct;
+  const name = acct?.game_name ? acct.game_name + '#' + (acct.tag_line ?? '') : null;
+  return { puuid: ui.sub, shard, name };
 }
 
 /** A stale X-Riot-ClientVersion may be rejected outright, so keep it fresh.

@@ -37,8 +37,13 @@ async function live(env: Env, uid: string): Promise<{ session: Session; t: Token
     return null;
   }
 
-  // A sign-in that stored the jar but died before identify heals itself here.
-  if (!session.puuid || !session.shard) Object.assign(session, await identify(t));
+  // A sign-in that stored the jar but died before identify heals itself here —
+  // and so does a session from before the name was worth remembering. An empty
+  // string means "we asked and there is none", so we do not ask again.
+  if (!session.puuid || !session.shard || session.name === undefined) {
+    const who = await identify(t);
+    Object.assign(session, { ...who, name: who.name ?? '' });
+  }
 
   // The jar was rolled forward by absorb(). Losing the CAS means another tab
   // already persisted a newer jar — theirs wins and ours is dropped on purpose.

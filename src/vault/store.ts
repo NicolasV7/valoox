@@ -14,6 +14,7 @@ export function shape(
   sf: Raw,
   wallet: Raw,
   now: number = Math.floor(Date.now() / 1000),
+  account: StoreView['account'] = { name: '', rank: null },
 ): StoreView {
   const panel = sf?.SkinsPanelLayout ?? {};
 
@@ -78,6 +79,7 @@ export function shape(
     bundles,
     accessory,
     wallet: { vp: b[VP] ?? 0, rad: b[RAD] ?? 0, kc: b[KC] ?? 0 },
+    account,
     fetchedAt: now,
   };
 }

@@ -22,7 +22,13 @@ export function shardHost(affinity: string): string {
   return 'pd.' + shard + '.a.pvp.net';
 }
 
+/** Base URL for anything on the player-data host, including the trailing slash.
+ *  More than the store lives there: /mmr, /personalization, /match-history. */
+export function shardBase(affinity: string): string {
+  return 'https://' + shardHost(affinity) + '/';
+}
+
 /** Base URL for every store call, including the trailing slash. */
 export function storeBase(affinity: string): string {
-  return 'https://' + shardHost(affinity) + '/store/';
+  return shardBase(affinity) + 'store/';
 }

@@ -106,6 +106,11 @@ const ALLOW: Rule[] = [
     pattern: new RegExp('^https://' + PD + '/store/v1/entitlements/' + UUID + '$'),
     why: 'the whole collection in one call, grouped by type — no type list to guess',
   },
+  {
+    method: 'GET',
+    pattern: new RegExp('^https://' + PD + '/mmr/v1/players/' + UUID + '$'),
+    why: 'your own rank. The puuid can only come from your own sealed session — looking up anyone else is scouting, which Riot names as a prohibited use',
+  },
 
   // --- notifications ------------------------------------------------------
   // The user supplies a TOPIC, never a URL. Pinning the host here keeps the rule
