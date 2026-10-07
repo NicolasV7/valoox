@@ -77,7 +77,7 @@ export async function grid(parent, title, items, lookup, opts = {}) {
   const g = el('div', { class: 'grid' });
   parent.append(g);
   const data = await Promise.all(items.map(lookup));
-  items.forEach((it, i) =>
+  for (const [i, it] of items.entries()) {
     g.append(
       el(
         'div',
@@ -86,8 +86,8 @@ export async function grid(parent, title, items, lookup, opts = {}) {
         label(data[i]?.displayName, it),
         money({ ...it, currency: opts.currency }),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /** <details> gives the open/close behaviour for free — no JS, no state to track. */

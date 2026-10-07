@@ -82,7 +82,9 @@ test('the URL is never logged either', () => {
 test('the KV namespace holds caches only, never a session', () => {
   // Sessions live in D1, sealed. A KV write of anything session-shaped would be
   // an unsealed credential in a store with no per-row encryption boundary.
-  const text = files.find((f) => f.path === 'src/vault/session.ts')!.text;
+  const session = files.find((f) => f.path === 'src/vault/session.ts');
+  assert.ok(session, 'session.ts moved — update this test, do not delete it');
+  const text = session.text;
   const literals = [...text.matchAll(/VAL\.(?:put|get|delete)\('([^']+)/g)].map((m) => m[1]);
   const ALLOWED = ['scan:'];
   for (const k of literals) {

@@ -4,7 +4,10 @@ import { KC, RAD, VP } from './constants.ts';
 // Pure. Storefront JSON in, the shape the page renders out. No network, no clock
 // except the one passed in — which is what makes the whole thing unit-testable.
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// Riot's storefront JSON is undocumented and has changed shape twice during this
+// project. Narrowing it here would be fiction: shape() is the function whose whole
+// job is to survive that, which it does with optional chaining on every access.
+// biome-ignore lint/suspicious/noExplicitAny: see above
 type Raw = any;
 
 export function shape(

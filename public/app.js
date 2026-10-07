@@ -78,7 +78,7 @@ async function render(app, s) {
       el('h2', { text: s.bundles.length > 1 ? 'Bundles destacados' : 'Bundle destacado' }),
     );
     const data = await Promise.all(s.bundles.map(bundleMeta));
-    s.bundles.forEach((bn, i) => app.append(bundle(bn, data[i])));
+    for (const [i, bn] of s.bundles.entries()) app.append(bundle(bn, data[i]));
   }
 
   const out = el('button', { class: 'ghost', text: 'Desconectar este dispositivo' });
