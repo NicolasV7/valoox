@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1923">
+<meta name="referrer" content="no-referrer">
+<title>Tienda</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+
+<nav id="nav"></nav>
+
+<div id="app">
+  <div class="grid">
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </div>
+</div>
+
+<!-- Two locks, and never the word "revocado" on its own: deleting our row revokes
+     OUR access, not the credential. The jar keeps working at Riot until it expires. -->
+<dialog id="bye">
+  <div class="body">
+    <h3>Desconectar este dispositivo</h3>
+    <p class="keep">Borramos tu sesión de nuestro servidor ahora mismo. Nuestro acceso se corta al
+      instante y no se puede deshacer.</p>
+    <p>Hay una segunda cerradura que no es nuestra: del lado de Riot, esa sesión sigue viva hasta
+      que se vence sola. Puede tardar hasta tres semanas.</p>
+    <p>¿Es un problema? Solo si alguien más ya tenía una copia de tu sesión. Si simplemente dejás
+      de usar el sitio, con esto alcanza.</p>
+    <p>¿Preferís cerrarla también en Riot? Abrí Riot Mobile → tu perfil → Ajustes →
+      Cerrar sesión en todos los dispositivos.</p>
+  </div>
+  <div class="row">
+    <button id="bye-no" class="ghost">Cancelar</button>
+    <button id="bye-yes">Desconectar</button>
+  </div>
+</dialog>
+
+<dialog id="sec">
+  <div class="body">
+    <h3>Qué guardamos</h3>
+    <p class="keep">Tu contraseña, nunca. No la tenemos ni la vemos: Riot te autentica dentro de su
+      propia app cuando escaneás el código.</p>
+    <p>Guardamos tu sesión de Riot, cifrada. La clave para abrirla no está en la misma base. Un
+      volcado de la base, por sí solo, devuelve texto cifrado.</p>
+    <p>Mientras tu pedido se ejecuta, nuestro servidor descifra esa sesión y la usa para preguntarle
+      a Riot por tu tienda. Tenemos la clave. Cualquier servicio que te diga que «no puede ver» una
+      credencial que necesita usar te está mintiendo.</p>
+    <p>El código solo sabe leer. Los endpoints de Riot que cambian cosas —loadout, cola, party,
+      chat, compras— no existen en él, y hay una prueba automática que lo verifica.</p>
+    <p>Lo que no podemos apagar: Cloudflare corre este sitio y ve el tráfico. Las imágenes de skins
+      se cargan desde valorant-api.com, así que ellos ven tu IP. No les llega ninguna credencial.</p>
+  </div>
+  <div class="row"><button id="sec-ok" class="ghost">Cerrar</button></div>
+</dialog>
+
+<script src="/app.js" type="module"></script>
+</body>
+</html>

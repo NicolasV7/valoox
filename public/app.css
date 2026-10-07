@@ -1,0 +1,102 @@
+:root { --bg:#0f1923; --card:#1a242d; --line:#2b3a47; --red:#ff4655; --txt:#ece8e1; --dim:#8b978f; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:16px; padding-bottom:40px; background:var(--bg); color:var(--txt);
+         font:15px/1.4 "Segoe UI",system-ui,-apple-system,sans-serif; }
+  h2 { font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim);
+       margin:28px 0 12px; font-weight:600; }
+  header { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px 16px; }
+  .wallet { display:flex; gap:14px; font-variant-numeric:tabular-nums; }
+  .wallet b { color:var(--txt); font-weight:600; }
+  .wallet span { color:var(--dim); font-size:13px; }
+  #clock { color:var(--red); font-variant-numeric:tabular-nums; font-weight:600; letter-spacing:.04em; }
+  .grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:6px; padding:12px;
+          display:flex; flex-direction:column; gap:8px; min-height:132px; }
+  .card img { width:100%; height:66px; object-fit:contain; }
+  .name { font-size:13px; font-weight:600; line-height:1.25; }
+  .price { color:var(--dim); font-size:13px; font-variant-numeric:tabular-nums; margin-top:auto; }
+  .price s { opacity:.5; margin-right:6px; }
+  .off { color:var(--red); font-weight:600; }
+  .bundle { background:var(--card); border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .bundle + .bundle { margin-top:10px; }
+  .ghost { background:none; border:1px solid var(--line); color:var(--dim); padding:10px 16px;
+           font-size:13px; font-weight:500; margin-top:28px; }
+  .bundle summary { cursor:pointer; list-style:none; }
+  .bundle summary::-webkit-details-marker { display:none; }
+  .bundle summary img { width:100%; display:block; aspect-ratio:16/6; object-fit:cover; }
+  .head { padding:12px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .head::after { content:'⌄'; color:var(--dim); font-size:18px; line-height:1; transition:transform .15s; }
+  .bundle[open] .head::after { transform:rotate(180deg); }
+  .items { padding:0 12px 14px; display:grid; gap:10px; }
+  .item { display:flex; align-items:center; gap:10px; }
+  .item img { width:46px; height:46px; object-fit:contain; flex:none; }
+  .item .name { flex:1; font-size:13px; font-weight:500; }
+  .item .price { margin:0; white-space:nowrap; }
+  .item.owned { opacity:.5; }
+  .item.owned .price { text-decoration:line-through; }
+  .tick { color:#5fd38d; font-weight:700; margin-left:7px; }
+  .card.owned { opacity:.5; }
+  .card.owned .price { text-decoration:line-through; }
+  .sub { color:var(--dim); font-weight:400; letter-spacing:0; text-transform:none; margin-left:8px;
+         font-variant-numeric:tabular-nums; }
+  .cur { color:var(--dim); font-size:11px; }
+  .qty { color:var(--dim); font-weight:400; }
+  .tag { display:inline-block; margin-left:8px; padding:2px 7px; border-radius:3px; font-size:11px;
+         font-weight:600; letter-spacing:.04em; background:#1f4030; color:#5fd38d; vertical-align:middle; }
+  button { background:var(--red); color:#fff; border:0; border-radius:4px; padding:13px 22px;
+           font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+  a.qr { display:inline-block; background:var(--red); color:#fff; text-decoration:none; border-radius:4px;
+         padding:15px 24px; font-weight:600; margin:14px 0; }
+  /* White ground + quiet zone: scanners need both, and the page is dark. */
+  .qrbox { display:inline-block; background:#fff; padding:16px; border-radius:6px; line-height:0; margin:4px 0 8px; }
+  .qrbox img, .qrbox canvas { display:block; }
+  .note { color:var(--dim); font-size:13px; margin:10px 0; }
+  .err { color:var(--red); font-size:13px; }
+  .skel { background:var(--card); border:1px solid var(--line); border-radius:6px; min-height:132px;
+          animation:p 1.2s ease-in-out infinite; }
+  @keyframes p { 50% { opacity:.45; } }
+
+/* --- sign-in + security, etapa 4 --- */
+dialog { background:var(--paper,#1a242d); color:var(--txt); border:1px solid var(--line);
+         border-radius:8px; padding:0; max-width:34rem; width:calc(100% - 32px); }
+dialog::backdrop { background:rgba(0,0,0,.6); }
+dialog .body { padding:22px 24px; }
+dialog h3 { margin:0 0 12px; font-size:1.05rem; }
+dialog p { font-size:.93rem; color:var(--dim); margin:0 0 11px; line-height:1.55; }
+dialog p.keep { color:var(--txt); }
+dialog .row { display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
+              padding:14px 24px; border-top:1px solid var(--line); }
+footer { margin-top:34px; padding-top:16px; border-top:1px solid var(--line);
+         font-size:12px; color:var(--dim); }
+footer a { color:var(--dim); }
+
+/* --- inventario --- */
+nav { display:flex; gap:8px; margin-bottom:18px; }
+nav button { background:none; border:1px solid var(--line); color:var(--dim);
+             padding:8px 16px; font-size:13px; font-weight:600; border-radius:4px; }
+nav button[aria-current="true"] { background:var(--card); color:var(--txt); border-color:var(--red); }
+.tiers { display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 0; }
+.tierchip { font-size:12px; color:var(--dim); border:1px solid var(--line);
+            border-radius:3px; padding:3px 9px; }
+.tierchip b { color:var(--txt); }
+.card.tiered { border-left-width:3px; border-left-style:solid; }
+
+/* --- favoritos --- */
+.field { display:block; margin:0 0 14px; }
+.field .lbl { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+              color:var(--dim); margin-bottom:5px; font-weight:600; }
+.field input { width:100%; background:var(--card); border:1px solid var(--line); color:var(--txt);
+               border-radius:4px; padding:10px 12px; font:inherit; font-size:14px; }
+.field input:focus { outline:2px solid var(--red); outline-offset:1px; }
+.field .note { margin:5px 0 0; font-size:12px; }
+.star { background:none; border:0; color:var(--dim); font-size:22px; line-height:1;
+        padding:4px 8px; cursor:pointer; flex:none; }
+.star.on { color:#ffd34d; }
+.item.tiered { border-left:3px solid var(--line); padding-left:10px; }
+
+/* --- favoritos en la tienda --- */
+.card.fav { border-color:#ffd34d; }
+.star-in { color:#ffd34d; }
+.hit { background:#2a2411; border:1px solid #6b5a1e; border-radius:6px;
+       padding:11px 14px; font-size:14px; margin:0 0 4px; }
+details.bundle.tiered { border-left-width:3px; border-left-style:solid; }

@@ -1,0 +1,27 @@
+name = "val"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+# Load-bearing for the privacy claim: Workers Logs defaults to ON for new Workers
+# and persists method + URL for 3 days. The storefront path carries the puuid.
+[observability]
+enabled = false
+
+# The daily store rotates at 00:00 UTC. Half an hour later is early enough to be
+# useful and late enough that Riot has settled — and off-the-hour on purpose,
+# because firing at :00 alongside everyone else is the shape that gets throttled.
+# 00:30 UTC is 19:30 in Colombia: a reasonable hour to be told something.
+[triggers]
+crons = ["30 0 * * *"]
+
+[assets]
+directory = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "val-sessions"
+database_id = "564cac83-d7b7-4c0c-ab08-705a2b5f6549"
+
+[[kv_namespaces]]
+binding = "VAL"
+id = "ecad056b1aa948c1af81ffd82ab9d5e3"

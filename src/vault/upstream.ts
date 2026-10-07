@@ -1,0 +1,150 @@
+// THE EGRESS ALLOWLIST.
+//
+// This is the whole "read-only" claim, expressed as code a stranger can check.
+// Every outbound request to Riot passes through here first. Nothing user-supplied
+// ever reaches fetch(): the shard comes from a fixed set, and the puuid comes from
+// the stored session, never off a request.
+//
+// DELIBERATELY ABSENT, and this is the point — these endpoints exist at Riot and
+// a stolen jar reaches them, but no code path here can:
+//   · PUT  /personalization/v2/players/{puuid}/playerloadout   (loadout)
+//   · POST /matchmaking/v1/parties/{party}/matchmaking/join     (enter queue)
+//   · POST /parties/v1/players/{puuid}                          (party)
+//   · POST /contracts/v1/contracts/{puuid}/special/{contract}   (activate contract)
+//   · anything under /chat/, /name-service/, or /store/v1/orders (purchases)
+//
+// The four writes below are all authentication handshake steps. None of them
+// changes anything about the account or the game.
+
+const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+
+/** An ntfy topic: the only user-influenced part of any URL in this file, and it
+ *  cannot contain a slash, a dot or an @, so it cannot escape the host. */
+export const TOPIC = '[A-Za-z0-9_-]{1,64}';
+
+/** A Discord webhook: numeric id, then an opaque token. Neither can contain a
+ *  slash, so neither can walk out of the path this rule pins. */
+export const HOOK = '[0-9]{15,25}/[A-Za-z0-9_-]{50,120}';
+
+/** The shard hosts that resolve. latam and br have no DNS record at all. */
+export const SHARD_HOSTS = ['na', 'eu', 'ap', 'kr'] as const;
+
+const PD = 'pd\\.(?:' + SHARD_HOSTS.join('|') + ')\\.a\\.pvp\\.net';
+
+interface Rule {
+  method: string;
+  pattern: RegExp;
+  why: string;
+}
+
+const ALLOW: Rule[] = [
+  // --- authentication handshake -------------------------------------------
+  {
+    method: 'GET',
+    pattern: new RegExp('^https://auth\\.riotgames\\.com/\\.well-known/openid-configuration$'),
+    why: 'warms the cookie jar before a QR scan',
+  },
+  {
+    method: 'GET',
+    pattern: new RegExp('^https://auth\\.riotgames\\.com/authorize\\?'),
+    why: 'reauth: jar in, access_token out of the Location fragment',
+  },
+  {
+    method: 'GET',
+    pattern: new RegExp('^https://auth\\.riotgames\\.com/userinfo$'),
+    why: 'resolves the puuid once, at sign-in',
+  },
+  {
+    method: 'POST',
+    pattern: new RegExp('^https://auth\\.riotgames\\.com/api/v1/authorization$'),
+    why: 'issues the ssid cookie at the end of a QR scan',
+  },
+  {
+    method: 'POST',
+    pattern: new RegExp('^https://auth\\.riotgames\\.com/api/v1/login-token$'),
+    why: 'swaps the scanned login_token for a session',
+  },
+  {
+    method: 'GET',
+    pattern: new RegExp('^https://authenticate\\.riotgames\\.com/api/v1/login$'),
+    why: 'polls for the scan to be approved in Riot Mobile',
+  },
+  {
+    method: 'POST',
+    pattern: new RegExp('^https://authenticate\\.riotgames\\.com/api/v1/login$'),
+    why: 'opens a QR session',
+  },
+  {
+    method: 'POST',
+    pattern: new RegExp('^https://entitlements\\.auth\\.riotgames\\.com/api/token/v1$'),
+    why: 'mints the entitlements JWT the storefront requires',
+  },
+  {
+    method: 'PUT',
+    pattern: new RegExp('^https://riot-geo\\.pas\\.si\\.riotgames\\.com/pas/v1/product/valorant$'),
+    why: 'resolves the affinity once, at sign-in',
+  },
+
+  // --- reads. this is the entire product ----------------------------------
+  {
+    method: 'POST',
+    pattern: new RegExp('^https://' + PD + '/store/v3/storefront/' + UUID + '$'),
+    why: 'the daily store. POST with an empty body; it is a read despite the verb',
+  },
+  {
+    method: 'GET',
+    pattern: new RegExp('^https://' + PD + '/store/v1/wallet/' + UUID + '$'),
+    why: 'VP / Radianite / Kingdom Credits balances',
+  },
+  {
+    method: 'GET',
+    pattern: new RegExp('^https://' + PD + '/store/v1/entitlements/' + UUID + '/' + UUID + '$'),
+    why: 'what the account already owns, of one item type',
+  },
+  {
+    method: 'GET',
+    pattern: new RegExp('^https://' + PD + '/store/v1/entitlements/' + UUID + '$'),
+    why: 'the whole collection in one call, grouped by type — no type list to guess',
+  },
+
+  // --- notifications ------------------------------------------------------
+  // The user supplies a TOPIC, never a URL. Pinning the host here keeps the rule
+  // that nothing user-supplied reaches fetch() — otherwise this route would be
+  // an open SSRF with our egress reputation attached to it.
+  {
+    method: 'POST',
+    pattern: new RegExp('^https://ntfy\\.sh/' + TOPIC + '$'),
+    why: 'delivers a wishlist hit; carries no credential and no puuid',
+  },
+
+  {
+    method: 'POST',
+    pattern: new RegExp('^https://discord\\.com/api/webhooks/' + HOOK + '$'),
+    why: 'same payload as ntfy; Discord throttles per webhook, not per source IP',
+  },
+
+  // --- public, unauthenticated --------------------------------------------
+  {
+    method: 'GET',
+    pattern: new RegExp('^https://valorant-api\\.com/v1/version$'),
+    why: 'the X-Riot-ClientVersion header; public data, no credential sent',
+  },
+];
+
+export class BlockedUpstream extends Error {
+  constructor(method: string, url: string) {
+    super('upstream not allowed: ' + method + ' ' + url.split('?')[0]);
+    this.name = 'BlockedUpstream';
+  }
+}
+
+/** Throws unless this exact method+URL is on the list above. */
+export function assertAllowed(method: string, url: string): void {
+  const m = method.toUpperCase();
+  if (!ALLOW.some((r) => r.method === m && r.pattern.test(url))) {
+    throw new BlockedUpstream(m, url);
+  }
+}
+
+/** Exposed so a test can assert the list has not silently grown. */
+export const allowCount = ALLOW.length;
