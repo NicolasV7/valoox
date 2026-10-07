@@ -60,51 +60,92 @@ export function mintTopic(): string {
 }
 
 /**
+ * ntfy.sh does not answer reliably from here.
+ *
+ * MEASURED 2026-10-07, from a deployed Worker, publish and GET /v1/health alike:
+ * roughly one request in four never completes a TCP connection and comes back as
+ * a Cloudflare 522 after 19 to 39 seconds. It happens with a token and without
+ * one, so it is not the rate limit and not the payload — it is the route between
+ * Cloudflare's egress and ntfy's origin. The same requests from a laptop are
+ * 200 in 300ms.
+ *
+ * Nothing here can fix that, so this bounds the wait and tries again. Three
+ * attempts at six seconds puts the odds of losing an alert near one in sixty,
+ * and costs 18 seconds in the worst case — which a job that runs once a day, and
+ * a button that says "Enviando…", can both afford.
+ */
+const NTFY_TRIES = 3;
+const NTFY_TIMEOUT = 6000;
+
+async function publishNtfy(env: Env, topic: string, text: string): Promise<Response> {
+  let last: Response | null = null;
+  for (let i = 0; i < NTFY_TRIES; i++) {
+    try {
+      const res = await rf('https://ntfy.sh/' + topic, {
+        method: 'POST',
+        headers: {
+          Title: 'Tienda de VALORANT',
+          Tags: 'dart',
+          'Content-Type': 'text/plain',
+          // Anonymous publishing is limited per source IP, and a Worker has no
+          // IP of its own — it shares Cloudflare's egress with everyone. The
+          // token moves the limit onto this service's own ntfy account.
+          ...(env.NTFY_TOKEN ? { Authorization: 'Bearer ' + env.NTFY_TOKEN } : {}),
+        },
+        body: text,
+        signal: AbortSignal.timeout(NTFY_TIMEOUT),
+      });
+      if (res.ok) return res;
+      last = res;
+    } catch {
+      // Aborted, or the connection never opened. Both are worth another go, and
+      // neither is worth logging: the status of the last attempt is the story.
+    }
+  }
+  // Ours, not ntfy's: every attempt timed out before anything answered.
+  return last ?? new Response(null, { status: 504 });
+}
+
+/**
  * Delivery. The payload carries no puuid, no uid and no credential — only skin
  * names the user themselves chose.
  *
- * Both are tried when both are configured, and it counts as delivered if EITHER
- * lands: ntfy.sh throttles by source IP and Cloudflare's egress is shared and
- * busy (measured: a consistent 429 from a Worker while the same topic accepts a
- * request from a laptop), so ntfy alone is not dependable from here. That is also
- * why /api/test-alert exists — the user should find out today, not on the morning
- * a skin they were waiting for goes past unannounced.
+ * Both channels are tried when both are set and it counts as delivered if EITHER
+ * lands. Discord answers in 7ms and ntfy does not always answer at all, so a
+ * second channel is worth more here than it looks.
  */
-export async function deliver(to: Notify, text: string): Promise<void> {
-  const tries: Array<Promise<Response>> = [];
+export async function deliver(env: Env, to: Notify, text: string): Promise<string[]> {
+  const tries: Array<[string, Promise<Response>]> = [];
 
-  if (to.ntfy) {
-    tries.push(
-      rf('https://ntfy.sh/' + to.ntfy, {
-        method: 'POST',
-        headers: { Title: 'Tienda de VALORANT', Tags: 'dart', 'Content-Type': 'text/plain' },
-        body: text,
-      }),
-    );
-  }
+  if (to.ntfy) tries.push(['ntfy', publishNtfy(env, to.ntfy, text)]);
   if (to.discord) {
-    tries.push(
+    tries.push([
+      'discord',
       rf('https://discord.com/api/webhooks/' + to.discord, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: text }),
       }),
-    );
+    ]);
   }
   // Reporting success for a message with nowhere to go is the same bug as
   // reporting success for a throttled one, so it fails the same way.
-  if (!tries.length) throw new Error('no delivery channel configured');
+  if (!tries.length) throw new Error('no hay ningún canal configurado');
 
-  const results = await Promise.allSettled(tries);
-  const ok = results.some((r) => r.status === 'fulfilled' && r.value.ok);
+  const results = await Promise.allSettled(tries.map(([, p]) => p));
+  // Every outcome is named. A bare "429" sent us measuring the wrong thing once;
+  // "ntfy 429" says which door was shut.
+  const report = results.map((r, i) => {
+    const name = tries[i][0];
+    return r.status === 'fulfilled' ? name + ' ' + r.value.status : name + ' sin respuesta';
+  });
+
   // A throttled push counted as delivered is the worst bug a notifier can have:
   // it reports success for something nobody received.
-  if (!ok) {
-    const codes = results
-      .map((r) => (r.status === 'fulfilled' ? r.value.status : 'threw'))
-      .join('/');
-    throw new Error('no delivery channel accepted: ' + codes);
+  if (!results.some((r) => r.status === 'fulfilled' && r.value.ok)) {
+    throw new Error(report.join(', '));
   }
+  return report;
 }
 
 export async function runAlerts(env: Env): Promise<{ checked: number; sent: number }> {
@@ -138,7 +179,7 @@ export async function runAlerts(env: Env): Promise<{ checked: number; sent: numb
       const view = await fetchStore(env, session, t);
       const found = hits(view, session.wishlist);
       if (found.length) {
-        await deliver(to, message(found));
+        await deliver(env, to, message(found));
         sent++;
       }
       // Persist the rolled-forward jar; a lost CAS just means a tab beat us.

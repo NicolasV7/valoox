@@ -95,4 +95,18 @@ export interface StoreView {
 export interface Env extends Cloudflare.Env {
   /** 32 random bytes, base64. Set with `wrangler secret put JAR_KEY`. */
   JAR_KEY: string;
+  /**
+   * An ntfy.sh access token, `tk_...`. Optional, and the whole reason alerts
+   * work at all.
+   *
+   * MEASURED 2026-10-07 from a deployed Worker: an anonymous publish to ntfy.sh
+   * is 429 every single time, in 55-103ms, never once a 200. ntfy identifies an
+   * anonymous visitor by source IP, a Worker has no IP of its own, and so every
+   * Worker on Cloudflare shares one bucket that is permanently empty. A token
+   * moves the limit onto the account, which is the fix ntfy itself documents.
+   *
+   * The account belongs to this service, not to the user: subscribing to a topic
+   * needs no login, so nobody but us ever needs one.
+   */
+  NTFY_TOKEN?: string;
 }

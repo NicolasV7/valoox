@@ -73,8 +73,13 @@ function channel(topic) {
     test.disabled = true;
     tell('Enviando…');
     const r = await api('/api/test-alert', { method: 'POST' }).catch((e) => ({ error: e.message }));
-    if (r.ok) tell('Enviada. Si no te llegó al celular, todavía no estás suscripto al canal.');
-    else tell('No salió: ' + (r.error ?? 'el servidor no respondió.'), true);
+    // Name the channel and its status either way. "No salió" alone sent us
+    // measuring the wrong thing for an afternoon; "ntfy 429" is a diagnosis.
+    if (r.ok) {
+      tell('Enviada (' + (r.via ?? []).join(', ') + '). Si no llegó, todavía no estás suscripto.');
+    } else {
+      tell('No salió: ' + (r.error ?? 'el servidor no respondió.'), true);
+    }
     test.disabled = false;
   };
 

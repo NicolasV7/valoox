@@ -188,8 +188,12 @@ export default {
       if (pathname === '/api/test-alert' && post) {
         const held = await readSession(env, uid);
         if (!held) return json({ needsReseed: true }, headers);
-        await deliver(held.session.notify ?? {}, 'Prueba de valstore. Los avisos te llegan bien.');
-        return json({ ok: true }, headers);
+        const via = await deliver(
+          env,
+          held.session.notify ?? {},
+          'Prueba de valstore. Los avisos te llegan bien.',
+        );
+        return json({ ok: true, via }, headers);
       }
       if (pathname === '/api/logout' && post) {
         await forget(env, uid);

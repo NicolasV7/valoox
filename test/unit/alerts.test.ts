@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
-import type { StoreView } from '../../src/types.ts';
+import type { Env, StoreView } from '../../src/types.ts';
 import { deliver, hits, message, mintTopic } from '../../src/vault/alerts.ts';
 import { assertAllowed } from '../../src/vault/upstream.ts';
 
@@ -74,5 +74,39 @@ test('a minted topic is unguessable and survives the egress allowlist', () => {
 });
 
 test('a message with nowhere to go is a failure, not a quiet success', async () => {
-  await assert.rejects(deliver({}, 'hola'), /no delivery channel/);
+  await assert.rejects(deliver({} as Env, {}, 'hola'), /ningún canal/);
+});
+
+test('a timing-out ntfy is retried, and a late success still counts', async () => {
+  // The failure this exists for: ntfy returns a Cloudflare 522 for roughly one
+  // request in four from a Worker. Without the retry, one alert in four is lost
+  // and nothing anywhere says so.
+  const real = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    return new Response(null, { status: calls < 3 ? 522 : 200 });
+  }) as typeof fetch;
+  try {
+    const report = await deliver({ NTFY_TOKEN: 'tk_x' } as Env, { ntfy: 'val-abc' }, 'hola');
+    assert.deepEqual(report, ['ntfy 200']);
+    assert.equal(calls, 3, 'the first two attempts should have been retried');
+  } finally {
+    globalThis.fetch = real;
+  }
+});
+
+test('a channel that never answers fails loudly, and says which one', async () => {
+  const real = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    return new Response(null, { status: 522 });
+  }) as typeof fetch;
+  try {
+    await assert.rejects(deliver({} as Env, { ntfy: 'val-abc' }, 'hola'), /ntfy 522/);
+    assert.equal(calls, 3, 'it should stop at three, not keep going');
+  } finally {
+    globalThis.fetch = real;
+  }
 });
