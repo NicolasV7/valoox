@@ -1,5 +1,5 @@
 import type { Env, Session, StoreView, Tokens } from '../types.ts';
-import { fetchRank } from './account.ts';
+import { fetchCard, fetchRank } from './account.ts';
 import { dataHeaders } from './auth.ts';
 import { rf } from './http.ts';
 import { ownedSet } from './owned.ts';
@@ -13,9 +13,9 @@ export async function fetchStore(env: Env, s: Session, t: Tokens): Promise<Store
   const h = await dataHeaders(env, t);
   const base = storeBase(s.shard as string);
 
-  // Three reads in parallel. Rank is not store data, but it shares the header and
-  // the cache lifetime, and fetching it here costs no extra latency.
-  const [sfRes, wRes, rank] = await Promise.all([
+  // Four reads in parallel. Rank and card are not store data, but they share the
+  // header and the cache lifetime, so fetching them here costs no extra latency.
+  const [sfRes, wRes, rank, card] = await Promise.all([
     rf(base + 'v3/storefront/' + puuid, {
       method: 'POST',
       headers: { ...h, 'Content-Type': 'application/json' },
@@ -23,6 +23,7 @@ export async function fetchStore(env: Env, s: Session, t: Tokens): Promise<Store
     }),
     rf(base + 'v1/wallet/' + puuid, { headers: h }),
     fetchRank(env, s, t),
+    fetchCard(env, s, t).catch(() => null),
   ]);
 
   if (!sfRes.ok) {
@@ -34,6 +35,7 @@ export async function fetchStore(env: Env, s: Session, t: Tokens): Promise<Store
   const view = shape(await sfRes.json(), wRes.ok ? await wRes.json() : null, undefined, {
     name: s.name ?? '',
     rank,
+    card,
   });
 
   const types = [...new Set(markable(view).flatMap((g) => g.items.map((i) => i.type)))];

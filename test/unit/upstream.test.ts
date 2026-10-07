@@ -93,8 +93,18 @@ test('rank is readable, and only ever for a well-formed puuid', () => {
   no('GET', 'https://pd.latam.a.pvp.net/mmr/v1/players/' + PUUID);
 });
 
+test('the loadout is readable but not writable', () => {
+  // The clearest case for why a rule is a method AND a path: the same URL serves
+  // the player card the header draws and the call that equips a different one.
+  const LOADOUT = 'https://pd.na.a.pvp.net/personalization/v2/players/' + PUUID + '/playerloadout';
+  ok('GET', LOADOUT);
+  no('PUT', LOADOUT);
+  no('POST', LOADOUT);
+  no('GET', 'https://pd.na.a.pvp.net/personalization/v2/players/not-a-uuid/playerloadout');
+});
+
 test('the list stays short enough to read in one sitting', () => {
   // If this fails, someone added an endpoint. That is allowed — but it should be
   // a deliberate edit to this number, with a look at what was added.
-  assert.equal(allowCount, 17);
+  assert.equal(allowCount, 18);
 });

@@ -25,6 +25,11 @@ export const skin = (i) => meta('weapons/skinlevels', i.id);
 
 export const bundleMeta = (b) => meta('bundles', b.id);
 
+/** The wide art of an equipped player card, for the header. largeArt is the
+ *  fallback because a handful of old cards never got a wide render. */
+export const cardArt = (id) =>
+  meta('playercards', id).then((d) => d?.wideArt ?? d?.largeArt ?? null);
+
 /** Bundle contents and the accessory store are mixed types. Normalised to the
  *  same two fields the renderer wants, so callers never branch on type. */
 export async function itemMeta(it) {

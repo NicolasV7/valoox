@@ -2,8 +2,8 @@ import { ranks, tierByPrice } from './catalogs.js';
 import { renderFavs } from './favs.js';
 import { icon } from './icons.js';
 import { renderInventory } from './inventory.js';
-import { bundleMeta, itemMeta, skin } from './items.js';
-import { art, disclosure, el, empty, heading, money, row, rows, ticker, vp } from './ui.js';
+import { bundleMeta, cardArt, itemMeta, skin } from './items.js';
+import { art, coin, disclosure, el, empty, heading, money, row, rows, ticker, vp } from './ui.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -43,15 +43,27 @@ async function statusLine(s) {
       el(
         'span',
         { class: 'bal' },
+        coin(label) ?? el('span', { text: label }),
         document.createTextNode(vp(s.wallet[k])),
-        el('span', { text: label }),
       ),
     ),
     el('span', { class: 'clock' }, el('span', { text: 'rota en' }), clock),
   );
   ticker(clock, s.fetchedAt + s.remaining);
 
-  return el('div', { class: 'status' }, who.childNodes.length ? who : null, readout);
+  const status = el('div', { class: 'status' }, who.childNodes.length ? who : null, readout);
+
+  // Your equipped card, behind your own name. Decoration, so it is never waited
+  // on — the store renders now and the art arrives whenever it arrives.
+  if (s.account?.card) {
+    cardArt(s.account.card).then((url) => {
+      const img = art(url);
+      if (!img) return;
+      img.className = 'cardart';
+      status.prepend(img);
+    });
+  }
+  return status;
 }
 
 // ── store ──────────────────────────────────────────────────────────────────
@@ -59,15 +71,17 @@ async function statusLine(s) {
 async function offerRows(items, fav, currency) {
   const data = await Promise.all(items.map(skin));
   return rows(
-    ...items.map((it, i) =>
-      row({
+    ...items.map((it, i) => {
+      const t = tierByPrice(it.cost);
+      return row({
         name: data[i]?.displayName,
         icon: data[i]?.displayIcon,
-        colour: tierByPrice(it.cost),
+        colour: t?.colour,
+        tier: t?.icon,
         fav: fav.has(it.id),
         price: money({ ...it, currency }),
-      }),
-    ),
+      });
+    }),
   );
 }
 
@@ -147,15 +161,17 @@ function bundleBox(bn, meta) {
       if (!bn.items.length) return empty('Riot no detalló el contenido.');
       const data = await Promise.all(bn.items.map(itemMeta));
       return rows(
-        ...bn.items.map((it, i) =>
-          row({
+        ...bn.items.map((it, i) => {
+          const t = tierByPrice(it.base ?? it.price);
+          return row({
             name: data[i]?.displayName,
             icon: data[i]?.displayIcon,
-            colour: tierByPrice(it.base ?? it.price),
+            colour: t?.colour,
+            tier: t?.icon,
             owned: it.owned,
             price: money(it),
-          }),
-        ),
+          });
+        }),
       );
     },
   );

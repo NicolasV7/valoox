@@ -37,13 +37,32 @@ export const empty = (text) => el('p', { class: 'empty', text });
 // One renderer for all five shapes: daily offer, night-market discount,
 // accessory priced in Kingdom Credits, bundle total, bundle item.
 
+/** The three currencies the store prices in. Fixed uuids, so the real coin costs
+ *  no fetch — the same trade the tier symbols make. */
+const COIN = {
+  VP: '85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741',
+  RAD: 'e59aa87c-4cbf-517a-5983-6e81511be9b7',
+  KC: '85ca954a-41f2-ce94-9b45-8ca3dd39a00d',
+};
+
+/** Riot's own coin, with the abbreviation as its name — the picture is the
+ *  label here, so it is the one <img> in this file that is not decorative. */
+export function coin(kind) {
+  if (!COIN[kind]) return null;
+  const img = art('https://media.valorant-api.com/currencies/' + COIN[kind] + '/displayicon.png');
+  if (!img) return null;
+  img.className = 'coin';
+  img.alt = kind;
+  return img;
+}
+
 export function money({ cost, price, percent, base, currency }) {
   const n = el('div', { class: 'price' });
   const was = percent ? cost : base;
   const now = percent ? price : (price ?? cost ?? base);
   if (was != null && now != null && was !== now) n.append(el('s', { text: vp(was) }));
   n.append(document.createTextNode(vp(now)));
-  if (currency) n.append(el('span', { class: 'cur', text: currency }));
+  if (currency) n.append(coin(currency) ?? el('span', { class: 'cur', text: currency }));
   if (percent) n.append(el('span', { class: 'off', text: '−' + percent + '%' }));
   return n;
 }
@@ -55,11 +74,19 @@ export function money({ cost, price, percent, base, currency }) {
 
 /**
  * @param {{ name?: string, meta?: string, icon?: string, colour?: string,
- *           owned?: boolean, fav?: boolean, qty?: number,
+ *           tier?: string, owned?: boolean, fav?: boolean, qty?: number,
  *           price?: Node, trailing?: Node }} o
  */
 export function row(o) {
   const name = el('div', { class: 'name' }, el('span', { text: o.name || 'Desconocido' }));
+  // Riot's tier symbol says the same thing the colour bar says. That redundancy
+  // is the point: the bar alone is unreadable to anyone who cannot separate the
+  // five hues, and the symbol is the one every player already knows.
+  const t = o.tier ? art(o.tier) : null;
+  if (t) {
+    t.className = 'tier';
+    name.append(t);
+  }
   if (o.fav) {
     const s = icon('star', { size: 13, fill: true, title: 'La marcaste' });
     s.classList.add('starred');

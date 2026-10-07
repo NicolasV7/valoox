@@ -82,8 +82,9 @@ export interface StoreView {
   } | null;
   wallet: { vp: number; rad: number; kc: number };
   /** Who you are and where you rank. Not store data, but it shares the header
-   *  with the wallet and the same cache lifetime. */
-  account: { name: string; rank: { tier: number; rr: number } | null };
+   *  with the wallet and the same cache lifetime. `card` is the uuid of the
+   *  equipped player card; the browser turns it into artwork. */
+  account: { name: string; rank: { tier: number; rr: number } | null; card?: string | null };
   fetchedAt: number;
 }
 

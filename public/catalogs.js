@@ -44,7 +44,11 @@ const tiers = () =>
       new Map(
         t.data.map((x) => [
           x.uuid,
-          { name: x.devName, colour: '#' + (x.highlightColor ?? '9b9a9633').slice(0, 6) },
+          {
+            name: x.devName,
+            colour: '#' + (x.highlightColor ?? '9b9a9633').slice(0, 6),
+            icon: x.displayIcon ?? null,
+          },
         ]),
       ),
   ));
@@ -69,6 +73,7 @@ async function weaponIndex() {
         icon: s.chromas?.[0]?.fullRender ?? s.displayIcon ?? null,
         tier: t?.name ?? 'Standard',
         colour: t?.colour ?? '#9b9a96',
+        tierIcon: t?.icon ?? null,
         value: (VP_BY_TIER[t?.name] ?? 0) * (melee ? 2 : 1),
         levels: (s.levels ?? []).map((l) => l.uuid),
         // Chromas keep their own identity here. Mapping them only to the parent
@@ -168,22 +173,38 @@ export const ranks = () =>
  * Rarity from the price, with no fetch at all.
  *
  * Riot prices every tier the same way and the storefront already tells us the
- * price, so the tier bar on a store row costs nothing. The alternative was the
- * 3.5 MB weapons catalogue on the one screen whose entire job is to load fast.
- * Melee skins cost double, hence both columns.
+ * price, so the tier bar and Riot's own tier symbol on a store row cost nothing.
+ * The alternative was the 3.5 MB weapons catalogue on the one screen whose entire
+ * job is to load fast. Melee skins cost double, hence two prices per tier.
+ *
+ * The uuids and colours are copied from /v1/contenttiers and match its
+ * highlightColor exactly — pinning them here is what buys the zero fetch.
  */
-const BY_PRICE = new Map([
-  [875, '#5a9fe2'],
-  [1750, '#5a9fe2'], // Select
-  [1275, '#009587'],
-  [2550, '#009587'], // Deluxe
-  [1775, '#d1548d'],
-  [3550, '#d1548d'], // Premium
-  [2175, '#f5955b'],
-  [4350, '#f5955b'], // Exclusive
-  [2475, '#fad663'],
-  [4950, '#fad663'], // Ultra
-]);
+const TIER = {
+  select: ['#5a9fe2', '12683d76-48d7-84a3-4e09-6985794f0445'],
+  deluxe: ['#009587', '0cebb8be-46d7-c12a-d306-e9907bfc5a25'],
+  premium: ['#d1548d', '60bca009-4182-7998-dee7-b8a2558dc369'],
+  exclusive: ['#f5955b', 'e046854e-406c-37f4-6607-19a9ba8426fc'],
+  ultra: ['#fad663', '411e4a55-4e59-7757-41f0-86a53f101bb5'],
+};
+
+const MEDIA = 'https://media.valorant-api.com/';
+
+const BY_PRICE = new Map(
+  [
+    [875, 1750, TIER.select],
+    [1275, 2550, TIER.deluxe],
+    [1775, 3550, TIER.premium],
+    [2175, 4350, TIER.exclusive],
+    [2475, 4950, TIER.ultra],
+  ].flatMap(([one, melee, [colour, uuid]]) => {
+    const t = { colour, icon: MEDIA + 'contenttiers/' + uuid + '/displayicon.png' };
+    return [
+      [one, t],
+      [melee, t],
+    ];
+  }),
+);
 
 /** The neutral bar is honest: an unknown price means we do not know the tier. */
 export const tierByPrice = (cost) => BY_PRICE.get(cost) ?? null;

@@ -78,7 +78,7 @@ export type Cache = 'store' | 'inv';
  * which is exactly what happened when the inventory grew from `owned` to
  * `byType`. Old versions simply expire; nothing needs migrating.
  */
-const VERSION: Record<Cache, number> = { store: 1, inv: 2 };
+const VERSION: Record<Cache, number> = { store: 2, inv: 2 };
 
 const key = (name: Cache, uid: string) => name + VERSION[name] + ':' + uid;
 

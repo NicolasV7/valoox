@@ -53,12 +53,31 @@ body {
 /* ── status line ─────────────────────────────────────────────────────────── */
 
 .status {
+  position: relative;
+  overflow: hidden;
   display: grid;
   gap: 10px;
   padding: 18px 0 16px;
   border-bottom: 1px solid var(--rule);
   margin-bottom: 20px;
 }
+
+/* The equipped player card, behind your own name. It is the only purely
+   decorative image in the app, so it is held to a low opacity and faded out
+   before it reaches the numbers it sits under. */
+.cardart {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 32%;
+  opacity: 0.2;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 42%, transparent 94%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 42%, transparent 94%);
+}
+.status > :not(.cardart) { position: relative; }
 
 .who { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 22px; }
 
@@ -91,8 +110,9 @@ body {
   font-variant-numeric: tabular-nums;
   font-size: 13px;
 }
-.readout .bal { color: var(--ink); }
-.readout .bal span { color: var(--faint); font-size: 11px; letter-spacing: 0.1em; margin-left: 4px; }
+.readout .bal { color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+.readout .bal span { color: var(--faint); font-size: 11px; letter-spacing: 0.1em; }
+.readout .coin { width: 17px; height: 17px; }
 .readout .clock { margin-left: auto; color: var(--dim); }
 .readout .clock span {
   color: var(--faint);
@@ -204,6 +224,12 @@ a:hover { color: var(--ink); }
 }
 .row .price s { display: block; color: var(--faint); font-size: 11px; text-decoration-color: var(--faint); }
 .row .price .cur { color: var(--faint); font-size: 11px; margin-left: 3px; }
+
+/* Riot's own art, at text size: the tier symbol beside a name and the coin
+   beside a price. Both are information, which is why they are not dimmed. */
+.tier { width: 15px; height: 15px; flex: none; }
+.coin { width: 14px; height: 14px; vertical-align: -2px; margin-left: 4px; }
+.price .coin { margin-left: 6px; opacity: 0.8; }
 .row .price .off { color: var(--green); font-size: 11px; display: block; }
 
 .row.owned { opacity: 0.45; }

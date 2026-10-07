@@ -26,7 +26,7 @@ function dedupe(ids, map) {
  *  thing you own beside a gun — it is a thing the gun has. */
 function weapon(e, ownedIds) {
   const mine = (e.chromas ?? []).filter((c) => ownedIds.has(c.uuid));
-  const base = { name: e.name, meta: e.sub, icon: e.icon, colour: e.colour };
+  const base = { name: e.name, meta: e.sub, icon: e.icon, colour: e.colour, tier: e.tierIcon };
 
   if (!mine.length) return row(base);
 
@@ -36,7 +36,10 @@ function weapon(e, ownedIds) {
       badges: [el('span', { class: 'tag qty', text: '+' + mine.length })],
       right: el('span', { class: 'count', text: e.tier ?? '' }),
     },
-    async () => rows(...mine.map((c) => row({ name: c.name, icon: c.icon, colour: e.colour }))),
+    async () =>
+      rows(
+        ...mine.map((c) => row({ name: c.name, icon: c.icon, colour: e.colour, tier: e.tierIcon })),
+      ),
   );
 }
 

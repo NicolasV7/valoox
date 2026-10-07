@@ -134,7 +134,14 @@ function entry(e, state, status, redraw) {
     redraw();
   };
 
-  return row({ name: e.name, meta: e.sub, icon: e.icon, colour: e.colour, trailing: star });
+  return row({
+    name: e.name,
+    meta: e.sub,
+    icon: e.icon,
+    colour: e.colour,
+    tier: e.tierIcon,
+    trailing: star,
+  });
 }
 
 export async function renderFavs(app, data) {
