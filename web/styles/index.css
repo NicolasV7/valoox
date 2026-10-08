@@ -8,6 +8,7 @@
 @import '../../design/tokens.css'; /* every value, once */
 @import '../../design/fonts.css'; /* the two faces, self-hosted */
 @import './base.css'; /* the ground, the scale, focus */
+@import './motion.css'; /* everything that moves */
 @import './shell.css'; /* the column and the tab bar */
 
 /* the four shapes, and the things that sit on them */

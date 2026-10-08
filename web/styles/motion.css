@@ -1,0 +1,99 @@
+/* Everything that moves, in one file.
+ *
+ * Every one is under 320ms or it is a slow loop at low contrast, and every
+ * one is tied to something real: a screen arriving, a request going out, a
+ * thing still being waited on. prefers-reduced-motion in base.css flattens
+ * all of it to nothing. */
+
+/* --- the four movements --------------------------------------------------- */
+/* Every one is under 320ms and every one is a state change. There is nothing
+ * here that runs on its own for decoration, and prefers-reduced-motion above
+ * flattens all of it to nothing. */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes seal {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* One screen replacing another. Short, and upward: the direction says a new
+ * thing arrived rather than that something slid past. */
+.rise {
+  animation: rise 240ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+/* --- a line that is still waiting ----------------------------------------- */
+/* Three dots, lit one after another. The `…` in the string cannot be animated a
+ * third at a time, so Thinking.tsx strips it and draws these instead. */
+
+.dots {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 1px;
+  vertical-align: baseline;
+}
+
+.dots i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.25;
+  animation: think 1300ms ease-in-out infinite;
+}
+.dots i:nth-child(2) {
+  animation-delay: 180ms;
+}
+.dots i:nth-child(3) {
+  animation-delay: 360ms;
+}
+
+@keyframes think {
+  30% {
+    opacity: 1;
+  }
+}
+
+/* A skeleton on a screen whose only job is to say "wait" may breathe.
+ *
+ * That is a narrowing of the rule in DESIGN.md, not an exception to it: a
+ * skeleton standing in for text you are about to read stays still, because
+ * movement there competes with the thing you came for. On the approved screen
+ * there is nothing to read yet — the whole screen means "a second" — and the
+ * same argument that lets the QR placeholder move lets these. */
+.bars--waiting .skel {
+  animation: settling 1700ms ease-in-out infinite;
+}
+.bars--waiting .skel:nth-child(2) {
+  animation-delay: 190ms;
+}
+.bars--waiting .skel:nth-child(3) {
+  animation-delay: 380ms;
+}
+
+@keyframes settling {
+  50% {
+    opacity: 0.45;
+  }
+}
