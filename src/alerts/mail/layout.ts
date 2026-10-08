@@ -31,6 +31,42 @@ export const INK = {
   legal: '#565C64',
 };
 
+/**
+ * Telling the client this message is already dark.
+ *
+ * Without it, Apple Mail and Gmail run their own dark-mode pass over the
+ * colours — and over a design that is dark to begin with, that pass inverts
+ * it: a phone in dark mode received a white message and the same phone in
+ * light mode received a black one. The two declarations below are how a
+ * message opts out of that; `color-scheme` is the modern one and the meta is
+ * what the older iOS builds read.
+ *
+ * One scheme, not two. A message is read once and archived, so matching the
+ * reader's current setting buys nothing and doubles what can go wrong — and
+ * every colour in it is a colour from the app, which is dark.
+ */
+const HEAD =
+  '<meta charset="utf-8">' +
+  '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+  '<meta name="color-scheme" content="dark">' +
+  '<meta name="supported-color-schemes" content="dark">' +
+  '<style>:root{color-scheme:dark;supported-color-schemes:dark}' +
+  // Gmail's dark pass marks what it has touched; these put it back.
+  'u+#body a{color:inherit}' +
+  '[data-ogsc] .ground{background:#0E0E11!important}' +
+  '[data-ogsc] .said{color:#f2f4f5!important}' +
+  // A phone is where this is read. The table is fluid to 600 rather than
+  // pinned at it, so the only thing left to do here is take the gutters
+  // down and stop the six digits running off the edge of a 320px screen.
+  '@media (max-width:600px){' +
+  '.pad{padding-left:18px!important;padding-right:18px!important}' +
+  '.big{font-size:38px!important;letter-spacing:0.12em!important}' +
+  '.stack{display:block!important;width:100%!important;max-width:100%!important;' +
+  'padding-left:18px!important;padding-right:18px!important;text-align:center!important}' +
+  '.stack img{margin:0 auto}' +
+  '}' +
+  '</style>';
+
 /** The weave, at the one angle the whole product uses, in whatever colour the
  *  message is about. A mail client that drops gradients falls back to the flat
  *  colour underneath, which is why that is given too. */
@@ -42,40 +78,63 @@ export const weave = (rgb: string, under: string): string =>
   `repeating-linear-gradient(107deg, rgba(${rgb},0.05) 0 1px, rgba(0,0,0,0) 1px 23px),` +
   `radial-gradient(104% 150% at 50% 50%, rgba(${rgb},0.3) 0%, rgba(${rgb},0) 70%)`;
 
-/** The mark, drawn rather than fetched: a mail client that blocks images would
- *  otherwise open on a broken icon, and this one is two circles. */
-const MARK =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:block">' +
-  '<circle cx="6.4" cy="12" r="4.65" fill="#f2f4f5"/>' +
-  '<circle cx="17.6" cy="12" r="4.05" stroke="#f2f4f5" stroke-width="1.9"/></svg>';
+/**
+ * The mark.
+ *
+ * A PNG and not the inline SVG the app uses, because Gmail strips `<svg>`
+ * outright and Outlook renders through Word, which never supported it. An
+ * inline mark is a mark most people would not see. Rendered once into
+ * public/brand/ and served from this origin, so there is still no third party
+ * in a message.
+ *
+ * It sits beside the word, so a client with images off loses the glyph and
+ * keeps the name — which is the right way round.
+ */
+const mark = (origin: string) =>
+  `<img src="${origin}/brand/mark.png" width="22" height="22" alt=""` +
+  ' style="display:block;border:0;width:22px;height:22px">';
 
 export function shell({
   aside,
   body,
   foot,
+  lang,
+  origin,
 }: {
-  /** The small line opposite the mark — a countdown, a date. */
+  /** The small line opposite the mark — how long is left, a date. */
   aside: string;
   body: string;
   foot: string;
+  /** On <html>, because a client's own translate prompt reads it and a screen
+   *  reader picks its voice from it. */
+  lang: string;
+  /** Where the pictures in a message are served from. */
+  origin: string;
 }): string {
   return (
-    `<!doctype html><html><body style="margin:0;padding:0;background:${INK.page}">` +
+    `<!doctype html><html lang="${lang}"><head>${HEAD}</head>` +
+    `<body id="body" class="ground" style="margin:0;padding:0;background:${INK.page}">` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
-    ` style="background:${INK.page}"><tr><td align="center">` +
-    `<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"` +
-    ` style="width:600px;max-width:100%;background:${INK.page};font-family:${SANS}">` +
+    ` class="ground" style="background:${INK.page}"><tr><td align="center">` +
+    // Fluid to 600 rather than pinned at it: a fixed 600 on a 390px phone is
+    // either a scaled-down page or a sideways scroll, and both read as narrow.
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
+    ` style="width:100%;max-width:600px;background:${INK.page};font-family:${SANS}">` +
     // the mark, and the one number worth knowing before you read anything
-    `<tr><td style="padding:22px 28px 18px;border-bottom:1px solid ${INK.rule}">` +
+    `<tr><td class="pad" style="padding:22px 28px 18px;border-bottom:1px solid ${INK.rule}">` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>` +
-    `<td style="width:22px">${MARK}</td>` +
-    `<td style="padding-left:11px;font-size:17px;font-weight:500;letter-spacing:-0.02em;color:${INK.text}">valoox</td>` +
+    `<td style="width:22px">${mark(origin)}</td>` +
+    `<td class="said" style="padding-left:11px;font-size:17px;font-weight:500;` +
+    `letter-spacing:-0.02em;color:${INK.text}">valoox</td>` +
     `<td align="right" style="font-family:${MONO};font-size:11.5px;color:${INK.quiet}">${aside}</td>` +
     `</tr></table></td></tr>` +
     body +
-    `<tr><td style="padding:20px 28px 26px;border-top:1px solid ${INK.rule}">${foot}` +
+    `<tr><td class="pad" style="padding:20px 28px 26px;border-top:1px solid ${INK.rule}">${foot}` +
     `<p style="margin:12px 0 0;font-size:12px;line-height:1.6;color:${INK.legal}">` +
-    'Sin relación con Riot Games. VALORANT y su arte son de Riot Games, Inc.</p>' +
+    (lang === 'en'
+      ? 'Not affiliated with Riot Games. VALORANT and its art belong to Riot Games, Inc.'
+      : 'Sin relación con Riot Games. VALORANT y su arte son de Riot Games, Inc.') +
+    '</p>' +
     `</td></tr></table></td></tr></table></body></html>`
   );
 }

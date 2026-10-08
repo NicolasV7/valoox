@@ -43,12 +43,12 @@ export const alerts = {
   notVerifiedYet: 'Guardado, sin verificar todavía.',
   comingNext: 'El buscador de skins es lo que sigue.',
   anAddress: 'Una dirección que puedas abrir ahora mismo.',
-  sendATest: 'Mandar una prueba',
+  sendATest: 'Mandar el código',
   badAddress: 'Eso no tiene forma de dirección. Revisá el arroba y el punto.',
   waitSeconds: (n: number) => `Esperá ${n} segundos antes de pedir otro código.`,
   testIsProof:
-    'La prueba es la verificación: mandamos un código de seis dígitos y vos lo ' +
-    'escribís de vuelta. Hasta que eso pase, a esta dirección no se le manda nada.',
+    'Ese código es la verificación: lo escribís de vuelta y recién ahí la ' +
+    'dirección queda probada. Hasta que eso pase, acá no se manda nada más.',
   oneChannel:
     'Un solo canal, no un menú. Un segundo duplica las formas en que un mensaje ' +
     'de la mañana se pierde y parte al medio la atención que se le presta a ' +

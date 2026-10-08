@@ -51,6 +51,9 @@ export interface Session {
    */
   mail?: {
     to: string;
+    /** The language of the tab that set it, so every later message — the code
+     *  again, the morning alert — arrives in the one it was asked for in. */
+    lang?: 'es' | 'en';
     ok: boolean;
     send?: string;
     said?: string;

@@ -6,6 +6,7 @@
 // disagreeing about whether you are verified.
 
 import { useEffect, useState } from 'preact/hooks';
+import { locale } from '../i18n/index.ts';
 import * as api from './api.ts';
 import { NEEDS_RESEED } from './api.ts';
 import type { Prefs } from './types.ts';
@@ -51,14 +52,15 @@ export const refused = (said: string | undefined): boolean =>
 export const open = (to: string) =>
   api.post<{ said?: string; error?: string; wait?: number; sent?: boolean }>('/api/channel', {
     to,
+    // Which language the mail should be in: the one on screen right now.
+    lang: locale(),
   });
 
 /** Another code to the address already stored. */
 export const again = () =>
-  api.post<{ said?: string; error?: string; wait?: number; sent?: boolean }>(
-    '/api/channel/again',
-    {},
-  );
+  api.post<{ said?: string; error?: string; wait?: number; sent?: boolean }>('/api/channel/again', {
+    lang: locale(),
+  });
 
 /** The code, typed back. */
 export const prove = (code: string) =>

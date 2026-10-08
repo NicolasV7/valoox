@@ -16,6 +16,7 @@
 
 import { claim, heldBy, release } from '../alerts/claim.ts';
 import { html, subject, text } from '../alerts/mail/code.ts';
+import { type Lang, langOf } from '../alerts/mail/words.ts';
 import { check, clear, LIFE, left, mint, waitFor } from '../alerts/otp.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
@@ -30,19 +31,23 @@ import { readSession, saveSession } from '../vault/session.ts';
 const TRAIL = 60 * 60 * 24 * 7;
 export const trail = (id: string) => 'sent:' + id;
 
-/** mm:ss in the sender's own clock, for the one line the mail puts beside the
- *  mark. Nothing is promised about the reader's timezone, so it is a duration
- *  rendered as a time of day only where the mail itself computes it. */
-const at = (ms: number) => new Date(ms).toISOString().slice(11, 16);
+/** Where the one picture in a message is served from.
+ *
+ *  The live origin, except in dev: a mail client has no way to reach
+ *  127.0.0.1, so a test message would arrive with a broken sticker and no way
+ *  to tell that from a real one. Anything that is not https falls back to the
+ *  address the app actually answers on. */
+const artFrom = (origin: string) =>
+  origin.startsWith('https://') ? origin : 'https://valoox.store';
 
-async function mail(env: Env, uid: string, to: string) {
+async function mail(env: Env, uid: string, to: string, lang: Lang, origin: string) {
   const { code, until } = await mint(env, uid);
   const sent = await send(
     env,
     to,
-    subject(code),
-    html(code, LIFE.minutes, at(until)),
-    text(code, LIFE.minutes),
+    subject(code, lang),
+    html(code, LIFE.minutes, lang, artFrom(origin)),
+    text(code, LIFE.minutes, lang),
   );
   // Nothing carried it, so nothing should be outstanding: the code is thrown
   // away and the cooldown with it, or a provider hiccup locks the button for a
@@ -65,8 +70,11 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
   const held = await readSession(env, uid);
   if (!held) return RESEED;
 
-  const body = (await req.json().catch(() => null)) as { to?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { to?: unknown; lang?: unknown } | null;
   const to = typeof body?.to === 'string' ? body.to.trim() : '';
+  // The language of the tab that asked, so the mail arrives in the language of
+  // the screen that sent it. Kept on the row so the morning message matches.
+  const lang = langOf(body?.lang);
   if (!looksLikeAddress(to)) return { error: 'address' };
 
   const wait = await waitFor(env, uid);
@@ -76,10 +84,11 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
   // Re-sending to an address already proved must not un-prove it: the code is
   // how you change an address, not how you keep one.
   const keep = was?.ok === true && was.to === to;
-  const { sent, until } = await mail(env, uid, to);
+  const { sent, until } = await mail(env, uid, to, lang, new URL(req.url).origin);
 
   held.session.mail = {
     to,
+    lang,
     ok: keep,
     ...(sent.id ? { send: sent.id } : {}),
     said: sent.said,
@@ -90,7 +99,7 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
 }
 
 /** Another code for the address already stored. Same cooldown, same ceiling. */
-export async function resend({ env, uid }: Ctx): Promise<Body> {
+export async function resend({ env, uid, req }: Ctx): Promise<Body> {
   const held = await readSession(env, uid);
   if (!held) return RESEED;
   const to = held.session.mail?.to;
@@ -99,10 +108,13 @@ export async function resend({ env, uid }: Ctx): Promise<Body> {
   const wait = await waitFor(env, uid);
   if (wait > 0) return { error: 'wait', wait };
 
-  const { sent, until } = await mail(env, uid, to);
+  const body = (await req.json().catch(() => null)) as { lang?: unknown } | null;
+  const lang = langOf(body?.lang ?? held.session.mail?.lang);
+  const { sent, until } = await mail(env, uid, to, lang, new URL(req.url).origin);
   held.session.mail = {
     ...held.session.mail,
     to,
+    lang,
     ok: held.session.mail?.ok === true,
     ...(sent.id ? { send: sent.id } : {}),
     said: sent.said,

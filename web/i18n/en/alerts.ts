@@ -43,12 +43,12 @@ export const alerts = {
   notVerifiedYet: 'Saved, not verified yet.',
   comingNext: 'The skin search is what comes next.',
   anAddress: 'An address you can open right now.',
-  sendATest: 'Send a test',
+  sendATest: 'Send the code',
   badAddress: 'That is not the shape of an address. Check the @ and the dot.',
   waitSeconds: (n: number) => `Wait ${n} seconds before asking for another code.`,
   testIsProof:
-    'The test is the verification: we mail a six-digit code and you type it ' +
-    'back. Until that lands, nothing is sent to this address.',
+    'That code is the verification: you type it back and only then is the ' +
+    'address proved. Until that happens, nothing else is sent here.',
   oneChannel:
     'One channel, not a menu of them. A second one doubles the ways a morning ' +
     'message can go missing and halves the attention paid to either — and an ' +

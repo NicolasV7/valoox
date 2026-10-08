@@ -8,67 +8,69 @@
 // Two sentences carry more weight than the design does. "If it was not you, do
 // nothing" has to be true, and it is: an address that never answers is never
 // written to again. And nobody will ever ask for this code — which is worth
-// saying in the one place a stranger could later claim otherwise.
+// saying in the one place a stranger could later claim otherwise. That one
+// gets the sticker, because it is the line a person has to remember.
+//
+// The words come from words.ts in the language of the tab that asked.
 
 import { FONT, INK, shell, weave } from './layout.ts';
+import type { Lang } from './words.ts';
+import { words } from './words.ts';
 
 /** The purple the sign-in screens use for a thing being proved. */
 const HUE = '152, 96, 192';
 
-export const subject = (code: string): string => code + ' es tu código de valoox';
+/** Killjoy with her hands up. Picked for what it is OF, like the rest: this
+ *  is the block that says do not hand the code over, and that is the gesture.
+ *  Served from our own origin so there is no third party in a message, and
+ *  absolute because a mail client has no page to be relative to.
+ *
+ *  Every client worth the name blocks images until asked, so the block has to
+ *  read without it — which is why the sentence is the block and the sticker is
+ *  alt="" beside it. */
+const STICKER = '/art/spray-holdup.png';
 
-export function text(code: string, mins: number): string {
-  return (
-    code +
-    ' es tu código de valoox.\n\n' +
-    'Escribilo en la pestaña que dejaste abierta. Vence en ' +
-    mins +
-    ' minutos y admite cinco intentos.\n\n' +
-    'Si no fuiste vos, no hagas nada: a una dirección que no contesta no se le ' +
-    'manda nada más, y acá no llega ningún aviso hasta que el código vuelva.\n\n' +
-    'Nadie de valoox te va a pedir este código. Ni por respuesta, ni en el ' +
-    'juego, en ningún lado. Tampoco tu contraseña de Riot: no la tenemos, el ' +
-    'ingreso es por QR dentro de la app de Riot.\n'
-  );
-}
+export const subject = (code: string, lang: Lang): string => words[lang].subject(code);
 
-export function html(code: string, mins: number, until: string): string {
-  const spaced = code.split('').join(' ');
+export const text = (code: string, mins: number, lang: Lang): string =>
+  words[lang].text(code, mins);
 
+export function html(code: string, mins: number, lang: Lang, origin: string): string {
+  const w = words[lang];
   const body =
     // the code, at the size of the message
-    `<tr><td align="center" style="padding:44px 28px 46px;${weave(HUE, INK.page)}">` +
-    `<div style="font-family:${FONT.mono};font-size:46px;font-weight:700;` +
-    `letter-spacing:0.18em;color:${INK.text};line-height:1">${spaced}</div>` +
+    `<tr><td align="center" class="pad" style="padding:44px 28px 46px;${weave(HUE, INK.page)}">` +
+    // Letter-spacing and not spaces between the digits: the spaces doubled
+    // the width of the one line in the message that must never wrap, and at
+    // 320px they pushed it off the edge.
+    `<div class="big" style="font-family:${FONT.mono};font-size:46px;font-weight:700;` +
+    `letter-spacing:0.18em;color:${INK.text};line-height:1">${code}</div>` +
     `<div style="font-family:${FONT.mono};font-size:11.5px;letter-spacing:0.16em;` +
     `text-transform:uppercase;color:${INK.body};padding-top:22px">` +
-    `${mins} minutos · cinco intentos</div></td></tr>` +
+    `${w.bounds(mins)}</div></td></tr>` +
     // what it is for, and what to do if it was not you
-    `<tr><td style="padding:26px 28px 0">` +
+    `<tr><td class="pad" style="padding:26px 28px 0">` +
     `<div style="font-size:23px;font-weight:500;letter-spacing:-0.02em;` +
-    `color:${INK.text};line-height:1.25">Alguien pidió avisos de tienda acá</div>` +
+    `color:${INK.text};line-height:1.25">${w.asked}</div>` +
     `<p style="margin:10px 0 0;font-size:14px;line-height:1.65;color:${INK.body}">` +
-    'Si fuiste vos, la pestaña que dejaste abierta está esperando esos seis ' +
-    'dígitos. Si no, no hagas nada: a una dirección que no contesta no se le ' +
-    'manda nada más, y acá no llega ningún aviso hasta que el código vuelva.' +
-    '</p></td></tr>' +
-    // the one line that matters if somebody later asks for the code
-    `<tr><td style="padding:22px 28px 0">` +
+    `${w.askedWhy}</p></td></tr>` +
+    // the line that matters if somebody later asks for the code, with the one
+    // picture in the message beside it
+    `<tr><td class="pad" style="padding:22px 28px 0">` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
     ` style="border-radius:14px;${weave(HUE, INK.stage)}"><tr>` +
-    `<td style="padding:18px 22px;font-size:14px;line-height:1.6;color:#D2D6D9">` +
-    'Nadie de valoox te va a pedir este código. Ni por respuesta, ni en el ' +
-    'juego, en ningún lado: solo te lo pedimos en la pestaña que abriste vos.' +
-    '</td></tr></table></td></tr>' +
-    `<tr><td style="padding:22px 28px 24px">` +
+    `<td width="120" class="stack" style="padding:18px 0 18px 22px" valign="middle">` +
+    `<img src="${origin}${STICKER}" width="120" height="120" alt=""` +
+    ` style="display:block;border:0;width:120px;height:120px"></td>` +
+    `<td class="stack" style="padding:18px 22px;font-size:14px;line-height:1.6;color:#D2D6D9" valign="middle">` +
+    `${w.neverAsk}</td></tr></table></td></tr>` +
+    `<tr><td class="pad" style="padding:22px 28px 24px">` +
     `<p style="margin:0;font-size:13.5px;line-height:1.65;color:${INK.faint}">` +
-    'Tampoco te vamos a pedir tu contraseña de Riot, y no la tenemos: el ' +
-    'ingreso es por QR, dentro de la app de Riot.</p></td></tr>';
+    `${w.neverPassword}</p></td></tr>`;
 
-  const foot =
-    `<p style="margin:0;font-size:12px;line-height:1.6;color:${INK.quiet}">` +
-    'Recibís esto porque alguien escribió esta dirección en valoox. No se manda ' +
-    'ningún aviso acá hasta que el código se escriba de vuelta.</p>';
+  const foot = `<p style="margin:0;font-size:12px;line-height:1.6;color:${INK.quiet}">${w.foot}</p>`;
 
-  return shell({ aside: 'Vence ' + until, body, foot });
+  // A duration, not a clock time. The board shows "Expires 10:14", which is a
+  // time in the sender's timezone printed for a reader in another one.
+  return shell({ aside: w.expiresIn(mins), body, foot, lang, origin });
 }
