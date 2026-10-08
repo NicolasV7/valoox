@@ -7,8 +7,11 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "node scripts/build.mjs --dev && wrangler dev",
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "fonts": "node scripts/fonts.mjs",
+    "deploy": "npm run build && wrangler deploy",
     "test": "vitest run",
     "typecheck": "wrangler types && tsc --noEmit",
     "lint": "biome check .",
@@ -19,8 +22,12 @@
     "@biomejs/biome": "^2.5.15",
     "@cloudflare/vitest-pool-workers": "^0.22.0",
     "@types/node": "^26.6.4",
+    "esbuild": "^0.28.2",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11",
     "wrangler": "^4.148.0"
+  },
+  "dependencies": {
+    "preact": "^11.0.0"
   }
 }

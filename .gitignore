@@ -4,3 +4,7 @@ node_modules/
 *.log
 .playwright-mcp/
 worker-configuration.d.ts
+
+# Fetched by `npm run fonts`. SIL OFL 1.1 permits shipping them; keeping a
+# binary out of a public repo is the reason, not the licence.
+public/fonts/
