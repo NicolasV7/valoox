@@ -29,7 +29,9 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
         <Countdown from={bundle.remaining} className="promo__clock" />
 
         <span class="promo__foot">
-          <span class="promo__name">{found?.name ?? t().common.loading}</span>
+          <span class="promo__name">
+            {found?.name ?? <span class="skel" style={{ width: '168px', height: '22px' }} />}
+          </span>
           <span class="promo__price">
             {bundle.allOwned && <span class="faint">{t().store.allOwned}</span>}
             <Money amount={bundle.price ?? bundle.base} size={14} />

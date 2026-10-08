@@ -63,7 +63,21 @@ export function OfferRow({
         </span>
       )}
 
-      <span class="row__name">{name ? split(name) : t().common.loading}</span>
+      {/* A hole where the name will be, not the word "loading". The name is
+          the thing you came to read; a placeholder that reads as a word is
+          something to read instead of it, and it is the wrong one. Two bars at
+          the widths the skeleton screen uses, so a row that fills late looks
+          like the rows that were never filled. */}
+      <span class="row__name">
+        {name ? (
+          split(name)
+        ) : (
+          <>
+            <span class="skel" style={{ width: '118px', height: '18px' }} />
+            <span class="skel" style={{ width: '92px', height: '18px', marginTop: '4px' }} />
+          </>
+        )}
+      </span>
 
       <span class="row__price">
         {cut && <Money amount={was} struck size={11} bare={bare} />}

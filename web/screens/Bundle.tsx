@@ -56,7 +56,9 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
         <Countdown from={bundle.remaining} className="chip chip--clock" />
 
         <div class="bundle__id">
-          <h1 class="bundle__name">{found?.name ?? t().common.loading}</h1>
+          <h1 class="bundle__name">
+            {found?.name ?? <span class="skel" style={{ width: '208px', height: '36px' }} />}
+          </h1>
           <p class="bundle__what">
             {s.pieces(bundle.items.length)}
             {tier && ' · ' + s.tier(t().common.tier[tier.name])}
