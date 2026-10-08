@@ -16,6 +16,11 @@ crons = ["30 0 * * *"]
 
 [assets]
 directory = "./public"
+# Named so the Worker can hand back the shell itself. Every path that is not
+# /api/* is an app route — /offer/<uuid> is a real, linkable URL — and without
+# this a reload or a shared link falls through to the Worker's 404 instead of
+# the page that knows what to do with it.
+binding = "ASSETS"
 
 [[d1_databases]]
 binding = "DB"

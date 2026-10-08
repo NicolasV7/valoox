@@ -13,7 +13,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 export function parse(path: string): Route {
   const [, head, id] = path.split('/');
   // Anything unrecognised is the store. A 404 screen for a typo in a one-column
-  // app would be a screen nobody reaches on purpose.
+  // app would be a screen nobody reaches on purpose — and this only holds
+  // because the Worker hands every non-/api/ path back as the shell, so a
+  // reload of /offer/<uuid> arrives here rather than at its 404.
   if (head === 'offer' && id && UUID.test(id)) return { name: 'offer', id };
   return { name: 'store' };
 }

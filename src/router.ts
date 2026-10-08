@@ -27,6 +27,9 @@ const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
   '/api/logout': { POST: logout },
 };
 
+/** The same request, pointed at the one asset that is the application. */
+const shell = (req: Request) => new Request(new URL('/', req.url), req);
+
 export async function route(req: Request, env: Env): Promise<Response> {
   const { pathname } = new URL(req.url);
   const method = req.method === 'POST' ? 'POST' : 'GET';
@@ -46,9 +49,16 @@ export async function route(req: Request, env: Env): Promise<Response> {
     cookie.set(headers, uid);
   }
 
+  // Everything that is not /api/* is an app route. /offer/<uuid> is a real URL
+  // — that is the whole reason the front end routes on the path rather than
+  // keeping the open offer in a variable — so a reload or a link somebody sent
+  // has to come back as the page, not as this Worker's opinion of the path.
+  // The client decides what an unknown one means, and its answer is the store.
+  if (!pathname.startsWith('/api/')) return env.ASSETS.fetch(shell(req));
+
   const handler = ROUTES[pathname]?.[method];
-  // 404 with the headers, so a first-time visitor who mistypes still keeps the
-  // uid that was just minted for them.
+  // 404 with the headers, so a first-time visitor who mistypes an endpoint
+  // still keeps the uid that was just minted for them.
   if (!handler) return json({ error: 'not found' }, headers, 404);
 
   try {
