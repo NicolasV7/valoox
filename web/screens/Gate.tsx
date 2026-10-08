@@ -11,7 +11,7 @@ import { t } from '../i18n/index.ts';
  *  the whole point of the line is that it is the same string every time. */
 const RIOT = 'auth.riotgames.com';
 
-export function Gate({ onScan }: { onScan: () => void }) {
+export function Gate({ onScan, onIntent }: { onScan: () => void; onIntent: () => void }) {
   const s = t().gate;
   const facts = [
     [s.facts.password, s.facts.passwordWhy],
@@ -21,7 +21,7 @@ export function Gate({ onScan }: { onScan: () => void }) {
   ];
 
   return (
-    <div class="screen gate">
+    <div class="gate rise">
       <Wordmark size={17} />
 
       <h1 class="gate__title">{s.title}</h1>
@@ -37,7 +37,10 @@ export function Gate({ onScan }: { onScan: () => void }) {
       </dl>
 
       <div class="gate__foot">
-        <button type="button" class="btn" onClick={onScan}>
+        {/* The handshake starts on the finger landing, not on the tap. That
+            is about 150ms of head start, and with the screen change covering
+            another 240 it is usually the whole wait for the code. */}
+        <button type="button" class="btn" onPointerDown={onIntent} onClick={onScan}>
           {s.show}
         </button>
         <p class="faint gate__dest">

@@ -4,10 +4,12 @@
 //
 // The plate is white in both themes and that is not an oversight. A QR inverted
 // to match a dark page fails to scan on a good share of phones, and the single
-// job of this screen is that it scans on the first try.
+// job of this screen is that it scans on the first try. It is the same 218px
+// square in every phase, so the code, the tick and the clock all land in the
+// same place and the screen changes without anything jumping.
 
 import { Check, Clock, Riot } from '../components/icons.tsx';
-import { QrCode } from '../components/QrCode.tsx';
+import { QrCode, QrWaiting } from '../components/QrCode.tsx';
 import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
 
@@ -15,25 +17,33 @@ export type ScanState =
   | { phase: 'starting' }
   | { phase: 'ready'; url: string }
   | { phase: 'expired' }
-  | { phase: 'approved'; name: string; tag: string };
+  | { phase: 'approved' };
 
-export function Scan({ state, onRetry }: { state: ScanState; onRetry: () => void }) {
+export function Scan({
+  state,
+  name,
+  onRetry,
+}: {
+  state: ScanState;
+  name?: string;
+  onRetry: () => void;
+}) {
   const s = t().gate;
-  if (state.phase === 'approved') return <Approved name={state.name} tag={state.tag} />;
+  if (state.phase === 'approved') return <Approved name={name} />;
   if (state.phase === 'expired') return <Expired onRetry={onRetry} />;
 
   return (
-    <div class="screen scan">
+    <div class="scan rise">
       <h1>{s.scan.title}</h1>
       <p class="lede scan__lede">{s.scan.lede}</p>
 
       <div class="plate">
         {state.phase === 'ready' ? (
-          <QrCode url={state.url} size={190} />
+          <span class="plate__code">
+            <QrCode url={state.url} size={190} />
+          </span>
         ) : (
-          // The plate where the code will be, at the size it will be. Nothing
-          // to announce: the line under it already says what is happening.
-          <div class="plate__wait" aria-hidden="true" />
+          <QrWaiting size={190} />
         )}
       </div>
       <p class="small scan__how">{s.scan.how}</p>
@@ -42,7 +52,17 @@ export function Scan({ state, onRetry }: { state: ScanState; onRetry: () => void
         <span class="small">{s.scan.or}</span>
       </div>
 
-      <a class="btn btn--riot" href={state.phase === 'ready' ? state.url : '#'}>
+      {/* A new tab, not this one. Riot Mobile opens from a universal link, and
+          if that link navigates the page away the poll dies with it — the scan
+          is approved, nobody is listening, and coming back lands on a reload
+          that never shows the screen saying you got in. */}
+      <a
+        class="btn btn--riot"
+        href={state.phase === 'ready' ? state.url : undefined}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-disabled={state.phase === 'ready' ? undefined : 'true'}
+      >
         <Riot />
         {s.scan.open}
       </a>
@@ -58,25 +78,33 @@ export function Scan({ state, onRetry }: { state: ScanState; onRetry: () => void
   );
 }
 
-function Approved({ name, tag }: { name: string; tag: string }) {
+function Approved({ name }: { name?: string }) {
   const s = t().gate;
+  const [handle, tag] = (name ?? '').split('#');
+
   return (
-    <div class="screen scan">
+    <div class="scan rise">
       <h1>{s.approved.title}</h1>
       <div class="plate plate--done">
-        <div class="plate__seal">
+        <span class="plate__seal">
           <Check />
-        </div>
+        </span>
       </div>
 
       <div class="scan__who">
         <img src={SPRAY.peace} alt="" width="78" height="78" />
-        <p class="item">{s.approved.as(name, tag)}</p>
+        {/* The name arrives with the store, which is loading underneath this.
+            If it beats the hold it fills in; if it does not, the line below
+            already says what is happening. */}
+        {handle && (
+          <p class="item scan__name">
+            {handle}
+            {tag && <span class="scan__tag">#{tag}</span>}
+          </p>
+        )}
         <p class="small">{s.approved.loading}</p>
       </div>
 
-      {/* The shape the store rows will take, at the size they will be, so
-          nothing jumps when the data lands. */}
       <div class="bars" aria-hidden="true">
         <span class="skel" />
         <span class="skel" />
@@ -91,14 +119,14 @@ function Approved({ name, tag }: { name: string; tag: string }) {
 function Expired({ onRetry }: { onRetry: () => void }) {
   const s = t().gate;
   return (
-    <div class="screen scan">
+    <div class="scan rise">
       <h1>{s.expired.title}</h1>
       <p class="lede scan__lede">{s.expired.lede}</p>
 
       <div class="plate plate--dead">
-        <div class="plate__seal plate__seal--quiet">
+        <span class="plate__seal plate__seal--quiet">
           <Clock />
-        </div>
+        </span>
       </div>
 
       <img class="scan__spray" src={SPRAY.goAgain} alt="" width="88" height="88" />
