@@ -1,0 +1,144 @@
+/* Where it goes: one address, and the state it is in.
+ *
+ * The card is the whole screen's subject, so the state of the address lives
+ * on its own top line rather than in a sentence underneath it. */
+
+/* The card is the whole screen's subject, so the state of the address lives on
+ * its own top line rather than in a sentence below it. */
+
+.bell__title {
+  margin: 12px var(--gut) 0;
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.bell__card {
+  margin: 16px var(--gut) 0;
+  padding: 16px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--stage);
+}
+
+/* A refusal is the card's own state, not a banner above it. */
+.bell__card--bad {
+  border-color: #3a2a2c;
+}
+
+.bell__kind {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.bell__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.bell__state--ok {
+  color: var(--ok);
+}
+.bell__state--wait {
+  color: var(--kept);
+}
+.bell__state--bad {
+  color: var(--bad);
+}
+
+/* Inherits the colour of whatever it sits in, which is how one rule draws the
+ * green, the amber and the red dot. */
+.bell__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.bell__label {
+  display: block;
+  margin: 13px 0 7px;
+  font-size: var(--t-small);
+  color: var(--ink-3);
+}
+
+/* The one well in the app: an address is typed, not read, so it sits below the
+ * card rather than on it. 16px on a phone, like the search — iOS zooms into
+ * anything smaller the moment it takes focus. */
+.bell__input {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 9px;
+  background: var(--sunk);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--t-small);
+}
+
+@media (pointer: coarse) {
+  .bell__input {
+    font-size: 16px;
+  }
+}
+
+.bell__go {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 9px;
+  font-size: 12.5px;
+}
+
+.bell__why {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--kept);
+}
+
+.bell__why--bad {
+  color: var(--bad);
+}
+
+.bell__said--ok {
+  color: var(--ok);
+}
+
+.bell__addr {
+  margin-top: 10px;
+  font-size: var(--t-label);
+  color: var(--ink-4);
+}
+
+.bell__pair {
+  display: flex;
+  gap: 8px;
+  margin: 12px var(--gut) 0;
+}
+
+.bell__pair .btn {
+  padding: 12px;
+  border-radius: 9px;
+  font-size: 12.5px;
+}
+
+.bell__under {
+  margin: 0 var(--gut);
+}
+

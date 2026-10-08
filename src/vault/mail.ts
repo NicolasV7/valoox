@@ -1,0 +1,81 @@
+// The one place this service sends mail.
+//
+// In the vault with the Riot calls, because what makes it belong here is not
+// whose API it is: it is that it leaves this origin, so it goes through rf()
+// and past assertAllowed() like everything else. api.resend.com is a rule in
+// upstream.ts with its own `why:`.
+//
+// What a send returns is the provider's own status and nothing else. A 2xx
+// means Resend accepted the message — not that it reached a mailbox, survived
+// a filter, or was read. Those are different claims and this module is careful
+// never to make them; what the webhook adds later is also the provider's word,
+// reported as theirs.
+//
+// No retry, unlike the daily alert. This one is a person waiting on a button:
+// three tries at six seconds is eighteen seconds of a spinner before they are
+// told the address was wrong, and the whole point of the screen is to tell
+// them quickly.
+
+import type { Env } from '../types.ts';
+import { rf } from './http.ts';
+
+const API = 'https://api.resend.com/emails';
+const TIMEOUT = 8000;
+
+/** What the provider said, in the shape the screens report. `said` is for a
+ *  person to read and goes on screen exactly as built here. */
+export interface Sent {
+  ok: boolean;
+  status: number;
+  /** Resend's id for the message, which its webhook quotes back. */
+  id?: string;
+  said: string;
+}
+
+/**
+ * Addresses this will send to.
+ *
+ * Deliberately not RFC 5322 — that grammar admits quoted strings, comments and
+ * bracketed literals, and a parser for it is a liability on an input that one
+ * round trip validates for real. This rejects what cannot be an address and
+ * lets the code in the message decide the rest.
+ */
+const ADDRESS = /^[^\s@,;:<>"']{1,64}@[^\s@,;:<>"'.]{1,63}(\.[^\s@,;:<>"'.]{1,63})+$/;
+
+export const looksLikeAddress = (to: string): boolean => to.length <= 254 && ADDRESS.test(to);
+
+export async function send(
+  env: Env,
+  to: string,
+  subject: string,
+  html: string,
+  text: string,
+): Promise<Sent> {
+  if (!env.RESEND_KEY || !env.MAIL_FROM) {
+    // Not configured is not the address's fault, and saying "refused" would
+    // send somebody to check their spelling for our missing secret.
+    return { ok: false, status: 0, said: 'mail no configurado' };
+  }
+
+  let res: Response;
+  try {
+    res = await rf(API, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + env.RESEND_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ from: env.MAIL_FROM, to: [to], subject, html, text }),
+      signal: AbortSignal.timeout(TIMEOUT),
+    });
+  } catch {
+    // Aborted, or the connection never opened. Ours, not the address's.
+    return { ok: false, status: 0, said: 'resend sin respuesta' };
+  }
+
+  const said = 'resend ' + res.status;
+  if (!res.ok) return { ok: false, status: res.status, said };
+
+  const body = (await res.json().catch(() => null)) as { id?: string } | null;
+  return { ok: true, status: res.status, id: body?.id, said };
+}

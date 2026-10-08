@@ -128,6 +128,16 @@ const ALLOW: Rule[] = [
     why: 'delivers a wishlist hit; carries no credential and no puuid. Throttled per webhook, which is the only kind of limit a Worker can own',
   },
 
+  // Mail. The address is ours to pick from a stored session, never off a
+  // request: the route validates and stores it first, and this sends to
+  // whatever is stored. The body carries a number we generated and skin names
+  // the user chose — no puuid, no jar, no Riot credential of any kind.
+  {
+    method: 'POST',
+    pattern: /^https:\/\/api\.resend\.com\/emails$/,
+    why: 'sends the six digits that prove an address, and the morning alert to it once proved',
+  },
+
   // --- public, unauthenticated --------------------------------------------
   {
     method: 'GET',

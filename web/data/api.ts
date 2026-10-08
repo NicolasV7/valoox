@@ -60,3 +60,13 @@ export const startScan = () => call<Scan>('/api/qr', { method: 'POST' });
 export const pollScan = () => call<Scan>('/api/qr');
 
 export const logout = () => call<{ ok: true }>('/api/logout', { method: 'POST' });
+
+/** A POST with a JSON body, for the few routes that take one. Returns the
+ *  Worker's own answer — including its `error` field, which on these routes is
+ *  an outcome to show rather than a failure to throw. */
+export const post = <T>(path: string, body: unknown) =>
+  call<T>(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });

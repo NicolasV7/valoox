@@ -3,7 +3,9 @@ import type { Body, Ctx } from './lib/json.ts';
 import { json } from './lib/json.ts';
 import { testAlert } from './routes/alerts.ts';
 import { logout, pollScan, startScan } from './routes/auth.ts';
+import { resend, setChannel, verify } from './routes/channel.ts';
 import { collection } from './routes/collection.ts';
+import { resendHook } from './routes/hook.ts';
 import { store } from './routes/store.ts';
 import { readWishlist, writeWishlist } from './routes/wishlist.ts';
 import type { Env } from './types.ts';
@@ -23,6 +25,9 @@ const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
   '/api/inventory': { GET: collection },
   '/api/qr': { GET: pollScan, POST: startScan },
   '/api/prefs': { GET: readWishlist, POST: writeWishlist },
+  '/api/channel': { POST: setChannel },
+  '/api/channel/again': { POST: resend },
+  '/api/channel/verify': { POST: verify },
   '/api/test-alert': { POST: testAlert },
   '/api/logout': { POST: logout },
 };
@@ -34,6 +39,14 @@ export async function route(req: Request, env: Env): Promise<Response> {
   const { pathname } = new URL(req.url);
   const method = req.method === 'POST' ? 'POST' : 'GET';
   const headers = new Headers();
+
+  // The one caller that is not a browser, and so the one that must come before
+  // the same-origin check: a provider's webhook is cross-site by definition and
+  // that check would be right to refuse it. Its signature is what stands in,
+  // and it is strictly the stronger of the two — see routes/hook.ts.
+  if (pathname === '/api/hook/resend') {
+    return method === 'POST' ? resendHook(req, env) : json({ error: 'not found' }, headers, 404);
+  }
 
   // The whole CSRF defence, and it is enough: a cross-site form post cannot set
   // this header, and a same-origin fetch always does.

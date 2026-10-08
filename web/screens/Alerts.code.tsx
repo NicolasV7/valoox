@@ -1,0 +1,108 @@
+// The code, typed back.
+//
+// Six boxes rather than one field, because six digits read back off a phone
+// are read in pairs and a single field gives you nowhere to lose your place.
+// One real input underneath them carries the typing, so paste, autofill and
+// the keyboard's own one-time-code suggestion all work — six separate inputs
+// break all three.
+
+import { useRef, useState } from 'preact/hooks';
+import { Back } from '../components/Back.tsx';
+import { again, prove, refused, reload, usePrefs } from '../data/channel.ts';
+import { t } from '../i18n/index.ts';
+import { ALERTS, go } from '../route.ts';
+
+const BOXES = [0, 1, 2, 3, 4, 5];
+
+export function AlertsCode() {
+  const s = t().alerts;
+  const prefs = usePrefs();
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [said, setSaid] = useState<string | null>(null);
+  const field = useRef<HTMLInputElement>(null);
+
+  const to = prefs?.mail?.to ?? '';
+  const sent = prefs?.mail?.said ?? '';
+
+  return (
+    <main class="screen bell">
+      <Back to={{ name: 'alerts', step: 'channel' }} said={s.whereItGoes} />
+
+      {/* Green is the provider having taken it, which is the only thing this
+          line claims. A refusal never reaches this screen, but the colour is
+          read off the status rather than assumed, so it cannot go stale. */}
+      <p class={refused(sent) ? 'bell__sent bell__sent--bad num' : 'bell__sent num'}>
+        <span class="bell__dot" />
+        {s.sentAs(sent)}
+      </p>
+      <h1 class="bell__ask">{s.typeTheCode}</h1>
+      <p class="lede bell__to">{s.sixDigitsTo(to)}</p>
+
+      {/* The boxes are the picture; the input under them is the field. */}
+      <button type="button" class="pin" onClick={() => field.current?.focus()}>
+        {BOXES.map((i) => (
+          <span class={i === code.length ? 'pin__box pin__box--on' : 'pin__box'} key={i}>
+            {code[i] ?? ''}
+          </span>
+        ))}
+      </button>
+      <input
+        ref={field}
+        class="pin__field"
+        type="text"
+        inputMode="numeric"
+        autocomplete="one-time-code"
+        maxLength={6}
+        value={code}
+        aria-label={s.typeTheCode}
+        onInput={(e) => {
+          const next = (e.currentTarget as HTMLInputElement).value.replace(/\D/g, '').slice(0, 6);
+          setCode(next);
+          setSaid(null);
+        }}
+      />
+
+      <div class="bell__pair">
+        <button type="button" class="btn" disabled={code.length !== 6 || busy} onClick={check}>
+          {s.verify}
+        </button>
+        <button type="button" class="btn btn--quiet" disabled={busy} onClick={more}>
+          {s.sendItAgain}
+        </button>
+      </div>
+
+      {said && <p class="bell__why bell__why--bad">{said}</p>}
+
+      <p class="legal bell__note">{s.tenAndFive}</p>
+
+      <h2 class="label bell__step">{s.whatHappensAfter}</h2>
+      <p class="legal bell__under">{s.afterWhy}</p>
+    </main>
+  );
+
+  async function check() {
+    setBusy(true);
+    const res = (await prove(code)) as { ok?: boolean; error?: string; left?: number | null };
+    setBusy(false);
+    if (res?.ok) {
+      await reload();
+      return go(ALERTS);
+    }
+    setCode('');
+    const how = res?.error;
+    setSaid(
+      how === 'gone' ? s.codeGone : how === 'spent' ? s.codeSpent : s.codeWrong(res?.left ?? 0),
+    );
+  }
+
+  async function more() {
+    setBusy(true);
+    const res = (await again()) as { error?: string; wait?: number; sent?: boolean };
+    setBusy(false);
+    setCode('');
+    if (res?.error === 'wait') return setSaid(s.waitSeconds(res.wait ?? 0));
+    await reload();
+    if (!res?.sent) go(ALERTS);
+  }
+}

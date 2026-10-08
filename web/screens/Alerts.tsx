@@ -9,32 +9,20 @@
 // nothing in the app can put something in it yet — the star on a skin is a
 // mark and not a control until the channel exists to send to.
 
-import { useEffect, useState } from 'preact/hooks';
-import * as api from '../data/api.ts';
-import { NEEDS_RESEED } from '../data/api.ts';
-import type { Prefs } from '../data/types.ts';
+import { refused, usePrefs } from '../data/channel.ts';
+import { AlertsFailed } from './Alerts.failed.tsx';
 import { AlertsFirst } from './Alerts.first.tsx';
 import { AlertsLoading } from './Alerts.loading.tsx';
 
 export function Alerts() {
-  const [prefs, setPrefs] = useState<Prefs | null>(null);
-
-  useEffect(() => {
-    let live = true;
-    void api
-      .prefs()
-      .then((got) => {
-        if (live && got !== NEEDS_RESEED) setPrefs(got);
-      })
-      .catch(() => undefined);
-    return () => {
-      live = false;
-    };
-  }, []);
+  const prefs = usePrefs();
 
   if (!prefs) return <AlertsLoading />;
+  // A refusal is the whole story, so it is the whole screen: nothing went
+  // anywhere and the only useful next move is on it.
+  if (refused(prefs.mail?.said)) return <AlertsFailed />;
   // The list with something in it is the next screen. Nothing in the app can
   // star anything yet, so an empty wishlist is the only state this can be in —
   // if one ever is not empty, that screen is what it needs, not this one.
-  return <AlertsFirst channel={prefs.discord} starred={prefs.wishlist.length} />;
+  return <AlertsFirst mail={prefs.mail} starred={prefs.wishlist.length} />;
 }

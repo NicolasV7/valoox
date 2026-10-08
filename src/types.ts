@@ -36,6 +36,25 @@ export interface Session {
    * one of each.
    */
   notify?: { discord?: string };
+  /**
+   * Where an alert goes, and whether that address has proved it can receive.
+   *
+   * Sealed with the rest for the same reason the webhook is: an address is a
+   * capability to message this person. `ok` is the whole safety story — nothing
+   * is ever sent to an address that has not carried a six-digit code back, so
+   * this cannot become a button that mails strangers.
+   *
+   * `send` is the provider's id for the last message, which is how its webhook
+   * finds its way back to this row, and `said` is the last thing the provider
+   * said about it: its HTTP status at send time, then whatever the webhook
+   * reports. Never our opinion of what happened.
+   */
+  mail?: {
+    to: string;
+    ok: boolean;
+    send?: string;
+    said?: string;
+  };
 }
 
 /** Headers every authenticated Riot data call must carry. Extends Record so it
@@ -95,4 +114,14 @@ export interface StoreView {
 export interface Env extends Cloudflare.Env {
   /** 32 random bytes, base64. Set with `wrangler secret put JAR_KEY`. */
   JAR_KEY: string;
+  /** Resend's API key. `wrangler secret put RESEND_KEY`. */
+  RESEND_KEY?: string;
+  /** The signing secret Resend shows when you add a webhook, `whsec_…`.
+   *  `wrangler secret put RESEND_HOOK`. Without it the hook refuses every
+   *  request, which is the right way for a verifier to fail. */
+  RESEND_HOOK?: string;
+  // MAIL_FROM is not here on purpose: it is a [vars] entry in wrangler.toml,
+  // so `wrangler types` already has it. A var rather than a secret because it
+  // is printed on every message — and it has to be an address on a domain
+  // verified in Resend.
 }

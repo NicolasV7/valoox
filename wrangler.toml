@@ -14,6 +14,12 @@ enabled = false
 [triggers]
 crons = ["30 0 * * *"]
 
+# Printed on every message, so it is a var and not a secret. It has to be an
+# address on a domain verified in Resend — the subdomain keeps the sending
+# reputation off valoox.store, which can then hold a strict DMARC of its own.
+[vars]
+MAIL_FROM = "valoox <alerts@mail.valoox.store>"
+
 [assets]
 directory = "./public"
 # Named so the Worker can hand back the shell itself. Every path that is not

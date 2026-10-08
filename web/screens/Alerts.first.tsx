@@ -6,11 +6,15 @@
 // one failure it must not hide.
 
 import { Chevron, Mail } from '../components/icons.tsx';
+import type { Prefs } from '../data/types.ts';
 import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
+import { href, intercept } from '../route.ts';
 
-export function AlertsFirst({ channel, starred }: { channel: string; starred: number }) {
+export function AlertsFirst({ mail, starred }: { mail: Prefs['mail']; starred: number }) {
   const s = t().alerts;
+  const to = { name: 'alerts', step: 'channel' } as const;
+  const ok = mail?.ok === true;
 
   return (
     <main class="screen bell">
@@ -26,27 +30,27 @@ export function AlertsFirst({ channel, starred }: { channel: string; starred: nu
       </div>
 
       <h2 class="label bell__step">{s.stepOne}</h2>
-      {/* Drawn and not yet a door: the screen it would open is not built. The
-          tab bar does the same with the one tab that does not exist — a
-          control that looks live and does nothing is the worst of the three. */}
-      <div class="bell__row">
+      <a class="bell__row" href={href(to)} onClick={intercept(to)}>
         <span class="bell__at">
           <Mail />
         </span>
         <span class="bell__id">
-          <span class="bell__name">{s.yourEmail}</span>
-          <span class="bell__said">{channel ? channel : s.oneAddress}</span>
+          <span class="bell__name">{mail?.to || s.yourEmail}</span>
+          <span class={ok ? 'bell__said bell__said--ok' : 'bell__said'}>
+            {ok ? s.verified : mail?.to ? s.notVerifiedYet : s.oneAddress}
+          </span>
         </span>
         <span class="bell__chev">
           <Chevron size={16} />
         </span>
-      </div>
+      </a>
 
       <h2 class="label bell__step">{s.stepTwo}</h2>
+      {/* Shut until step one is done, and the reason is on it. */}
       <div class="bell__row bell__row--shut">
         <span class="bell__id">
           <span class="bell__name">{s.searchASkin}</span>
-          <span class="bell__said">{s.opensOnce}</span>
+          <span class="bell__said">{ok ? s.comingNext : s.opensOnce}</span>
         </span>
       </div>
 

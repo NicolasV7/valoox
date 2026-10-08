@@ -1,0 +1,101 @@
+/* The six digits, and the two-line table under a refusal.
+ *
+ * Six boxes are the picture and one input underneath is the field. Six real
+ * inputs break paste, autofill and the keyboard's own one-time-code
+ * suggestion, which between them are how most people enter one of these. */
+
+.bell__sent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px var(--gut) 0;
+  font-size: var(--t-floor);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ok);
+}
+
+.bell__sent--bad {
+  color: var(--bad);
+}
+
+.bell__ask {
+  margin: 12px var(--gut) 0;
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+.bell__to {
+  margin: 10px var(--gut) 0;
+  font-size: 13.5px;
+}
+
+/* Six boxes are the picture and one input underneath is the field: six real
+ * inputs break paste, autofill and the keyboard's own code suggestion, which
+ * between them are how most people enter one of these. */
+.pin {
+  display: flex;
+  gap: 8px;
+  width: calc(100% - var(--gut) * 2);
+  margin: 22px var(--gut) 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: text;
+}
+
+.pin__box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--sunk);
+  color: var(--ink);
+  font-family: var(--num);
+  font-size: 22px;
+}
+
+.pin__box--on {
+  border-color: var(--ink);
+}
+
+/* Off-screen but focusable, and never display:none — a hidden field is not
+ * focusable and the boxes would be a picture of an input nobody can fill. */
+.pin__field {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  clip-path: inset(50%);
+}
+
+/* --- what a send proves --------------------------------------------------- */
+
+.tells {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--stage-row);
+  font-size: var(--t-small);
+  color: var(--ink-3);
+}
+
+.tells__yes {
+  color: var(--ok);
+}
+
+.tells__no {
+  color: var(--ink-5);
+}
+
+.bell .shelf {
+  margin: 0 var(--gut);
+}

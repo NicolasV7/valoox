@@ -21,9 +21,15 @@ export type Route =
   | { name: 'card'; id: string }
   | { name: 'title'; id: string }
   | { name: 'skin'; id: string }
-  | { name: 'alerts' };
+  | { name: 'alerts'; step?: Step };
 
 export type Tab = 'weapons' | 'sprays' | 'buddies' | 'cards' | 'titles';
+
+/** The two screens inside the alerts tab that are their own place: setting an
+ *  address, and carrying its code back. */
+export type Step = 'channel' | 'code';
+
+const STEPS: Step[] = ['channel', 'code'];
 
 const TABS: Tab[] = ['weapons', 'sprays', 'buddies', 'cards', 'titles'];
 
@@ -44,7 +50,10 @@ export function parse(path: string): Route {
   if (head === 'card' && id && UUID.test(id)) return { name: 'card', id };
   if (head === 'title' && id && UUID.test(id)) return { name: 'title', id };
   if (head === 'skin' && id && UUID.test(id)) return { name: 'skin', id };
-  if (head === 'alerts') return { name: 'alerts' };
+  if (head === 'alerts') {
+    const step = STEPS.find((x) => x === id);
+    return step ? { name: 'alerts', step } : { name: 'alerts' };
+  }
   if (head === 'collection') {
     const tab = TABS.find((t) => t === id) ?? 'weapons';
     return { name: 'collection', tab };
@@ -54,7 +63,7 @@ export function parse(path: string): Route {
 
 export const href = (route: Route): string => {
   if (route.name === 'store') return '/';
-  if (route.name === 'alerts') return '/alerts';
+  if (route.name === 'alerts') return route.step ? '/alerts/' + route.step : '/alerts';
   if (route.name === 'collection') {
     return route.tab === 'weapons' ? '/collection' : '/collection/' + route.tab;
   }
@@ -148,6 +157,11 @@ export function retreat(to: Route) {
     else go(to);
   };
 }
+
+/** The top of the alerts tab. Named here rather than in the back control's
+ *  own list, because it is a route and the three screens that point at it are
+ *  not all back controls. */
+export const ALERTS: Route = { name: 'alerts' };
 
 export function useRoute(): Route {
   const [route, set] = useState<Route>(() => parse(location.pathname));

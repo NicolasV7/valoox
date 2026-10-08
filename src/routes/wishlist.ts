@@ -46,6 +46,11 @@ export const readWishlist = ({ env, uid }: Ctx): Promise<Body> => wishlist(env, 
 export const writeWishlist = async ({ env, uid, req }: Ctx): Promise<Body> =>
   wishlist(env, uid, await req.json());
 
+/** Somewhere to put a hit. A verified address counts; an unverified one does
+ *  not, which is the same rule the send side enforces. */
+const hasChannel = (s: { notify?: { discord?: string }; mail?: { ok: boolean } }) =>
+  !!s.notify?.discord || s.mail?.ok === true;
+
 async function wishlist(env: Env, uid: string, body: unknown | null, retry = true): Promise<Body> {
   const held = await readSession(env, uid);
   if (!held) return RESEED;
@@ -64,7 +69,16 @@ async function wishlist(env: Env, uid: string, body: unknown | null, retry = tru
     }
     // The only preference kept in the clear, and only so the daily job can find
     // the rows to poll without opening every sealed blob in the table.
-    await setAlerts(env, uid, session.wishlist.length > 0 && !!discord);
+    await setAlerts(env, uid, session.wishlist.length > 0 && hasChannel(session));
   }
-  return { wishlist: session.wishlist ?? [], discord: session.notify?.discord ?? '' };
+  return {
+    wishlist: session.wishlist ?? [],
+    discord: session.notify?.discord ?? '',
+    // The address itself, never a code and never a secret: the browser needs
+    // it to show you what it is about to write to. `said` is the provider's
+    // own last word, passed through unchanged so no screen can soften it.
+    mail: session.mail
+      ? { to: session.mail.to, ok: session.mail.ok, said: session.mail.said ?? '' }
+      : null,
+  };
 }

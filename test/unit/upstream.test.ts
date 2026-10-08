@@ -100,5 +100,9 @@ test('the loadout is readable but not writable', () => {
 test('the list stays short enough to read in one sitting', () => {
   // If this fails, someone added an endpoint. That is allowed — but it should be
   // a deliberate edit to this number, with a look at what was added.
-  assert.equal(allowCount, 17);
+  // 17 -> 18 on 2026-10-08: POST https://api.resend.com/emails, which sends
+  // the six digits that prove an address and the morning alert to it once
+  // proved. It is the second non-Riot rule here, after the Discord webhook,
+  // and like that one it carries no puuid, no jar and no Riot credential.
+  assert.equal(allowCount, 18);
 });

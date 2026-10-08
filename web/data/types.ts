@@ -73,6 +73,11 @@ export interface StoreView {
 export interface Prefs {
   wishlist: Array<{ id: string; name: string }>;
   discord: string;
+  /** The address an alert would go to, whether it has carried a code back,
+   *  and the last thing the provider said about the last message sent to it.
+   *  `said` is theirs — `resend 422`, `email.bounced` — and goes on screen as
+   *  given, because a status we paraphrased is a status we invented. */
+  mail: { to: string; ok: boolean; said: string } | null;
 }
 
 /** What `/api/qr` answers. `url` only on start; `shard` only once approved. */
