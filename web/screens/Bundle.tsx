@@ -15,7 +15,8 @@ import { Countdown } from '../components/Countdown.tsx';
 import { Chevron } from '../components/icons.tsx';
 import { OfferRow } from '../components/OfferRow.tsx';
 import { Tile } from '../components/Tile.tsx';
-import { shapeOf, tierByPrice } from '../data/catalogue.ts';
+import { shapeOf } from '../data/catalogue.ts';
+import { tierByPrice } from '../data/tiers.ts';
 import type { Bundle as BundleData, GroupItem } from '../data/types.ts';
 import { useBundle, useSkin } from '../data/usePiece.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
@@ -106,6 +107,7 @@ function Gun({ item }: { item: GroupItem }) {
       tier={tierByPrice(item.base)}
       cost={item.price ?? item.base}
       was={item.base}
+      scale={found?.scale}
       bare
       href={'/offer/' + item.id}
       onClick={undefined}

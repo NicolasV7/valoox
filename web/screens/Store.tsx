@@ -6,7 +6,7 @@
 
 import { Countdown } from '../components/Countdown.tsx';
 import { OfferRow } from '../components/OfferRow.tsx';
-import { tierByPrice } from '../data/catalogue.ts';
+import { tierByPrice } from '../data/tiers.ts';
 import type { Offer as OfferData, StoreView } from '../data/types.ts';
 import { useSkin } from '../data/usePiece.ts';
 import { t } from '../i18n/index.ts';
@@ -81,6 +81,7 @@ function Daily({
       tier={tierByPrice(was ?? offer.cost)}
       cost={paid}
       was={cut ? was : null}
+      scale={found?.scale}
       href={'/offer/' + offer.id}
       onClick={intercept({ name: 'offer', id: offer.id })}
     />

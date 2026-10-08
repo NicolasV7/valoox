@@ -15,6 +15,41 @@ const MEDIA = 'https://media.valorant-api.com/';
 export interface Piece {
   name: string | null;
   icon: string | null;
+  /** How long the thing really is, relative to the longest weapon. 1 for
+   *  anything that is not a weapon. See sizeOf(). */
+  scale: number;
+}
+
+/**
+ * How long a weapon really is, relative to the longest one.
+ *
+ * Riot draws every render at the same file width — measured: every skin level
+ * icon is 512px across, whatever it is of — so a Ghost arrives the same length
+ * as an Operator, and a column of four offers reads as an oversized pistol next
+ * to a correctly sized rifle. The game does not look like that.
+ *
+ * The asset path says which family the skin came from, and seven of them cover
+ * the whole catalogue: Sidearms, Rifles, SniperRifles, SubMachineGuns,
+ * Shotguns, HvyMachineGuns, Melee. That is enough to give each one its size
+ * back, with no index to download and no name to parse. The ratios are the
+ * in-game models', normalised so the longest still fills the row.
+ */
+const SIZE: Record<string, number> = {
+  SniperRifles: 1,
+  HvyMachineGuns: 0.97,
+  Rifles: 0.94,
+  Shotguns: 0.8,
+  SubMachineGuns: 0.76,
+  Melee: 0.64,
+  Sidearms: 0.55,
+};
+
+// .../Equippables/Guns/Rifles/AK/... and .../Equippables/Melee/Cyberpunk/...
+const FAMILY = /\/Equippables\/(?:Guns\/)?([^/]+)\//;
+
+export function sizeOf(assetPath: string | undefined): number {
+  const found = assetPath ? FAMILY.exec(assetPath) : null;
+  return (found && SIZE[found[1] as string]) || 1;
 }
 
 const seen = new Map<string, Promise<Piece | null>>();
@@ -36,6 +71,7 @@ function one(kind: string, id: string): Promise<Piece | null> {
         name: d.titleText || d.displayName || null,
         // A title carries no art at all; a spray prefers the transparent cut.
         icon: d.displayIcon || d.fullTransparentIcon || d.largeArt || null,
+        scale: sizeOf(d.assetPath),
       };
     })
     .catch(() => null);
@@ -125,50 +161,3 @@ export const cardArt = (id: string): Promise<string | null> =>
         j?.data?.wideArt ?? j?.data?.largeArt ?? null,
     )
     .catch(() => null);
-
-// --- tiers -----------------------------------------------------------------
-// Pinned rather than fetched. The uuids and the token names match
-// /v1/contenttiers exactly, and pinning them is what buys the zero requests on
-// the screen that has to open fastest.
-
-export type TierName = 'select' | 'deluxe' | 'premium' | 'exclusive' | 'ultra';
-
-export interface Tier {
-  name: TierName;
-  icon: string;
-}
-
-const UUID: Record<TierName, string> = {
-  select: '12683d76-48d7-84a3-4e09-6985794f0445',
-  deluxe: '0cebb8be-46d7-c12a-d306-e9907bfc5a25',
-  premium: '60bca009-4182-7998-dee7-b8a2558dc369',
-  exclusive: 'e046854e-406c-37f4-6607-19a9ba8426fc',
-  ultra: '411e4a55-4e59-7757-41f0-86a53f101bb5',
-};
-
-const tier = (name: TierName): Tier => ({
-  name,
-  icon: MEDIA + 'contenttiers/' + UUID[name] + '/displayicon.png',
-});
-
-/** Riot prices a skin by its tier, and a melee at twice the gun price. Reading
- *  the tier back off the number is what avoids downloading an index to learn
- *  one word. An unknown price returns null, and the row shows no tier at all —
- *  which is honest: we do not know it. */
-const BY_PRICE = new Map<number, Tier>(
-  (
-    [
-      [875, 1750, 'select'],
-      [1275, 2550, 'deluxe'],
-      [1775, 3550, 'premium'],
-      [2175, 4350, 'exclusive'],
-      [2475, 4950, 'ultra'],
-    ] as Array<[number, number, TierName]>
-  ).flatMap(([gun, melee, name]) => [
-    [gun, tier(name)],
-    [melee, tier(name)],
-  ]),
-);
-
-export const tierByPrice = (cost: number | null): Tier | null =>
-  cost === null ? null : (BY_PRICE.get(cost) ?? null);

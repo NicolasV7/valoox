@@ -10,7 +10,7 @@
 
 import { Chevron } from '../components/icons.tsx';
 import { Money } from '../components/Money.tsx';
-import { tierByPrice } from '../data/catalogue.ts';
+import { tierByPrice } from '../data/tiers.ts';
 import type { StoreView } from '../data/types.ts';
 import { useSkin } from '../data/usePiece.ts';
 import { artStyle, useArt } from '../design/useArt.ts';

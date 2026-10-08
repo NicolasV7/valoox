@@ -16,7 +16,7 @@
 // the second in a long one, so the one word you are looking for moves between
 // rows. Splitting at the last space pins it.
 
-import type { Tier } from '../data/catalogue.ts';
+import type { Tier } from '../data/tiers.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { Money } from './Money.tsx';
@@ -28,6 +28,7 @@ export function OfferRow({
   cost,
   was,
   bare = false,
+  scale = 1,
   href,
   onClick,
 }: {
@@ -38,21 +39,21 @@ export function OfferRow({
   was?: number | null;
   /** Without the coin, where the screen has already said which one it is. */
   bare?: boolean;
+  /** How long this weapon really is, relative to the longest. */
+  scale?: number;
   href: string;
   onClick?: (e: MouseEvent) => void;
 }) {
   const art = useArt(render);
+  // Two things the row hands to CSS: the colour measured off the render, and
+  // how much of the row that render is allowed to take.
+  const style = { ...artStyle(art), '--gun': String(scale) } as Record<string, string>;
   // A price that was something else wants both numbers, which no longer fits
   // under the name — so it moves to the far corner and stacks there instead.
   const cut = was != null && was !== cost;
 
   return (
-    <a
-      class={cut ? 'row row--cut stage' : 'row stage'}
-      style={artStyle(art)}
-      href={href}
-      onClick={onClick}
-    >
+    <a class={cut ? 'row row--cut stage' : 'row stage'} style={style} href={href} onClick={onClick}>
       {render && <img class="row__art" src={render} alt="" loading="lazy" />}
 
       {tier && (

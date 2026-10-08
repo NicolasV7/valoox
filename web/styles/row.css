@@ -33,19 +33,21 @@
  * and a dagger is a thick blade. Scaling either to match the other would be
  * editing Riot's artwork, so the box is what is held equal.
  *
- * 72 rather than the row's full height is that box doing its second job. A
- * blade is about twice as deep as a rifle for the same length, so at 104 it
- * came out half again as tall as everything around it and read as a bigger
- * object rather than a different one. The ceiling costs the three rifles
- * nothing — they are limited by width long before they reach it — and pulls
- * the thick ones back into the same band. It is a rule, not a melee
- * exception: anything deep enough gets it. */
+ * --gun is what fixes that: the width the family is entitled to, from
+ * catalogue.ts. A Ghost gets 55% of the row and an Operator gets all of it,
+ * which is the proportion the game shows and the reason a pistol stops
+ * arriving the same length as a rifle.
+ *
+ * The 72 is the second half of it, and it is a ceiling rather than a size. A
+ * blade is about twice as deep as a rifle for the same length, so without one
+ * it came out half again as tall as everything near it. It costs the rifles
+ * nothing — they are limited by width long before they reach it. */
 .row__art {
   position: absolute;
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  width: 228px;
+  width: calc(228px * var(--gun, 1));
   height: 72px;
   object-fit: contain;
 }
