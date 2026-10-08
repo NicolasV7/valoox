@@ -99,7 +99,7 @@ export const alerts = {
     'comes from one list that is the same for everybody, fetched once a day.',
 
   // --- the code ------------------------------------------------------------
-  sentAs: (said: string) => `Sent · ${said}`,
+  sentOut: 'Sent',
   typeTheCode: 'Type the code we mailed you',
   sixDigitsTo: (to: string) =>
     `Six digits, to ${to}. It is good for ten minutes and five attempts.`,
@@ -126,10 +126,12 @@ export const alerts = {
   bouncedLede:
     'A test went out and the receiving server sent it back. Nothing here is ' +
     'lost — your stars are untouched.',
-  refusedWhy: (said: string) =>
-    `The address was rejected before anything was sent. ${said} is the provider ` +
-    `saying this mailbox does not work — not that it is full, and not that it ` +
-    `bounced later. Check the spelling and send another code.`,
+  refusedWhy:
+    'The address was rejected before anything was sent: this mailbox does not ' +
+    'work. Not that it is full, and not that it bounced later. Check the ' +
+    'spelling and send another code.',
+  wasRefused: 'Rejected',
+  wasBounced: 'Bounced',
   bouncedWhy:
     'The message went out and the receiving server sent it back. That is the ' +
     'mailbox itself saying no, so sending the same thing again is the one piece ' +
@@ -143,9 +145,8 @@ export const alerts = {
     'same thing again is the one thing that cannot work, so it needs to ' +
     'change.',
   alreadyThere:
-    'Resend says that message was opened, so it reached the mailbox, and the ' +
-    'code it carries is still live. Look there. When it expires, the button ' +
-    'comes back.',
+    'That message already reached the mailbox and the code it carries is still ' +
+    'live. Look there. When it expires, the button comes back.',
   sendAnother: 'Send another code',
   editAddress: 'Edit the address',
   oneChannelMeans:
@@ -153,10 +154,10 @@ export const alerts = {
     'Your stars are untouched and the daily job keeps running — it just has ' +
     'nowhere to put the result until this clears.',
   codeIsTheirs:
-    'The code comes from the provider, not from us, and is shown exactly as ' +
-    'received. A 4xx is the address being wrong and will stay wrong; a bounce is ' +
-    'the far end sending it back after looking at it.',
+    'The two are different things. A rejection is the address being wrong ' +
+    'before anything went out, and it will stay wrong; a bounce is the far end ' +
+    'sending it back after looking at it.',
   canAndCannot: 'What a send can and cannot tell you',
-  canTell: 'That the channel accepted it (a 2xx), and then whatever its webhook says',
+  canTell: 'That the channel accepted it, and then whatever that channel tells us',
   cannotTell: 'That it reached an inbox, survived a spam filter, or was read',
 };

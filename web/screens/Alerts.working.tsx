@@ -51,7 +51,6 @@ export function AlertsWorking({ mail, view }: { mail: Prefs['mail']; view: Store
           </span>
           <Chevron size={15} />
         </span>
-        {mail?.said && <span class="watch__last num">{s.sentAs(mail.said)}</span>}
       </a>
 
       <Group said={s.weapons} left={view.remaining} />

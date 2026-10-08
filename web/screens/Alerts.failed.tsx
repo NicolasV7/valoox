@@ -1,9 +1,9 @@
 // Test refused.
 //
-// Both doors shut, each with the code the channel actually returned, and a
-// plain statement of what a send does and does not prove. The code is the
-// provider's and is shown exactly as received — a status we paraphrased is a
-// status we invented.
+// Both doors shut, with a plain statement of what a send does and does not
+// prove. What is NOT on it is the provider's own string: `resend 422` reads
+// as a fault code to look up, and the only two outcomes that change what to
+// do about it are already the two branches of this screen.
 //
 // Which door is open depends on who refused it. A 4xx came back before
 // anything was sent and may be a typo, so another code is worth a try. A
@@ -38,10 +38,10 @@ export function AlertsFailed() {
           {s.email}
           <span class="bell__state bell__state--bad">
             <span class="bell__dot" />
-            {said}
+            {bounced ? s.wasBounced : s.wasRefused}
           </span>
         </p>
-        <p class="lede bell__said">{bounced ? s.bouncedWhy : s.refusedWhy(said)}</p>
+        <p class="lede bell__said">{bounced ? s.bouncedWhy : s.refusedWhy}</p>
         <p class="bell__addr num">{prefs?.mail?.to ?? ''}</p>
       </div>
 

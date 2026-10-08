@@ -31,8 +31,14 @@ test('the signature cannot be lifted onto another uid', async () => {
 
 test('one flipped character is enough to fail', async () => {
   const token = await mintStop(env, UID);
-  const last = token.at(-1) === 'A' ? 'B' : 'A';
-  assert.equal(await readStop(env, token.slice(0, -1) + last), null);
+  // The FIRST character of the signature, not the last. Base64 spends six
+  // bits per character and sixteen bytes is 128 of them, so the last
+  // character carries two significant bits and six that decode to nothing —
+  // flipping it leaves the bytes identical about three times in four, which
+  // is how this test failed once and passed the next three runs.
+  const cut = token.lastIndexOf('.') + 1;
+  const head = token[cut] === 'A' ? 'B' : 'A';
+  assert.equal(await readStop(env, token.slice(0, cut) + head + token.slice(cut + 1)), null);
 });
 
 test('a token from another key opens nothing', async () => {

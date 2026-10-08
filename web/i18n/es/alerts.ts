@@ -101,7 +101,7 @@ export const alerts = {
     'sale de una lista que es la misma para todos, pedida una vez al día.',
 
   // --- el código -----------------------------------------------------------
-  sentAs: (said: string) => `Enviado · ${said}`,
+  sentOut: 'Enviado',
   typeTheCode: 'Escribí el código que te mandamos',
   sixDigitsTo: (to: string) => `Seis dígitos, a ${to}. Vale diez minutos y cinco intentos.`,
   verify: 'Verificar',
@@ -127,10 +127,12 @@ export const alerts = {
   bouncedLede:
     'La prueba salió y el servidor del otro lado la devolvió. Acá no se perdió ' +
     'nada: tus marcas quedaron intactas.',
-  refusedWhy: (said: string) =>
-    `La dirección fue rechazada antes de mandar nada. ${said} es el proveedor ` +
-    `diciendo que esa casilla no sirve — no que esté llena, y no que haya ` +
-    `rebotado después. Revisá cómo está escrita y mandá otro código.`,
+  refusedWhy:
+    'La dirección fue rechazada antes de mandar nada: esa casilla no sirve. No ' +
+    'que esté llena, y no que haya rebotado después. Revisá cómo está escrita y ' +
+    'mandá otro código.',
+  wasRefused: 'Rechazada',
+  wasBounced: 'Rebotó',
   bouncedWhy:
     'El mensaje salió y el servidor del otro lado lo devolvió. Eso es la casilla ' +
     'misma diciendo que no, así que mandar lo mismo otra vez es el único consejo ' +
@@ -144,8 +146,8 @@ export const alerts = {
     'mismo otra vez es lo único que no puede funcionar, así que hace falta ' +
     'cambiarla.',
   alreadyThere:
-    'Resend dice que ese mensaje se abrió, así que llegó a la casilla, y el ' +
-    'código que lleva sigue vivo. Buscalo ahí. Cuando se venza, el botón vuelve.',
+    'Ese mensaje ya llegó a la casilla y el código que lleva sigue vivo. ' +
+    'Buscalo ahí. Cuando se venza, el botón vuelve.',
   sendAnother: 'Mandar otro código',
   editAddress: 'Cambiar la dirección',
   oneChannelMeans:
@@ -153,10 +155,10 @@ export const alerts = {
     'ningún lado. Tus marcas están intactas y el trabajo diario sigue corriendo ' +
     '— solo que no tiene dónde poner el resultado hasta que esto se arregle.',
   codeIsTheirs:
-    'El código es del proveedor, no nuestro, y se muestra tal cual llegó. Un 4xx ' +
-    'es la dirección estando mal y va a seguir mal; un rebote es el otro lado ' +
-    'devolviéndolo después de mirarla.',
+    'Las dos son cosas distintas. Un rechazo es la dirección estando mal antes ' +
+    'de que saliera nada, y va a seguir mal; un rebote es el otro lado ' +
+    'devolviéndola después de mirarla.',
   canAndCannot: 'Qué puede y qué no puede decirte un envío',
-  canTell: 'Que el canal lo aceptó (un 2xx), y después lo que diga su webhook',
+  canTell: 'Que el canal lo aceptó, y después lo que ese canal nos cuente',
   cannotTell: 'Que llegó a una bandeja, que sobrevivió un filtro, o que se leyó',
 };

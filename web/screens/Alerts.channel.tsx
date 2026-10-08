@@ -59,7 +59,7 @@ export function AlertsChannel() {
           {stated && (
             <span class={state(ok, bad)}>
               <span class="bell__dot" />
-              {ok ? s.verified : bad ? (prefs?.mail?.said ?? '') : s.notVerified}
+              {ok ? s.verified : bad ? verdict(prefs?.mail?.said) : s.notVerified}
             </span>
           )}
         </p>
@@ -145,6 +145,15 @@ export function AlertsChannel() {
     setSaid(out.said ?? '');
   }
 }
+
+/** What went wrong, in a word. The provider's own string says it in theirs —
+ *  `resend 422`, `email.bounced` — and on a chip that reads as a fault code
+ *  for the reader to look up. These two are the only distinction that changes
+ *  what to do about it, which is the only distinction worth drawing. */
+const verdict = (said: string | undefined): string =>
+  said === 'email.bounced' || said === 'email.complained'
+    ? t().alerts.wasBounced
+    : t().alerts.wasRefused;
 
 const state = (ok: boolean, bad: boolean) =>
   'bell__state ' + (ok ? 'bell__state--ok' : bad ? 'bell__state--bad' : 'bell__state--wait');

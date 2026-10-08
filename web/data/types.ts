@@ -77,8 +77,9 @@ export interface Prefs {
   discord: string;
   /** The address an alert would go to, whether it has carried a code back,
    *  and the last thing the provider said about the last message sent to it.
-   *  `said` is theirs — `resend 422`, `email.bounced` — and goes on screen as
-   *  given, because a status we paraphrased is a status we invented. */
+   *  `said` is theirs — `resend 422`, `email.bounced` — and is never printed:
+   *  a fault code on a screen is something to look up, not something to read.
+   *  Screens branch on it and say the outcome in their own words. */
   mail: { to: string; ok: boolean; said: string } | null;
 }
 

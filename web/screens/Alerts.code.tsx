@@ -44,12 +44,13 @@ export function AlertsCode() {
     <main class="screen bell">
       <Back to={{ name: 'alerts', step: 'channel' }} said={s.whereItGoes} />
 
-      {/* Green is the provider having taken it, which is the only thing this
-          line claims. A refusal never reaches this screen, but the colour is
-          read off the status rather than assumed, so it cannot go stale. */}
-      <p class={refused(sent) ? 'bell__sent bell__sent--bad num' : 'bell__sent num'}>
+      {/* The channel took it, which is the only thing this line claims — and
+          the only thing anybody could do with the provider's own word for it
+          is misread it as delivery. The colour is still read off the status
+          rather than assumed, so it cannot go stale. */}
+      <p class={refused(sent) ? 'bell__sent bell__sent--bad' : 'bell__sent'}>
         <span class="bell__dot" />
-        {s.sentAs(sent)}
+        {s.sentOut}
       </p>
       <h1 class="bell__ask">{s.typeTheCode}</h1>
       <p class="lede bell__to">{s.sixDigitsTo(to)}</p>
