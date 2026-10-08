@@ -16,7 +16,7 @@
 // render for an accessory here, only for the one skin it leads with.
 
 import type { Hit } from '../../types.ts';
-import { FONT, INK, note, shell, weave } from './layout.ts';
+import { FONT, INK, note, shell, solid, weave } from './layout.ts';
 import type { Lang } from './words.ts';
 import { words } from './words.ts';
 
@@ -58,7 +58,7 @@ export function html(
     // the one number that decides whether you act, next to the thing you do
     `<tr><td class="pad" style="padding:22px 28px 0">` +
     `<a href="${origin}/" style="display:block;padding:15px 20px;border-radius:10px;` +
-    `background:${INK.text};color:#0e0e11;text-decoration:none;font-size:15px;` +
+    `${solid(INK.text)}color:#0e0e11;text-decoration:none;font-size:15px;` +
     `font-weight:600;text-align:center">${w.openYourStore}</a>` +
     `<div style="padding-top:14px;text-align:center">` +
     `<span style="font-family:${FONT.mono};font-size:11.5px;letter-spacing:0.14em;` +

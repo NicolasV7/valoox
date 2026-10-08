@@ -34,16 +34,16 @@ export const INK = {
 /**
  * Telling the client this message is already dark.
  *
- * Without it, Apple Mail and Gmail run their own dark-mode pass over the
- * colours — and over a design that is dark to begin with, that pass inverts
- * it: a phone in dark mode received a white message and the same phone in
- * light mode received a black one. The two declarations below are how a
- * message opts out of that; `color-scheme` is the modern one and the meta is
- * what the older iOS builds read.
+ * `color-scheme` is the modern declaration and the meta is what the older
+ * iOS builds read. Apple Mail and Outlook honour them and leave the colours
+ * alone, which is the whole ask: a design that is dark to begin with does
+ * not want a second opinion.
  *
  * One scheme, not two. A message is read once and archived, so matching the
  * reader's current setting buys nothing and doubles what can go wrong — and
  * every colour in it is a colour from the app, which is dark.
+ *
+ * Gmail honours none of it. See solid() below, which is the half that works.
  */
 const HEAD =
   '<meta charset="utf-8">' +
@@ -53,7 +53,7 @@ const HEAD =
   '<style>:root{color-scheme:dark;supported-color-schemes:dark}' +
   // Gmail's dark pass marks what it has touched; these put it back.
   'u+#body a{color:inherit}' +
-  '[data-ogsc] .ground{background:#0E0E11!important}' +
+  '[data-ogsc] .ground{background-color:#0E0E11!important}' +
   '[data-ogsc] .said{color:#f2f4f5!important}' +
   // A phone is where this is read. The table is fluid to 600 rather than
   // pinned at it, so the only thing left to do here is take the gutters
@@ -72,16 +72,38 @@ const HEAD =
   '}' +
   '</style>';
 
+/**
+ * A background colour Gmail cannot take away.
+ *
+ * Gmail's dark mode runs its own pass over every message and ignores
+ * `color-scheme` entirely. What that pass rewrites is `background-color`;
+ * what it leaves alone is `background-image`. So a dark design comes out of
+ * it half-inverted — this message kept its colour exactly where the weave
+ * had painted a gradient and lost it everywhere a flat colour was declared,
+ * which is why a phone in dark mode was reading a light email.
+ *
+ * A one-stop gradient is an image as far as that pass is concerned and a
+ * flat colour as far as the eye is concerned. The colour stays too, for the
+ * clients that drop gradients.
+ */
+export const solid = (c: string): string =>
+  `background-color:${c};background-image:linear-gradient(${c},${c});`;
+
 /** The weave, at the one angle the whole product uses, in whatever colour the
  *  message is about. A mail client that drops gradients falls back to the flat
- *  colour underneath, which is why that is given too. */
+ *  colour underneath, which is why that is given too.
+ *
+ *  The last layer is the opaque one, because the layer listed last is the one
+ *  underneath — and every layer above it is translucent, so without it the
+ *  colour showing through is a `background-color` and Gmail rewrites it. */
 export const weave = (rgb: string, under: string): string =>
-  `background: ${under}; background-image:` +
+  `background-color: ${under}; background-image:` +
   `linear-gradient(107deg, rgba(0,0,0,0) 0 31%, rgba(${rgb},0.085) 31% 45%,` +
   ` rgba(0,0,0,0) 45% 51%, rgba(${rgb},0.045) 51% 58%, rgba(0,0,0,0) 58% 72%,` +
   ` rgba(${rgb},0.064) 72% 77%, rgba(0,0,0,0) 77%),` +
   `repeating-linear-gradient(107deg, rgba(${rgb},0.05) 0 1px, rgba(0,0,0,0) 1px 23px),` +
-  `radial-gradient(104% 150% at 50% 50%, rgba(${rgb},0.3) 0%, rgba(${rgb},0) 70%)`;
+  `radial-gradient(104% 150% at 50% 50%, rgba(${rgb},0.3) 0%, rgba(${rgb},0) 70%),` +
+  `linear-gradient(${under},${under})`;
 
 /**
  * The mark.
@@ -134,13 +156,13 @@ export function shell({
 }): string {
   return (
     `<!doctype html><html lang="${lang}"><head>${HEAD}</head>` +
-    `<body id="body" class="ground" style="margin:0;padding:0;background:${INK.page}">` +
+    `<body id="body" class="ground" style="margin:0;padding:0;${solid(INK.page)}">` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
-    ` class="ground" style="background:${INK.page}"><tr><td align="center">` +
+    ` class="ground" style="${solid(INK.page)}"><tr><td align="center">` +
     // Fluid to 600 rather than pinned at it: a fixed 600 on a 390px phone is
     // either a scaled-down page or a sideways scroll, and both read as narrow.
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
-    ` style="width:100%;max-width:600px;background:${INK.page};font-family:${SANS}">` +
+    ` style="width:100%;max-width:600px;${solid(INK.page)}font-family:${SANS}">` +
     // the mark, and the one number worth knowing before you read anything
     `<tr><td class="pad" style="padding:22px 28px 18px;border-bottom:1px solid ${INK.rule}">` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>` +

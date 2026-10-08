@@ -94,7 +94,9 @@ export function AlertsCode() {
       </div>
 
       {(wait > 0 || said) && (
-        <p class="bell__why bell__why--bad">{wait > 0 ? s.waitSeconds(wait) : said}</p>
+        <p class="bell__why bell__why--bad bell__why--mid">
+          {wait > 0 ? s.waitSeconds(wait) : said}
+        </p>
       )}
 
       <p class="legal bell__note">{s.tenAndFive}</p>

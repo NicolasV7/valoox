@@ -116,6 +116,13 @@
   color: var(--bad);
 }
 
+/* Under the six boxes, where everything else on the screen is centred and a
+ * line hard against the left edge reads as belonging to something else. */
+.bell__why--mid {
+  justify-content: center;
+  text-align: center;
+}
+
 .bell__said--ok {
   color: var(--ok);
 }

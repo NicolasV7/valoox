@@ -19,7 +19,8 @@
     "typecheck": "wrangler types && tsc --noEmit && tsc --noEmit -p web/tsconfig.json",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "check": "npm run typecheck && npm run lint && npm test && npm run build"
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "mail": "node scripts/mailpreview.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

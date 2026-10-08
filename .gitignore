@@ -17,3 +17,6 @@ public/art/
 # Built by `npm run build` from web/. wrangler uploads public/ at deploy.
 public/app.js
 public/app.css
+
+# npm run mail, which is for looking at and never for committing
+mail-*.html
