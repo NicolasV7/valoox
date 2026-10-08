@@ -10,6 +10,7 @@
 // 512×340 and a Marshal is 512×96 — sizing by width alone made one look twice
 // the other.
 
+import { useState } from 'preact/hooks';
 import type { Rack, Skin, Weapon } from '../data/skins.ts';
 import { tierOf } from '../data/tiers.ts';
 import type { Inventory } from '../data/types.ts';
@@ -80,7 +81,12 @@ function Slot({ weapon, on, big }: { weapon: Weapon; on?: string; big?: boolean 
   const art = tier
     ? (skin?.levels.find((l) => l.id === on)?.icon ?? skin?.render ?? weapon.icon)
     : weapon.icon;
-  const lit = useArt(tier ? art : null);
+  // Measured off the picture once the picture is in, rather than alongside it:
+  // measure() opens its own Image, so firing it at mount means every slot is
+  // downloaded twice, in parallel, before anything can paint. crossOrigin on
+  // the visible one makes the two requests one cache entry.
+  const [shot, setShot] = useState(false);
+  const lit = useArt(shot && tier ? art : null);
   const route = { name: 'weapon', id: weapon.id } as const;
 
   return (
@@ -106,6 +112,8 @@ function Slot({ weapon, on, big }: { weapon: Weapon; on?: string; big?: boolean 
           src={stock(weapon, tier ? art : null)}
           alt=""
           loading="lazy"
+          crossOrigin="anonymous"
+          onLoad={() => setShot(true)}
           // The stock renders are fetched into public/art/ by `npm run art`,
           // so the day Riot ships a gun its slot falls back to the url the
           // index gave rather than drawing nothing until someone re-runs it.

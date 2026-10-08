@@ -45,15 +45,22 @@
   background: var(--card);
 }
 
+/* Grey until the render paints, then out from under it. The box is already
+ * the final 150x60, so nothing moves — what changes is whether an empty row
+ * reads as one that is coming or as one that is broken. The same grey as the
+ * loading screen's bars, because it is the same thing. */
 .skin__art,
 .skin__art--waiting {
   width: 150px;
   height: 60px;
+  border-radius: var(--r-sm);
+  background: var(--skel);
   object-fit: contain;
 }
 
-.skin__art--waiting {
-  border-radius: var(--r-sm);
+.skin__art--on {
+  background: none;
+  transition: background 220ms;
 }
 
 .skin__id {

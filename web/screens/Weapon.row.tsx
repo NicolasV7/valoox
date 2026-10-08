@@ -4,6 +4,7 @@
 // before it can wear it, and a hook cannot run inside the map that draws the
 // list. One component per row is what makes that legal.
 
+import { useState } from 'preact/hooks';
 import { Chevron, Star } from '../components/icons.tsx';
 import { type Skin, shortName } from '../data/skins.ts';
 import { tierOf } from '../data/tiers.ts';
@@ -14,7 +15,14 @@ import { href, intercept } from '../route.ts';
 export function SkinRow({ skin, gun, mine }: { skin: Skin; gun: string; mine: boolean }) {
   const s = t().weapon;
   const art = skin.render;
-  const lit = useArt(art);
+  // The colour is read off the picture, so it waits for the picture. That is
+  // not politeness: measure() opens its own Image, and firing all 174 of them
+  // the moment the list mounts is 174 downloads racing the ones the rows are
+  // already making. Hanging it off the <img>'s own load hands the scheduling
+  // to loading="lazy" — nothing below the fold is fetched or measured at all,
+  // and crossOrigin makes both requests the same cache entry instead of two.
+  const [shot, setShot] = useState(false);
+  const lit = useArt(shot ? art : null);
   const tier = tierOf(skin.tier);
   const route = { name: 'offer', id: skin.levels[0]?.id ?? skin.id } as const;
 
@@ -35,7 +43,16 @@ export function SkinRow({ skin, gun, mine }: { skin: Skin; gun: string; mine: bo
       href={href(route)}
       onClick={intercept(route)}
     >
-      {art && <img class="skin__art" src={art} alt="" loading="lazy" />}
+      {art && (
+        <img
+          class={shot ? 'skin__art skin__art--on' : 'skin__art'}
+          src={art}
+          alt=""
+          loading="lazy"
+          crossOrigin="anonymous"
+          onLoad={() => setShot(true)}
+        />
+      )}
       <span class="skin__id">
         <span class="skin__name">
           <span class="skin__text">{shortName(skin, gun)}</span>
