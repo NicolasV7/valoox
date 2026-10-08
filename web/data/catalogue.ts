@@ -35,6 +35,11 @@ export interface Piece {
   /** A spray that moves in game. Riot publishes the frames for those and most
    *  sprays have none. */
   gif: string | null;
+  /** A bundle's wide crop. Riot publishes three — 16:9, 3.33:1 and a 3:4
+   *  portrait — and the strip on the store is 2.73:1, so the wide one is the
+   *  one that was cut for it. Measured: it loses 18% of the picture to the
+   *  crop where the 16:9 loses 35%. */
+  banner: string | null;
 }
 
 // .../AK_Soulstealer_Lv1_PrimaryAsset
@@ -103,6 +108,7 @@ function one(kind: string, id: string): Promise<Piece | null> {
         small: d.smallArt || null,
         tall: d.largeArt || null,
         gif: d.animationGif || null,
+        banner: d.displayIcon2 || null,
       };
     })
     .catch(() => null);

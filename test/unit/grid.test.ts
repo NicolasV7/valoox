@@ -72,3 +72,24 @@ test('every mix of four pieces comes out whole', () => {
     }
   }
 });
+
+test('and every mix a bundle can hold', () => {
+  // The same grid carries a bundle's contents now, and a bundle is between
+  // four and ten pieces. Walk every length and every mix at that length —
+  // 88,572 of them — rather than trusting that four generalises.
+  const kinds: Shape[] = ['portrait', 'tile', 'text'];
+  let checked = 0;
+  for (let n = 1; n <= 10; n++) {
+    for (let code = 0; code < 3 ** n; code++) {
+      const mix: Shape[] = [];
+      let left = code;
+      for (let i = 0; i < n; i++) {
+        mix.push(kinds[left % 3] as Shape);
+        left = Math.floor(left / 3);
+      }
+      assert.ok(whole(mix), 'leaves a hole: ' + mix.join(', '));
+      checked += 1;
+    }
+  }
+  assert.ok(checked > 88_000, 'walked only ' + checked + ' mixes');
+});

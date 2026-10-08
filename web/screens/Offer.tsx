@@ -62,9 +62,14 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
   const still = clip ? clip + '#t=' + STILL : undefined;
   // The base colourway until a swatch is tapped, so the block is there from
   // the first frame rather than appearing under your thumb.
-  // Only when there is more than one: a swatch row of one is not a choice, and
-  // the render under it would be the one already on the stage.
+  // Only when there is more than one: a swatch row of one is not a choice.
   const variant = family && family.chromas.length > 1 ? chosen(family, chroma ?? '') : null;
+  // And the weapon itself, below. The stage is a clip of somebody holding it
+  // in a corridor, which is not a picture of the gun — so when there is a clip
+  // the render goes underneath, whether or not there is a colourway to pick.
+  // Without a clip the stage already is the render, and a second one would be
+  // the same picture twice.
+  const below = clip ? (variant?.render ?? found.icon) : (variant?.render ?? null);
   // Same for the chip. "Level 1" on a skin that has exactly one level is a
   // label that answers a question nobody could have had.
   const chip = family && family.levels.length > 1 ? chipFor(family, level) : null;
@@ -143,12 +148,13 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
         <>
           <Levels family={family} on={level} pick={setLevel} />
           <Variants family={family} on={chroma ?? family.chromas[0]?.id ?? ''} pick={setChroma} />
-          {variant?.render && (
-            <div class="offer__variant stage" style={artStyle(art)}>
-              <img src={variant.render} alt="" />
-            </div>
-          )}
         </>
+      )}
+
+      {below && (
+        <div class="offer__variant stage" style={artStyle(art)}>
+          <img src={below} alt={name} />
+        </div>
       )}
 
       <p class="legal offer__note">{s.clips}</p>

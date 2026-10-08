@@ -18,7 +18,7 @@ import { Tile } from '../components/Tile.tsx';
 import { tierByPrice } from '../data/tiers.ts';
 import type { Bundle as BundleData, GroupItem } from '../data/types.ts';
 import { useBundle, useSkin } from '../data/usePiece.ts';
-import { shapeOf } from '../design/shapes.ts';
+import { shapeOf, spans } from '../design/shapes.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { back } from '../route.ts';
@@ -33,6 +33,7 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
 
   const guns = bundle.items.filter((it) => shapeOf(it.type) === 'row');
   const rest = bundle.items.filter((it) => shapeOf(it.type) !== 'row');
+  const grown = spans(rest.map((it) => shapeOf(it.type)));
   // The tier of the dearest weapon. Every piece in a bundle is sold at the same
   // tier, and a weapon is the only one whose price says which.
   const tier = tierByPrice(guns.map((g) => g.base ?? 0).sort((a, b) => b - a)[0] ?? null);
@@ -76,14 +77,20 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
         </div>
 
         {rest.length > 0 && (
-          <div class="grid grid--bundle">
-            {rest.map((it) => (
+          // The accessory store's grid, not a narrower one of its own. Three
+          // across put a charm's 128px artwork in a 91px box, which is a
+          // thumbnail of a thumbnail — and a bundle is never the same mix
+          // twice, so it wants the solver rather than a layout. Same two
+          // columns, same spans(), same holes closed.
+          <div class="grid grid--roomy">
+            {rest.map((it, i) => (
               <Tile
                 key={it.id}
                 type={it.type}
                 id={it.id}
                 cost={it.price ?? it.base}
                 was={it.base}
+                span={grown[i]}
                 bare
                 // Always, here. A bundle piece is called "Dragon" and the name
                 // on its own does not say whether that is a card or a spray.

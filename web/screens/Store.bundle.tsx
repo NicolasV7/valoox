@@ -24,7 +24,17 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
       <h2 class="label">{t().store.bundle}</h2>
 
       <a class="promo" href={href(route)} onClick={intercept(route)}>
-        {found?.icon && <img class="promo__art" src={found.icon} alt="" loading="lazy" />}
+        {/* The wide crop, not the square one. This strip is 2.73:1 and Riot
+            publishes a 3.33:1 next to the 16:9 — using the 16:9 here threw a
+            third of the picture away above and below the band. */}
+        {found && (found.banner || found.icon) && (
+          <img
+            class="promo__art"
+            src={(found.banner ?? found.icon) as string}
+            alt=""
+            loading="lazy"
+          />
+        )}
 
         <Countdown from={bundle.remaining} className="promo__clock" />
 

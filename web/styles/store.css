@@ -106,7 +106,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 46%;
+  /* Centred both ways, because the crop is horizontal now: the wide art is
+   * 3.33:1 against a band of about 2.9, so what is lost is a sliver off each
+   * end rather than a third of the height. Nudging it vertically would be
+   * aiming at nothing. */
+  object-position: center;
 }
 
 /* Dark at the bottom only: the names live down there and the art is somebody

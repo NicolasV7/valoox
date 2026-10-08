@@ -10,12 +10,13 @@
   margin-top: 11px;
 }
 
-/* Inside a bundle the same grid runs three across: the pieces are smaller, and
- * there are between four and ten of them rather than always four. */
-.grid--bundle {
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-auto-rows: 104px;
-  gap: 8px;
+/* Taller rows where every piece carries a caption. A bundle names its pieces
+ * "Dragon" and "Champions2026", so the kind has to be under each one — and
+ * that third line comes out of the artwork's share: measured, a charm came to
+ * 37px in a 110px row, which is a thumbnail of a thumbnail. At 132 the same
+ * charm is 74. */
+.grid--roomy {
+  grid-auto-rows: 132px;
 }
 
 .tile {
