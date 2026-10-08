@@ -7,8 +7,6 @@
 // Its own file because it is a different job from the rest of data/: nothing
 // here resolves an id against anything. It is a table and one lookup.
 
-const MEDIA = 'https://media.valorant-api.com/';
-
 export type TierName = 'select' | 'deluxe' | 'premium' | 'exclusive' | 'ultra';
 
 export interface Tier {
@@ -24,10 +22,9 @@ const UUID: Record<TierName, string> = {
   ultra: '411e4a55-4e59-7757-41f0-86a53f101bb5',
 };
 
-const tier = (name: TierName): Tier => ({
-  name,
-  icon: MEDIA + 'contenttiers/' + UUID[name] + '/displayicon.png',
-});
+/** Served from this origin, like the coins: five symbols that never change and
+ *  turn up on every row, slot and offer. scripts/art.mjs fetches them. */
+const tier = (name: TierName): Tier => ({ name, icon: '/art/tier-' + name + '.png' });
 
 /** Riot prices a skin by its tier, and a melee at twice the gun price. Reading
  *  the tier back off the number is what avoids downloading an index to learn

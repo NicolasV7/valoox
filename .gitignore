@@ -9,6 +9,11 @@ worker-configuration.d.ts
 # binary out of a public repo is the reason, not the licence.
 public/fonts/
 
+# Fetched by `npm run art`. Riot's artwork — the coins, the tiers, the sprays.
+# Same reason as the fonts: wrangler uploads public/ at deploy, so it reaches
+# production without sitting in a public history.
+public/art/
+
 # Built by `npm run build` from web/. wrangler uploads public/ at deploy.
 public/app.js
 public/app.css

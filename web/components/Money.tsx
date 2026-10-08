@@ -9,17 +9,13 @@
 
 import { locale } from '../i18n/index.ts';
 
-const MEDIA = 'https://media.valorant-api.com/currencies/';
-
 export type Coin = 'vp' | 'rad' | 'kc';
 
-const UUID: Record<Coin, string> = {
-  vp: '85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741',
-  rad: 'e59aa87c-4cbf-517a-5983-6e81511be9b7',
-  kc: '85ca954a-41f2-ce94-9b45-8ca3dd39a00d',
-};
-
-export const coin = (of: Coin) => MEDIA + UUID[of] + '/displayicon.png';
+/** Served from this origin. The three coins never change and they appear ten
+ *  times on a store screen, so they are fetched once at build time into
+ *  public/art/ rather than opening a second connection on first paint. Riot's
+ *  uuids for them live in scripts/art.mjs, which is what downloads these. */
+export const coin = (of: Coin) => '/art/coin-' + of + '.png';
 
 export function Money({
   amount,

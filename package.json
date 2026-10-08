@@ -13,6 +13,7 @@
     "build": "node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
     "fonts": "node scripts/fonts.mjs",
+    "art": "node scripts/art.mjs",
     "deploy": "npm run build && wrangler deploy",
     "test": "vitest run",
     "typecheck": "wrangler types && tsc --noEmit && tsc --noEmit -p web/tsconfig.json",

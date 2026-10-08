@@ -46,8 +46,12 @@ with `script-src 'self'` and no `unsafe-inline`, so colours are set through
 CSSOM (`style.setProperty`), never a `style` attribute.
 
 **Nothing loads from a third party.** No CDN, no font host, no analytics, no
-embedded widget. Three off-origin hosts, all of them Riot's own content and
-each pinned to one CSP directive: `valorant-api.com` for the catalogue
+embedded widget. Anything fixed is served from this origin — the two faces, and
+the fifteen images that never change: three coins, five tiers, seven sprays
+(`npm run art`). What stays off-origin is what rotates, because pinning a
+moving thing is how a page starts lying about what Riot is selling today.
+Three hosts, all of them Riot's own content and each pinned to one CSP
+directive: `valorant-api.com` for the catalogue
 (`connect-src`), `media.valorant-api.com` for artwork (`img-src`), and
 `valorant.dyn.riotcdn.net` for the skin clips (`media-src`). `media-src`
 streams audio and video and executes nothing; the clips are 13 MB each and
@@ -121,6 +125,7 @@ public/              served as-is by [assets]
   index.html  app.css  _headers  .well-known/
   app.js             build artifact, gitignored
   fonts/             fetched by `npm run fonts`, gitignored
+  art/               fetched by `npm run art`, gitignored
 
 design/              the spec: DESIGN.md, tokens.css, palette.json, boards.md
 ```
@@ -136,6 +141,7 @@ Module names are lowercase and single-word, no suffixes: `seal.ts`, not
 ```sh
 npm ci
 npm run fonts        # once — downloads the two faces into public/fonts/
+npm run art          # once — downloads the coins, tiers and sprays into public/art/
 npm run dev          # builds web/ then starts the Worker
 npm run check        # typecheck + lint + tests + build. What CI runs.
 npm run deploy       # builds, then wrangler deploy
