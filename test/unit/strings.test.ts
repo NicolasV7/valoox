@@ -31,13 +31,18 @@ const files = sources(ROOT).filter((f) => !f.path.startsWith(I18N));
 
 const BLOCK_COMMENT = /\/\*[\s\S]*?\*\//g;
 const LINE_COMMENT = /^\s*\/\/.*$/gm;
-// `class="screen screen--flush store"` reads exactly like two words of prose.
-// It is a stylesheet reference, and so is every one of them — including the
-// ones computed in a brace, `class={on ? 'a b' : 'a'}`.
-const CLASS_ATTR = /\bclass(?:Name)?\s*=\s*(?:(['"`])[^'"`\n]*\1|\{[^{}\n]*\})/g;
+// Attributes whose value is addressed to a machine. `class="screen store"`,
+// `rel="noopener noreferrer"` and an svg `d` all read exactly like prose and
+// none of them is — including the ones computed in a brace.
+//
+// The list is explicit rather than "everything except the four spoken ones",
+// because a component prop genuinely can carry a sentence, and that is the case
+// this check exists to find.
+const MACHINE =
+  /\b(?:class|className|rel|target|type|role|style|href|src|id|for|name|viewBox|transform|d|fill|stroke|points)\s*=\s*(?:(['"`])[^'"`\n]*\1|\{[^{}\n]*\})/g;
 
 const strip = (t: string) =>
-  t.replace(BLOCK_COMMENT, '').replace(LINE_COMMENT, '').replace(CLASS_ATTR, 'class=""');
+  t.replace(BLOCK_COMMENT, '').replace(LINE_COMMENT, '').replace(MACHINE, 'x=""');
 
 // A quoted run of two or more words, at least one of which has a vowel and a
 // lower-case letter. That is prose. It will not match 'flex-start', 'image/png',
