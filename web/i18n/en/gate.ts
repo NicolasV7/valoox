@@ -4,23 +4,21 @@
 
 export const gate = {
   title: 'Your VALORANT store, without opening the game.',
-  lede:
-    'You get in by scanning a code with Riot Mobile. Before you do, here is ' +
-    'exactly what happens to your account.',
+  lede: 'Before you scan, here is what happens to your account.',
 
+  // One line each wherever the sentence allows it. This screen has to be read
+  // in one piece on a phone, and a fact below the fold is a fact nobody read —
+  // the long version of all four is on valoox.store, where somebody who wants
+  // it goes looking.
   facts: {
     password: 'Your password never comes here.',
-    passwordWhy:
-      'Riot signs you in inside their own app. There is nowhere on this page to ' + 'type it.',
+    passwordWhy: 'It is typed in Riot’s own app, never on this page.',
     keep: 'We keep one thing.',
-    keepWhy: 'The session Riot hands back, encrypted, with the key held outside the ' + 'database.',
+    keepWhy: 'The session Riot returns, encrypted, with the key held elsewhere.',
     read: 'It only knows how to read.',
-    readWhy:
-      'The endpoints that change something — equipping, queueing, buying — are ' +
-      'not in the code, and a test proves it.',
+    readWhy: 'Buying, equipping and queueing are not in the code, and a test proves it.',
     leave: 'You can leave.',
-    leaveWhy:
-      'Disconnect and your session is deleted at once. On Riot’s side it expires ' + 'on its own.',
+    leaveWhy: 'Disconnect and it is deleted at once. At Riot it expires on its own.',
   },
 
   show: 'Show me the code',

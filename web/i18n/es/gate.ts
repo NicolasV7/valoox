@@ -4,23 +4,21 @@
 
 export const gate = {
   title: 'Tu tienda de VALORANT, sin abrir el juego.',
-  lede:
-    'Entrás escaneando un código con Riot Mobile. Antes de hacerlo, esto es ' +
-    'exactamente lo que pasa con tu cuenta.',
+  lede: 'Antes de escanear, esto es lo que pasa con tu cuenta.',
 
+  // One line each wherever the sentence allows it. This screen has to be read
+  // in one piece on a phone, and a fact below the fold is a fact nobody read —
+  // the long version of all four is on valoox.store, where somebody who wants
+  // it goes looking.
   facts: {
     password: 'Tu contraseña no llega acá.',
-    passwordWhy:
-      'Riot te firma adentro de su propia app. No hay dónde escribirla en esta ' + 'página.',
+    passwordWhy: 'Se escribe en la app de Riot, nunca en esta página.',
     keep: 'Guardamos una sola cosa.',
-    keepWhy:
-      'La sesión que Riot devuelve, cifrada, con la clave guardada fuera de la ' + 'base de datos.',
+    keepWhy: 'La sesión que Riot devuelve, cifrada, con la clave fuera de la base.',
     read: 'Solo sabe leer.',
-    readWhy:
-      'Los endpoints que cambian algo — equipar, entrar a cola, comprar — no ' +
-      'están en el código, y hay un test que lo prueba.',
+    readWhy: 'Comprar, equipar y entrar a cola no están en el código, y un test lo prueba.',
     leave: 'Te podés ir.',
-    leaveWhy: 'Desconectás y tu sesión se borra al instante. Del lado de Riot vence ' + 'sola.',
+    leaveWhy: 'Desconectás y se borra al instante. En Riot vence sola.',
   },
 
   show: 'Mostrame el código',
