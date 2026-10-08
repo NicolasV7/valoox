@@ -6,7 +6,7 @@
 // and again inside a bundle is fetched once.
 
 import { useEffect, useState } from 'preact/hooks';
-import { type Piece, piece, skin } from './catalogue.ts';
+import { bundle, type Piece, piece, skin } from './catalogue.ts';
 
 function resolve(get: () => Promise<Piece | null>, key: string): Piece | null {
   const [found, setFound] = useState<Piece | null>(null);
@@ -30,3 +30,6 @@ export const useSkin = (id: string) => resolve(() => skin(id), id);
 
 /** A bundle's contents and the accessory store are mixed types. */
 export const usePiece = (type: string, id: string) => resolve(() => piece(type, id), type + id);
+
+/** A bundle's own name and its banner. */
+export const useBundle = (id: string) => resolve(() => bundle(id), id);

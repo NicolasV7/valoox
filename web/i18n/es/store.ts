@@ -52,3 +52,27 @@ export const offer = {
     'clip por nivel; enlazamos el suyo en vez de guardar copias, pesan 13 MB ' +
     'cada uno.',
 };
+
+// The bundle, opened. Riot sends between four and ten pieces and each carries
+// its own price, so the screen says where every number came from.
+export const bundle = {
+  pieces: (n: number) => `${n} piezas`,
+  tier: (name: string) => `Tier ${name}`,
+  contents: 'Qué trae',
+
+  full: (n: number) => `${n} piezas a precio de lista`,
+  cut: 'Descuento dentro del bundle',
+  total: 'Precio del bundle',
+
+  perItem:
+    'Cada pieza trae su propio precio: Riot le pone a cada ítem del bundle un ' +
+    'BasePrice y un DiscountedPrice, accesorios incluidos, así que el descuento ' +
+    'se aplica por ítem y no como un número sobre el total.',
+  read:
+    'Leído, no estimado: cada fila de arriba es un BasePrice y un ' +
+    'DiscountedPrice tal como vienen en el storefront, y los totales son su ' +
+    'TotalBaseCost y su TotalDiscountedCost. La tienda diaria es el único lugar ' +
+    'donde un precio se deduce acá, del tier, porque esa oferta trae solo un costo.',
+
+  gone: 'Este bundle ya no está en tu tienda.',
+};

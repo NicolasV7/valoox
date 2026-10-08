@@ -13,6 +13,7 @@ import * as api from './data/api.ts';
 import { NEEDS_RESEED } from './data/api.ts';
 import type { Fault, StoreView } from './data/types.ts';
 import { useRoute } from './route.ts';
+import { Bundle } from './screens/Bundle.tsx';
 import { Fail } from './screens/Fail.tsx';
 import { Gate } from './screens/Gate.tsx';
 import { Offer } from './screens/Offer.tsx';
@@ -80,13 +81,21 @@ export function App() {
 
     return (
       <>
-        {route.name === 'offer' ? (
-          <Offer id={route.id} view={state.view} />
-        ) : (
-          <Store view={state.view} />
-        )}
+        {open(state.view)}
         <Tabs />
       </>
     );
+  }
+
+  function open(view: StoreView) {
+    if (route.name === 'offer') return <Offer id={route.id} view={view} />;
+    if (route.name === 'bundle') {
+      // A bundle rotates out, so a link to last week's lands here with nothing
+      // behind it. The store is the honest answer rather than an empty screen
+      // about a thing that is gone.
+      const it = view.bundles.find((b) => b.id === route.id);
+      if (it) return <Bundle bundle={it} />;
+    }
+    return <Store view={view} />;
   }
 }

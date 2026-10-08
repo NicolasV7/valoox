@@ -5,7 +5,6 @@
 // stumbled into — the bundle, the accessory store, the way out.
 
 import { Countdown } from '../components/Countdown.tsx';
-import { Money } from '../components/Money.tsx';
 import { OfferRow } from '../components/OfferRow.tsx';
 import { tierByPrice } from '../data/catalogue.ts';
 import type { Offer as OfferData, StoreView } from '../data/types.ts';
@@ -13,6 +12,7 @@ import { useSkin } from '../data/usePiece.ts';
 import { t } from '../i18n/index.ts';
 import { intercept } from '../route.ts';
 import { Accessories } from './Store.accessories.tsx';
+import { BundleCard } from './Store.bundle.tsx';
 import { StoreHeader } from './Store.header.tsx';
 
 export function Store({ view }: { view: StoreView }) {
@@ -35,7 +35,7 @@ export function Store({ view }: { view: StoreView }) {
         <section class="store__block">
           <div class="store__head">
             <h2 class="label">{s.night}</h2>
-            <Countdown from={view.night.remaining} className="faint" />
+            <Countdown from={view.night.remaining} className="store__clock" />
           </div>
           <div class="store__rows">
             {view.night.items.map((o) => (
@@ -46,16 +46,7 @@ export function Store({ view }: { view: StoreView }) {
       )}
 
       {view.bundles.map((b) => (
-        <section class="store__block" key={b.id}>
-          <div class="store__head">
-            <h2 class="label">{s.bundle}</h2>
-            <Countdown from={b.remaining} className="faint" />
-          </div>
-          <div class="store__total">
-            <Money amount={b.price ?? b.base} />
-            {b.allOwned && <span class="faint">{s.allOwned}</span>}
-          </div>
-        </section>
+        <BundleCard key={b.id} bundle={b} />
       ))}
 
       {view.accessory && <Accessories store={view.accessory} />}

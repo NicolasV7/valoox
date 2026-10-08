@@ -4,6 +4,6 @@
 
 import { common } from './common.ts';
 import { gate } from './gate.ts';
-import { offer, store } from './store.ts';
+import { bundle, offer, store } from './store.ts';
 
-export const en = { common, gate, store, offer };
+export const en = { common, gate, store, offer, bundle };

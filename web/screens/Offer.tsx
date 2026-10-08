@@ -22,14 +22,10 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
   const art = useArt(found?.icon);
 
   // The price is the store's, not the catalogue's — the same skin costs
-  // something different in the night market, and that is the number on screen.
-  const sold =
-    view.offers.find((o) => o.id === id) ?? view.night?.items.find((o) => o.id === id) ?? null;
-  const paid =
-    sold && 'price' in sold
-      ? ((sold as { price: number | null }).price ?? sold.cost)
-      : (sold?.cost ?? null);
-  const tier = tierByPrice(sold?.cost ?? null);
+  // something different in the night market and different again inside a
+  // bundle, and whichever one you came in through is the number on screen.
+  const { now, was } = priced(view, id);
+  const tier = tierByPrice(was ?? now);
 
   return (
     <main class="screen offer">
@@ -54,10 +50,27 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
             </span>
           )}
           <span class="offer__price">
-            <Money amount={paid} size={17} />
+            {was !== null && was !== now && <Money amount={was} struck size={11} />}
+            <Money amount={now} size={17} />
           </span>
         </div>
       </div>
     </main>
   );
+}
+
+/** What this skin costs, and what it cost before, from whichever of the three
+ *  places it was opened from. `was` is null in the daily store, which sells at
+ *  one price and never shows a second number. */
+function priced(view: StoreView, id: string): { now: number | null; was: number | null } {
+  const daily = view.offers.find((o) => o.id === id);
+  if (daily) return { now: daily.cost, was: null };
+
+  const night = view.night?.items.find((o) => o.id === id);
+  if (night) return { now: night.price ?? night.cost, was: night.cost };
+
+  const packed = view.bundles.flatMap((b) => b.items).find((it) => it.id === id);
+  if (packed) return { now: packed.price ?? packed.base, was: packed.base };
+
+  return { now: null, was: null };
 }

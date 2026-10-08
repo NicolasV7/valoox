@@ -6,7 +6,10 @@
 
 import { useEffect, useState } from 'preact/hooks';
 
-export type Route = { name: 'store' } | { name: 'offer'; id: string };
+export type Route =
+  | { name: 'store' }
+  | { name: 'offer'; id: string }
+  | { name: 'bundle'; id: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -17,10 +20,12 @@ export function parse(path: string): Route {
   // because the Worker hands every non-/api/ path back as the shell, so a
   // reload of /offer/<uuid> arrives here rather than at its 404.
   if (head === 'offer' && id && UUID.test(id)) return { name: 'offer', id };
+  if (head === 'bundle' && id && UUID.test(id)) return { name: 'bundle', id };
   return { name: 'store' };
 }
 
-export const href = (route: Route): string => (route.name === 'offer' ? '/offer/' + route.id : '/');
+export const href = (route: Route): string =>
+  route.name === 'store' ? '/' : '/' + route.name + '/' + route.id;
 
 const listeners = new Set<(r: Route) => void>();
 

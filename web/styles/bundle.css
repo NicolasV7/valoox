@@ -1,0 +1,193 @@
+/* A bundle, opened: a banner you could put on a poster, then the pieces. */
+
+/* The ground, sampled from the banner. Every other screen sits on the neutral
+ * page; this one is a poster for one object, so the page takes that object's
+ * colour and the artwork stops being a rectangle pasted on top of it.
+ *
+ * Sized to the whole screen rather than the viewport: the banner is the top
+ * 282px and would cover a viewport-tall glow entirely, which is the one place
+ * it has nothing to do. Behind everything, so nothing has to opt out of it. */
+.bundle {
+  position: relative;
+}
+
+.bundle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    132% 52% at 50% 0%,
+    rgba(var(--art), 0.34) 0%,
+    rgba(var(--art), 0.16) 32%,
+    rgba(var(--art), 0.05) 56%,
+    rgba(var(--art), 0) 76%
+  );
+}
+
+/* --- the hero ------------------------------------------------------------- */
+/* Riot sells a bundle on its artwork, so the artwork is the top third of the
+ * screen and bleeds into the page rather than sitting in a box. */
+
+.bundle__hero {
+  position: relative;
+  height: 282px;
+  /* It is Riot's art, lit for a dark background, so it stays a dark stage when
+   * the rest of the page goes light. */
+  color-scheme: dark;
+  color: var(--ink);
+  background: var(--card);
+}
+
+.bundle__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 46%;
+}
+
+/* Dark at the top so the two chips read, dark at the bottom so the name does,
+ * and out of the way in the middle where the picture is. */
+.bundle__hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 14, 17, 0.58) 0%,
+    rgba(14, 14, 17, 0) 26%,
+    rgba(14, 14, 17, 0.56) 66%,
+    rgba(14, 14, 17, 0.93) 88%,
+    var(--page) 100%
+  );
+}
+
+.bundle__id {
+  position: absolute;
+  z-index: 1;
+  left: var(--gut);
+  right: var(--gut);
+  bottom: 18px;
+}
+
+.bundle__name {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 200;
+  letter-spacing: -0.045em;
+  line-height: 0.96;
+  text-wrap: balance;
+}
+
+.bundle__what {
+  margin: 9px 0 0;
+  font-size: var(--t-small);
+  color: var(--ink-3);
+}
+
+/* --- a chip on somebody else's artwork ------------------------------------ */
+/* Both of these sit on a picture nobody chose, so neither is allowed to be
+ * bare text. */
+
+.chip {
+  position: absolute;
+  z-index: 1;
+  top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border: 0;
+  border-radius: 9px;
+  background: rgba(10, 10, 12, 0.56);
+  font: inherit;
+  font-size: var(--t-small);
+  color: #e4e8ea;
+  text-decoration: none;
+}
+
+.chip--back {
+  left: 16px;
+  padding-left: 9px;
+  cursor: pointer;
+}
+
+.chip__chev {
+  display: flex;
+  transform: rotate(90deg);
+}
+
+.chip--clock {
+  right: 16px;
+  font-weight: 700;
+  color: var(--clock);
+}
+
+/* --- the contents --------------------------------------------------------- */
+
+.bundle__body {
+  padding: 18px var(--gut) 0;
+}
+
+.bundle__body .grid {
+  margin-top: 9px;
+}
+
+.bundle__note {
+  margin: 11px 0 0;
+  font-size: var(--t-floor);
+  color: var(--ink-4);
+}
+
+/* --- the arithmetic ------------------------------------------------------- */
+
+.totals {
+  margin-top: 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.totals__row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 13px 16px;
+  font-size: var(--t-small);
+  color: var(--ink-3);
+}
+
+.totals__row + .totals__row {
+  border-top: 1px solid var(--rule);
+}
+
+.totals__row > :last-child {
+  margin-left: auto;
+}
+
+.totals__was {
+  font-size: 14px;
+}
+
+/* The one green in the interface, and it is a number rather than a mood. */
+.totals__cut {
+  font-size: 14px;
+  color: var(--good);
+}
+
+.totals__label {
+  color: var(--ink);
+}
+
+.totals__sum {
+  font-size: 20px;
+  color: var(--ink);
+}
+
+.totals__sum .money {
+  font-size: inherit;
+}
