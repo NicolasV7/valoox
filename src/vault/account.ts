@@ -43,8 +43,11 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
  * and a field from an upstream response is not a thing to trust on sight.
  */
 export async function fetchCard(env: Env, s: Session, t: Tokens): Promise<string | null> {
+  // v3. v2 is the version every third-party map still lists and it answers 404
+  // now — measured 2026-10-08 against a live session, on the same host and the
+  // same headers that /mmr answers 200 for.
   const url =
-    shardBase(s.shard as string) + 'personalization/v2/players/' + s.puuid + '/playerloadout';
+    shardBase(s.shard as string) + 'personalization/v3/players/' + s.puuid + '/playerloadout';
   const res = await rf(url, { headers: await dataHeaders(env, t) });
   if (!res.ok) return null;
 

@@ -7,7 +7,7 @@
 //
 // DELIBERATELY ABSENT, and this is the point — these endpoints exist at Riot and
 // a stolen jar reaches them, but no code path here can:
-//   · PUT  /personalization/v2/players/{puuid}/playerloadout   (equip a loadout —
+//   · PUT  /personalization/v3/players/{puuid}/playerloadout   (equip a loadout —
 //     the GET on that same path IS allowed, which is the clearest example of why
 //     the method is half of every rule here)
 //   · POST /matchmaking/v1/parties/{party}/matchmaking/join     (enter queue)
@@ -113,7 +113,7 @@ const ALLOW: Rule[] = [
   {
     method: 'GET',
     pattern: new RegExp(
-      '^https://' + PD + '/personalization/v2/players/' + UUID + '/playerloadout$',
+      '^https://' + PD + '/personalization/v3/players/' + UUID + '/playerloadout$',
     ),
     why: 'the equipped player card, which the header draws behind your name. Reading a loadout changes nothing; the PUT that equips one is not on this list',
   },

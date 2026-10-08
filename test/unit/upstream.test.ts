@@ -86,11 +86,15 @@ test('rank is readable, and only ever for a well-formed puuid', () => {
 test('the loadout is readable but not writable', () => {
   // The clearest case for why a rule is a method AND a path: the same URL serves
   // the player card the header draws and the call that equips a different one.
-  const LOADOUT = 'https://pd.na.a.pvp.net/personalization/v2/players/' + PUUID + '/playerloadout';
+  const LOADOUT = 'https://pd.na.a.pvp.net/personalization/v3/players/' + PUUID + '/playerloadout';
   ok('GET', LOADOUT);
   no('PUT', LOADOUT);
   no('POST', LOADOUT);
-  no('GET', 'https://pd.na.a.pvp.net/personalization/v2/players/not-a-uuid/playerloadout');
+  no('GET', 'https://pd.na.a.pvp.net/personalization/v3/players/not-a-uuid/playerloadout');
+  // v2 is gone at Riot — 404 on a live session, measured 2026-10-08. Pinning
+  // the version is the point: a path that silently stopped existing is exactly
+  // what left the header with no artwork for weeks.
+  no('GET', 'https://pd.na.a.pvp.net/personalization/v2/players/' + PUUID + '/playerloadout');
 });
 
 test('the list stays short enough to read in one sitting', () => {
