@@ -48,11 +48,16 @@ collection, favourites — is secondary and reached deliberately.
 
 ## Constraints that shape the design
 
-- Content Security Policy is `default-src 'none'` with `script-src 'self'` and
-  `style-src 'self'`, no `unsafe-inline`. No inline style attributes, no webfont
-  host, no third-party script. Styling comes from app.css or CSSOM.
-- No framework and no build step. The DOM is built in ui.js; `innerHTML` is
-  banned because item names come from a community database.
+- Content Security Policy is `default-src 'none'` with `script-src 'self'`,
+  `style-src 'self'` and `font-src 'self'`, no `unsafe-inline`. No inline style
+  attributes, no third-party script, no webfont host — the two faces are
+  self-hosted and `npm run fonts` fetches them. Colour that is data is set
+  through CSSOM.
+- Preact, bundled by esbuild into one file. `innerHTML` is banned because item
+  names come from a community database, and `test/unit/seams.test.ts` fails the
+  build if one appears.
+- No file over 200 lines, and no user-facing string outside `web/i18n/`. Both
+  are tests, not conventions.
 - The Worker parses no catalogue: names, icons, tier colours and rank art are
   resolved in the browser against valorant-api.com.
 - Riot's policy forbids implying official affiliation, so the interface must not

@@ -38,7 +38,7 @@ flowchart LR
 congelados. Todo request que sale pasa por ahí, y los endpoints que **cambian
 estado** —comprar, equipar, entrar a cola, party, chat— simplemente no están.
 
-Eso convierte «solo lectura» de promesa en propiedad verificable: son dieciocho
+Eso convierte «solo lectura» de promesa en propiedad verificable: son diecisiete
 reglas, se leen de una sentada, y `test/unit/upstream.test.ts` intenta alcanzar
 las escrituras y exige que todas sean rechazadas.
 
@@ -49,15 +49,27 @@ la cambiaría, no existe.
 ## Mapa
 
 ```
-public/      la página: index.html, app.js, ui.js, items.js, catalogs.js,
-             inventory.js, favs.js, icons.js, app.css, qr.js (vendorizado)
-src/
-  index.ts         rutas, cookie uid, guarda Sec-Fetch-Site
+design/      la especificación: DESIGN.md, tokens.css, palette.json, boards.md
+web/         el navegador. TypeScript, se bundlea a public/app.js
+  main.tsx         monta y rutea
+  i18n/            todos los textos. es/ es el idioma fuente, en/ está lleno
+  design/          measure · hsv · useArt · sprays
+  components/      las cuatro formas, nav, chips, skeleton
+  screens/         una por artboard
+  data/            api · catalogue · types
+public/      lo que se sirve tal cual: index.html, _headers, .well-known/
+             app.js y app.css son artefactos; fonts/ la baja `npm run fonts`
+src/         el Worker
+  index.ts         fetch + scheduled
+  router.ts        la tabla de rutas, el guard Sec-Fetch-Site, el embudo de error
+  routes/          store · collection · auth · wishlist · alerts
+  lib/json.ts      la respuesta, el Ctx que recibe una ruta
   app/cookie.ts    el uid del navegador
   types.ts         las formas que cruzan un borde de módulo
   vault/
     upstream.ts    la allowlist  <- leé esta primero
     http.ts        el único fetch() que sale. Aplica la allowlist
+    live.ts        reauth y curación: lo que toda ruta de datos comparte
     auth.ts        reauth, entitlements, identify
     qr.ts          el handshake de Riot Mobile
     storefront.ts  tienda, wallet y adquiridos
@@ -70,15 +82,22 @@ src/
     store.ts / jar.ts / shard.ts / owned.ts / constants.ts
 ```
 
-Ningún archivo pasa de 200 líneas. El front no usa `innerHTML` en ningún lado y
-la CSP es `default-src 'none'`; `test/unit/seams.test.ts` falla si eso cambia.
+Ningún archivo pasa de 200 líneas y ningún texto visible vive fuera de
+`web/i18n/`. Las dos son tests, no convenciones: `size.test.ts` y
+`strings.test.ts`. El front no usa `innerHTML` en ningún lado y la CSP es
+`default-src 'none'`; `seams.test.ts` falla si eso cambia.
+
+El color detrás de cada pieza se mide de su propio arte — `web/design/hsv.ts`,
+y `measure.test.ts` lo compara contra 57 colores calculados offline.
 
 ## Correr
 
 ```sh
 npm ci
-npm run check        # tipos + lint + 78 tests
-npx wrangler deploy
+npm run fonts        # una vez: baja las dos tipografías a public/fonts/
+npm run dev          # compila web/ y levanta el Worker
+npm run check        # tipos + lint + 92 tests + build
+npm run deploy
 ```
 
 El interruptor, que deja indescifrable todo ciphertext que exista y desloguea a
