@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { type Buddy, buddies } from './buddies.ts';
 import { type Card, cards } from './cards.ts';
-import { type Rack, racks, type Weapon, weaponOf } from './skins.ts';
+import { type Found, type Rack, racks, skinOf, type Weapon, weaponOf } from './skins.ts';
 import { type Spray, sprays } from './sprays.ts';
 import { type Title, titles } from './titles.ts';
 
@@ -42,6 +42,9 @@ export const useRacks = (): Rack[] | null => held(racks, 'racks');
 
 /** One weapon and all of its skins. */
 export const useWeapon = (id: string): Weapon | null => held(() => weaponOf(id), id);
+
+/** The skin a level uuid belongs to, and the weapon that skin is for. */
+export const useSkinOf = (levelId: string): Found | null => held(() => skinOf(levelId), levelId);
 
 /** Every spray the game has, which is also where the total comes from. */
 export const useSprays = (): Spray[] | null => held(sprays, 'sprays');

@@ -48,6 +48,24 @@ const BY_PRICE = new Map<number, Tier>(
 export const tierByPrice = (cost: number | null): Tier | null =>
   cost === null ? null : (BY_PRICE.get(cost) ?? null);
 
+/** And the same table read the other way: what a tier lists at.
+ *
+ *  The store deduces a tier from a price because the daily offer sends one
+ *  cost and no tier. A skin opened out of the collection has the opposite
+ *  problem — it has a tier and Riot sends no price with it at all, because it
+ *  is not for sale to you today. This is the list price for the tier and is
+ *  labelled as that on screen, not as something Riot said about this skin. */
+const BY_TIER = new Map<string, [gun: number, melee: number]>([
+  ['select', [875, 1750]],
+  ['deluxe', [1275, 2550]],
+  ['premium', [1775, 3550]],
+  ['exclusive', [2175, 4350]],
+  ['ultra', [2475, 4950]],
+]);
+
+export const priceOf = (name: TierName | undefined, melee: boolean): number | null =>
+  (name && BY_TIER.get(name)?.[melee ? 1 : 0]) ?? null;
+
 /** The reverse lookup: Riot's content tier uuid -> the tier. Null for a skin
  *  with no tier at all, which is every default and every battle-pass one — and
  *  is how a bare collection slot is told apart from a dressed one. */

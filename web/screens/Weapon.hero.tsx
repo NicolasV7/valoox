@@ -33,7 +33,7 @@ export function Worn({
     ? (chroma?.render ?? skin.levels[level]?.icon ?? skin.render)
     : '/art/weapon-' + gun.id + '.png';
   const lit = useArt(tier ? art : null);
-  const route = { name: 'offer', id: on?.level ?? skin.levels[0]?.id ?? '' } as const;
+  const route = { name: 'skin', id: on?.level ?? skin.levels[0]?.id ?? '' } as const;
 
   // Each part only when it is a choice: "Level 1" on a skin with one level
   // answers a question nobody could have had, and so does its one colourway.

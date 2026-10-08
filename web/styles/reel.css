@@ -1,0 +1,114 @@
+/* The clip box on a skin's screen: Riot's own video, at rest.
+ *
+ * Its own file because it is the one piece of this app that is a video
+ * player, and a video player has rules nothing else here does — a black
+ * ground, a crop that keeps the gun in frame, and two labels that sit on
+ * moving pictures and so bring their own ground with them. */
+
+/* Black, not the card grey: a frame of video sits on black or it has a border
+ * of the wrong colour for the sixteenth of a second before it paints. */
+
+.reel,
+.reel--waiting {
+  position: relative;
+  height: 196px;
+  margin-top: 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.reel {
+  background: #000;
+}
+
+.reel--waiting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--stage-bare);
+}
+
+.reel__clip,
+.reel__still {
+  width: 100%;
+  height: 196px;
+  object-fit: cover;
+  /* 46% down. A clip of somebody holding a gun in a corridor puts the gun just
+   * above the middle, and centring the crop puts their knees in the box. */
+  object-position: center 46%;
+}
+
+.reel__clip {
+  opacity: 0;
+  transition: opacity 160ms;
+}
+
+.reel__clip--lit {
+  opacity: 1;
+}
+
+.reel__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 14, 17, 0.35) 0%,
+    rgba(14, 14, 17, 0) 36%,
+    rgba(14, 14, 17, 0.72) 100%
+  );
+}
+
+.reel__play,
+.reel__play--waiting {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.reel__play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: rgba(242, 244, 245, 0.92);
+  color: #0e0e11;
+  cursor: pointer;
+}
+
+.reel--waiting .reel__play--waiting {
+  position: static;
+  transform: none;
+}
+
+/* Both labels sit on the clip, so both bring their own ground. */
+.reel__of,
+.reel__long {
+  position: absolute;
+  border-radius: 5px;
+  background: rgba(10, 10, 12, 0.66);
+  color: #e4e8ea;
+}
+
+.reel__of {
+  left: 12px;
+  top: 11px;
+  padding: 4px 8px;
+  font-size: var(--t-floor);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.reel__long {
+  right: 12px;
+  bottom: 11px;
+  padding: 3px 7px;
+  font-size: 11.5px;
+}
+

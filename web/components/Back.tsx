@@ -18,7 +18,7 @@ import { t } from '../i18n/index.ts';
 import { href, type Route, retreat, whence } from '../route.ts';
 import { Chevron } from './icons.tsx';
 
-export function Back({ to }: { to: Route }) {
+export function Back({ to, said: named }: { to: Route; said?: string }) {
   const from = whence();
   const there = from?.to ?? to;
 
@@ -27,7 +27,7 @@ export function Back({ to }: { to: Route }) {
       <span class="back__chev">
         <Chevron />
       </span>
-      {from?.said ?? said(to)}
+      {from?.said ?? named ?? said(to)}
     </a>
   );
 }

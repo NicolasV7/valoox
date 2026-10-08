@@ -37,7 +37,7 @@ export function SkinRow({
   const [shot, setShot] = useState(() => colourOf(art) !== null);
   const lit = useArt(shot ? art : null);
   const tier = tierOf(skin.tier);
-  const route = { name: 'offer', id: skin.levels[0]?.id ?? skin.id } as const;
+  const route = { name: 'skin', id: skin.levels[0]?.id ?? skin.id } as const;
   // A skin opened from here belongs to this weapon, not to the store it is
   // also sold in, so it carries the way back with it.
   const from = { to: { name: 'weapon', id: of } as const, said: gun };

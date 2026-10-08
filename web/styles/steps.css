@@ -1,0 +1,190 @@
+/* The two rows of choices on a skin's screen, and the box under them.
+ *
+ * A level is a button in a strip and a colourway is a card in a grid, which is
+ * not decoration: the levels are one thing at four strengths and read as a
+ * scale, while the colourways are four different paint jobs and read as a set.
+ * The strip also has to hold five across a phone, and the grid four. */
+
+.steps {
+  display: flex;
+  gap: 6px;
+}
+
+.step,
+.step--waiting {
+  flex: 1;
+  height: 36px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-sm);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 9px 0;
+  background: none;
+  color: var(--ink-3);
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.step--on {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ink-inverse);
+  font-weight: 500;
+}
+
+/* --- the colourways ------------------------------------------------------- */
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.swatch,
+.swatch--waiting {
+  display: grid;
+  gap: 7px;
+  justify-items: center;
+  padding: 8px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--stage);
+}
+
+.swatch {
+  color: var(--ink-3);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.swatch img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 1.5px rather than 1, which is what makes the chosen one read as chosen
+ * without moving the grid by half a pixel: the border box is the same. */
+.swatch--on {
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  padding: 7.5px;
+}
+
+/* One you do not hold. Dashed and drained rather than hidden — it is the same
+ * skin, a different line on the receipt, and that is the point of the block. */
+.swatch--not {
+  border-style: dashed;
+  border-color: var(--rule-strong);
+  background: var(--card);
+  color: var(--ink-5);
+}
+
+.swatch--not img {
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+
+.swatch__of {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--t-floor);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.swatch__dot--waiting {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.swatch__of--waiting {
+  width: 70%;
+  height: 9px;
+  border-radius: 4px;
+}
+
+/* --- the box at the foot -------------------------------------------------- */
+/* A gun lies across it and a knife stands up in it, so the box is two heights
+ * and the render is two shapes. Same reason the collection slot is. */
+
+.slab,
+.slab--waiting {
+  --wash-at: 50% 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 128px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.slab--waiting {
+  background: var(--stage-bare);
+}
+
+.slab--tall {
+  height: 176px;
+}
+
+.slab__art {
+  width: 300px;
+  height: 92px;
+  object-fit: contain;
+}
+
+.slab--tall .slab__art {
+  width: 186px;
+  height: 152px;
+}
+
+/* --- the holes ------------------------------------------------------------ */
+
+.vary__back--waiting {
+  width: 62px;
+  height: 13px;
+}
+
+.vary__word--waiting {
+  width: 120px;
+  height: 26px;
+  margin-bottom: 7px;
+  border-radius: 7px;
+}
+
+.vary__word--waiting + .vary__word--waiting {
+  width: 96px;
+  margin-bottom: 11px;
+}
+
+.vary__tier--waiting {
+  width: 78px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.vary__yes--waiting {
+  width: 54px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.vary__list--waiting {
+  width: 70px;
+  height: 15px;
+  border-radius: 7px;
+}
+
+.reel__play--waiting {
+  background: var(--skel);
+}

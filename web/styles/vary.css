@@ -1,0 +1,120 @@
+/* A skin opened out of the collection: the clip, what it is, and what it is
+ * to you.
+ *
+ * The light on this screen is the tier's, not the art's — the one screen where
+ * the two are different choices. Everywhere else the colour answers "what does
+ * this look like" and is measured; here the screen's subject is a thing you own
+ * or do not, and the tier is the fact about it that decides that. The weave in
+ * the box at the foot is still the measured one. */
+
+.vary {
+  position: relative;
+  padding-top: 0;
+}
+
+.vary--select {
+  --hue: var(--select);
+}
+.vary--deluxe {
+  --hue: var(--deluxe);
+}
+.vary--premium {
+  --hue: var(--premium);
+}
+.vary--exclusive {
+  --hue: var(--exclusive);
+}
+.vary--ultra {
+  --hue: var(--ultra);
+}
+
+.vary--lit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    132% 50% at 50% 0%,
+    rgba(var(--hue), 0.38) 0%,
+    rgba(var(--hue), 0.16) 32%,
+    rgba(var(--hue), 0.053) 52%,
+    rgba(var(--hue), 0) 70%
+  );
+}
+
+/* --- what it is ----------------------------------------------------------- */
+
+.vary__id {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.vary__name {
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+}
+
+.vary__name > span {
+  display: block;
+}
+
+.vary__tier {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.vary__has {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+  margin-left: auto;
+  text-align: right;
+}
+
+.vary__yes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-label);
+  color: var(--ok);
+}
+
+/* The list price, and it reads as one: quieter than a price you are being
+ * asked for, because nobody is asking. */
+.vary__list .money {
+  font-size: 15px;
+  color: var(--ink-4);
+}
+
+.vary__list img {
+  opacity: 0.6;
+}
+
+.vary__band {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 22px 0 10px;
+}
+
+.vary__band .faint {
+  margin-left: auto;
+  font-size: 11.5px;
+}
+
+.vary__under {
+  margin-top: 11px;
+}
+
+.vary__note {
+  margin-top: 22px;
+}

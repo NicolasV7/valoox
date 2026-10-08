@@ -11,6 +11,8 @@
 // time precisely so it never pays this, and the screens that are about what
 // else exists pay it once, because that is what they are for.
 
+import { build, type Index, type Raw } from './skins.build.ts';
+
 const V1 = 'https://valorant-api.com/v1/';
 
 export interface Level {
@@ -29,6 +31,10 @@ export interface Chroma {
   colour: string | null;
   swatch: string | null;
   render: string | null;
+  /** Some colourways ship a clip of their own. Measured: 865 of the 2,931
+   *  chromas in the catalogue do, 186 melee and 679 gun — so which ones is a
+   *  thing to read off the payload, not to guess from the weapon. */
+  video: string | null;
 }
 
 export interface Family {
@@ -69,97 +75,17 @@ export interface Weapon {
   skins: Skin[];
 }
 
-/** The order the game racks them in, which is the order the board draws. */
-const ORDER = ['Sidearm', 'SMG', 'Shotgun', 'Rifle', 'Sniper', 'Heavy', 'Melee'];
+/** A level uuid is what both the storefront and the loadout speak in, and on
+ *  its own it says nothing about what it is a level of. */
+export interface Found {
+  weapon: Weapon;
+  skin: Skin;
+}
 
 export interface Rack {
   /** The category key, for i18n. Lower-cased from Riot's own enum. */
   of: string;
   weapons: Weapon[];
-}
-
-interface Raw {
-  uuid: string;
-  defaultSkinUuid?: string;
-  displayName: string;
-  levelItem: string | null;
-  streamedVideo: string | null;
-  swatch: string | null;
-  fullRender: string | null;
-  displayIcon: string | null;
-  contentTierUuid: string | null;
-  category: string;
-  shopData: { cost?: number } | null;
-  levels: Raw[];
-  chromas: Raw[];
-  skins: Raw[];
-}
-
-// EEquippableSkinLevelItem::Finisher -> finisher, EEquippableCategory::SMG -> SMG
-const TAIL = /::(\w+)$/;
-// "Reaver Vandal Level 4\n(Variant 1 Red)" -> Red
-const COLOUR = /\(Variant \d+\s+([^)]+)\)/;
-
-const family = (skin: Raw): Family => ({
-  levels: (skin.levels ?? []).map((l) => ({
-    id: l.uuid,
-    adds: TAIL.exec(l.levelItem ?? '')?.[1]?.toLowerCase() ?? null,
-    video: l.streamedVideo ?? null,
-    icon: l.displayIcon ?? null,
-  })),
-  chromas: (skin.chromas ?? []).map((c) => ({
-    id: c.uuid,
-    colour: COLOUR.exec(c.displayName ?? '')?.[1]?.trim() ?? null,
-    swatch: c.swatch ?? null,
-    render: c.fullRender ?? null,
-  })),
-});
-
-interface Index {
-  racks: Rack[];
-  /** Keyed by every level, because a level uuid is what the storefront sends. */
-  byLevel: Map<string, Family>;
-}
-
-function build(rows: Raw[]): Index {
-  const byLevel = new Map<string, Family>();
-  const byCategory = new Map<string, Weapon[]>();
-
-  for (const w of rows) {
-    const stock = (w.skins ?? []).find((s) => s.uuid === w.defaultSkinUuid);
-    const weapon: Weapon = {
-      id: w.uuid,
-      name: w.displayName,
-      icon: stock?.chromas?.[0]?.fullRender ?? w.displayIcon ?? null,
-      cost: w.shopData?.cost ?? null,
-      skins: (w.skins ?? []).map((s) => {
-        const f = family(s);
-        for (const level of f.levels) byLevel.set(level.id, f);
-        return {
-          id: s.uuid,
-          name: s.displayName,
-          tier: s.contentTierUuid ?? null,
-          render: s.chromas?.[0]?.fullRender ?? s.levels?.[0]?.displayIcon ?? s.displayIcon ?? null,
-          ...f,
-        };
-      }),
-    };
-    const of = TAIL.exec(w.category)?.[1] ?? 'Other';
-    byCategory.set(of, [...(byCategory.get(of) ?? []), weapon]);
-  }
-
-  // "Grouped the way the buy menu groups them" — and the buy menu lists by
-  // price, cheapest first. Riot's own shopData says so, which is why this is a
-  // sort rather than a list of names that goes stale the day they ship a gun.
-  // Ties break alphabetically: the Phantom, the Vandal and the Warden all cost
-  // 2900 and that is the order the menu shows them in.
-  const racks = ORDER.filter((of) => byCategory.has(of)).map((of) => ({
-    of: of.toLowerCase(),
-    weapons: (byCategory.get(of) as Weapon[]).sort(
-      (a, b) => (a.cost ?? 0) - (b.cost ?? 0) || a.name.localeCompare(b.name),
-    ),
-  }));
-  return { racks, byLevel };
 }
 
 let held: Promise<Index> | null = null;
@@ -168,12 +94,16 @@ function index(): Promise<Index> {
   held ??= fetch(V1 + 'weapons')
     .then((r) => (r.ok ? r.json() : null))
     .then((j: { data?: Raw[] } | null) => build(j?.data ?? []))
-    .catch(() => ({ racks: [], byLevel: new Map<string, Family>() }));
+    .catch(() => ({ racks: [], byLevel: new Map<string, Found>() }));
   return held;
 }
 
 /** Everything else this skin has, or null if it is not a weapon skin. */
 export const familyOf = (levelId: string): Promise<Family | null> =>
+  index().then((i) => i.byLevel.get(levelId)?.skin ?? null);
+
+/** The skin a level belongs to, and the weapon that skin is for. */
+export const skinOf = (levelId: string): Promise<Found | null> =>
   index().then((i) => i.byLevel.get(levelId) ?? null);
 
 /** Every weapon, in the groups and the order the game racks them. */
