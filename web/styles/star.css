@@ -104,3 +104,12 @@
   position: static;
   background: none;
 }
+
+/* Not a control: there is nowhere to send what it would watch. Drawn exactly
+ * as it was before the wishlist existed — the same mark that tells the two
+ * shelves apart at the end of a scroll. */
+.star--mark {
+  background: none;
+  cursor: default;
+  pointer-events: none;
+}

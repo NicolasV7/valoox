@@ -24,10 +24,32 @@ export function tell(next: Prefs | null) {
   for (const fn of listeners) fn(next);
 }
 
-/** Ask again. Called after anything that changes the address or proves it. */
+/** Ask again, now. Called after anything that changes the address or proves
+ *  it, where the answer is the point and a cached one is wrong. */
 export async function reload(): Promise<void> {
   const got = await api.prefs().catch(() => null);
+  last = Date.now();
   if (got && got !== NEEDS_RESEED) tell(got);
+}
+
+let flight: Promise<void> | null = null;
+let last = 0;
+
+/**
+ * Ask again, but only if nobody just did.
+ *
+ * This is the mount path, and the mount path is not one component: the star
+ * is on every tile in a collection tab, which is nine on screen and hundreds
+ * as you scroll. Each one asking for the same row would be hundreds of
+ * requests for one answer. So in-flight calls are shared and a fresh answer
+ * is reused for a couple of seconds, which is shorter than the time it takes
+ * to scroll to the next window and far shorter than anything that changes it.
+ */
+function freshen(): void {
+  if (flight || Date.now() - last < 2000) return;
+  flight = reload().finally(() => {
+    flight = null;
+  });
 }
 
 export function usePrefs(): Prefs | null {
@@ -40,7 +62,7 @@ export function usePrefs(): Prefs | null {
     // a cached copy from before that is exactly the copy that would show a
     // screen saying everything is fine. The held value still paints first, so
     // re-reading costs a request and no flash.
-    void reload();
+    freshen();
     return () => {
       listeners.delete(set);
     };
