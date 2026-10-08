@@ -109,10 +109,10 @@ function front(dir: string, out: Array<{ path: string; text: string }> = []) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, e.name).replace(/\\/g, '/');
     if (e.isDirectory()) front(p, out);
-    // qr.js is a vendored minified encoder, exempt from the style checks but not
-    // from the origin one — it is covered by the CSP test below like everything
-    // else the page loads.
-    else if (/\.(js|tsx?|html)$/.test(e.name) && p !== 'public/qr.js') {
+    // public/app.js and app.css are the build output. Checking a bundle tells
+    // you about the bundler; the source it was built from is in web/ and is
+    // checked there, which is where a mistake would actually be made.
+    else if (/\.(js|tsx?|html)$/.test(e.name) && p !== 'public/app.js') {
       out.push({ path: p, text: readFileSync(p, 'utf8') });
     }
   }

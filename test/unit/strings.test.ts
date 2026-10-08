@@ -28,7 +28,16 @@ function sources(dir: string, out: Array<{ path: string; text: string }> = []) {
 }
 
 const files = sources(ROOT).filter((f) => !f.path.startsWith(I18N));
-const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+const BLOCK_COMMENT = /\/\*[\s\S]*?\*\//g;
+const LINE_COMMENT = /^\s*\/\/.*$/gm;
+// `class="screen screen--flush store"` reads exactly like two words of prose.
+// It is a stylesheet reference, and so is every one of them — including the
+// ones computed in a brace, `class={on ? 'a b' : 'a'}`.
+const CLASS_ATTR = /\bclass(?:Name)?\s*=\s*(?:(['"`])[^'"`\n]*\1|\{[^{}\n]*\})/g;
+
+const strip = (t: string) =>
+  t.replace(BLOCK_COMMENT, '').replace(LINE_COMMENT, '').replace(CLASS_ATTR, 'class=""');
 
 // A quoted run of two or more words, at least one of which has a vowel and a
 // lower-case letter. That is prose. It will not match 'flex-start', 'image/png',
@@ -39,26 +48,25 @@ const PROSE = /(['"`])((?=[^'"`]*[aeiouáéíóú])[A-Za-zÁÉÍÓÚÜÑáéíó
 // Attributes a person reads, even when the value is a single word.
 const SPOKEN = /\b(?:title|placeholder|alt|aria-label)\s*[=:]\s*(['"`])([^'"`\n]+)\1/;
 
-test('no prose outside web/i18n/', () => {
+function scan(pattern: RegExp): string[] {
   const found: string[] = [];
   for (const f of files) {
     for (const [i, line] of strip(f.text).split('\n').entries()) {
       if (/\bimport\b|\bfrom\b/.test(line)) continue;
-      const m = PROSE.exec(line);
-      if (m) found.push(f.path + ':' + (i + 1) + '  ' + m[2].slice(0, 48));
+      const m = pattern.exec(line);
+      if (m) found.push(f.path + ':' + (i + 1) + '  ' + (m[2] as string).slice(0, 48));
     }
   }
+  return found;
+}
+
+test('no prose outside web/i18n/', () => {
+  const found = scan(PROSE);
   assert.deepEqual(found, [], 'string outside i18n:\n  ' + found.join('\n  '));
 });
 
 test('no spoken attribute is written inline', () => {
-  const found: string[] = [];
-  for (const f of files) {
-    for (const [i, line] of strip(f.text).split('\n').entries()) {
-      const m = SPOKEN.exec(line);
-      if (m) found.push(f.path + ':' + (i + 1) + '  ' + m[2].slice(0, 48));
-    }
-  }
+  const found = scan(SPOKEN);
   assert.deepEqual(found, [], 'spoken attribute outside i18n:\n  ' + found.join('\n  '));
 });
 

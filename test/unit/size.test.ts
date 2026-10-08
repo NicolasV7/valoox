@@ -14,19 +14,14 @@ import { test } from 'vitest';
 const LIMIT = 200;
 const ROOTS = ['src', 'web', 'test', 'public', 'design'];
 const EXT = /\.(ts|tsx|js|jsx|css)$/;
-// Vendored, and minified onto one line anyway. Not ours to split.
-const SKIP = new Set(['public/qr.js']);
+// Built, not written. Measuring a bundle tells you about esbuild.
+const SKIP = new Set(['public/app.js', 'public/app.css']);
 
-// The app as it stood before the rewrite from the artboards. Every one of these
-// is deleted in phase 1, and this list may only ever get shorter — adding to it
-// is how a limit stops being one.
-const LEGACY = new Set([
-  'src/index.ts',
-  'public/app.css',
-  'public/app.js',
-  'public/favs.js',
-  'public/catalogs.js',
-]);
+// The app as it stood before the rewrite from the artboards. The front end is
+// gone; src/index.ts is the last one and it goes when the routes split out.
+// This list may only ever get shorter — adding to it is how a limit stops
+// being one.
+const LEGACY = new Set(['src/index.ts']);
 
 function sources(dir: string, out: string[] = []) {
   if (!existsSync(dir)) return out;
