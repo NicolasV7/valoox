@@ -20,7 +20,8 @@ export type Route =
   | { name: 'buddy'; id: string }
   | { name: 'card'; id: string }
   | { name: 'title'; id: string }
-  | { name: 'skin'; id: string };
+  | { name: 'skin'; id: string }
+  | { name: 'alerts' };
 
 export type Tab = 'weapons' | 'sprays' | 'buddies' | 'cards' | 'titles';
 
@@ -43,6 +44,7 @@ export function parse(path: string): Route {
   if (head === 'card' && id && UUID.test(id)) return { name: 'card', id };
   if (head === 'title' && id && UUID.test(id)) return { name: 'title', id };
   if (head === 'skin' && id && UUID.test(id)) return { name: 'skin', id };
+  if (head === 'alerts') return { name: 'alerts' };
   if (head === 'collection') {
     const tab = TABS.find((t) => t === id) ?? 'weapons';
     return { name: 'collection', tab };
@@ -52,6 +54,7 @@ export function parse(path: string): Route {
 
 export const href = (route: Route): string => {
   if (route.name === 'store') return '/';
+  if (route.name === 'alerts') return '/alerts';
   if (route.name === 'collection') {
     return route.tab === 'weapons' ? '/collection' : '/collection/' + route.tab;
   }
@@ -101,6 +104,7 @@ export const wasAt = (): number => (history.state as { y?: number } | null)?.y ?
 const UNDER: Array<[section: string, screens: Array<Route['name']>]> = [
   ['store', ['store', 'offer', 'bundle', 'piece']],
   ['collection', ['collection', 'weapon', 'skin', 'spray', 'buddy', 'card', 'title']],
+  ['alerts', ['alerts']],
 ];
 
 export const section = (name: Route['name']): string | undefined =>

@@ -77,6 +77,14 @@ export const Star = ({ size = 18, on = false }: P & { on?: boolean }) => (
   </svg>
 );
 
+/** An envelope, on the one channel an alert can go to. */
+export const Mail = ({ size = 16 }: P) => (
+  <Glyph size={size}>
+    <rect x="1.6" y="3.4" width="12.8" height="9.2" rx="1.6" />
+    <path d="M1.9 4.5L8 8.7l6.1-4.2" />
+  </Glyph>
+);
+
 /** Riot's fist, on the one button that opens their app. */
 export const Riot = ({ size = 20 }: P) => (
   <svg

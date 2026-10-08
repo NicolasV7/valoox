@@ -66,6 +66,15 @@ export interface StoreView {
   fetchedAt: number;
 }
 
+/** What `/api/prefs` answers: the skins you starred and where an alert would
+ *  go. Both are ours — they live in our own row and come back with the page —
+ *  which is why neither waits on Riot or on the catalogue. A starred skin is
+ *  an id and the name you saw when you starred it, and nothing else. */
+export interface Prefs {
+  wishlist: Array<{ id: string; name: string }>;
+  discord: string;
+}
+
 /** What `/api/qr` answers. `url` only on start; `shard` only once approved. */
 export interface Scan {
   url?: string;

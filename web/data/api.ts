@@ -8,7 +8,7 @@
 // written for a log — `storefront 403`, `sealed blob did not open` — and
 // rendering it would put a stack trace in front of somebody checking a shop.
 
-import type { Fault, Inventory, Scan, StoreView } from './types.ts';
+import type { Fault, Inventory, Prefs, Scan, StoreView } from './types.ts';
 
 export class ApiError extends Error {
   readonly fault: Fault;
@@ -48,6 +48,10 @@ export const store = () => call<StoreView>('/api/store');
 /** What you own and what you have on. One call, cached for an hour by the
  *  Worker: an inventory only changes when you buy something. */
 export const inventory = () => call<Inventory>('/api/inventory');
+
+/** What you starred and where an alert would go. Ours, so it waits on nothing
+ *  outside this origin. */
+export const prefs = () => call<Prefs>('/api/prefs');
 
 /** Opens a scan and returns the URL the QR encodes. */
 export const startScan = () => call<Scan>('/api/qr', { method: 'POST' });

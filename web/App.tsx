@@ -13,6 +13,7 @@ import * as api from './data/api.ts';
 import { NEEDS_RESEED } from './data/api.ts';
 import type { Fault, Inventory, StoreView } from './data/types.ts';
 import { section, useRoute, wasAt } from './route.ts';
+import { Alerts } from './screens/Alerts.tsx';
 import { BuddiesLoading } from './screens/Buddies.loading.tsx';
 import { Buddies } from './screens/Buddies.tsx';
 import { Buddy } from './screens/Buddy.tsx';
@@ -145,6 +146,7 @@ export function App() {
     if (route.name === 'buddy') {
       return inv ? <Buddy id={route.id} inv={inv} /> : <BuddiesLoading />;
     }
+    if (route.name === 'alerts') return <Alerts />;
     if (route.name === 'skin') {
       return inv ? <Skin id={route.id} inv={inv} /> : <SkinLoading />;
     }

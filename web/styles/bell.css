@@ -1,0 +1,171 @@
+/* Alerts. The one tab whose whole subject is ours: what you starred and where
+ * it would go live in our own row, so nothing on it waits on Riot and nothing
+ * waits on the community catalogue except the pictures. */
+
+.bell {
+  padding: 0 0 calc(84px + env(safe-area-inset-bottom));
+}
+
+.bell__head {
+  padding: 26px var(--gut) 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.bell__head h1 {
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.bell__head p {
+  margin-top: 8px;
+}
+
+/* --- where it goes -------------------------------------------------------- */
+
+.bell__box {
+  margin: 18px var(--gut) 0;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--stage);
+}
+
+.bell__to {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.bell__dot--waiting {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.bell__at--waiting {
+  width: 54%;
+  height: 14px;
+}
+
+.bell__step {
+  display: block;
+  margin: 22px var(--gut) 10px;
+}
+
+/* --- a step, on the first run --------------------------------------------- */
+
+.bell__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 var(--gut);
+  padding: 16px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--stage);
+}
+
+/* Step two, shut until step one is done. Drawn rather than hidden, because the
+ * order is the instruction. */
+.bell__row--shut {
+  border-color: var(--hair);
+}
+
+.bell__row--shut .bell__name {
+  color: var(--ink-5);
+}
+
+.bell__at {
+  display: flex;
+  color: var(--ink-4);
+}
+
+.bell__id {
+  min-width: 0;
+}
+
+.bell__name {
+  display: block;
+  font-size: 14.5px;
+}
+
+.bell__said {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-4);
+}
+
+.bell__chev {
+  display: flex;
+  margin-left: auto;
+  color: var(--ink-5);
+  transform: rotate(-90deg);
+}
+
+.bell__none {
+  margin-top: 18px;
+  padding: 24px 20px 26px;
+}
+
+.bell__none p + p {
+  margin-top: 7px;
+}
+
+.bell__note {
+  margin: 14px var(--gut) 0;
+}
+
+/* --- a row of the watching list ------------------------------------------- */
+
+.bell .shelf {
+  margin: 0 var(--gut);
+}
+
+.watch,
+.watch--waiting {
+  display: grid;
+  grid-template-columns: 76px 1fr auto;
+  align-items: center;
+  gap: 0 12px;
+  min-height: 56px;
+  padding: 9px 8px 9px 0;
+}
+
+.watch--waiting {
+  background: var(--card);
+}
+
+.watch__id {
+  min-width: 0;
+}
+
+.watch__art--waiting {
+  width: 76px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.watch__name--waiting {
+  width: 58%;
+  height: 13px;
+  border-radius: 6px;
+}
+
+.watch__said--waiting {
+  width: 44px;
+  height: 9px;
+  margin-top: 6px;
+  border-radius: 4px;
+}
+
+.watch__star--waiting {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  border-radius: 4px;
+}

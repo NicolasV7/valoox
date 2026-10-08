@@ -33,11 +33,13 @@ export function Tabs() {
     <nav class="tabs">
       {open({ name: 'store' }, nav.store, 'store')}
       {open({ name: 'collection', tab: 'weapons' }, nav.collection, 'collection')}
-      {[nav.alerts, nav.account].map((label) => (
-        <button type="button" class="tab" key={label} disabled aria-disabled="true">
-          {label}
-        </button>
-      ))}
+      {open({ name: 'alerts' }, nav.alerts, 'alerts')}
+      {/* The one that does not exist yet stays drawn and shut: a tab that
+          looks live and does nothing is worse than either, and a missing one
+          hides the shape of the app from somebody deciding whether to scan. */}
+      <button type="button" class="tab" disabled aria-disabled="true">
+        {nav.account}
+      </button>
     </nav>
   );
 }
