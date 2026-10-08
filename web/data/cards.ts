@@ -12,7 +12,9 @@ export interface Card {
   name: string;
   /** The tall painting, which is what a card is. */
   tall: string | null;
-  /** The square, for anywhere the tall one would letterbox. */
+  /** The banner behind your name in the lobby. */
+  wide: string | null;
+  /** The square, beside it on the scoreboard. */
   small: string | null;
 }
 
@@ -20,6 +22,7 @@ interface Raw {
   uuid: string;
   displayName: string;
   displayIcon: string | null;
+  wideArt: string | null;
   smallArt: string | null;
   largeArt: string | null;
 }
@@ -41,6 +44,7 @@ export function cards(): Promise<Card[]> {
         id: c.uuid,
         name: bare(c.displayName),
         tall: c.largeArt ?? c.displayIcon ?? null,
+        wide: c.wideArt ?? c.largeArt ?? null,
         small: c.smallArt ?? c.displayIcon ?? null,
       })),
     )

@@ -10,8 +10,9 @@ import { useCards } from '../data/useIndex.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { CARD } from './Cards.tsx';
+import { Crops } from './Piece.card.tsx';
 
-export function Card({ id, inv }: { id: string; inv: Inventory }) {
+export function Card({ id, inv, who }: { id: string; inv: Inventory; who: string }) {
   const s = t().cards;
   const all = useCards();
   const found = all?.find((c) => c.id === id) ?? null;
@@ -48,8 +49,10 @@ export function Card({ id, inv }: { id: string; inv: Inventory }) {
         <span class="num">{says}</span>
       </p>
 
-      <h2 class="label wall__head">{s.crops}</h2>
-      <p class="legal">{s.cropsWhy}</p>
+      {/* Shown rather than described: the three are cropped differently and
+          the point does not survive being asserted. */}
+      <p class="legal wall__crops">{s.cropsWhy}</p>
+      <Crops wide={found?.wide ?? null} small={found?.small ?? null} who={who} />
 
       {lit && (
         <>

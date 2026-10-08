@@ -23,11 +23,7 @@ export const cards = {
 
   crops: 'Three crops, one card',
   cropsWhy:
-    'Riot ships every card as small, wide and large art: a square for a grid, ' +
-    'a banner for the match scoreboard and this tall painting for the profile. ' +
-    'They are crops, not scales — the tall one has detail the square never ' +
-    'shows. The grid behind this uses the square and this screen uses the tall ' +
-    'one: same entitlement, three files.',
+    'Riot ships every card three times and they are crops, not scales: the tall one has detail the square never shows. The grid crops the tall one, and here are the other two — each drawn where you actually meet it, because “wide crop” means nothing and “behind your name in the lobby” is the same fact in a form you can check.',
 
   colourFrom: 'Where the colour comes from',
   colourWhy: (rgb: string) =>

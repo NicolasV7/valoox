@@ -87,7 +87,7 @@ export function Piece({ id, view }: { id: string; view: StoreView }) {
       )}
 
       {kind === 'card' && found.wide && found.small && (
-        <Crops piece={found} who={view.account.name} />
+        <Crops wide={found.wide} small={found.small} who={view.account.name} />
       )}
 
       <p class="legal piece__note">{note(kind, !!found.gif)}</p>

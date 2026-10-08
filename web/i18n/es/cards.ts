@@ -23,11 +23,7 @@ export const cards = {
 
   crops: 'Tres recortes, una tarjeta',
   cropsWhy:
-    'Riot manda cada tarjeta tres veces: un cuadrado para una grilla, una ' +
-    'banda para el marcador de la partida, y esta pintura alta para el perfil. ' +
-    'Son recortes, no escalas — el alto tiene detalle que el cuadrado no ' +
-    'muestra nunca. La grilla de atrás usa el cuadrado y esta pantalla usa el ' +
-    'alto: la misma pertenencia, tres archivos.',
+    'Riot manda cada tarjeta tres veces y son recortes, no escalas: el alto tiene detalle que el cuadrado no muestra nunca. La celda de la grilla recorta el alto, y acá están los otros dos — cada uno dibujado donde te lo encontrás, porque «recorte ancho» no quiere decir nada y «detrás de tu nombre en el lobby» es el mismo dato en una forma que podés verificar.',
 
   colourFrom: 'De dónde sale el color',
   colourWhy: (rgb: string) =>

@@ -90,3 +90,8 @@
   width: 144px;
   height: 340px;
 }
+
+/* The note that introduces the three crops, which follow it. */
+.wall__crops {
+  margin: 22px 0 10px;
+}

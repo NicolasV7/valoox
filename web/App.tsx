@@ -149,7 +149,7 @@ export function App() {
       return inv ? <Skin id={route.id} inv={inv} /> : <SkinLoading />;
     }
     if (route.name === 'card') {
-      return inv ? <Card id={route.id} inv={inv} /> : <CardsLoading />;
+      return inv ? <Card id={route.id} inv={inv} who={view.account.name} /> : <CardsLoading />;
     }
     if (route.name === 'title') {
       return inv ? <Title id={route.id} inv={inv} /> : <TitlesLoading />;

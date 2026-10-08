@@ -10,10 +10,17 @@
 // "wide crop" means nothing and "behind your name in the lobby" is the same
 // fact in a form you can check.
 
-import type { Piece } from '../data/catalogue.ts';
 import { t } from '../i18n/index.ts';
 
-export function Crops({ piece, who }: { piece: Piece; who: string }) {
+export function Crops({
+  wide,
+  small,
+  who,
+}: {
+  wide: string | null;
+  small: string | null;
+  who: string;
+}) {
   const s = t().piece;
   const [handle, tag] = (who || '').split('#');
 
@@ -22,7 +29,7 @@ export function Crops({ piece, who }: { piece: Piece; who: string }) {
       <h2 class="label piece__head">{s.crops}</h2>
 
       <div class="crop crop--wide">
-        {piece.wide && <img src={piece.wide} alt="" />}
+        {wide && <img src={wide} alt="" />}
         <div class="crop__who">
           <p class="crop__name">
             {handle}
@@ -33,7 +40,7 @@ export function Crops({ piece, who }: { piece: Piece; who: string }) {
       </div>
 
       <div class="crop crop--small">
-        {piece.small && <img src={piece.small} alt="" width="54" height="54" />}
+        {small && <img src={small} alt="" width="54" height="54" />}
         <div class="crop__who">
           <p class="crop__name">
             {handle}
