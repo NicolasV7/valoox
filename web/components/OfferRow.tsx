@@ -5,6 +5,10 @@
 // block. It is measured off the render — see design/measure.ts — so the same
 // skin looks like the same object here, in the collection and in an alert.
 //
+// Three things stacked against the art: what kind of skin it is, what it is
+// called, what it costs. The tier leads because it is the one word that says
+// how much this is going to hurt before the number does.
+//
 // The name wraps rather than truncating. "Prelude to Chaos Vandal" at one line
 // is three characters and an ellipsis, which is not a name.
 
@@ -19,6 +23,7 @@ export function OfferRow({
   tier,
   cost,
   was,
+  bare = false,
   href,
   onClick,
 }: {
@@ -27,30 +32,37 @@ export function OfferRow({
   tier: Tier | null;
   cost: number | null;
   was?: number | null;
+  /** Without the coin, where the screen has already said which one it is. */
+  bare?: boolean;
   href: string;
   onClick?: (e: MouseEvent) => void;
 }) {
   const art = useArt(render);
+  // A price that was something else wants both numbers, which no longer fits
+  // under the name — so it moves to the far corner and stacks there instead.
+  const cut = was != null && was !== cost;
 
   return (
-    <a class="row stage" style={artStyle(art)} href={href} onClick={onClick}>
+    <a
+      class={cut ? 'row row--cut stage' : 'row stage'}
+      style={artStyle(art)}
+      href={href}
+      onClick={onClick}
+    >
       {render && <img class="row__art" src={render} alt="" loading="lazy" />}
 
-      <span class="row__foot">
-        <span class="row__id">
-          <span class="row__name">{name ?? t().common.loading}</span>
-          {tier && (
-            <span class="row__tier">
-              <img src={tier.icon} alt="" width="12" height="12" />
-              {t().common.tier[tier.name]}
-            </span>
-          )}
+      {tier && (
+        <span class={'row__tier row__tier--' + tier.name}>
+          <img src={tier.icon} alt="" width="14" height="14" />
+          {t().common.tier[tier.name]}
         </span>
+      )}
 
-        <span class="row__price">
-          {was != null && was !== cost && <Money amount={was} struck size={11} />}
-          <Money amount={cost} />
-        </span>
+      <span class="row__name">{name ?? t().common.loading}</span>
+
+      <span class="row__price">
+        {cut && <Money amount={was} struck size={11} bare={bare} />}
+        <Money amount={cost} size={14} bare={bare} />
       </span>
     </a>
   );
@@ -61,12 +73,9 @@ export function OfferRow({
 export function OfferRowLoading() {
   return (
     <div class="row row--waiting" aria-hidden="true">
-      <span class="row__foot">
-        <span class="row__id">
-          <span class="skel" style={{ width: '58%', height: '15px' }} />
-          <span class="skel" style={{ width: '34%', height: '11px', marginTop: '6px' }} />
-        </span>
-      </span>
+      <span class="skel" style={{ width: '38%', height: '11px' }} />
+      <span class="skel" style={{ width: '58%', height: '15px' }} />
+      <span class="skel" style={{ width: '30%', height: '14px' }} />
     </div>
   );
 }

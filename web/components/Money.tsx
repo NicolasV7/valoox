@@ -26,18 +26,24 @@ export function Money({
   of = 'vp',
   size = 14,
   struck = false,
+  bare = false,
 }: {
   amount: number | null;
   of?: Coin;
   size?: number;
   struck?: boolean;
+  /** Without the coin. For a screen that has already said which one it is — a
+   *  bundle prices every piece in VP and says so once, at the bottom, and the
+   *  icon repeated eight times is both noise and, at a third of a phone wide,
+   *  the thing that pushes the number off the edge. */
+  bare?: boolean;
 }) {
   // Riot omits a cost now and then. An em dash says we do not know it, which is
   // different from free.
   if (amount === null) return <span class="money num">—</span>;
   return (
     <span class={struck ? 'money money--was num' : 'money num'}>
-      <img src={coin(of)} alt="" width={size} height={size} />
+      {!bare && <img src={coin(of)} alt="" width={size} height={size} />}
       {amount.toLocaleString(locale())}
     </span>
   );

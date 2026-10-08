@@ -1,15 +1,23 @@
 /* The letterbox row — a rifle, on its own colour — and the price beside it. */
 
 /* --- the letterbox row ---------------------------------------------------- */
+/* Three things stacked down the left against the art: the tier at the top, the
+ * name in the middle, the price at the bottom. The render sits to the right in
+ * a box that is the same size on every row, so what the eye compares is the box
+ * and not the artwork's own aspect ratio. */
 
 .row {
   position: relative;
-  display: block;
-  height: 118px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 130px;
+  padding: 13px 16px;
   border: 1px solid var(--rule);
   border-radius: var(--r);
   overflow: hidden;
   text-decoration: none;
+  color: var(--ink);
 }
 
 .row--waiting {
@@ -18,52 +26,76 @@
 
 .row__art {
   position: absolute;
-  left: 50%;
-  top: 40%;
-  transform: translate(-50%, -50%);
-  width: 86%;
-  height: 62px;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 228px;
+  height: 104px;
   object-fit: contain;
 }
 
-.row__foot {
-  position: absolute;
-  left: 13px;
-  right: 13px;
-  bottom: 11px;
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.row__id {
-  display: block;
-  min-width: 0;
-}
-
-/* It wraps rather than truncating. "Prelude to Chaos Vandal" cut to one line is
- * three characters and an ellipsis, which is not a name. */
-.row__name {
-  display: block;
-  font-size: var(--t-small);
-  line-height: 1.2;
+/* Everything that is not the art sits over it. */
+.row > :not(.row__art) {
+  position: relative;
 }
 
 .row__tier {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-top: 4px;
+  gap: 7px;
+  font-family: var(--num);
   font-size: var(--t-floor);
-  color: var(--ink-4);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Riot's own five, from /v1/contenttiers. The word is the colour, which is how
+ * the tier is readable before the price is. */
+.row__tier--select {
+  color: rgb(var(--select));
+}
+.row__tier--deluxe {
+  color: rgb(var(--deluxe));
+}
+.row__tier--premium {
+  color: rgb(var(--premium));
+}
+.row__tier--exclusive {
+  color: rgb(var(--exclusive));
+}
+.row__tier--ultra {
+  color: rgb(var(--ultra));
+}
+
+/* Held off the art rather than truncated: two short lines beat one clipped one,
+ * and 140px is where "Prelude to Chaos Vandal" breaks without reaching the
+ * render. */
+.row__name {
+  max-width: 140px;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.04;
 }
 
 .row__price {
-  margin-left: auto;
   display: flex;
   align-items: baseline;
   gap: 8px;
   white-space: nowrap;
+  font-size: 15.5px;
+}
+
+/* A discounted price is two numbers, which no longer fits under a two-line
+ * name. It goes to the opposite corner and stacks, so the pair reads as one
+ * price rather than two. */
+.row--cut .row__price {
+  position: absolute;
+  right: 14px;
+  bottom: 13px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
 }
 
 /* --- money ---------------------------------------------------------------- */
@@ -75,6 +107,13 @@
   font-size: var(--t-small);
 }
 
+/* Inside a price block the number takes the block's size, so one declaration
+ * sets both halves of a was/now pair. */
+.row__price .money,
+.tile__price .money {
+  font-size: inherit;
+}
+
 .money img {
   opacity: 0.85;
 }
@@ -84,4 +123,3 @@
   color: var(--ink-4);
   text-decoration: line-through;
 }
-

@@ -1,0 +1,80 @@
+/* Who you are, what you can spend, and how long the store has left.
+ *
+ * Its own file rather than part of the store: it is two bands of chrome that
+ * every signed-in screen will eventually wear, and the store is the rows
+ * underneath it. */
+
+/* Two bands, not one. The equipped player card sits behind the top one and
+ * nothing at all behind the second: the wallet is three light-coloured coin
+ * PNGs of Riot's and a clock, and reading those against a bright corner of
+ * somebody's artwork is how a number becomes a guess.
+ *
+ * Both of them carry Riot's art, so the header keeps `color-scheme: dark` when
+ * the page goes light. Without it the coins are white on white. */
+.head {
+  color-scheme: dark;
+  color: var(--ink);
+  border-bottom: 1px solid var(--rule);
+  background: var(--page-top);
+}
+
+.head__who {
+  position: relative;
+  height: 104px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 var(--gut);
+  overflow: hidden;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* The equipped player card, behind everything. Masked off to the left so the
+ * name is read on the page's own ground rather than on the art. */
+.head__card {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  opacity: 0.3;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 42%, #000 100%);
+}
+
+.head__badge,
+.head__id {
+  position: relative;
+}
+
+.head__badge {
+  flex: none;
+  object-fit: contain;
+}
+
+.head__id {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.head__tag {
+  color: var(--ink-4);
+}
+
+.head__rank {
+  margin-top: 3px;
+}
+
+.head__line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px var(--gut);
+}
+
+.head__clock {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--clock);
+}

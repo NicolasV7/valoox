@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Countdown } from '../components/Countdown.tsx';
 import { Money } from '../components/Money.tsx';
-import { cardArt } from '../data/catalogue.ts';
+import { cardArt, rankIcon } from '../data/catalogue.ts';
 import type { Account, Wallet } from '../data/types.ts';
 import { t } from '../i18n/index.ts';
 
@@ -54,7 +54,10 @@ export function StoreHeader({
   remaining: number;
 }) {
   const [art, setArt] = useState<string | null>(null);
+  const [badge, setBadge] = useState<string | null>(null);
   const [name, tag] = (account.name || '').split('#');
+  const rank = account.rank;
+  const named = rank && TIERS[rank.tier];
 
   useEffect(() => {
     if (!account.card) return;
@@ -67,21 +70,34 @@ export function StoreHeader({
     };
   }, [account.card]);
 
-  const rank = account.rank;
-  const named = rank && TIERS[rank.tier];
+  useEffect(() => {
+    if (!rank) return;
+    let live = true;
+    void rankIcon(rank.tier).then((url) => {
+      if (live) setBadge(url);
+    });
+    return () => {
+      live = false;
+    };
+  }, [rank]);
 
   return (
     <header class="head">
-      {art && <img class="head__card" src={art} alt="" />}
-
+      {/* The identity band. Riot's own two pieces of personalisation — the
+          equipped card behind, the rank badge beside — and nothing we chose. */}
       <div class="head__who">
-        <span class="item">
-          {name}
-          {tag && <span class="head__tag">#{tag}</span>}
-        </span>
-        <span class="label head__rank">
-          {named ? t().store.rank(named, rank.rr) : t().store.unranked}
-        </span>
+        {art && <img class="head__card" src={art} alt="" />}
+        {badge && <img class="head__badge" src={badge} alt="" width="44" height="44" />}
+
+        <div class="head__id">
+          <span class="item">
+            {name}
+            {tag && <span class="head__tag">#{tag}</span>}
+          </span>
+          <span class="label head__rank">
+            {named ? t().store.rank(named, rank.rr) : t().store.unranked}
+          </span>
+        </div>
       </div>
 
       <div class="head__line">

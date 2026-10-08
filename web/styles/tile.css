@@ -1,10 +1,6 @@
 /* The accessory grid: two columns, dense, so a portrait spanning two rows is
  * filled around rather than leaving a hole. */
 
-/* --- the accessory grid --------------------------------------------------- */
-/* Two columns, dense, so a portrait spanning two rows is filled around rather
- * than leaving a hole. */
-
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -12,6 +8,14 @@
   grid-auto-flow: dense;
   gap: 9px;
   margin-top: 11px;
+}
+
+/* Inside a bundle the same grid runs three across: the pieces are smaller, and
+ * there are between four and ten of them rather than always four. */
+.grid--bundle {
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-rows: 104px;
+  gap: 8px;
 }
 
 .tile {
@@ -22,6 +26,13 @@
   border: 1px solid var(--rule);
   border-radius: var(--r);
   overflow: hidden;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.tile--waiting {
+  justify-content: flex-end;
+  background: var(--card);
 }
 
 .tile--portrait {
@@ -39,13 +50,32 @@
   object-fit: contain;
 }
 
+/* A card is its own artwork, edge to edge, with the names laid over the bottom
+ * of it rather than beside it. */
 .tile--portrait .tile__art {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 24%;
+  object-position: center 22%;
+}
+
+/* The scrim that makes the names readable on whatever the art happens to be
+ * doing down there. Over the whole tile rather than a strip at the bottom: a
+ * strip has a visible edge wherever the art is bright, and the thing it is
+ * meant to be invisible against is somebody else's picture. */
+.tile--portrait::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 14, 17, 0) 44%,
+    rgba(14, 14, 17, 0.92) 86%,
+    rgba(14, 14, 17, 0.98) 100%
+  );
+  pointer-events: none;
 }
 
 .tile--text .tile__text {
@@ -53,21 +83,29 @@
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 15px;
   font-size: var(--t-item);
   font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+/* The bracket is Riot's frame around the title, not part of the name — so it
+ * sits back a step the way it does in the game. */
+.tile--text .tile__text svg {
+  color: var(--ink-3);
 }
 
 .tile__foot {
   position: relative;
   flex: none;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
   margin-top: 8px;
 }
 
 .tile--portrait .tile__foot {
   position: absolute;
+  z-index: 1;
   left: 11px;
   right: 11px;
   bottom: 9px;
@@ -75,23 +113,53 @@
 }
 
 .tile--text .tile__foot {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   margin: 0;
-  justify-content: flex-end;
 }
 
 .tile__name {
+  display: block;
   font-size: var(--t-small);
   font-weight: 500;
+  letter-spacing: -0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* What it is, and what it costs. One line where they fit and two where they do
+ * not — which is the difference between the accessory store's half-width tiles
+ * and a bundle's third-width ones, without either being written down. */
+.tile__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin-top: 3px;
+}
+
+.tile--text .tile__meta {
+  flex-direction: column-reverse;
+  align-items: flex-end;
+}
+
+.tile__kind {
+  font-size: var(--t-floor);
+  color: var(--ink-4);
+}
+
 .tile__price {
-  margin-left: auto;
   display: flex;
   align-items: baseline;
   gap: 6px;
   white-space: nowrap;
+  font-size: 12.5px;
 }
 
+.tile--text .tile__price {
+  font-size: var(--t-small);
+}

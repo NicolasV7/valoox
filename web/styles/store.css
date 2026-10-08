@@ -27,74 +27,98 @@
   margin-top: 11px;
 }
 
-.store__total {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 11px;
-  font-size: var(--t-item);
+/* The one number on the screen that is moving, so it is the one with weight —
+ * in the gold the game's own store counts down in. */
+.store__clock {
+  font-weight: 700;
+  color: var(--clock);
 }
 
-.store__foot {
-  padding: 30px var(--gut) 0;
-}
+/* --- the bundle ----------------------------------------------------------- */
+/* Everything else on this screen is a thing with a price. A bundle is a set
+ * sold on its artwork, so it is the one card that leads with a picture and
+ * says only what it is called and what it costs. */
 
-/* --- who you are ---------------------------------------------------------- */
-
-/* The header carries Riot's art — the equipped player card — and the three coin
- * icons, which are light-coloured PNGs of theirs. So it is a stage like any
- * other surface with their artwork on it, and keeps `color-scheme: dark` when
- * the page goes light. Without this the coins are white on white and the wallet
- * reads as three bare numbers. */
-.head {
+.promo {
   position: relative;
+  display: block;
+  height: 128px;
+  margin-top: 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
   overflow: hidden;
+  background: var(--card);
+  text-decoration: none;
+  /* It carries Riot's banner, so it stays a dark stage when the page is light. */
   color-scheme: dark;
   color: var(--ink);
-  padding: 24px var(--gut) 18px;
-  background: var(--page-top);
-  border-bottom: 1px solid var(--rule);
 }
 
-/* The equipped player card, behind everything. Masked off to the right so the
- * wallet never has to be read against a bright corner of somebody's art. */
-.head__card {
+.promo__art {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.2;
-  mask-image: linear-gradient(90deg, transparent 0%, #000 42%, #000 100%);
+  object-position: center 46%;
 }
 
-.head__who,
-.head__line {
-  position: relative;
+/* Dark at the bottom only: the names live down there and the art is somebody
+ * else's, so it is never known what is behind them. */
+.promo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14, 14, 17, 0.08) 38%, rgba(14, 14, 17, 0.9) 100%);
 }
 
-.head__who {
+.promo__clock,
+.promo__foot {
+  position: absolute;
+  z-index: 1;
+}
+
+/* A chip, not a bare line. It sits on artwork nobody chose, and a number on
+ * that is unreadable about half the time. */
+.promo__clock {
+  left: 14px;
+  top: 12px;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  background: rgba(10, 10, 12, 0.6);
+  font-size: var(--t-floor);
+  color: #e4e8ea;
+}
+
+.promo__foot {
+  left: 14px;
+  right: 14px;
+  bottom: 11px;
   display: flex;
-  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
 }
 
-.head__tag {
-  color: var(--ink-4);
+.promo__name {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
-.head__rank {
-  margin-top: 3px;
-}
-
-.head__line {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 14px;
-}
-
-.head__clock {
+.promo__price {
   margin-left: auto;
-  font-weight: 700;
-  color: var(--clock);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: nowrap;
+  font-size: 15px;
+}
+
+.promo__price .money {
+  font-size: inherit;
+}
+
+.store__foot {
+  padding: 30px var(--gut) 0;
 }

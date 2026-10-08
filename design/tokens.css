@@ -81,6 +81,11 @@
    * Nothing else in the interface may use it. */
   --riot: #e32c1f;
 
+  /* A number that went down. The only green in the interface, and it is never a
+   * mood or a success state — it marks a discount Riot sent, and nothing else
+   * is allowed to borrow it. */
+  --good: light-dark(#2f7a48, #7fb98f);
+
   /* --- type --------------------------------------------------------------- */
   --ui: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
   --num: "Azeret Mono", ui-monospace, "SF Mono", "Cascadia Mono", monospace;

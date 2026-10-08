@@ -30,7 +30,10 @@ function one(kind: string, id: string): Promise<Piece | null> {
       const d = j?.data;
       if (!d) return null;
       return {
-        name: d.displayName || d.titleText || null,
+        // titleText first: a player title's displayName is the catalogue entry
+        // ("Fortune Title") and its titleText is the thing you actually wear
+        // ("Fortune"). Nothing else in the catalogue carries the field.
+        name: d.titleText || d.displayName || null,
         // A title carries no art at all; a spray prefers the transparent cut.
         icon: d.displayIcon || d.fullTransparentIcon || d.largeArt || null,
       };
@@ -72,8 +75,45 @@ const SHAPE: Record<string, Shape> = {
 
 export const shapeOf = (type: string): Shape => SHAPE[type] ?? 'tile';
 
+/** What a piece IS, as a key rather than a word — the word lives in i18n.
+ *
+ *  Shape and kind are not the same question: a spray and a charm are both
+ *  squares and are not the same thing, and "Dragon" inside a bundle is a name
+ *  that says nothing at all without one of these under it. */
+export type Kind = 'skin' | 'buddy' | 'spray' | 'card' | 'title';
+
+const KIND: Record<string, Kind> = {
+  'e7c63390-eda7-46e0-bb7a-a6abdacd2433': 'skin',
+  'dd3bf334-87f3-40bd-b043-682a57a8dc3a': 'buddy',
+  'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475': 'spray',
+  '3f296c07-64c3-494c-923b-fe692a4fa1bd': 'card',
+  'de7caa6b-adf7-4588-bbd1-143831e786c6': 'title',
+};
+
+export const kindOf = (type: string): Kind | null => KIND[type] ?? null;
+
 export const piece = (type: string, id: string): Promise<Piece | null> =>
   BY_TYPE[type] ? one(BY_TYPE[type] as string, id) : Promise.resolve(null);
+
+/** The icon for a competitive tier, from the table Riot is using right now.
+ *
+ *  One request, and only the last row of it: Riot publishes a tier table per
+ *  episode and renames the art every few of them, so a pinned url rots. The
+ *  table is small and the answer is remembered for the life of the page. */
+let tiers: Promise<Record<number, string>> | null = null;
+
+export function rankIcon(tier: number): Promise<string | null> {
+  tiers ??= fetch(V1 + 'competitivetiers')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j: { data?: Array<{ tiers: Array<{ tier: number; largeIcon: string | null }> }> }) => {
+      const now = j?.data?.[j.data.length - 1];
+      const map: Record<number, string> = {};
+      for (const t of now?.tiers ?? []) if (t.largeIcon) map[t.tier] = t.largeIcon;
+      return map;
+    })
+    .catch(() => ({}));
+  return tiers.then((map) => map[tier] ?? null);
+}
 
 /** The wide art of the equipped player card, for the header. largeArt is the
  *  fallback because a handful of old cards never got a wide render. */

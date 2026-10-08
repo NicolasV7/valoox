@@ -16,6 +16,16 @@ export const common = {
   radianite: 'Radianite',
   kc: 'Kingdom Credits',
 
+  // What a piece IS, when its name does not say so. "Dragon" inside a bundle is
+  // a card, a spray or a title and the name gives you nothing.
+  kind: {
+    skin: 'Skin',
+    buddy: 'Gun buddy',
+    spray: 'Spray',
+    card: 'Player card',
+    title: 'Player title',
+  },
+
   tier: {
     select: 'Select',
     deluxe: 'Deluxe',
