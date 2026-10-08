@@ -26,7 +26,6 @@ export function AlertsChannel() {
   const [to, setTo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [said, setSaid] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
   const [until, setUntil] = useState<number | null>(null);
   const wait = useLeft(until);
   const field = useRef<HTMLInputElement>(null);
@@ -45,10 +44,11 @@ export function AlertsChannel() {
   // empty field labelled "not verified" is an accusation about a blank.
   const stated = now.trim().length > 0;
   // A verified address has nothing to send: the code it would carry has
-  // already been carried back. So the only control is the one that changes it,
-  // and the field stays shut until that is what you asked for — which also
-  // means a stray tap cannot quietly unverify the address you rely on.
-  const locked = ok && !editing;
+  // already been carried back. So while the field still says what the row
+  // says, the only control is the one that takes you to changing it — and the
+  // moment a single character differs, `ok` is false and the send button is
+  // there on its own. No second piece of state decides that; the field does.
+  const locked = ok;
 
   return (
     <main class="screen bell">
@@ -77,7 +77,6 @@ export function AlertsChannel() {
           inputMode="email"
           autocomplete="email"
           spellcheck={false}
-          readOnly={locked}
           class={locked ? 'bell__input bell__input--shut' : 'bell__input'}
           value={now}
           onInput={(e) => {
@@ -116,8 +115,11 @@ export function AlertsChannel() {
     </main>
   );
 
+  /** Puts the cursor in the field. Synchronous, inside the click, because a
+   *  focus deferred to the next render has lost the gesture and iOS opens no
+   *  keyboard for one — which is also why the field is not readOnly: iOS
+   *  opens no keyboard for one of those either, however it was focused. */
   function edit() {
-    setEditing(true);
     setSaid(null);
     field.current?.focus();
   }

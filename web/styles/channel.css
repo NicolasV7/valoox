@@ -150,8 +150,9 @@
 }
 
 
-/* A verified address, shut. Readable rather than dimmed: it is the thing the
- * screen is reporting, not a control that happens to be unavailable. */
+/* A verified address, settled. Quieter than an empty field, because it is the
+ * thing the screen is reporting rather than something waiting to be filled —
+ * but still a live field: it takes a tap and a keyboard like any other. */
 .bell__input--shut {
   border-color: var(--rule);
   color: var(--ink-2);
