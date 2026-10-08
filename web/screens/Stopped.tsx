@@ -77,7 +77,7 @@ export function Stopped({ token }: { token: string }) {
 
   if (state.at === 'used') {
     return (
-      <Card art={SPRAY.huh} said={s.alreadyUsed}>
+      <Card art={SPRAY.nothing} said={s.alreadyUsed}>
         <p class="lede stop__lede">{s.alreadyUsedWhy}</p>
       </Card>
     );
@@ -85,21 +85,34 @@ export function Stopped({ token }: { token: string }) {
 
   if (state.at === 'failed') {
     return (
-      <Card art={SPRAY.whoops} said={s.couldNot}>
+      <Card art={SPRAY.lostConn} said={s.couldNot}>
         <p class="lede stop__lede">{s.couldNotWhy}</p>
       </Card>
     );
   }
 
-  // Asking and asked look the same on purpose: the check is one round trip to
-  // our own Worker, and a spinner in front of a question is a flash.
-  const busy = state.at !== 'ask';
+  // Nothing is said until there is something true to say. The check is one
+  // round trip to our own Worker, and asking "stop the alerts?" for the
+  // length of it — on a link that turns out to be spent, or wrong — is the
+  // screen making a claim before it knows one.
+  if (state.at === 'asking') {
+    return (
+      <main class="screen stop">
+        <div class="stop__mid">
+          <span class="skel stop__art stop__art--waiting" />
+          <span class="skel stop__title--waiting" />
+        </div>
+      </main>
+    );
+  }
+
+  const busy = state.at === 'going';
   return (
-    <Card art={SPRAY.holdOn} said={s.sure}>
+    <Card art={SPRAY.huh} said={s.sure}>
       <p class="lede stop__lede">{s.sureWhy}</p>
       <div class="stop__pair">
         <button type="button" class="btn" disabled={busy} onClick={() => answer('yes')}>
-          {state.at === 'going' ? t().common.loading : s.yesStop}
+          {busy ? t().common.loading : s.yesStop}
         </button>
         <button type="button" class="btn btn--quiet" disabled={busy} onClick={() => answer('no')}>
           {s.no}

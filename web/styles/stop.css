@@ -84,3 +84,21 @@
 .stop__pair .btn {
   transition: transform 120ms cubic-bezier(0.22, 0.8, 0.3, 1);
 }
+
+/* While the Worker is being asked whether this link is still good. The shape
+ * of the answer without any of its words: a wrong question held for a round
+ * trip is worse than a blank one. */
+.stop__art--waiting {
+  display: block;
+  width: min(132px, 34vw);
+  aspect-ratio: 1;
+  border-radius: 24px;
+}
+
+.stop__title--waiting {
+  display: block;
+  width: min(14rem, 62%);
+  height: 30px;
+  margin: calc(var(--v) * 0.8) auto 0;
+  border-radius: 8px;
+}

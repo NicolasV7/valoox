@@ -26,7 +26,7 @@ export function CollectionEmpty({ inv }: { inv: Inventory }) {
       <CollectionTabs on="weapons" said={s.equipped(0, 0)} />
 
       <div class="nothing">
-        <img src={SPRAY.goAgain} alt="" width="92" height="92" />
+        <img src={SPRAY.empty} alt="" width="92" height="92" />
         <p class="lede">{s.nothing}</p>
         <p class="small faint">{s.nothingWhy}</p>
       </div>

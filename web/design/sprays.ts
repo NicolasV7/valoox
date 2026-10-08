@@ -3,13 +3,18 @@
 // feeling to carry, and they are the only ones where a picture is not in the
 // way of the thing you came to look at. The store and the collection stay bare.
 //
-// They are served from this origin. Fourteen files that never change, fetched at
+// They are served from this origin. Thirteen files that never change, fetched at
 // build time by scripts/art.mjs — which is where Riot's uuid for each one is
 // written down — so the screen a stranger reads before scanning does not open
 // a second connection to draw a sticker on it.
 //
 // Each is picked for what it is *of*, not because a screen looked empty: swap
 // one and the joke stops being about the screen it is on.
+//
+// And each appears exactly once. Two screens wearing one sticker is two
+// screens that have stopped being about anything in particular — so this list
+// is the whole inventory, every entry below has one caller, and adding a
+// screen means finding a drawing rather than reaching for a nearby one.
 
 const art = (name: string) => '/art/spray-' + name + '.png';
 
@@ -32,14 +37,16 @@ export const SPRAY = {
   shh: art('shh'),
   /** Somebody delighted with the gun they are holding. A wishlist hit. */
   thisGun: art('thisgun'),
-  /** Yoru asleep, with the Zzz. The list is kept and nothing is being sent. */
-  asleep: art('asleep'),
-  /** Jett, palm up, unimpressed. The one question before something is undone. */
-  holdOn: art('holdon'),
   /** A gloved thumb up, with the Spike. Nothing was changed; carry on. */
   carryOn: art('carryon'),
   /** Jett shrugging an Operator off a ledge. Something let go on purpose. */
   letGo: art('letgo'),
-  /** Reyna, open hand, unimpressed. A link that no longer does anything. */
+  /** Reyna, eyebrow up, hand out. The one question before something is undone. */
   huh: art('huh'),
+  /** Omen behind a wall of smoke. A link with nothing left behind it. */
+  nothing: art('nothing'),
+  /** A radio smashed, with the error badge still lit. A link that is wrong. */
+  lostConn: art('lostconn'),
+  /** Brimstone in a hammock, cucumber on his eyes. Kept, and running nothing. */
+  chill: art('chill'),
 } as const;

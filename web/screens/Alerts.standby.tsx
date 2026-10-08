@@ -17,7 +17,7 @@ export function AlertsStandby({ starred }: { starred: number }) {
 
   return (
     <div class="standby">
-      <img class="standby__art" src={SPRAY.asleep} alt="" width="104" height="104" />
+      <img class="standby__art" src={SPRAY.chill} alt="" width="104" height="104" />
       <p class="lede standby__lede">{s.standby}</p>
       <p class="small standby__under">{starred > 0 ? s.standbyKept(starred) : s.standbyNone}</p>
       <a class="btn standby__go" href={href(CHANNEL)} onClick={intercept(CHANNEL)}>
