@@ -1,0 +1,37 @@
+/* The two faces, served from this origin.
+ *
+ * `npm run fonts` puts the files here; they are gitignored. If they are missing
+ * the page still renders — `font-display: swap` falls through to the stacks in
+ * --ui and --num, which is why those stacks name real system faces rather than
+ * ending in a bare `sans-serif`.
+ *
+ * Both are variable over their weight axis, so four weights cost one file. */
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/fonts/bricolage.woff2") format("woff2-variations");
+  font-weight: 200 700;
+  font-stretch: 100%;
+  font-style: normal;
+  font-display: swap;
+  /* Latin only. Spanish lives entirely inside U+0000–00FF, ñ and ¿ included. */
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+20AC, U+2122;
+}
+
+@font-face {
+  font-family: "Azeret Mono";
+  src: url("/fonts/azeret.woff2") format("woff2-variations");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+20AC, U+2122;
+}
+
+/* Numbers never reflow. A countdown that shifts sideways every second reads as
+ * broken, and this is the one line that prevents it everywhere at once. */
+.num,
+[class*="num"] {
+  font-family: var(--num);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}

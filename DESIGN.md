@@ -1,81 +1,154 @@
 # Design
 
-## The world: operator terminal
+The spec is the canvas: 122 artboards at
+[claude.ai/artifact/JdhyhhmhsdoEtc9UxFLYYB](https://claude.ai/artifact/JdhyhhmhsdoEtc9UxFLYYB).
+This file is the part of it that has to survive without the link —
+`design/boards.md` maps every screen to its board.
 
-An instrument, not a storefront. The player is checking a readout, deciding in
-seconds, usually one-handed. It should feel closer to a trading terminal or a
-flight computer than to a game's shop screen — precise, dense, quiet, and fast
-to parse.
+Values live in `design/tokens.css`, once. Nothing below restates a hex.
 
-Deliberately **not** VALORANT's visual identity. Riot's policy forbids implying
-official affiliation, and imitating their red-and-angular brand is exactly what
-that looks like. The game's content is the data; the chrome is ours.
+## The world
 
-## The one rule: colour means something
+The interface spends no colour. The game does. Every colour on screen is either
+Riot's or measured off Riot's art, which is why this is mostly rules about where
+a value came from rather than a list of values.
 
-The interface is achromatic. Every coloured pixel is data, and the colour comes
-from the data itself:
+That is also the answer to Riot's policy, which forbids implying official
+affiliation: the content is theirs and reads as theirs, the chrome is ours and
+reads as nothing in particular.
 
-| Hue | What it means | Source |
-|---|---|---|
-| tier colours | a skin's rarity | `valorant-api.com/v1/contenttiers` |
-| rank colour | your competitive tier | `valorant-api.com/v1/competitivetiers` |
-| gold | you marked it | ours |
-| green | you already own it | ours |
-| red | something failed | ours |
+## The mark
 
-No brand accent exists, so nothing competes with the five tier hues — which is
-also why those hues read instantly instead of becoming decoration.
+The name has two o's in the middle and the app has one idea running through
+every screen: what is yours and what is not. So the o's carry it — one filled,
+one an open ring. Owned, and not owned.
 
-## Palette
+They sit tangent, not overlapping, because overlap turns to mud below about 20px
+and this has to survive a favicon. The solid is drawn a hair smaller than the
+ring: a filled circle reads larger than an outlined one of the same diameter.
 
-```
---void    #0A0C0D   the page
---panel   #13171A   raised surface
---rule    #222A2F   borders, dividers
---line    #2E383E   stronger border, focus
---ink     #E7ECEE   primary text
---dim     #8B979D   secondary text
---faint   #5A6469   labels, disabled
---gold    #E3B341   favourited
---green   #58C98A   owned
---red     #E5574F   error
-```
-
-Neutrals carry a slight cyan cast, so the ground reads cool and engineered
-rather than muddy, and the tier hues sit on it without fighting.
+The word is set in the UI face at the weight a label uses, lowercase, so the mark
+is the only thing in the lockup asking for attention.
 
 ## Type
 
-System stacks, zero bytes, no font host — which the CSP would block anyway
-without opening `font-src`. On an instrument the platform's own monospace is the
-correct material, not a compromise: the discipline carries the personality.
+**Bricolage Grotesque** for everything a person reads. Four weights: 200 for a
+screen title, 300 for a heading, 500 for a label or a button, 400 for the rest.
 
-- **Data** — `ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', Menlo,
-  Consolas, monospace`. Every number, price, countdown, label and identifier.
-  Always `font-variant-numeric: tabular-nums` so columns of digits line up.
-- **Prose** — `system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`. Item
-  names, explanations, trust copy.
+**Azeret Mono** for numbers, and only for numbers. Tabular figures are the whole
+point: a countdown that shifts sideways every second reads as broken.
 
-Scale: 11 / 12 / 13 / 15 / 19 / 26. Micro-labels are 11px uppercase with
-`.14em` tracking. Nothing is bold for emphasis alone; weight marks hierarchy.
+Both are self-hosted from `/fonts/` — the CSP names no third-party origin, and
+`seams.test.ts` fails the build if one appears. `npm run fonts` fetches them;
+they are not committed.
 
-## Composition
+**The email is the exception.** No web font loads reliably in a mail client, so
+the mails are designed in the system stack they will actually get.
 
-Single column, mobile-first, 16px gutters. The status line sits at the top: who
-you are and where you rank, then your three balances and the rotation countdown,
-all mono and tabular. Then the four daily offers, above the fold, without
-scrolling — that is the whole job.
+| Role | Size / weight |
+| --- | --- |
+| Screen title | 32 / 200 |
+| Section title | 28 / 300 |
+| Item name | 20 / 500 |
+| Body | 15 / 400 |
+| Secondary | 13 / 400 |
+| Label | 12 / 500, uppercase, tracked |
+| Floor | 11 / 400 |
 
-Offers are **rows**, not cards. A row fits a readable name, a tier bar, a wide
-weapon render and a right-aligned tabular price in the width of a phone; a card
-grid wastes that width on padding and truncates the names.
+Eleven is a hard floor. Anything a person reads or taps stays at or above it,
+footers included.
 
-A 3px tier-coloured bar on the leading edge of every item is the one recurring
-structural device. It is the only place rarity appears, so it does real work.
+## Colour is data
+
+The interface has one near-black and one near-white. Everything else came from
+somewhere:
+
+- **Five tier hues** are Riot's own, from `/v1/contenttiers`.
+- **Everything else is measured.** One `drawImage` into a 1×1 canvas gives the
+  average of an image. The hue is kept; the saturation is taken from the art's
+  vivid end, because a mean saturation over a whole picture is always grey and
+  would hand every skin the same wash. `valorant-api.com` sends the CORS header
+  that makes reading the pixels back legal.
+
+The melee grid is the clearest case for why: every melee Riot has ever sold is
+Exclusive, so without measurement the whole slot is one orange.
+
+`design/palette.json` holds 57 of these, measured offline. It is a reference for
+building screens, not a runtime dependency — the app measures what it draws.
+
+## The weave
+
+One angle, **107°**, everywhere a piece of art sits on a surface. The bands and
+the wash take the piece's own colour, so the same skin looks like the same object
+in the store, in the collection and in an alert.
+
+In code it is one class and one custom property:
+
+```js
+node.className = 'stage';
+node.style.setProperty('--art', '104, 92, 158');
+```
+
+A title gets the white default, because a title genuinely has no art to read.
+
+## The four shapes
+
+Shape follows the kind of thing, never the slot it came from. That is what lets
+a random accessory drop and a ten-piece bundle share one grid.
+
+| Shape | For |
+| --- | --- |
+| Letterbox row | a rifle |
+| Square tile | a knife, a spray, a charm |
+| Portrait | a card |
+| Text row | a title |
+
+A card gets two columns; a spray gets three.
+
+## The six states
+
+| State | How it reads |
+| --- | --- |
+| Yours | a tick, never a badge |
+| Not yours | 55% opacity, hollow star. Present, dimmed, still openable |
+| Equipped | a light chip on the art. One per slot |
+| Verified | the address carried a code back |
+| Not verified | saved, and nothing is sent to it yet |
+| Refused | the channel's own status code, shown as received |
+
+There is no seventh, and the missing one is deliberate: **delivered**. A server
+cannot see whether a message was read, so nothing claims it. The strongest thing
+a send can say is the status the channel returned.
+
+## Waiting
+
+- **One grey, no shimmer.** `--raised` and nothing else. A skeleton that animates
+  is a skeleton asking to be looked at, and it is the one thing on screen with
+  nothing to say.
+- **Final sizes, always.** Every box is already the size the real thing will be,
+  so nothing jumps when the data lands. Where the shape genuinely cannot be known
+  — a bundle holds between four and ten pieces — the screen says so rather than
+  guessing.
+- **Draw whatever needs no data.** The tab bar, the back link, the address you
+  already saved: all real. Only what is in flight is grey, which is what makes
+  the grey mean something.
+- **A dead control says it is dead.** The search on a loading slot is drawn and
+  disabled, reading "waiting for the catalogue". A field that silently does
+  nothing is worse than one that admits it.
+
+## Light
+
+A token remap, not a second design — possible only because nothing was picked ad
+hoc. `light-dark()` carries both values on one line in `tokens.css`.
+
+The one thing a table cannot decide is what to do with the art. A VALORANT render
+is lit for a dark background; recolouring it would be editing Riot's artwork, and
+dropping it on near-white leaves a Singularity Vandal as a pale smear. So
+**anything carrying the weave stays dark**: `.stage` declares `color-scheme:
+dark`, and every `light-dark()` in its subtree resolves dark with it. The light
+theme is light chrome around dark stages.
 
 ## Motion
 
-Almost none, and never decorative. State changes get a 120ms ease; `<details>`
-open with the browser's own behaviour. Everything respects
+Almost none, and never decorative. State changes get 120ms. Everything respects
 `prefers-reduced-motion`.

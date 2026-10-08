@@ -1,0 +1,147 @@
+/* The whole palette, defined once.
+ *
+ * Two rules explain every value here. The interface spends no colour of its
+ * own: it has one near-black, one near-white and the greys between them. And
+ * every colour that is not grey is data — five are Riot's tier hues, and the
+ * rest arrive at runtime, measured off the art they sit behind.
+ *
+ * So there is no --brand, no --accent, no --primary. A token that named one
+ * would be a colour with nothing behind it, and the next screen would reach for
+ * it instead of measuring.
+ *
+ * Both themes live on one line each, through light-dark(). That is not only
+ * shorter: it also solves the hard half of a light theme for free. A VALORANT
+ * render is lit for a dark background, so anything with art on it has to stay
+ * dark whatever the page does — and an element that declares `color-scheme:
+ * dark` makes every light-dark() in its subtree resolve dark, with no second
+ * stylesheet and no list of exceptions. That is what .stage does, below. */
+
+:root {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+  }
+}
+
+:root {
+  /* --- surfaces, darkest to lightest ------------------ light / dark ------- */
+  --page: light-dark(#edeef2, #0e0e11); /* the ground's far end */
+  --page-mid: light-dark(#f5f6f8, #101216);
+  --page-top: light-dark(#ffffff, #171a20);
+  --sunk: light-dark(#f7f8fa, #0b0c0f); /* a well: an input, a code box */
+  --card: light-dark(#f7f8fa, #131419); /* a panel on the page */
+  --stage: light-dark(#ffffff, #16171b); /* what art sits on */
+  --stage-row: light-dark(#ffffff, #191b20); /* the same, for a row */
+  --raised: light-dark(#e7e9ee, #232630); /* lighter than its ground */
+
+  /* --- lines -------------------------------------------------------------- */
+  --hair: light-dark(#ebedf1, #1d1f25); /* between rows. Barely there */
+  --rule: light-dark(#e3e5ea, #24262c); /* a real border */
+  --rule-strong: light-dark(#d2d6dd, #30333a); /* a border doing work */
+
+  /* --- ink, brightest to faintest ----------------------------------------- */
+  --ink: light-dark(#15171c, #f2f4f5);
+  --ink-2: light-dark(#3a4047, #d2d6d9); /* a lead paragraph */
+  --ink-3: light-dark(#4c545c, #a7aeb3); /* body on a stage */
+  --ink-4: light-dark(#646c74, #8b9399); /* secondary, labels */
+  --ink-5: light-dark(#646b73, #6e757b); /* footers. 3.8:1 — the floor */
+  --ink-6: light-dark(#7a828a, #565c64); /* legal lines */
+  --ink-7: light-dark(#8b939b, #4a5058); /* decorative. Never a sentence */
+  --ink-inverse: light-dark(#ffffff, #0e0e11); /* on a light button */
+
+  /* --- the four things that mean something -------------------------------- */
+  --ok: light-dark(#2e7d4f, #7fb98f); /* accepted, verified, owned */
+  --kept: light-dark(#8a6200, #e0b740); /* starred */
+  --bad: light-dark(#b3261e, #d96d6d); /* refused, with its status */
+  --clock: light-dark(#8a6200, #f0cb74); /* a countdown, and only that */
+
+  /* --- Riot's tier colours ------------------------------------------------ */
+  /* Components rather than colours, because a tier is also a wash, and a wash
+   * needs four alphas of the same hue. light-dark() only takes a <color>. */
+  --select: 90, 159, 226;
+  --deluxe: 0, 149, 135;
+  --premium: 209, 84, 141;
+  --exclusive: 245, 149, 91;
+  --ultra: 250, 214, 99;
+
+  /* --- type --------------------------------------------------------------- */
+  --ui: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --num: "Azeret Mono", ui-monospace, "SF Mono", "Cascadia Mono", monospace;
+
+  --t-screen: 32px; /* 200 — one per screen */
+  --t-section: 28px; /* 300 */
+  --t-item: 20px; /* 500 — the name of a thing */
+  --t-body: 15px; /* 400 */
+  --t-small: 13px; /* 400 */
+  --t-label: 12px; /* 500 — tracked, uppercase */
+  --t-floor: 11px; /* 400 — the hard floor. Nothing readable goes below */
+
+  /* --- space -------------------------------------------------------------- */
+  --gut: 20px; /* the page gutter on a phone */
+  --gut-web: 56px; /* and on the site */
+  --r-sm: 8px;
+  --r: 12px;
+  --r-lg: 18px;
+
+  /* --- the ground --------------------------------------------------------- */
+  /* A 135° hatch at 1.6% over a radial. A flat black page reads as unfinished,
+   * and a texture this faint still survives being photographed off a screen. */
+  --hatch: light-dark(rgba(17, 19, 24, 0.028), rgba(255, 255, 255, 0.016));
+  --ground:
+    repeating-linear-gradient(
+      135deg,
+      var(--hatch) 0px,
+      var(--hatch) 1px,
+      transparent 1px,
+      transparent 7px
+    ),
+    radial-gradient(128% 72% at 50% -8%, var(--page-top) 0%, var(--page-mid) 42%, var(--page) 100%);
+
+  /* --- the weave ---------------------------------------------------------- */
+  /* One angle, 107°, everywhere a piece of art sits on a surface. --art is the
+   * measured colour of that piece as `r, g, b`, set per element from JS. The
+   * default is white, which is what a title gets: it has no art to read. */
+  --art: 255, 255, 255;
+  --wash-at: 50% 60%;
+  --wash-size: 118% 100%;
+}
+
+/* The one class that carries the weave. Everything that shows a piece of Riot's
+ * art wears it, and the only thing that changes between a rifle and a spray is
+ * --art. `color-scheme: dark` is what keeps the render on a dark ground when
+ * the rest of the page has gone light. */
+.stage {
+  color-scheme: dark;
+  color: var(--ink);
+  background:
+    linear-gradient(
+      107deg,
+      transparent 0 31%,
+      rgba(var(--art), 0.085) 31% 45%,
+      transparent 45% 51%,
+      rgba(var(--art), 0.045) 51% 58%,
+      transparent 58% 72%,
+      rgba(var(--art), 0.064) 72% 77%,
+      transparent 77%
+    ),
+    repeating-linear-gradient(107deg, rgba(var(--art), 0.05) 0 1px, transparent 1px 23px),
+    radial-gradient(
+      var(--wash-size) at var(--wash-at),
+      rgba(var(--art), 0.3) 0%,
+      rgba(var(--art), 0) 70%
+    ),
+    var(--stage);
+}
+
+/* A row in a list sits on a slightly lighter base and takes its wash from the
+ * left, because the art in a row is left-aligned and the name reads over it. */
+.stage--row {
+  --wash-at: 30% 50%;
+  --wash-size: 84% 128%;
+  background-color: var(--stage-row);
+}
