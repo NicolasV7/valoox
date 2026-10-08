@@ -19,55 +19,6 @@
  *
  * The same square in every phase, so the code, the tick and the clock all land
  * in the same place and the screen changes without anything jumping. */
-.plate {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 218px;
-  height: 218px;
-  margin: calc(var(--v) * 1.2) auto 0;
-  border-radius: 14px;
-  background: #ffffff;
-  line-height: 0;
-}
-
-.plate__code {
-  display: block;
-  animation: settle 260ms ease-out both;
-}
-
-/* The three corner squares, where the real ones will be. Grey rather than
- * black so it reads as absent rather than as a broken code, and breathing
- * slowly rather than sweeping: a sweep is a loading bar wearing a costume,
- * and this is a specific thing arriving. */
-.plate__wait {
-  display: block;
-  color: #d3d7dd;
-  animation: breathe 1600ms ease-in-out infinite;
-}
-
-.plate__seal {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 66px;
-  height: 66px;
-  border-radius: 50%;
-  background: var(--ok);
-  color: #0e0e11;
-  animation: seal 320ms cubic-bezier(0.2, 1.3, 0.5, 1) both;
-}
-
-.plate__seal--quiet {
-  width: 60px;
-  height: 60px;
-  border: 1.5px solid #c9ced2;
-  background: none;
-  color: #8b9399;
-  animation: settle 260ms ease-out both;
-}
-
 .scan__how {
   margin-top: calc(var(--v) * 0.7);
   text-align: center;
@@ -135,14 +86,62 @@
   margin: calc(var(--v) * 0.9) auto calc(var(--v) * 0.7);
 }
 
-.scan__waiting .dot {
-  display: inline-block;
+/* Waiting, and saying what it is waiting on.
+ *
+ * The dot rings out once per poll — the animation-duration is set from the same
+ * constant the interval uses, so the two cannot drift. It is the request
+ * leaving, drawn. A spinner here would be a thing that moves to fill time; this
+ * moves because something happened. */
+.waiting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.waiting .dot {
+  position: relative;
+  flex: none;
   width: 7px;
   height: 7px;
-  margin-right: 4px;
   border-radius: 50%;
   background: var(--ink-4);
-  animation: breathe 1800ms ease-in-out infinite;
+  animation-name: ping;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation-iteration-count: infinite;
+}
+
+.waiting .dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-4);
+  animation: inherit;
+  animation-name: ring;
+}
+
+@keyframes ping {
+  0%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes ring {
+  0% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(3.2);
+  }
 }
 
 /* The shape the store rows will take, at the size they will be. */
