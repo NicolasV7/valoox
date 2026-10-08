@@ -47,17 +47,22 @@ export const looksLikeAddress = (to: string): boolean => to.length <= 254 && ADD
 /**
  * Whether the last word about an address means it cannot receive.
  *
- * A 4xx is the provider refusing the address before anything left; a bounce or
- * a complaint is the far end refusing it after looking. Both mean the same
- * thing to the sender — this address does not work — and both have to stop a
- * resend, because sending the same message to the same mailbox again is the
- * one action that cannot help.
+ * Four ways to arrive at the same fact. A 4xx is the provider refusing the
+ * address before anything left. A bounce or a complaint is the far end
+ * refusing it after looking. A suppression is the provider refusing to try
+ * at all, because one of the other two already happened — to us or to
+ * somebody else on the same sender.
  *
- * web/data/channel.ts holds the same two lines for the screens. They are two
+ * They mean one thing to whoever is waiting: this address does not work, and
+ * sending the same message to it again is the one action that cannot help.
+ *
+ * web/data/channel.ts holds the same list for the screens. They are two
  * runtimes and the duplicate is deliberate; if one changes, change both.
  */
+const DEAD = ['email.bounced', 'email.complained', 'email.suppressed'];
+
 export const refused = (said: string | undefined): boolean =>
-  !!said && (/^resend 4/.test(said) || said === 'email.bounced' || said === 'email.complained');
+  !!said && (/^resend 4/.test(said) || DEAD.includes(said));
 
 /**
  * Whether the provider says the message got where it was going.
@@ -93,6 +98,10 @@ const WEIGHT: Record<string, number> = {
   'email.failed': 8,
   'email.bounced': 9,
   'email.complained': 9,
+  // Not sent at all, because the address was already known bad. It outranks a
+  // bounce only in the sense that it is the last thing that can be said about
+  // this address: nothing further will be attempted.
+  'email.suppressed': 9,
 };
 
 export const outranks = (next: string, was: string | undefined): boolean =>

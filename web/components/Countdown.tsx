@@ -22,6 +22,33 @@ export function spell(seconds: number): string {
   return days > 0 ? t().store.days(days) + ' ' + clock : clock;
 }
 
+/**
+ * Seconds left until a moment, ticking.
+ *
+ * Takes a deadline rather than a duration, for two reasons. A tab that was
+ * backgrounded comes back correct instead of however many seconds behind it
+ * was asleep. And pressing a button twice inside the same cooldown gives the
+ * same duration both times — a duration would not change, so the effect
+ * would not restart, and the number would sit frozen at whatever it had
+ * counted down to.
+ */
+export function useLeft(until: number | null): number {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (until === null) return;
+    setNow(Date.now());
+    // Twice a second. On a one-second tick the displayed number spends most
+    // of its life up to a second stale, which on a sixty-second wait is the
+    // difference between the button lighting up when it says it will and a
+    // second after.
+    const id = setInterval(() => setNow(Date.now()), 500);
+    return () => clearInterval(id);
+  }, [until]);
+
+  return until === null ? 0 : Math.max(0, Math.ceil((until - now) / 1000));
+}
+
 export function Countdown({ from, className }: { from: number; className?: string }) {
   const [left, setLeft] = useState(from);
 

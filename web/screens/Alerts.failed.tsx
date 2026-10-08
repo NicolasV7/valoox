@@ -5,11 +5,13 @@
 // as a fault code to look up, and the only two outcomes that change what to
 // do about it are already the two branches of this screen.
 //
-// Which door is open depends on who refused it. A 4xx came back before
-// anything was sent and may be a typo, so another code is worth a try. A
-// bounce came back after the far end looked at the address and said no, and
-// sending the same thing again is the one piece of advice that cannot help —
-// so that button is gone and the only way on is a different address.
+// Three outcomes, two doors. A 4xx came back before anything was sent and
+// may be a typo, so another code is worth a try. A bounce came back after
+// the far end looked at the address and said no, and a suppression is the
+// channel declining to try because one of those already happened — for both
+// of those, sending the same thing again is the one piece of advice that
+// cannot help, so that button is gone and the only way on is a different
+// address.
 
 import { useState } from 'preact/hooks';
 import { Check, Mail } from '../components/icons.tsx';
@@ -22,14 +24,26 @@ export function AlertsFailed() {
   const prefs = usePrefs();
   const [busy, setBusy] = useState(false);
   const said = prefs?.mail?.said ?? '';
-  // The far end refused it, rather than the provider refusing to try.
-  const bounced = said === 'email.bounced' || said === 'email.complained';
+  // Which of the three, in the order they can be told apart: the channel
+  // declining to try at all, the far end sending it back, or the address
+  // being rejected before anything left.
+  //
+  // `again` is part of the same table rather than derived from it: whether
+  // another code could land is a property of which outcome this is, and
+  // working it out a second way is how the button and the sentence above it
+  // end up disagreeing.
+  const fate =
+    said === 'email.suppressed'
+      ? { word: s.wasBlocked, lede: s.blockedLede, why: s.blockedWhy, again: false }
+      : said === 'email.bounced' || said === 'email.complained'
+        ? { word: s.wasBounced, lede: s.bouncedLede, why: s.bouncedWhy, again: false }
+        : { word: s.wasRefused, lede: s.refusedLede, why: s.refusedWhy, again: true };
 
   return (
     <main class="screen bell">
       <header class="bell__head">
         <h1>{t().common.nav.alerts}</h1>
-        <p class="small">{bounced ? s.bouncedLede : s.refusedLede}</p>
+        <p class="small">{fate.lede}</p>
       </header>
 
       <div class="bell__card bell__card--bad">
@@ -38,22 +52,22 @@ export function AlertsFailed() {
           {s.email}
           <span class="bell__state bell__state--bad">
             <span class="bell__dot" />
-            {bounced ? s.wasBounced : s.wasRefused}
+            {fate.word}
           </span>
         </p>
-        <p class="lede bell__said">{bounced ? s.bouncedWhy : s.refusedWhy}</p>
+        <p class="lede bell__said">{fate.why}</p>
         <p class="bell__addr num">{prefs?.mail?.to ?? ''}</p>
       </div>
 
       <div class="bell__pair">
-        {!bounced && (
+        {fate.again && (
           <button type="button" class="btn" disabled={busy} onClick={more}>
             {s.sendAnother}
           </button>
         )}
         <button
           type="button"
-          class={bounced ? 'btn' : 'btn btn--quiet'}
+          class={fate.again ? 'btn btn--quiet' : 'btn'}
           onClick={() => go({ name: 'alerts', step: 'channel' })}
         >
           {s.editAddress}

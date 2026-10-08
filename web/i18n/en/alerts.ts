@@ -132,6 +132,14 @@ export const alerts = {
     'spelling and send another code.',
   wasRefused: 'Rejected',
   wasBounced: 'Bounced',
+  wasBlocked: 'Blocked',
+  blockedLede:
+    'It did not even go out: that address was already marked as not ' +
+    'receiving. Nothing here is lost — your stars are untouched.',
+  blockedWhy:
+    'The channel declined to try. That address is on its block list from an ' +
+    'earlier bounce or complaint, so nothing of ours will go there. Insisting ' +
+    'does not take it off that list: it needs a different one.',
   bouncedWhy:
     'The message went out and the receiving server sent it back. That is the ' +
     'mailbox itself saying no, so sending the same thing again is the one piece ' +

@@ -19,7 +19,7 @@
 
 import { verify } from '../alerts/svix.ts';
 import type { Env } from '../types.ts';
-import { outranks } from '../vault/mail.ts';
+import { outranks, refused } from '../vault/mail.ts';
 import { readSession, saveSession } from '../vault/session.ts';
 import { trail } from './channel.ts';
 
@@ -65,10 +65,10 @@ export async function resendHook(req: Request, env: Env): Promise<Response> {
   // must not un-open it.
   if (!outranks(kind, held.session.mail.said)) return new Response(null, { status: 204 });
 
-  // The provider's own event name, stored as theirs. A bounce also drops the
-  // proof: an address that refused the code never carried one back, and
+  // The provider's own event name, stored as theirs. These three also drop
+  // the proof: an address that refused the code never carried one back, and
   // leaving it verified would keep the morning message pointed at a wall.
-  const dead = kind === 'email.bounced' || kind === 'email.complained';
+  const dead = refused(kind);
   held.session.mail = {
     ...held.session.mail,
     said: kind,

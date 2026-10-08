@@ -10,6 +10,7 @@
 
 import { useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
+import { useLeft } from '../components/Countdown.tsx';
 import { Mail } from '../components/icons.tsx';
 import { again, open, refused, reload, usePrefs } from '../data/channel.ts';
 import { t } from '../i18n/index.ts';
@@ -26,6 +27,8 @@ export function AlertsChannel() {
   const [busy, setBusy] = useState(false);
   const [said, setSaid] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [until, setUntil] = useState<number | null>(null);
+  const wait = useLeft(until);
   const field = useRef<HTMLInputElement>(null);
 
   const now = to ?? prefs?.mail?.to ?? '';
@@ -34,7 +37,7 @@ export function AlertsChannel() {
   // makes it somebody else's history, so the chip stops reporting it.
   const bad = refused(prefs?.mail?.said) && now.trim() === prefs?.mail?.to;
   const valid = ADDRESS.test(now.trim()) && now.trim().length <= 254;
-  // The address that bounced is the one send that cannot work, so the button
+  // The address that failed is the one send that cannot work, so the button
   // is shut until it is a different one. The Worker refuses it too; this is
   // only the half that says so before the round trip.
   const stuck = bad;
@@ -91,17 +94,19 @@ export function AlertsChannel() {
           <button
             type="button"
             class="btn bell__go"
-            disabled={!valid || busy || stuck}
+            disabled={!valid || busy || stuck || wait > 0}
             onClick={start}
           >
             {busy ? t().common.loading : s.sendATest}
           </button>
         )}
 
-        <p class={said || stuck ? 'bell__why bell__why--bad' : 'bell__why'}>
+        <p class={said || stuck || wait > 0 ? 'bell__why bell__why--bad' : 'bell__why'}>
           {/* The dot only joins once there is a state it is reporting. */}
           {(stated || said) && <span class="bell__dot" />}
-          <span>{said ?? (stuck ? s.changeIt : s.testIsProof)}</span>
+          <span>
+            {wait > 0 ? s.waitSeconds(wait) : (said ?? (stuck ? s.changeIt : s.testIsProof))}
+          </span>
         </p>
       </div>
 
@@ -128,7 +133,8 @@ export function AlertsChannel() {
     if (typeof res !== 'object' || res === null) return;
 
     const out = res as { error?: string; wait?: number; sent?: boolean; said?: string };
-    if (out.error === 'wait') return setSaid(s.waitSeconds(out.wait ?? 0));
+    // A moment, not a count: see useLeft in components/Countdown.tsx.
+    if (out.error === 'wait') return setUntil(Date.now() + (out.wait ?? 0) * 1000);
     if (out.error === 'address') return setSaid(s.badAddress);
     if (out.error === 'taken') return setSaid(s.taken);
     if (out.error === 'bounced') return setSaid(s.changeIt);
@@ -148,12 +154,14 @@ export function AlertsChannel() {
 
 /** What went wrong, in a word. The provider's own string says it in theirs —
  *  `resend 422`, `email.bounced` — and on a chip that reads as a fault code
- *  for the reader to look up. These two are the only distinction that changes
- *  what to do about it, which is the only distinction worth drawing. */
-const verdict = (said: string | undefined): string =>
-  said === 'email.bounced' || said === 'email.complained'
-    ? t().alerts.wasBounced
-    : t().alerts.wasRefused;
+ *  for the reader to look up. These three are the distinctions that change
+ *  what to do about it, which is what makes them worth drawing. */
+const verdict = (said: string | undefined): string => {
+  const s = t().alerts;
+  if (said === 'email.suppressed') return s.wasBlocked;
+  if (said === 'email.bounced' || said === 'email.complained') return s.wasBounced;
+  return s.wasRefused;
+};
 
 const state = (ok: boolean, bad: boolean) =>
   'bell__state ' + (ok ? 'bell__state--ok' : bad ? 'bell__state--bad' : 'bell__state--wait');

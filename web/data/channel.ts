@@ -67,16 +67,20 @@ export function useWatch(on: boolean, every = 4000): void {
 
 /** What the provider last said, read as a verdict rather than a sentence.
  *
- *  src/vault/mail.ts holds the same two lines for the send side, which is the
- *  one that enforces them. Two runtimes, so the duplicate is deliberate; if
- *  one changes, change both.
+ *  src/vault/mail.ts holds the same list for the send side, which is the one
+ *  that enforces it. Two runtimes, so the duplicate is deliberate; if one
+ *  changes, change both.
  *
- *  A 4xx is the address being wrong and it will stay wrong; a bounce or a
- *  complaint is the far end refusing it after the fact. Both mean the same
- *  thing to a person — change the address — which is why both land on the same
- *  screen. Anything else is either fine or still in flight. */
+ *  A 4xx is the address being wrong and it will stay wrong. A bounce or a
+ *  complaint is the far end refusing it after the fact. A suppression is the
+ *  provider declining to try, because one of those already happened. All of
+ *  them mean the same thing to a person — change the address — which is why
+ *  all of them land on the same screen. Anything else is either fine or still
+ *  in flight. */
+const DEAD = ['email.bounced', 'email.complained', 'email.suppressed'];
+
 export const refused = (said: string | undefined): boolean =>
-  !!said && (/^resend 4/.test(said) || said === 'email.bounced' || said === 'email.complained');
+  !!said && (/^resend 4/.test(said) || DEAD.includes(said));
 
 /** The provider saying the message reached a mailbox — its pictures were
  *  fetched from one. Not that a person read it: Apple Mail loads them for

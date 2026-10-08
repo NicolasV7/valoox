@@ -133,6 +133,14 @@ export const alerts = {
     'mandá otro código.',
   wasRefused: 'Rechazada',
   wasBounced: 'Rebotó',
+  wasBlocked: 'Bloqueada',
+  blockedLede:
+    'Ni siquiera salió: esa dirección ya estaba marcada como que no recibe. Acá ' +
+    'no se perdió nada, tus marcas quedaron intactas.',
+  blockedWhy:
+    'El canal se negó a intentarlo. Esa dirección quedó en su lista de bloqueo ' +
+    'por un rebote o una queja de antes, así que ningún mensaje nuestro va a ' +
+    'salir hacia ahí. Insistir no la saca de esa lista: hace falta otra.',
   bouncedWhy:
     'El mensaje salió y el servidor del otro lado lo devolvió. Eso es la casilla ' +
     'misma diciendo que no, así que mandar lo mismo otra vez es el único consejo ' +

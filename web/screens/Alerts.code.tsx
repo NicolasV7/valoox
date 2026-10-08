@@ -8,6 +8,7 @@
 
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
+import { useLeft } from '../components/Countdown.tsx';
 import { again, landed, prove, refused, reload, usePrefs, useWatch } from '../data/channel.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS, go } from '../route.ts';
@@ -20,6 +21,8 @@ export function AlertsCode() {
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [said, setSaid] = useState<string | null>(null);
+  const [until, setUntil] = useState<number | null>(null);
+  const wait = useLeft(until);
   const field = useRef<HTMLInputElement>(null);
 
   const to = prefs?.mail?.to ?? '';
@@ -84,13 +87,15 @@ export function AlertsCode() {
           {s.verify}
         </button>
         {!here && (
-          <button type="button" class="btn btn--quiet" disabled={busy} onClick={more}>
+          <button type="button" class="btn btn--quiet" disabled={busy || wait > 0} onClick={more}>
             {s.sendItAgain}
           </button>
         )}
       </div>
 
-      {said && <p class="bell__why bell__why--bad">{said}</p>}
+      {(wait > 0 || said) && (
+        <p class="bell__why bell__why--bad">{wait > 0 ? s.waitSeconds(wait) : said}</p>
+      )}
 
       <p class="legal bell__note">{s.tenAndFive}</p>
 
@@ -125,7 +130,9 @@ export function AlertsCode() {
     const res = (await again()) as { error?: string; wait?: number; sent?: boolean };
     setBusy(false);
     setCode('');
-    if (res?.error === 'wait') return setSaid(s.waitSeconds(res.wait ?? 0));
+    // A moment, not a count: see useLeft. The line counts itself down and
+    // goes away on its own when the cooldown is up.
+    if (res?.error === 'wait') return setUntil(Date.now() + (res.wait ?? 0) * 1000);
     await reload();
     if (res?.error === 'bounced' || !res?.sent) go(ALERTS);
   }
