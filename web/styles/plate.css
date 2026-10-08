@@ -19,23 +19,12 @@
   line-height: 0;
 }
 
-/* Nothing scales and nothing fades as a whole. The three corners are already
- * on the plate — grey, in the right place — so the arrival is the corners
- * turning black and the data filling in around them. A transform on the whole
- * svg would move those corners and break the one thing that makes this read as
- * completing rather than replacing. */
+/* The code arrives whole. Nothing fades in over it: a QR is one object, and
+ * rendering half of it differently from the other half shows. The placeholder
+ * puts its corners in the same three places, so the swap lands where the eye
+ * already is. */
 .plate__code {
   display: block;
-}
-
-.qr__fill {
-  animation: fill 260ms ease-out both;
-}
-
-@keyframes fill {
-  from {
-    opacity: 0;
-  }
 }
 
 /* Grey, and there from the first frame.

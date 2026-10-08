@@ -46,19 +46,23 @@ function finders(modules: number) {
   ));
 }
 
-const inFinder = (x: number, y: number, n: number) =>
-  (x < FINDER && y < FINDER) || (x >= n - FINDER && y < FINDER) || (x < FINDER && y >= n - FINDER);
-
+/**
+ * The code itself, drawn in one pass over the matrix.
+ *
+ * Not split into corners and data. That version faded the data in over
+ * geometrically-drawn corners so nothing ever moved, which was true and also
+ * made the code look worse — a QR is one object and anything that renders part
+ * of it differently shows. The placeholder below still puts its corners in the
+ * same places, so the swap lands where the eye already is; it is a swap rather
+ * than a fill, and that is the right trade.
+ */
 export function QrCode({ url, size = 190 }: { url: string; size?: number }) {
   const { data, size: modules } = encode(url, { ecc: 'M' });
 
-  // The corners are drawn geometrically rather than from the matrix, so they
-  // are the same three shapes the placeholder already put on the plate. Only
-  // the rest fades in, and the code reads as completing rather than replacing.
   let d = '';
   for (const [y, row] of data.entries()) {
     for (const [x, on] of row.entries()) {
-      if (on && !inFinder(x, y, modules)) d += 'M' + x + ',' + y + 'h1v1h-1z';
+      if (on) d += 'M' + x + ',' + y + 'h1v1h-1z';
     }
   }
 
@@ -68,11 +72,9 @@ export function QrCode({ url, size = 190 }: { url: string; size?: number }) {
       height={size}
       viewBox={'0 0 ' + modules + ' ' + modules}
       shape-rendering="crispEdges"
-      fill="#000000"
       aria-hidden="true"
     >
-      {finders(modules)}
-      <path class="qr__fill" d={d} />
+      <path d={d} fill="#000000" />
     </svg>
   );
 }
