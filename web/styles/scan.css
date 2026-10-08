@@ -1,48 +1,50 @@
-/* The code, and the three things that happen to it: approved, waiting,
- * dead. One screen, and the only thing that changes is what is on the
- * plate. */
+/* The code, and the three things that happen to it: approved, waiting, dead.
+ * One screen, and the only thing that changes is what is on the plate.
+ *
+ * Same rule as the gate: it fits, and it cannot scroll. The plate is the one
+ * thing here that does not scale — 218px is the size the code is drawn at, and
+ * a QR that shrinks with the viewport is a QR that takes two tries to scan.
+ * Everything around it gives way instead. */
 
-/* --- the code ------------------------------------------------------------- */
-
-.scan {
-  padding-top: 50px;
+.scan > h1 {
+  font-size: clamp(24px, 3.9vh, 32px);
 }
 
 .scan__lede {
-  margin-top: 15px;
+  margin-top: calc(var(--v) * 0.8);
 }
 
 /* White in both themes, and that is not an oversight: a QR inverted to match a
- * dark page fails to scan on a good share of phones. */
+ * dark page fails to scan on a good share of phones.
+ *
+ * The same square in every phase, so the code, the tick and the clock all land
+ * in the same place and the screen changes without anything jumping. */
 .plate {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: fit-content;
-  margin: 24px auto 0;
-  padding: 14px;
+  width: 218px;
+  height: 218px;
+  margin: calc(var(--v) * 1.2) auto 0;
   border-radius: 14px;
   background: #ffffff;
   line-height: 0;
 }
 
-.plate__wait,
-.plate--done,
-.plate--dead {
-  position: relative;
+.plate__code {
+  display: block;
+  animation: settle 260ms ease-out both;
 }
 
+/* The three corner squares, where the real ones will be. Grey rather than
+ * black so it reads as absent rather than as a broken code, and breathing
+ * slowly rather than sweeping: a sweep is a loading bar wearing a costume,
+ * and this is a specific thing arriving. */
 .plate__wait {
-  width: 190px;
-  height: 190px;
-  border-radius: var(--r-sm);
-  background: #eceef1;
-}
-
-.plate--done,
-.plate--dead {
-  width: 218px;
-  height: 218px;
+  display: block;
+  color: #d3d7dd;
+  animation: breathe 1600ms ease-in-out infinite;
 }
 
 .plate__seal {
@@ -54,6 +56,7 @@
   border-radius: 50%;
   background: var(--ok);
   color: #0e0e11;
+  animation: seal 320ms cubic-bezier(0.2, 1.3, 0.5, 1) both;
 }
 
 .plate__seal--quiet {
@@ -62,10 +65,11 @@
   border: 1.5px solid #c9ced2;
   background: none;
   color: #8b9399;
+  animation: settle 260ms ease-out both;
 }
 
 .scan__how {
-  margin-top: 13px;
+  margin-top: calc(var(--v) * 0.7);
   text-align: center;
 }
 
@@ -73,7 +77,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-top: 22px;
+  margin-top: var(--v);
   color: var(--ink-4);
 }
 .rule-or::before,
@@ -89,26 +93,46 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: calc(var(--v) * 0.9);
   background: var(--riot);
   color: #ffffff;
+}
+
+/* The button cannot open an app until there is a url to open. Drawn, dimmed,
+ * and saying so — a control that silently does nothing is worse than one that
+ * admits it. */
+.btn--riot[aria-disabled='true'] {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .scan__waiting,
 .scan__who {
   margin-top: auto;
-  padding-top: 14px;
+  padding-top: calc(var(--v) * 0.6);
   text-align: center;
 }
 
-.scan__who {
-  margin-top: 18px;
+.scan__name {
+  margin-top: 2px;
 }
 
+.scan__tag {
+  color: var(--ink-4);
+}
+
+/* The sprays give way first. They are the one thing on these screens carrying
+ * no information, so on a short phone they are the one thing that shrinks. */
 .scan__waiting img,
 .scan__who img,
 .scan__spray {
-  margin: 0 auto 10px;
+  width: clamp(48px, 9vh, 78px);
+  height: clamp(48px, 9vh, 78px);
+  margin: 0 auto calc(var(--v) * 0.5);
+}
+
+.scan__spray {
+  margin: calc(var(--v) * 0.9) auto calc(var(--v) * 0.7);
 }
 
 .scan__waiting .dot {
@@ -118,17 +142,14 @@
   margin-right: 4px;
   border-radius: 50%;
   background: var(--ink-4);
-}
-
-.scan__spray {
-  margin: 20px auto 14px;
+  animation: breathe 1800ms ease-in-out infinite;
 }
 
 /* The shape the store rows will take, at the size they will be. */
 .bars {
   display: grid;
   gap: 10px;
-  margin-top: 26px;
+  margin-top: var(--v);
 }
 .bars .skel {
   height: 10px;
@@ -143,6 +164,21 @@
 
 .scan__foot {
   margin-top: auto;
-  padding-top: 24px;
+  padding-top: var(--v);
   text-align: center;
+}
+
+/* Below about 640 the plate is 40% of the screen and the rhythm has nothing
+ * left to give. Rather than clip the bottom off — which with the scroll locked
+ * means losing whatever happens to be last — two lines go on purpose.
+ *
+ * The lede's trust half is already on the gate, two screens of reading ago, and
+ * "if you are reading this on the phone itself" explains a button that reads
+ * "Open Riot Mobile" on a phone. They are the two most redundant sentences
+ * here, which is why they are the two that go. */
+@media (max-height: 640px) {
+  .scan__lede,
+  .btn--riot + .scan__how {
+    display: none;
+  }
 }

@@ -1,14 +1,24 @@
-/* The way in. Four screens, no tab bar — you are not in the app yet. */
+/* The way in. Four screens, no tab bar — you are not in the app yet.
+ *
+ * None of them scrolls, and none of them can: a person deciding whether to hand
+ * over a session should see the whole argument at once, and a code that is half
+ * off the bottom of the screen is a code nobody scans.
+ *
+ * So the spacing is not a set of numbers picked for one artboard. --v is the
+ * unit these screens breathe in and it scales with the viewport, which removes
+ * the cliff a media query leaves at its breakpoint: the designed rhythm on a
+ * tall phone, the same rhythm proportionally tighter on a short one, and no
+ * height at which the layout suddenly changes shape. */
 
-/* flex: 1 rather than min-height: 100dvh. .shell already fills the viewport,
- * and a child that also asks for a full viewport makes the document two of
- * them tall — which looks like a page with a seam halfway down it. */
 .gate,
 .scan {
+  --v: clamp(7px, 2.1vh, 22px);
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 48px 24px 28px;
+  padding: calc(var(--v) * 2) 24px calc(var(--v) * 1.3);
+  overflow: hidden;
 }
 
 .wordmark {
@@ -22,26 +32,30 @@
 
 /* --- the trust page ------------------------------------------------------- */
 
+/* The one title in the app that is not on the scale, and the one screen whose
+ * job is to persuade rather than inform. It scales with the height as well: at
+ * 38px it takes three lines in both languages on a short phone, and the room
+ * for the fourth fact is exactly those two extra lines. */
 .gate__title {
-  margin-top: 34px;
-  font-size: var(--t-hero);
+  margin-top: calc(var(--v) * 1.5);
+  font-size: clamp(26px, 4.3vh, 38px);
   font-weight: 300;
   letter-spacing: -0.03em;
 }
 
 .gate__lede {
-  margin-top: 18px;
+  margin-top: calc(var(--v) * 0.8);
 }
 
 /* Four facts as text. They were four identical icon-and-paragraph cards, which
  * is the stock container doing the thinking: a rule between lines separates
  * them just as well and claims nothing. */
 .facts {
-  margin: 22px 0 0;
+  margin: var(--v) 0 0;
 }
 
 .facts__row {
-  padding: 15px 0;
+  padding: calc(var(--v) * 0.6) 0;
   border-top: 1px solid var(--rule);
 }
 .facts__row:first-child {
@@ -58,18 +72,18 @@
 }
 
 .facts__why {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   font-size: var(--t-small);
   color: var(--ink-3);
 }
 
 .gate__foot {
   margin-top: auto;
-  padding-top: 26px;
+  padding-top: calc(var(--v) * 1.2);
 }
 
 .gate__dest {
-  margin-top: 14px;
+  margin-top: calc(var(--v) * 0.7);
   text-align: center;
   color: var(--ink-4);
 }

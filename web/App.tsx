@@ -48,22 +48,35 @@ export function App() {
 
   const scan = useScan(load);
 
-  return <div class="shell">{inside()}</div>;
+  // The four sign-in screens are locked to the viewport: they do not scroll and
+  // they cannot. A person deciding whether to hand over a session should see
+  // the whole argument at once, and a code half off the bottom of the screen is
+  // a code nobody scans. Everything after sign-in scrolls normally.
+  const locked = state.at === 'out' || !!scan.state;
+
+  return <div class={locked ? 'shell shell--lock' : 'shell'}>{inside()}</div>;
 
   function inside() {
-    if (state.at === 'loading') return <StoreLoading />;
+    if (state.at === 'loading' && !scan.state) return <StoreLoading />;
 
     if (state.at === 'fail') {
       return <Fail fault={state.fault} status={state.status} onRetry={load} />;
     }
 
-    if (state.at === 'out') {
-      return scan.state ? (
-        <Scan state={scan.state} onRetry={scan.start} />
-      ) : (
-        <Gate onScan={scan.start} />
-      );
+    // The scan outranks everything while it is running, including the store
+    // loading underneath it. Without that, approval sets the store fetching,
+    // the fetch sets the state to loading, and the screen that says "you are
+    // in" is replaced in the frame it appears — which is why nobody ever saw
+    // it. The key remounts the screen on every phase, so each one arrives.
+    if (scan.state) {
+      const who = state.at === 'in' ? state.view.account.name : undefined;
+      return <Scan key={scan.state.phase} state={scan.state} name={who} onRetry={scan.start} />;
     }
+
+    if (state.at === 'out') return <Gate onScan={scan.start} onIntent={scan.prefetch} />;
+
+    // Still loading, and the scan screen that was covering it has just gone.
+    if (state.at !== 'in') return <StoreLoading />;
 
     return (
       <>

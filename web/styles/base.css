@@ -132,3 +132,41 @@ a:hover {
   background: var(--raised);
   border-radius: var(--r-sm);
 }
+
+/* --- the four movements --------------------------------------------------- */
+/* Every one is under 320ms and every one is a state change. There is nothing
+ * here that runs on its own for decoration, and prefers-reduced-motion above
+ * flattens all of it to nothing. */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes seal {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* One screen replacing another. Short, and upward: the direction says a new
+ * thing arrived rather than that something slid past. */
+.rise {
+  animation: rise 240ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}

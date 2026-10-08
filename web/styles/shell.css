@@ -13,6 +13,16 @@
   margin: 0 auto;
 }
 
+/* The sign-in flow, pinned to exactly the viewport. `height` rather than
+ * `min-height` is the whole lock: the shell cannot grow past the screen, so the
+ * document never has anywhere to scroll to. The screens inside it are built to
+ * fit — see gate.css — and this is what makes that a guarantee rather than a
+ * hope that the copy stays short. */
+.shell--lock {
+  height: 100dvh;
+  overflow: hidden;
+}
+
 /* Everything above the tab bar. The padding-bottom keeps the last row clear of
  * it, and of the home indicator underneath. */
 .screen {
