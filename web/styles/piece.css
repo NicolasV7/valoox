@@ -151,6 +151,11 @@
   margin: 24px 0 11px;
 }
 
+/* The label's hole sits where the label does. */
+.piece .label--waiting {
+  margin: 24px 0 11px;
+}
+
 .piece__note {
   margin: 22px 0 0;
 }

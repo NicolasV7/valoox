@@ -81,3 +81,20 @@
   margin-left: auto;
   font-size: 12.5px;
 }
+
+/* --- the crops, waiting ---------------------------------------------------- */
+
+.crop--waiting {
+  background: var(--card);
+}
+
+.crop--wide.crop--waiting::after {
+  content: none;
+}
+
+.crop__thumb--waiting {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  border-radius: var(--r-sm);
+}
