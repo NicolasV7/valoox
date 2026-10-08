@@ -44,28 +44,24 @@ export function Collection({ inv }: { inv: Inventory }) {
   );
 }
 
-function Group({
-  rack,
-  worn,
-}: {
-  rack: Rack;
-  worn: Record<string, { level: string } | undefined>;
-}) {
+type Worn = NonNullable<Inventory['worn']>['guns'];
+
+function Group({ rack, worn }: { rack: Rack; worn: Worn }) {
   const melee = rack.of === 'melee';
   return (
     <section class="coll__rack">
       <h2 class="label">{t().collection.rack[rack.of] ?? rack.of}</h2>
       <div class={melee ? 'slots slots--one' : 'slots'}>
         {rack.weapons.map((w) => (
-          <Slot key={w.id} weapon={w} on={worn[w.id]?.level} big={melee} />
+          <Slot key={w.id} weapon={w} on={worn[w.id]} big={melee} />
         ))}
       </div>
     </section>
   );
 }
 
-function Slot({ weapon, on, big }: { weapon: Weapon; on?: string; big?: boolean }) {
-  const skin = skinOn(weapon, on);
+function Slot({ weapon, on, big }: { weapon: Weapon; on?: Worn[string]; big?: boolean }) {
+  const skin = skinOn(weapon, on?.level);
   // A default skin has no content tier, which is also how a bare slot is told
   // apart from a dressed one: Riot gives every weapon a standard skin, and it
   // is the only one of the lot with nothing behind it.
@@ -78,8 +74,16 @@ function Slot({ weapon, on, big }: { weapon: Weapon; on?: string; big?: boolean 
   // publishes a 512×512 × placeholder as the displayIcon of most standard skin
   // levels — downloaded one and looked at it — so going through the level there
   // draws a cross in twenty slots.
+  // The colourway that is on, first. A chroma is a different paint job, not a
+  // shade of the same one — the Aeris Guardian is white at level 4 and pink in
+  // its second variant, and a slot that shows the white one is showing a gun
+  // the account is not carrying.
+  const chroma = skin?.chromas.find((c) => c.id === on?.chroma);
   const art = tier
-    ? (skin?.levels.find((l) => l.id === on)?.icon ?? skin?.render ?? weapon.icon)
+    ? (chroma?.render ??
+      skin?.levels.find((l) => l.id === on?.level)?.icon ??
+      skin?.render ??
+      weapon.icon)
     : weapon.icon;
   // Measured off the picture once the picture is in, rather than alongside it:
   // measure() opens its own Image, so firing it at mount means every slot is

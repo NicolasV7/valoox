@@ -89,9 +89,14 @@
   object-fit: contain;
 }
 
-/* The stock gun, dimmed, so a gap reads as a gap rather than as a mistake. */
+/* The stock gun, dimmed, so a gap reads as a gap rather than as a mistake.
+ *
+ * Darkened rather than faded. A render is a transparent PNG and the weave is
+ * the surface behind it, so at 62% opacity the bands show through the gun —
+ * which reads as the pattern lying on top of it instead of under. brightness
+ * leaves the pixels opaque and only takes the light out of them. */
 .slot--bare .slot__art {
-  opacity: 0.62;
+  filter: brightness(0.66);
 }
 
 .slot__name {

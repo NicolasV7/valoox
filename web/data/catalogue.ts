@@ -99,8 +99,12 @@ function one(kind: string, id: string): Promise<Piece | null> {
         // ("Fortune Title") and its titleText is the thing you actually wear
         // ("Fortune"). Nothing else in the catalogue carries the field.
         name: d.titleText || d.displayName || null,
-        // A title carries no art at all; a spray prefers the transparent cut.
-        icon: d.displayIcon || d.fullTransparentIcon || d.largeArt || null,
+        // A title carries no art at all; a spray prefers the transparent cut,
+        // and is the only thing in the catalogue that publishes one — so this
+        // order is a spray rule everywhere and a no-op on the rest. Its
+        // displayIcon is a square crop with a hard edge, which on a stage made
+        // of weave reads as a sticker stuck over it.
+        icon: d.fullTransparentIcon || d.displayIcon || d.largeArt || null,
         scale: sizeOf(d.assetPath),
         video: d.streamedVideo || null,
         level: Number(LEVEL.exec(d.assetPath ?? '')?.[1]) || null,
