@@ -17,6 +17,13 @@ crons = ["30 0 * * *"]
 # Printed on every message, so it is a var and not a secret. It has to be an
 # address on a domain verified in Resend — the subdomain keeps the sending
 # reputation off valoox.store, which can then hold a strict DMARC of its own.
+# The apex, once valoox.store is a zone on this account. A Custom Domain
+# rather than a route pattern so Cloudflare issues and renews the certificate
+# itself — the uid cookie is Secure, so without HTTPS sign-in silently never
+# completes. Commented rather than deleted because the only thing missing is
+# the nameserver change: uncomment it and deploy.
+# routes = [{ pattern = "valoox.store", custom_domain = true }]
+
 [vars]
 MAIL_FROM = "valoox <alerts@mail.valoox.store>"
 
