@@ -32,25 +32,31 @@ export const INK = {
 };
 
 /**
- * Telling the client this message is already dark.
+ * Telling the client to leave the colours alone.
  *
- * `color-scheme` is the modern declaration and the meta is what the older
- * iOS builds read. Apple Mail and Outlook honour them and leave the colours
- * alone, which is the whole ask: a design that is dark to begin with does
- * not want a second opinion.
+ * `light dark`, and the message is dark in both. That reads backwards and is
+ * the point: these declarations are not a request for a scheme, they are a
+ * claim about who handles them. A client runs its own dark-mode pass over
+ * any message that does not claim to handle the scheme the reader is in, so
+ * naming only one leaves the other unclaimed — and the unclaimed one is
+ * exactly where a dark design comes back inverted.
  *
- * One scheme, not two. A message is read once and archived, so matching the
- * reader's current setting buys nothing and doubles what can go wrong — and
- * every colour in it is a colour from the app, which is dark.
+ * There are no light colours behind the claim. A message is read once and
+ * archived; matching the reader's current setting buys nothing and doubles
+ * what can go wrong, and every colour in here is a colour from the app,
+ * which has one theme.
  *
- * Gmail honours none of it. See solid() below, which is the half that works.
+ * Apple Mail and Outlook honour this. Gmail honours none of it and runs its
+ * pass regardless — see solid() below, which is the half that holds there.
  */
+const SCHEMES = 'light dark';
+
 const HEAD =
   '<meta charset="utf-8">' +
   '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-  '<meta name="color-scheme" content="dark">' +
-  '<meta name="supported-color-schemes" content="dark">' +
-  '<style>:root{color-scheme:dark;supported-color-schemes:dark}' +
+  `<meta name="color-scheme" content="${SCHEMES}">` +
+  `<meta name="supported-color-schemes" content="${SCHEMES}">` +
+  `<style>:root{color-scheme:${SCHEMES};supported-color-schemes:${SCHEMES}}` +
   // Gmail's dark pass marks what it has touched; these put it back.
   'u+#body a{color:inherit}' +
   '[data-ogsc] .ground{background-color:#0E0E11!important}' +

@@ -6,7 +6,6 @@ import { logout, pollScan, startScan } from './routes/auth.ts';
 import { resend, setChannel, verify } from './routes/channel.ts';
 import { collection } from './routes/collection.ts';
 import { resendHook } from './routes/hook.ts';
-import { sellable } from './routes/sells.ts';
 import { stopMail } from './routes/stop.ts';
 import { store } from './routes/store.ts';
 import { readWishlist, writeWishlist } from './routes/wishlist.ts';
@@ -25,7 +24,6 @@ type Handler = (c: Ctx) => Promise<Body>;
 const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
   '/api/store': { GET: store },
   '/api/inventory': { GET: collection },
-  '/api/sellable': { GET: sellable },
   '/api/qr': { GET: pollScan, POST: startScan },
   '/api/prefs': { GET: readWishlist, POST: writeWishlist },
   '/api/channel': { POST: setChannel },

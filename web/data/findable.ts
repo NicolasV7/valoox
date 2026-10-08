@@ -1,16 +1,18 @@
 // Everything a star is allowed to go on.
 //
-// Three filters, and each one removes a row that could only ever disappoint:
+// Two filters, and each one removes a row that could only ever disappoint:
 //
-//   - not in what Riot sells. The content tier does not say this — most of the
-//     battle pass carries one and is never in a shop — so it comes from
-//     /store/v1/offers/, which is Riot's own answer. See data/sells.ts.
 //   - already owned. The daily store never offers you something you have.
 //   - melee. The daily panel is four guns and never a knife, so a starred
-//     dagger is a row that cannot fire even when Riot does sell it.
+//     dagger is a row that cannot fire whatever else is true of it.
 //
-// Built once per index load and held, because it is a walk over 1,400 skins
-// and 2,900 accessories and the search field types faster than that.
+// There was a third and it is gone, which is worth writing down because it
+// looks like an omission. Whether Riot sells a given skin at all is not in
+// the public catalogue — a battle-pass skin carries a content tier and a
+// theme exactly like a sold one — and Riot's own answer, /store/v1/offers/,
+// now 404s on every shard and every spelling of the path. So the list holds
+// things that will never match, and the screen says so rather than pretending
+// to a filter it cannot run.
 
 import { type Buddy, bare as bareBuddy } from './buddies.ts';
 import { bare as bareCard, type Card } from './cards.ts';
@@ -52,14 +54,15 @@ const row = (
 
 /** Guns only, and only the base level: the store sells a skin, and level 2 is
  *  not a thing that turns up on its own. */
-export function guns(racks: Rack[], sold: Set<string>, owned: Set<string>): Findable[] {
+export function guns(racks: Rack[], owned: Set<string>): Findable[] {
   const out: Findable[] = [];
   for (const rack of racks) {
     if (rack.of === 'melee') continue;
     for (const w of rack.weapons) {
       for (const skin of w.skins) {
         const id = skin.levels[0]?.id;
-        if (!id || !sold.has(id) || owned.has(id)) continue;
+        // No tier is a default skin: the gun you already have, in grey.
+        if (!id || !skin.tier || owned.has(id)) continue;
         out.push(row(id, skin.name, LEVELS, w.name, null));
       }
     }
@@ -72,13 +75,12 @@ export function bits(
   buddies: Buddy[],
   cards: Card[],
   titles: Title[],
-  sold: Set<string>,
   owned: Set<string>,
   words: { spray: string; buddy: string; card: string; title: string },
 ): Findable[] {
   const out: Findable[] = [];
   const take = (id: string, name: string, type: string, of: string) => {
-    if (sold.has(id) && !owned.has(id)) out.push(row(id, name, type, of, null));
+    if (!owned.has(id)) out.push(row(id, name, type, of, null));
   };
   for (const s of sprays) take(s.id, bareSpray(s.name), SPRAYS, words.spray);
   // A charm is sold as its first level, which is also what the loadout speaks.

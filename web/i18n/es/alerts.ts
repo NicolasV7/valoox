@@ -75,10 +75,11 @@ export const alerts = {
   addSomethingTitle: 'Agregar algo',
   outOf: (n: number, max: number) => `${n} / ${max}`,
   onlyWhatTurnsUp:
-    'La lista solo guarda cosas que pueden aparecer de verdad. Riot vende un ' +
-    'conjunto fijo de skins y la tienda sale de ahí — una skin de pase de batalla ' +
-    'o de evento nunca está, y un cuchillo tampoco, porque el panel diario son ' +
-    'cuatro armas. Lo que ya tenés queda afuera por lo mismo.',
+    'El trabajo diario cruza esta lista con tu tienda y manda los nombres que ' +
+    'coinciden. Si marcaste algo que Riot no vende —casi todo el pase de batalla, ' +
+    'cada premio de evento— la fila existe y no va a coincidir nunca. No hay de ' +
+    'dónde saber cuáles son: el catálogo público no lo dice y el endpoint de Riot ' +
+    'que lo decía ya no existe.',
   hundredWhy:
     'Cien es el techo para las dos listas juntas. El trabajo diario es una ' +
     'intersección de conjuntos y la lista entera viaja en una sola fila, así que ' +
@@ -87,18 +88,17 @@ export const alerts = {
 
   // --- agregar -------------------------------------------------------------
   kinds: { spray: 'Spray', buddy: 'Colgante', card: 'Tarjeta', title: 'Título' },
-  sellsCount: (n: number) => `${n} que Riot vende y no tenés.`,
+  sellsCount: (n: number) => (n === 1 ? '1 que no tenés.' : `${n} que no tenés.`),
   listFull: (max: number) =>
     `La lista está llena: ${max} entre las dos. Sacá una para poder marcar otra.`,
   notInThisList:
-    'Lo que no está en esta lista: todo lo que ya tenés, cada cuchillo — el panel ' +
-    'diario son cuatro armas y nunca un melee — y cada skin que Riot no vende, ' +
-    'que es casi todo el pase de batalla y cada premio de evento. Marcar una de ' +
-    'esas sería una fila que no puede dispararse nunca.',
+    'Lo que no está acá: todo lo que ya tenés, y cada cuchillo — el panel diario ' +
+    'son cuatro armas y nunca un melee. El pase de batalla sí está, y no es un ' +
+    'descuido: nada publicado dice qué skins vende Riot, así que preferimos ' +
+    'mostrarlas y decirte esto a filtrar a ojo.',
   searchIsLocal:
     'El buscador corre contra el catálogo que el navegador ya tiene, así que ' +
-    'filtra mientras escribís sin preguntarle nada al Worker. Lo que Riot vende ' +
-    'sale de una lista que es la misma para todos, pedida una vez al día.',
+    'filtra mientras escribís sin preguntarle nada al Worker ni a Riot.',
 
   // --- el código -----------------------------------------------------------
   sentOut: 'Enviado',

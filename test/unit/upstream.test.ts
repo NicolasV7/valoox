@@ -104,8 +104,12 @@ test('the list stays short enough to read in one sitting', () => {
   // the six digits that prove an address and the morning alert to it once
   // proved. It is the second non-Riot rule here, after the Discord webhook,
   // and like that one it carries no puuid, no jar and no Riot credential.
-  // 18 -> 19 on 2026-10-08: GET /store/v1/offers/, the fixed set of items the
-  // store can draw from. A read with no uuid in its path at all, which is why
-  // one answer serves everybody and it is fetched once a day.
-  assert.equal(allowCount, 19);
+  // 19 -> 18 the same day: GET /store/v1/offers/ went back out. Riot removed
+  // the endpoint — it answers 404 on every shard and every spelling, which a
+  // live session proved — and there is no other source for "what the store
+  // can draw from". The public catalogue does not carry it: a battle-pass
+  // skin has a content tier and a theme exactly like a sold one, and the
+  // contentEdition field is set on 159 skins out of 1,415 and separates
+  // nothing. So the filter went, and so did the sentence that promised it.
+  assert.equal(allowCount, 18);
 });

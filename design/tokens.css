@@ -14,18 +14,20 @@
  * render is lit for a dark background, so anything with art on it has to stay
  * dark whatever the page does — and an element that declares `color-scheme:
  * dark` makes every light-dark() in its subtree resolve dark, with no second
- * stylesheet and no list of exceptions. That is what .stage does, below. */
+ * stylesheet and no list of exceptions. That is what .stage does, below.
+ *
+ * DARK IS THE ONLY THEME, for now. One declaration decides it: with
+ * `color-scheme: dark` and nothing that ever says otherwise, every
+ * light-dark() on the page resolves to its second value and the first half of
+ * each pair is simply not used. The light values stay written down because
+ * they are correct and because turning the theme back on should be putting
+ * two rules back, not re-deriving a palette.
+ *
+ * The two rules that used to turn it on were an attribute hook nothing set
+ * and a `prefers-color-scheme: light` query. They are the ones to restore. */
 
 :root {
   color-scheme: dark;
-}
-:root[data-theme="light"] {
-  color-scheme: light;
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    color-scheme: light;
-  }
 }
 
 :root {

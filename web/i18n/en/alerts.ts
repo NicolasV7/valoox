@@ -74,10 +74,11 @@ export const alerts = {
   addSomethingTitle: 'Add something',
   outOf: (n: number, max: number) => `${n} / ${max}`,
   onlyWhatTurnsUp:
-    'The list only holds things that can actually turn up. Riot sells a fixed ' +
-    'set of skins and the store draws from that set — a battle pass or event ' +
-    'skin is never in it, and neither is a knife, because the daily panel is ' +
-    'four guns. Anything you already own is left out for the same reason.',
+    'The daily job crosses this list with your store and sends the names that ' +
+    'match. If you starred something Riot does not sell — most of the battle ' +
+    'pass, every event reward — the row is there and will never match. There ' +
+    'is no way to know which those are: the public catalogue does not say, and ' +
+    'the Riot endpoint that did say is gone.',
   hundredWhy:
     'A hundred is the ceiling for both lists together. The daily job is a set ' +
     'intersection and the whole list rides in one row, so the limit is about ' +
@@ -85,18 +86,17 @@ export const alerts = {
 
   // --- adding --------------------------------------------------------------
   kinds: { spray: 'Spray', buddy: 'Buddy', card: 'Card', title: 'Title' },
-  sellsCount: (n: number) => `${n} Riot sells that you do not own.`,
+  sellsCount: (n: number) => (n === 1 ? '1 you do not own.' : `${n} you do not own.`),
   listFull: (max: number) =>
     `The list is full at ${max} across both. Take one off to star another.`,
   notInThisList:
-    'What is not in this list: anything you already own, every knife — the ' +
-    'daily panel is four guns and never a melee — and every skin Riot does not ' +
-    'sell, which is most of the battle pass and every event reward. Starring ' +
-    'one of those would be a row that can never fire.',
+    'What is not here: anything you already own, and every knife — the daily ' +
+    'panel is four guns and never a melee. The battle pass is here, and that ' +
+    'is not an oversight: nothing published says which skins Riot sells, so ' +
+    'showing them and telling you this beats filtering by guesswork.',
   searchIsLocal:
     'The search runs against the catalogue the browser already holds, so it ' +
-    'narrows as you type without asking the Worker anything. What Riot sells ' +
-    'comes from one list that is the same for everybody, fetched once a day.',
+    'narrows as you type without asking the Worker or Riot anything.',
 
   // --- the code ------------------------------------------------------------
   sentOut: 'Sent',
