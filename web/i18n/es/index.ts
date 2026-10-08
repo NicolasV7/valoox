@@ -1,0 +1,9 @@
+// One bundle per locale, composed from one module per area. Split this way so
+// no file grows past a screenful and so a translator opens the screen they are
+// translating rather than a thousand-line map.
+
+import { common } from './common.ts';
+import { gate } from './gate.ts';
+import { offer, store } from './store.ts';
+
+export const es = { common, gate, store, offer };
