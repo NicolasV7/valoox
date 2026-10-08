@@ -8,8 +8,9 @@
 // Everything here is already in the browser — one index, fetched once — so the
 // list narrows as you type and nothing goes back to the Worker for it.
 
-import { useMemo, useState } from 'preact/hooks';
+import { useMemo } from 'preact/hooks';
 import { Search } from '../components/icons.tsx';
+import { useKept } from '../data/kept.ts';
 import type { Spray } from '../data/sprays.ts';
 import type { Inventory } from '../data/types.ts';
 import { useSprays } from '../data/useIndex.ts';
@@ -24,7 +25,7 @@ export const SPRAY = 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475';
 export function Sprays({ inv }: { inv: Inventory }) {
   const s = t().sprays;
   const all = useSprays();
-  const [find, setFind] = useState('');
+  const [find, setFind] = useKept('sprays');
 
   const own = useMemo(() => new Set(inv.byType[SPRAY] ?? []), [inv]);
   const wheel = inv.worn?.sprays ?? [];

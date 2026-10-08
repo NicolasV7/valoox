@@ -44,3 +44,4 @@ function said(to: Route): string {
 export const STORE: Route = { name: 'store' };
 export const COLLECTION: Route = { name: 'collection', tab: 'weapons' };
 export const SPRAYS: Route = { name: 'collection', tab: 'sprays' };
+export const BUDDIES: Route = { name: 'collection', tab: 'buddies' };

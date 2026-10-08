@@ -13,6 +13,9 @@ import * as api from './data/api.ts';
 import { NEEDS_RESEED } from './data/api.ts';
 import type { Fault, Inventory, StoreView } from './data/types.ts';
 import { useRoute, wasAt } from './route.ts';
+import { BuddiesLoading } from './screens/Buddies.loading.tsx';
+import { Buddies } from './screens/Buddies.tsx';
+import { Buddy } from './screens/Buddy.tsx';
 import { Bundle } from './screens/Bundle.tsx';
 import { CollectionLoading } from './screens/Collection.loading.tsx';
 import { Collection } from './screens/Collection.tsx';
@@ -121,10 +124,14 @@ export function App() {
   function open(view: StoreView) {
     if (route.name === 'collection') {
       if (route.tab === 'sprays') return inv ? <Sprays inv={inv} /> : <SpraysLoading />;
+      if (route.tab === 'buddies') return inv ? <Buddies inv={inv} /> : <BuddiesLoading />;
       return inv ? <Collection inv={inv} /> : <CollectionLoading />;
     }
     if (route.name === 'spray') {
       return inv ? <Spray id={route.id} inv={inv} /> : <SpraysLoading />;
+    }
+    if (route.name === 'buddy') {
+      return inv ? <Buddy id={route.id} inv={inv} /> : <BuddiesLoading />;
     }
     if (route.name === 'weapon') {
       return inv ? <Weapon id={route.id} inv={inv} /> : <WeaponLoading />;

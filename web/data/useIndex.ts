@@ -4,6 +4,7 @@
 // change or a weapon opening costs nothing after the first.
 
 import { useEffect, useState } from 'preact/hooks';
+import { type Buddy, buddies } from './buddies.ts';
 import { type Rack, racks, type Weapon, weaponOf } from './skins.ts';
 import { type Spray, sprays } from './sprays.ts';
 
@@ -42,3 +43,6 @@ export const useWeapon = (id: string): Weapon | null => held(() => weaponOf(id),
 
 /** Every spray the game has, which is also where the total comes from. */
 export const useSprays = (): Spray[] | null => held(sprays, 'sprays');
+
+/** Every charm, likewise. */
+export const useBuddies = (): Buddy[] | null => held(buddies, 'buddies');

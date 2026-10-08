@@ -28,11 +28,19 @@
   overflow: hidden;
 }
 
+/* 921 of these exist at once, and nine are on screen. content-visibility lets
+ * the browser skip laying out and painting the rest until they come near —
+ * contain-intrinsic-size is what keeps the scrollbar honest while it does, and
+ * it is exact here because the cell height is fixed. The grey of an unpainted
+ * tile is never drawn at all, so the wall of it that used to scroll past is
+ * gone with it. */
 .pad {
   --wash-size: 116% 92%;
   --wash-at: 50% 42%;
   position: relative;
   color: var(--ink);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 124px;
   text-decoration: none;
 }
 
@@ -92,6 +100,9 @@
   flex: none;
   display: block;
   min-height: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--t-floor);
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -104,6 +115,16 @@
   min-height: 0;
   margin-top: 5px;
   border-radius: 4px;
+}
+
+/* A charm's cell is six pixels taller than a spray's and starts its art lower:
+ * a charm is a small object with a lot of air around it, and the board gives
+ * it that air rather than scaling it up to fill a square it does not fill. */
+.pad--tall,
+.pad--tall.pad--waiting {
+  height: 130px;
+  padding-top: 12px;
+  contain-intrinsic-size: auto 130px;
 }
 
 /* --- the two shelves ------------------------------------------------------ */

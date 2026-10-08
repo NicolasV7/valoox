@@ -126,6 +126,10 @@ export const skin = (id: string) => one('weapons/skinlevels', id);
 
 export const bundle = (id: string) => one('bundles', id);
 
+/** One weapon's own name. For the buddies tab, which needs it only for the few
+ *  guns something is hanging off — the index that has all of them is 430 KB. */
+export const gun = (id: string) => one('weapons', id);
+
 /** Each item type resolves at exactly one endpoint — probed against live bundle
  *  and accessory data. Buddies sit under buddies/levels, not buddies, and the
  *  uuid commonly labelled "buddy" is actually skin chromas. */

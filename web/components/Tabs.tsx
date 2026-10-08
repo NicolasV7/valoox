@@ -20,6 +20,7 @@ const WHERE: Record<string, string> = {
   collection: 'collection',
   weapon: 'collection',
   spray: 'collection',
+  buddy: 'collection',
 };
 
 export function Tabs() {

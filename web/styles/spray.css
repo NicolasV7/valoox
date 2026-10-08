@@ -1,4 +1,4 @@
-/* One spray, opened from the collection. */
+/* One piece of the collection, opened: a spray, or a charm. */
 
 .wall__stage {
   --wash-at: 50% 46%;
@@ -17,6 +17,13 @@
   width: 230px;
   height: 230px;
   object-fit: contain;
+}
+
+/* A charm is published at 128 square and is mostly air, so it gets less of the
+ * stage than a spray — blown to a spray's size it is a blur. */
+.wall__art--charm {
+  width: 208px;
+  height: 208px;
 }
 
 .wall__name {
