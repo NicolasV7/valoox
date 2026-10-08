@@ -12,7 +12,18 @@ import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
 
-export function SkinRow({ skin, gun, mine }: { skin: Skin; gun: string; mine: boolean }) {
+export function SkinRow({
+  skin,
+  gun,
+  of,
+  mine,
+}: {
+  skin: Skin;
+  gun: string;
+  /** The weapon's uuid, so the screen this opens knows its way back here. */
+  of: string;
+  mine: boolean;
+}) {
   const s = t().weapon;
   const art = skin.render;
   // The colour is read off the picture, so it waits for the picture. That is
@@ -25,6 +36,9 @@ export function SkinRow({ skin, gun, mine }: { skin: Skin; gun: string; mine: bo
   const lit = useArt(shot ? art : null);
   const tier = tierOf(skin.tier);
   const route = { name: 'offer', id: skin.levels[0]?.id ?? skin.id } as const;
+  // A skin opened from here belongs to this weapon, not to the store it is
+  // also sold in, so it carries the way back with it.
+  const from = { to: { name: 'weapon', id: of } as const, said: gun };
 
   // Only what is a choice. 857 skins have one level and 880 have no second
   // colourway, so a line that always read "1 level · 1 variant" would be a
@@ -41,7 +55,7 @@ export function SkinRow({ skin, gun, mine }: { skin: Skin; gun: string; mine: bo
       class="skin stage stage--row"
       style={artStyle(lit)}
       href={href(route)}
-      onClick={intercept(route)}
+      onClick={intercept(route, from)}
     >
       {art && (
         <img

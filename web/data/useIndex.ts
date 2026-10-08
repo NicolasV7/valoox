@@ -7,12 +7,22 @@ import { useEffect, useState } from 'preact/hooks';
 import { type Rack, racks, type Weapon, weaponOf } from './skins.ts';
 import { type Spray, sprays } from './sprays.ts';
 
+/** What each key has already resolved to. The promise behind it is cached too,
+ *  but a promise is still a tick away — and that tick is a real defect on the
+ *  way back: the screen paints its skeleton first, the document is short for
+ *  one frame, and the browser clamps the scroll position it was about to
+ *  restore. Coming back to a list you were two thousand pixels down should not
+ *  put you at the top. */
+const done = new Map<string, unknown>();
+
 function held<T>(get: () => Promise<T>, key: string): T | null {
-  const [found, setFound] = useState<T | null>(null);
+  const [found, setFound] = useState<T | null>(() => (done.get(key) as T) ?? null);
 
   useEffect(() => {
+    if (done.has(key)) return;
     let live = true;
     void get().then((v) => {
+      done.set(key, v);
       if (live) setFound(v);
     });
     return () => {

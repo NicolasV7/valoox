@@ -50,6 +50,37 @@ export const href = (route: Route): string => {
   return '/' + route.name + '/' + route.id;
 };
 
+/** Where the back control on the screen being opened should point, and what it
+ *  is called there.
+ *
+ *  Carried in the history entry rather than in a module variable: a variable
+ *  is wrong the moment the page reloads or the swipe brings an entry back, and
+ *  this is exactly the state the browser already keeps per entry. A screen
+ *  opened without one falls back to the section it belongs to. */
+export interface Whence {
+  to: Route;
+  said: string;
+}
+
+export const whence = (): Whence | null => (history.state as Whence | null) ?? null;
+
+// The browser restores the scroll position at popstate, which is before this
+// app has rendered the screen being restored — measured: the document is one
+// viewport tall at that moment, so a weapon you were two thousand pixels down
+// comes back clamped to the top. So we keep the position ourselves, in the
+// history entry, and put it back once the screen is on the page.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+/** Where the entry being left was scrolled to. Written into it on the way out,
+ *  because by the time it comes back the number is gone. */
+function mark(): void {
+  history.replaceState({ ...(history.state ?? {}), y: scrollY }, '');
+}
+
+/** Where the screen that is arriving belongs. Zero for one being opened for
+ *  the first time, which has never been anywhere. */
+export const wasAt = (): number => (history.state as { y?: number } | null)?.y ?? 0;
+
 const listeners = new Set<(r: Route) => void>();
 
 function announce() {
@@ -57,20 +88,38 @@ function announce() {
   for (const fn of listeners) fn(now);
 }
 
-export function go(route: Route): void {
-  history.pushState(null, '', href(route));
+// Once, here, rather than inside the hook. addEventListener dedupes by
+// identity, so two components using the hook registered one handler between
+// them — and the first of them to unmount took it away from the other. The
+// swipe and the back control then changed the URL and nothing on the screen,
+// which is the worst way for a router to fail: it looks like it worked.
+addEventListener('popstate', announce);
+
+export function go(route: Route, from?: Whence): void {
+  mark();
+  history.pushState(from ?? null, '', href(route));
   announce();
-  scrollTo(0, 0);
+}
+
+/** The back control's click. Pops when the entry behind us is the place being
+ *  pointed at — which is exactly when `whence` is set, because that is the only
+ *  thing that sets it — so the list you came from comes back at the scroll
+ *  position you left it. Otherwise it is an ordinary navigation. */
+export function retreat(to: Route) {
+  return (e: MouseEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    if (whence()) history.back();
+    else go(to);
+  };
 }
 
 export function useRoute(): Route {
   const [route, set] = useState<Route>(() => parse(location.pathname));
   useEffect(() => {
     listeners.add(set);
-    addEventListener('popstate', announce);
     return () => {
       listeners.delete(set);
-      removeEventListener('popstate', announce);
     };
   }, []);
   return route;
@@ -78,10 +127,10 @@ export function useRoute(): Route {
 
 /** For an `<a>` that should route instead of reloading the page. Keeps the real
  *  href, so middle-click and "open in new tab" still work. */
-export function intercept(route: Route) {
+export function intercept(route: Route, from?: Whence) {
   return (e: MouseEvent) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
-    go(route);
+    go(route, from);
   };
 }

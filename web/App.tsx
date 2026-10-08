@@ -6,13 +6,13 @@
 // expires between two taps lands on the sign-in screen by itself rather than
 // through a listener somebody has to remember to wire up.
 
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'preact/hooks';
 import { Tabs } from './components/Tabs.tsx';
 import type { ApiError } from './data/api.ts';
 import * as api from './data/api.ts';
 import { NEEDS_RESEED } from './data/api.ts';
 import type { Fault, Inventory, StoreView } from './data/types.ts';
-import { useRoute } from './route.ts';
+import { useRoute, wasAt } from './route.ts';
 import { Bundle } from './screens/Bundle.tsx';
 import { CollectionLoading } from './screens/Collection.loading.tsx';
 import { Collection } from './screens/Collection.tsx';
@@ -39,6 +39,13 @@ type State =
 export function App() {
   const route = useRoute();
   const [state, setState] = useState<State>({ at: 'loading' });
+
+  // Put the scroll back where this entry left it — see route.ts. Layout rather
+  // than effect, so it happens before the frame paints and nobody sees the top
+  // of a list they were not at.
+  useLayoutEffect(() => {
+    scrollTo(0, wasAt());
+  }, [route]);
 
   // What you own, fetched the first time a collection tab is opened and held
   // for the life of the page. The store does not wait on it and it does not

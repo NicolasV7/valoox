@@ -1,44 +1,45 @@
 // The way out of a screen.
 //
-// It goes to the place written on it rather than into the browser's history.
-// That is not a style choice: a link opened from a message has somebody else's
-// page behind it, and history.back() there walks out of the app — which is
-// exactly what happened on a /weapon/<uuid> opened cold. It also makes the
-// label true, which it was not: a skin opened from a weapon said "Store" and
+// Two things it has to get right, and the old history.back() got neither.
+//
+// A /weapon/<uuid> opened cold — a link from a message, or a reload — has
+// somebody else's page behind it, and history.length is almost always above 1
+// in a real tab, so a pop walked out of the app. And the label lied: a skin
+// reached from a weapon is /offer/<level>, whose back link read "Store" and
 // landed on the weapon.
 //
-// The boards agree. Every one of them draws this control as a link that names
-// a screen and points at that screen.
-//
-// The swipe still retraces your steps. This is the other thing — the way up
-// rather than the way back — and the two only look alike because most of the
-// time you came from the place above.
+// So it is a link to a route. Which route is the screen you came from when the
+// screen you came from said so — that is `whence`, and it rides in the history
+// entry, so it survives a reload and comes back with the entry on a swipe —
+// and otherwise the section this screen belongs to. Either way the word on it
+// is the name of the place it goes, which is the whole point.
 
 import { t } from '../i18n/index.ts';
-import { href, intercept, type Route } from '../route.ts';
+import { href, type Route, retreat, whence } from '../route.ts';
 import { Chevron } from './icons.tsx';
 
 export function Back({ to }: { to: Route }) {
+  const from = whence();
+  const there = from?.to ?? to;
+
   return (
-    <a class="back" href={href(to)} onClick={intercept(to)}>
+    <a class="back" href={href(there)} onClick={retreat(there)}>
       <span class="back__chev">
         <Chevron />
       </span>
-      {said(to)}
+      {from?.said ?? said(to)}
     </a>
   );
 }
 
-/** What that place is called. Only the two sections are ever a destination, so
- *  anything else is the store — the screen every piece with a price sits
- *  under. */
+/** What a section is called, for the screens that were opened straight into. */
 function said(to: Route): string {
   const s = t();
   if (to.name !== 'collection') return s.common.nav.store;
   return to.tab === 'weapons' ? s.collection.title : s.collection.tab[to.tab];
 }
 
-/** The two places a back control can point at, named once so a screen declares
+/** The sections a back control falls back to, named once so a screen declares
  *  where it belongs rather than spelling out a route. */
 export const STORE: Route = { name: 'store' };
 export const COLLECTION: Route = { name: 'collection', tab: 'weapons' };

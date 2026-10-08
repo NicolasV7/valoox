@@ -18,6 +18,7 @@ import type { Inventory } from '../data/types.ts';
 import { useWeapon } from '../data/useIndex.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
+import { href, intercept } from '../route.ts';
 import { WeaponLoading } from './Weapon.loading.tsx';
 import { SkinRow } from './Weapon.row.tsx';
 
@@ -75,8 +76,8 @@ export function Weapon({ id, inv }: { id: string; inv: Inventory }) {
       </div>
       <p class="legal gun__note">{s.searchWhy(all)}</p>
 
-      <Shelf said={s.alsoYours} list={yours} gun={gun.name} mine />
-      <Shelf said={s.notYours} list={theirs} gun={gun.name} />
+      <Shelf said={s.alsoYours} list={yours} gun={gun.name} of={gun.id} mine />
+      <Shelf said={s.notYours} list={theirs} gun={gun.name} of={gun.id} />
       {yours.length === 0 && theirs.length === 0 && <p class="lede gun__none">{s.nothing}</p>}
 
       <p class="legal gun__note">{s.weave}</p>
@@ -101,11 +102,13 @@ function Shelf({
   said,
   list,
   gun,
+  of,
   mine,
 }: {
   said: string;
   list: Skin[];
   gun: string;
+  of: string;
   mine?: boolean;
 }) {
   if (list.length === 0) return null;
@@ -117,7 +120,7 @@ function Shelf({
       </div>
       <div class={mine ? 'shelf' : 'shelf shelf--theirs'}>
         {list.map((skin) => (
-          <SkinRow key={skin.id} skin={skin} gun={gun} mine={!!mine} />
+          <SkinRow key={skin.id} skin={skin} gun={gun} of={of} mine={!!mine} />
         ))}
       </div>
     </>
@@ -146,6 +149,7 @@ function Worn({
     ? (chroma?.render ?? skin.levels[level]?.icon ?? skin.render)
     : '/art/weapon-' + gun.id + '.png';
   const lit = useArt(tier ? art : null);
+  const route = { name: 'offer', id: on?.level ?? skin.levels[0]?.id ?? '' } as const;
 
   // Each part only when it is a choice: "Level 1" on a skin with one level
   // answers a question nobody could have had, and so does its one colourway.
@@ -161,7 +165,8 @@ function Worn({
     <a
       class="worn stage"
       style={artStyle(lit)}
-      href={'/offer/' + (on?.level ?? skin.levels[0]?.id)}
+      href={href(route)}
+      onClick={intercept(route, { to: { name: 'weapon', id: gun.id }, said: gun.name })}
     >
       <span class="worn__on">{t().common.equipped}</span>
       {art && <img class="worn__art" src={art} alt="" />}
