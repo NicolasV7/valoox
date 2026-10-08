@@ -9,7 +9,9 @@
 
 import { useMemo } from 'preact/hooks';
 import { Search, Star, TitleMark } from '../components/icons.tsx';
+import { More } from '../components/More.tsx';
 import { useKept } from '../data/kept.ts';
+import { useMore } from '../data/more.ts';
 import type { Title } from '../data/titles.ts';
 import type { Inventory } from '../data/types.ts';
 import { useTitles } from '../data/useIndex.ts';
@@ -26,6 +28,9 @@ export function Titles({ inv }: { inv: Inventory }) {
   const s = t().titles;
   const all = useTitles();
   const [find, setFind] = useKept('titles');
+  // The ones that are not yours arrive a window at a time. The ones that are
+  // never do: there are tens of them and they are why the tab was opened.
+  const [shown, more] = useMore('titles', 10);
   warm();
 
   const own = useMemo(() => new Set(inv.byType[TITLE] ?? []), [inv]);
@@ -65,7 +70,8 @@ export function Titles({ inv }: { inv: Inventory }) {
       </div>
 
       <Shelf said={s.yours} list={yours} worn={worn} mine />
-      <Shelf said={s.notYours} list={theirs} worn={worn} />
+      <Shelf said={s.notYours} shown={shown} list={theirs} worn={worn} />
+      {theirs.length > shown && <More when={more} at={shown} />}
       {yours.length === 0 && theirs.length === 0 && <p class="lede wall__none">{s.nothing}</p>}
 
       <p class="legal coll__note">{s.noArt}</p>
@@ -83,11 +89,13 @@ function sift(list: Title[], find: string): Title[] {
 function Shelf({
   said,
   list,
+  shown,
   worn,
   mine,
 }: {
   said: string;
   list: Title[];
+  shown?: number;
   worn: string | null;
   mine?: boolean;
 }) {
@@ -99,7 +107,7 @@ function Shelf({
         <span class="faint num">{list.length}</span>
       </div>
       <div class={mine ? 'said' : 'said wall--theirs'}>
-        {list.map((title) => (
+        {(shown ? list.slice(0, shown) : list).map((title) => (
           <Row key={title.id} title={title} worn={title.id === worn} mine={!!mine} />
         ))}
       </div>

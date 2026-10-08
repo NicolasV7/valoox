@@ -9,8 +9,10 @@
 
 import { useMemo } from 'preact/hooks';
 import { Search } from '../components/icons.tsx';
+import { More } from '../components/More.tsx';
 import type { Buddy } from '../data/buddies.ts';
 import { useKept } from '../data/kept.ts';
+import { useMore } from '../data/more.ts';
 import type { Inventory } from '../data/types.ts';
 import { useGuns } from '../data/useGuns.ts';
 import { useBuddies } from '../data/useIndex.ts';
@@ -27,6 +29,9 @@ export function Buddies({ inv }: { inv: Inventory }) {
   const s = t().buddies;
   const all = useBuddies();
   const [find, setFind] = useKept('buddies');
+  // The ones that are not yours arrive a window at a time. The ones that are
+  // never do: there are tens of them and they are why the tab was opened.
+  const [shown, more] = useMore('buddies', 12);
   warm();
 
   // Two different numbers out of one list. Riot sends one entry per instance
@@ -88,7 +93,8 @@ export function Buddies({ inv }: { inv: Inventory }) {
       </div>
 
       <Shelf said={s.yours} list={yours} on={carried} mine />
-      <Shelf said={s.notYours} list={theirs} on={carried} />
+      <Shelf said={s.notYours} shown={shown} list={theirs} on={carried} />
+      {theirs.length > shown && <More when={more} at={shown} />}
       {yours.length === 0 && theirs.length === 0 && <p class="lede wall__none">{s.nothing}</p>}
 
       <p class="legal coll__note">{s.grid}</p>
@@ -109,11 +115,13 @@ function sift(list: Buddy[], find: string): Buddy[] {
 function Shelf({
   said,
   list,
+  shown,
   on,
   mine,
 }: {
   said: string;
   list: Buddy[];
+  shown?: number;
   on: (b: Buddy) => string[];
   mine?: boolean;
 }) {
@@ -125,7 +133,7 @@ function Shelf({
         <span class="faint num">{list.length}</span>
       </div>
       <div class={mine ? 'wall' : 'wall wall--theirs'}>
-        {list.map((buddy) => (
+        {(shown ? list.slice(0, shown) : list).map((buddy) => (
           <Tile key={buddy.id} buddy={buddy} on={on(buddy)} mine={!!mine} />
         ))}
       </div>

@@ -166,3 +166,9 @@
   display: flex;
   color: var(--ink-4);
 }
+
+/* The mark at the foot of a windowed list. It has no look — it is a position
+ * an observer watches, and 1px is enough to have one. */
+.more {
+  height: 1px;
+}

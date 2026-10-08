@@ -10,7 +10,9 @@
 
 import { useMemo } from 'preact/hooks';
 import { Search } from '../components/icons.tsx';
+import { More } from '../components/More.tsx';
 import { useKept } from '../data/kept.ts';
+import { useMore } from '../data/more.ts';
 import type { Spray } from '../data/sprays.ts';
 import type { Inventory } from '../data/types.ts';
 import { useSprays } from '../data/useIndex.ts';
@@ -27,6 +29,9 @@ export function Sprays({ inv }: { inv: Inventory }) {
   const s = t().sprays;
   const all = useSprays();
   const [find, setFind] = useKept('sprays');
+  // The ones that are not yours arrive a window at a time. The ones that are
+  // never do: there are tens of them and they are why the tab was opened.
+  const [shown, more] = useMore('sprays', 12);
   warm();
 
   const own = useMemo(() => new Set(inv.byType[SPRAY] ?? []), [inv]);
@@ -72,7 +77,8 @@ export function Sprays({ inv }: { inv: Inventory }) {
       </div>
 
       <Shelf said={s.yours} list={yours} wheel={wheel} mine />
-      <Shelf said={s.notYours} list={theirs} wheel={wheel} />
+      <Shelf said={s.notYours} shown={shown} list={theirs} wheel={wheel} />
+      {theirs.length > shown && <More when={more} at={shown} />}
       {yours.length === 0 && theirs.length === 0 && <p class="lede wall__none">{s.nothing}</p>}
 
       <p class="legal coll__note">{s.grid}</p>
@@ -91,11 +97,13 @@ function sift(list: Spray[], find: string): Spray[] {
 function Shelf({
   said,
   list,
+  shown,
   wheel,
   mine,
 }: {
   said: string;
   list: Spray[];
+  shown?: number;
   wheel: string[];
   mine?: boolean;
 }) {
@@ -107,7 +115,7 @@ function Shelf({
         <span class="faint num">{list.length}</span>
       </div>
       <div class={mine ? 'wall' : 'wall wall--theirs'}>
-        {list.map((spray) => (
+        {(shown ? list.slice(0, shown) : list).map((spray) => (
           <Tile key={spray.id} spray={spray} slot={wheel.indexOf(spray.id) + 1} mine={!!mine} />
         ))}
       </div>

@@ -7,8 +7,10 @@
 
 import { useMemo } from 'preact/hooks';
 import { Search } from '../components/icons.tsx';
+import { More } from '../components/More.tsx';
 import type { Card } from '../data/cards.ts';
 import { useKept } from '../data/kept.ts';
+import { useMore } from '../data/more.ts';
 import type { Inventory } from '../data/types.ts';
 import { useCards } from '../data/useIndex.ts';
 import { warm } from '../data/warm.ts';
@@ -24,6 +26,9 @@ export function Cards({ inv }: { inv: Inventory }) {
   const s = t().cards;
   const all = useCards();
   const [find, setFind] = useKept('cards');
+  // The ones that are not yours arrive a window at a time. The ones that are
+  // never do: there are tens of them and they are why the tab was opened.
+  const [shown, more] = useMore('cards', 10);
   warm();
 
   const own = useMemo(() => new Set(inv.byType[CARD] ?? []), [inv]);
@@ -63,7 +68,8 @@ export function Cards({ inv }: { inv: Inventory }) {
       </div>
 
       <Shelf said={s.yours} list={yours} worn={worn} mine />
-      <Shelf said={s.notYours} list={theirs} worn={worn} />
+      <Shelf said={s.notYours} shown={shown} list={theirs} worn={worn} />
+      {theirs.length > shown && <More when={more} at={shown} />}
       {yours.length === 0 && theirs.length === 0 && <p class="lede wall__none">{s.nothing}</p>}
 
       <p class="legal coll__note">{s.grid}</p>
@@ -81,11 +87,13 @@ function sift(list: Card[], find: string): Card[] {
 function Shelf({
   said,
   list,
+  shown,
   worn,
   mine,
 }: {
   said: string;
   list: Card[];
+  shown?: number;
   worn: string | null;
   mine?: boolean;
 }) {
@@ -97,7 +105,7 @@ function Shelf({
         <span class="faint num">{list.length}</span>
       </div>
       <div class={mine ? 'leaves' : 'leaves wall--theirs'}>
-        {list.map((card) => (
+        {(shown ? list.slice(0, shown) : list).map((card) => (
           <Tile key={card.id} card={card} on={card.id === worn} mine={!!mine} />
         ))}
       </div>
