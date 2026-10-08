@@ -10,6 +10,14 @@
     />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0e0e11" />
+
+    <!-- The mark, in the tab. SVG first because it is two circles and stays
+         two circles at any size; the PNG is what Safari and every mail client
+         can actually read, and it is the same file the messages carry.
+         Both are ours and both are generated — see scripts/mark.mjs. -->
+    <link rel="icon" href="/brand/mark.svg" type="image/svg+xml" />
+    <link rel="icon" href="/brand/mark.png" sizes="66x66" type="image/png" />
+    <link rel="apple-touch-icon" href="/brand/mark.png" />
     <meta name="referrer" content="no-referrer" />
 
     <!--

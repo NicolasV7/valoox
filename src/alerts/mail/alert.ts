@@ -28,8 +28,8 @@ const CLOCK = '#F0CB74';
 /** Somebody delighted with the gun they are holding. */
 const STICKER = '/art/spray-thisgun.png';
 
-export const subject = (found: Hit[], lang: Lang): string =>
-  words[lang].hitSubject(found[0]?.name ?? '', found.length);
+export const subject = (found: Hit[], lang: Lang, who?: string | null): string =>
+  words[lang].hitSubject(found[0]?.name ?? '', found.length) + (who ? ' · ' + who : '');
 
 export const text = (found: Hit[], lang: Lang, link: string): string =>
   words[lang].hitText(
@@ -44,6 +44,7 @@ export function html(
   lang: Lang,
   origin: string,
   stop: string,
+  who?: string | null,
 ): string {
   const w = words[lang];
   const lead = found[0]?.name ?? '';
@@ -91,7 +92,7 @@ export function html(
     `<p style="margin:10px 0 0;font-size:12px;line-height:1.6">` +
     `<a href="${stop}" style="color:${INK.faint}">${w.stopThese}</a></p>`;
 
-  return shell({ aside: w.goneInAside(hours(left)), body, foot, lang, origin });
+  return shell({ aside: w.goneInAside(hours(left)), body, foot, lang, origin, who });
 }
 
 /** `13:52:06`, or `2d 04:11:09` past a day — the same spelling the app uses,

@@ -16,6 +16,10 @@ export const alerts = {
 
   yourEmail: 'Tu correo',
   oneAddress: 'Una dirección, verificada una vez.',
+  sameInbox:
+    'La misma casilla sirve para varias cuentas. Cada correo lleva arriba el ' +
+    'nombre de Riot al que corresponde, así que dos cuentas en una bandeja se ' +
+    'distinguen de una mirada.',
 
   searchASkin: 'Buscar una skin…',
   opensOnce:
@@ -160,6 +164,8 @@ export const alerts = {
     'Esa dirección ya está verificada en otra cuenta. Una casilla recibe los ' +
     'avisos de una sola, así que hace falta otra — o desconectá la otra cuenta ' +
     'primero.',
+  // Sin uso desde que una casilla sirve para varias cuentas. Se deja porque
+  // el Worker todavía puede devolver 'taken' si alguna vez vuelve la regla.
   changeIt:
     'Esa dirección rebotó: el servidor del otro lado la devolvió. Mandarle lo ' +
     'mismo otra vez es lo único que no puede funcionar, así que hace falta ' +

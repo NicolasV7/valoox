@@ -20,7 +20,6 @@
 // from a thread they scrolled past — so `no` closes it exactly as `yes` does,
 // and the next message carries a link of its own.
 
-import { release } from '../alerts/claim.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import type { Env } from '../types.ts';
 import { setAlerts } from '../vault/repo.ts';
@@ -67,10 +66,7 @@ async function off(env: Env, uid: string, retry = true): Promise<Body> {
     if (retry) return off(env, uid, false);
     return { ok: false, error: 'conflict' };
   }
-  // In this order: the row stops being polled before the address is free, so
-  // there is no window where the job could pick it up with nowhere to send.
   await setAlerts(env, uid, false);
-  await release(env, was, uid);
 
   return { ok: true, was, kept: held.session.wishlist?.length ?? 0 };
 }

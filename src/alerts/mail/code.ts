@@ -37,7 +37,14 @@ export const subject = (code: string, lang: Lang): string => words[lang].subject
 export const text = (code: string, mins: number, lang: Lang): string =>
   words[lang].text(code, mins);
 
-export function html(code: string, mins: number, lang: Lang, origin: string, stop: string): string {
+export function html(
+  code: string,
+  mins: number,
+  lang: Lang,
+  origin: string,
+  stop: string,
+  who?: string | null,
+): string {
   const w = words[lang];
   const body =
     // the code, at the size of the message
@@ -75,5 +82,5 @@ export function html(code: string, mins: number, lang: Lang, origin: string, sto
 
   // A duration, not a clock time. The board shows "Expires 10:14", which is a
   // time in the sender's timezone printed for a reader in another one.
-  return shell({ aside: w.expiresIn(mins), body, foot, lang, origin });
+  return shell({ aside: w.expiresIn(mins), body, foot, lang, origin, who });
 }

@@ -52,8 +52,9 @@ const es: Words = {
     'Tampoco te vamos a pedir tu contraseña de Riot, y no la tenemos: el ' +
     'ingreso es por QR, dentro de la app de Riot.',
   foot:
-    'Recibís esto porque alguien escribió esta dirección en valoox. No se ' +
-    'manda ningún aviso acá hasta que el código se escriba de vuelta.',
+    'Recibís esto porque alguien escribió esta dirección en valoox, para la ' +
+    'cuenta de arriba. No se manda ningún aviso acá hasta que el código se ' +
+    'escriba de vuelta.',
   text: (code, mins) =>
     code +
     ' es tu código de valoox.\n\n' +
@@ -80,9 +81,9 @@ const es: Words = {
     'efectivamente delante tuyo. Los accesorios corren con su propio reloj semanal ' +
     'y llegan igual.',
   hitFoot:
-    'Marcaste esto en valoox. Este correo lleva nombres de skins y nada más: ' +
-    'ningún id de cuenta, ninguna sesión, nada con lo que alguien pueda entrar ' +
-    'como vos.',
+    'Marcaste esto en valoox. Este correo lleva nombres de skins y el nombre de ' +
+    'Riot de la cuenta — el que ve cualquiera que juegue con vos. Ningún id ' +
+    'interno, ninguna sesión, nada con lo que alguien pueda entrar como vos.',
   stopThese: 'Dejar de recibir estos correos',
   hitText: (names, link) =>
     (names.length === 1
@@ -110,8 +111,8 @@ const en: Words = {
     'We will never ask for your Riot password either, and we do not have one. ' +
     'Signing in happens by QR, inside Riot’s own app.',
   foot:
-    'You are getting this because someone entered this address at valoox. No ' +
-    'alerts are sent here until the code is typed back.',
+    'You are getting this because someone entered this address at valoox, for ' +
+    'the account above. No alerts are sent here until the code is typed back.',
   text: (code, mins) =>
     code +
     ' is your valoox code.\n\n' +
@@ -138,8 +139,9 @@ const en: Words = {
     'in front of you. Accessories run on their own weekly clock and arrive the ' +
     'same way.',
   hitFoot:
-    'You starred this at valoox. This mail carries skin names and nothing else ' +
-    '— no account id, no session, nothing that would let anyone sign in as you.',
+    'You starred this at valoox. This mail carries skin names and the account’s ' +
+    'Riot name — the one anybody you play with sees. No internal id, no session, ' +
+    'nothing that would let anyone sign in as you.',
   stopThese: 'Stop these emails',
   hitText: (names, link) =>
     (names.length === 1

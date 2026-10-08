@@ -104,6 +104,7 @@ export function shell({
   foot,
   lang,
   origin,
+  who,
 }: {
   /** The small line opposite the mark — how long is left, a date. */
   aside: string;
@@ -114,6 +115,10 @@ export function shell({
   lang: string;
   /** Where the pictures in a message are served from. */
   origin: string;
+  /** The Riot name this message is about — `Termo#GOD`. One mailbox can
+   *  receive for several accounts, so without it a morning message about a
+   *  store is a message about somebody's store. */
+  who?: string | null;
 }): string {
   return (
     `<!doctype html><html lang="${lang}"><head>${HEAD}</head>` +
@@ -129,7 +134,12 @@ export function shell({
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>` +
     `<td style="width:22px">${mark(origin)}</td>` +
     `<td class="said" style="padding-left:11px;font-size:17px;font-weight:500;` +
-    `letter-spacing:-0.02em;color:${INK.text}">valoox</td>` +
+    `letter-spacing:-0.02em;color:${INK.text}">valoox` +
+    (who
+      ? `<div style="font-family:${FONT.mono};font-size:11.5px;font-weight:400;` +
+        `letter-spacing:0.02em;padding-top:3px">${who}</div>`
+      : '') +
+    '</td>' +
     `<td align="right" style="font-family:${FONT.mono};font-size:11.5px;color:${INK.quiet}">${aside}</td>` +
     `</tr></table></td></tr>` +
     body +

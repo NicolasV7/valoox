@@ -11,7 +11,7 @@ import { html as alertHtml } from '../src/alerts/mail/alert.ts';
 const ORIGIN = 'https://drop.valoox.store';
 const STOP = ORIGIN + '/stop?t=preview';
 
-export const code = () => codeHtml('418302', 10, 'en', ORIGIN, STOP);
+export const code = () => codeHtml('418302', 10, 'en', ORIGIN, STOP, 'Termo#GOD');
 export const alert = () =>
   alertHtml(
     [
@@ -22,4 +22,5 @@ export const alert = () =>
     'en',
     ORIGIN,
     STOP,
+    'Termo#GOD',
   );

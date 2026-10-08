@@ -14,7 +14,6 @@
 // A 2xx means Resend accepted the message. It does not mean an inbox has it,
 // and no field here says otherwise.
 
-import { claim, heldBy, release } from '../alerts/claim.ts';
 import { html, subject, text } from '../alerts/mail/code.ts';
 import { type Lang, langOf } from '../alerts/mail/words.ts';
 import { check, clear, LIFE, left, mint, waitFor } from '../alerts/otp.ts';
@@ -42,7 +41,14 @@ export const trail = (id: string) => 'sent:' + id;
 const artFrom = (origin: string) =>
   origin.startsWith('https://') ? origin : 'https://drop.valoox.store';
 
-async function mail(env: Env, uid: string, to: string, lang: Lang, origin: string) {
+async function mail(
+  env: Env,
+  uid: string,
+  to: string,
+  lang: Lang,
+  origin: string,
+  who?: string | null,
+) {
   const { code, until } = await mint(env, uid);
   const home = artFrom(origin);
   const stop = stopLink(home, await mintStop(env, uid));
@@ -50,7 +56,7 @@ async function mail(env: Env, uid: string, to: string, lang: Lang, origin: strin
     env,
     to,
     subject(code, lang),
-    html(code, LIFE.minutes, lang, home, stop),
+    html(code, LIFE.minutes, lang, home, stop, who),
     text(code, LIFE.minutes, lang),
   );
   // Nothing carried it, so nothing should be outstanding: the code is thrown
@@ -99,7 +105,14 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
   // Re-sending to an address already proved must not un-prove it: the code is
   // how you change an address, not how you keep one.
   const keep = was?.ok === true && was.to === to;
-  const { sent, until } = await mail(env, uid, to, lang, new URL(req.url).origin);
+  const { sent, until } = await mail(
+    env,
+    uid,
+    to,
+    lang,
+    new URL(req.url).origin,
+    held.session.name,
+  );
 
   held.session.mail = {
     to,
@@ -135,7 +148,14 @@ export async function resend({ env, uid, req }: Ctx): Promise<Body> {
 
   const body = (await req.json().catch(() => null)) as { lang?: unknown } | null;
   const lang = langOf(body?.lang ?? held.session.mail?.lang);
-  const { sent, until } = await mail(env, uid, to, lang, new URL(req.url).origin);
+  const { sent, until } = await mail(
+    env,
+    uid,
+    to,
+    lang,
+    new URL(req.url).origin,
+    held.session.name,
+  );
   held.session.mail = {
     ...held.session.mail,
     to,
@@ -161,24 +181,14 @@ export async function verify({ env, uid, req }: Ctx): Promise<Body> {
   const verdict = await check(env, uid, code);
   if (verdict !== 'ok') return { error: verdict, left: await left(env, uid) };
 
-  // The code was right, so this person holds the mailbox — which is the only
-  // point at which it is safe to say whether somebody else already does. See
-  // alerts/claim.ts for why this is not checked at send time.
+  // One mailbox, as many accounts as somebody has. Two of them is a thing
+  // people actually do — a main and a smurf, a sibling's account on the same
+  // phone — and refusing the second was the app deciding how many accounts a
+  // person is allowed. What it cost instead was a message you could not place,
+  // so every message now carries the Riot name it is about.
   const to = held.session.mail.to;
-  const by = await heldBy(env, to);
-  if (by && by !== uid) {
-    // Unless that browser is gone. A pruned row must not hold an address
-    // hostage: whoever can still read the mailbox should get it.
-    if (await repo.get(env, by)) return { error: 'taken' };
-  }
-
-  // Letting go of the old one first, so changing address frees the previous.
-  const was = held.session.mailWas;
-  if (was && was !== to) await release(env, was, uid);
-  await claim(env, to, uid);
 
   held.session.mail = { ...held.session.mail, ok: true };
-  held.session.mailWas = to;
   await saveSession(env, uid, held.session, held.ver);
   return { ok: true, to };
 }

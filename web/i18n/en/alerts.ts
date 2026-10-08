@@ -16,6 +16,10 @@ export const alerts = {
 
   yourEmail: 'Your email',
   oneAddress: 'One address, verified once.',
+  sameInbox:
+    'The same mailbox works for several accounts. Every message carries the ' +
+    'Riot name it is about at the top, so two accounts in one inbox tell ' +
+    'themselves apart at a glance.',
 
   searchASkin: 'Search a skin…',
   opensOnce:

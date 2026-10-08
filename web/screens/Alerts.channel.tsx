@@ -129,6 +129,7 @@ export function AlertsChannel() {
         </p>
       </div>
 
+      <p class="legal bell__note">{s.sameInbox}</p>
       <p class="legal bell__note">{s.oneChannel}</p>
       <p class="legal bell__note">{s.whyACode}</p>
       <p class="legal bell__note">{s.changeItLater}</p>
