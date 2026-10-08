@@ -45,3 +45,5 @@ export const STORE: Route = { name: 'store' };
 export const COLLECTION: Route = { name: 'collection', tab: 'weapons' };
 export const SPRAYS: Route = { name: 'collection', tab: 'sprays' };
 export const BUDDIES: Route = { name: 'collection', tab: 'buddies' };
+export const CARDS: Route = { name: 'collection', tab: 'cards' };
+export const TITLES: Route = { name: 'collection', tab: 'titles' };

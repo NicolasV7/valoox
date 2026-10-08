@@ -17,6 +17,9 @@ import { BuddiesLoading } from './screens/Buddies.loading.tsx';
 import { Buddies } from './screens/Buddies.tsx';
 import { Buddy } from './screens/Buddy.tsx';
 import { Bundle } from './screens/Bundle.tsx';
+import { Card } from './screens/Card.tsx';
+import { CardsLoading } from './screens/Cards.loading.tsx';
+import { Cards } from './screens/Cards.tsx';
 import { CollectionLoading } from './screens/Collection.loading.tsx';
 import { Collection } from './screens/Collection.tsx';
 import { Fail } from './screens/Fail.tsx';
@@ -29,6 +32,9 @@ import { SpraysLoading } from './screens/Sprays.loading.tsx';
 import { Sprays } from './screens/Sprays.tsx';
 import { StoreLoading } from './screens/Store.loading.tsx';
 import { Store } from './screens/Store.tsx';
+import { Title } from './screens/Title.tsx';
+import { TitlesLoading } from './screens/Titles.loading.tsx';
+import { Titles } from './screens/Titles.tsx';
 import { WeaponLoading } from './screens/Weapon.loading.tsx';
 import { Weapon } from './screens/Weapon.tsx';
 import { useScan } from './sign-in.ts';
@@ -125,6 +131,8 @@ export function App() {
     if (route.name === 'collection') {
       if (route.tab === 'sprays') return inv ? <Sprays inv={inv} /> : <SpraysLoading />;
       if (route.tab === 'buddies') return inv ? <Buddies inv={inv} /> : <BuddiesLoading />;
+      if (route.tab === 'cards') return inv ? <Cards inv={inv} /> : <CardsLoading />;
+      if (route.tab === 'titles') return inv ? <Titles inv={inv} /> : <TitlesLoading />;
       return inv ? <Collection inv={inv} /> : <CollectionLoading />;
     }
     if (route.name === 'spray') {
@@ -132,6 +140,12 @@ export function App() {
     }
     if (route.name === 'buddy') {
       return inv ? <Buddy id={route.id} inv={inv} /> : <BuddiesLoading />;
+    }
+    if (route.name === 'card') {
+      return inv ? <Card id={route.id} inv={inv} /> : <CardsLoading />;
+    }
+    if (route.name === 'title') {
+      return inv ? <Title id={route.id} inv={inv} /> : <TitlesLoading />;
     }
     if (route.name === 'weapon') {
       return inv ? <Weapon id={route.id} inv={inv} /> : <WeaponLoading />;

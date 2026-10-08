@@ -3,12 +3,14 @@
 // translating rather than a thousand-line map.
 
 import { buddies } from './buddies.ts';
+import { cards } from './cards.ts';
 import { collection } from './collection.ts';
 import { common } from './common.ts';
 import { gate } from './gate.ts';
 import { piece } from './piece.ts';
 import { sprays } from './sprays.ts';
 import { bundle, offer, store } from './store.ts';
+import { titles } from './titles.ts';
 import { weapon } from './weapon.ts';
 
 export const es = {
@@ -22,4 +24,6 @@ export const es = {
   weapon,
   sprays,
   buddies,
+  cards,
+  titles,
 };

@@ -1,0 +1,167 @@
+/* Player titles: the one part of the app with no artwork in it.
+ *
+ * A title is a string the game prints next to your name. There is nothing to
+ * measure, so there is no colour — it wears the weave at its neutral default
+ * plus one grey ramp, which is the only gradient in the interface that is not
+ * the colour of something. Inventing a hue here would be inventing data. */
+
+.said {
+  display: grid;
+  gap: 1px;
+  margin: 16px var(--gut) 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.said__row,
+.said__row--waiting {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 14px 14px 14px 13px;
+  color-scheme: dark;
+  color: var(--ink);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 64px;
+  text-decoration: none;
+}
+
+.said__row {
+  /* The weave at half strength, which is what the board draws here and the
+   * only place in the app that is not --art: there is no artwork to read a
+   * colour off, so the bands are white and quiet, and the ramp under them is
+   * the one gradient in the interface that is not the colour of something. */
+  background:
+    linear-gradient(
+      107deg,
+      transparent 0 31%,
+      rgba(255, 255, 255, 0.034) 31% 45%,
+      transparent 45% 51%,
+      rgba(255, 255, 255, 0.018) 51% 58%,
+      transparent 58% 72%,
+      rgba(255, 255, 255, 0.0256) 72% 77%,
+      transparent 77%
+    ),
+    repeating-linear-gradient(107deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 23px),
+    linear-gradient(
+      152deg,
+      rgba(242, 244, 245, 0.17) 0%,
+      rgba(210, 214, 217, 0.115) 20%,
+      rgba(167, 174, 179, 0.072) 40%,
+      rgba(139, 147, 153, 0.04) 60%,
+      rgba(107, 114, 120, 0.018) 78%,
+      transparent 94%
+    ),
+    var(--stage);
+}
+
+.said__row--waiting {
+  background: var(--card);
+}
+
+.said__row svg {
+  color: var(--ink-3);
+}
+
+.said__text {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 15.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.said__on {
+  margin-left: auto;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: var(--ink);
+  color: var(--ink-inverse);
+  font-family: var(--num);
+  font-size: var(--t-floor);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.said__star {
+  display: flex;
+  margin-left: auto;
+  color: var(--ink-4);
+}
+
+.said__mark--waiting {
+  width: 24px;
+  height: 24px;
+  flex: none;
+}
+
+.said__text--waiting {
+  width: 42%;
+  height: 14px;
+}
+
+/* --- one of them opened --------------------------------------------------- */
+
+.said__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 240px;
+  margin-top: 14px;
+  padding: 24px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+  color-scheme: dark;
+  color: var(--ink);
+  /* The weave at half strength, which is what the board draws here and the
+   * only place in the app that is not --art: there is no artwork to read a
+   * colour off, so the bands are white and quiet, and the ramp under them is
+   * the one gradient in the interface that is not the colour of something. */
+  background:
+    linear-gradient(
+      107deg,
+      transparent 0 31%,
+      rgba(255, 255, 255, 0.034) 31% 45%,
+      transparent 45% 51%,
+      rgba(255, 255, 255, 0.018) 51% 58%,
+      transparent 58% 72%,
+      rgba(255, 255, 255, 0.0256) 72% 77%,
+      transparent 77%
+    ),
+    repeating-linear-gradient(107deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 23px),
+    linear-gradient(
+      152deg,
+      rgba(242, 244, 245, 0.17) 0%,
+      rgba(210, 214, 217, 0.115) 20%,
+      rgba(167, 174, 179, 0.072) 40%,
+      rgba(139, 147, 153, 0.04) 60%,
+      rgba(107, 114, 120, 0.018) 78%,
+      transparent 94%
+    ),
+    var(--stage);
+}
+
+.said__stage svg {
+  margin-bottom: 20px;
+  color: var(--ink-2);
+}
+
+.said__word {
+  display: block;
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+/* Grey, and that is the honest colour: there is no art to read one off. */
+.wall__chip--grey {
+  background: var(--ink-4);
+}

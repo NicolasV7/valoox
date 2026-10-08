@@ -17,7 +17,9 @@ export type Route =
   | { name: 'collection'; tab: Tab }
   | { name: 'weapon'; id: string }
   | { name: 'spray'; id: string }
-  | { name: 'buddy'; id: string };
+  | { name: 'buddy'; id: string }
+  | { name: 'card'; id: string }
+  | { name: 'title'; id: string };
 
 export type Tab = 'weapons' | 'sprays' | 'buddies' | 'cards' | 'titles';
 
@@ -37,6 +39,8 @@ export function parse(path: string): Route {
   if (head === 'weapon' && id && UUID.test(id)) return { name: 'weapon', id };
   if (head === 'spray' && id && UUID.test(id)) return { name: 'spray', id };
   if (head === 'buddy' && id && UUID.test(id)) return { name: 'buddy', id };
+  if (head === 'card' && id && UUID.test(id)) return { name: 'card', id };
+  if (head === 'title' && id && UUID.test(id)) return { name: 'title', id };
   if (head === 'collection') {
     const tab = TABS.find((t) => t === id) ?? 'weapons';
     return { name: 'collection', tab };

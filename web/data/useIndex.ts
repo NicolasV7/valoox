@@ -5,8 +5,10 @@
 
 import { useEffect, useState } from 'preact/hooks';
 import { type Buddy, buddies } from './buddies.ts';
+import { type Card, cards } from './cards.ts';
 import { type Rack, racks, type Weapon, weaponOf } from './skins.ts';
 import { type Spray, sprays } from './sprays.ts';
+import { type Title, titles } from './titles.ts';
 
 /** What each key has already resolved to. The promise behind it is cached too,
  *  but a promise is still a tick away — and that tick is a real defect on the
@@ -46,3 +48,9 @@ export const useSprays = (): Spray[] | null => held(sprays, 'sprays');
 
 /** Every charm, likewise. */
 export const useBuddies = (): Buddy[] | null => held(buddies, 'buddies');
+
+/** Every player card. */
+export const useCards = (): Card[] | null => held(cards, 'cards');
+
+/** Every player title. */
+export const useTitles = (): Title[] | null => held(titles, 'titles');

@@ -12,21 +12,20 @@ import { go, type Route, useRoute } from '../route.ts';
 /** Which tab a screen belongs to. The offer and the bundle are reached from
  *  the store, a weapon from the collection — the bar marks where you are, not
  *  which URL you are on. */
-const WHERE: Record<string, string> = {
-  store: 'store',
-  offer: 'store',
-  bundle: 'store',
-  piece: 'store',
-  collection: 'collection',
-  weapon: 'collection',
-  spray: 'collection',
-  buddy: 'collection',
-};
+/* Grouped by tab rather than keyed by screen, which also keeps a route called
+ * `title` from reading as an HTML title attribute to the strings test. */
+const UNDER: Array<[tab: string, screens: string[]]> = [
+  ['store', ['store', 'offer', 'bundle', 'piece']],
+  ['collection', ['collection', 'weapon', 'spray', 'buddy', 'card', 'title']],
+];
+
+const where = (screen: string): string | undefined =>
+  UNDER.find(([, screens]) => screens.includes(screen))?.[0];
 
 export function Tabs() {
   const route = useRoute();
   const nav = t().common.nav;
-  const here = WHERE[route.name];
+  const here = where(route.name);
 
   const open = (to: Route, label: string, key: string) => (
     <button
