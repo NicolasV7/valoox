@@ -41,10 +41,18 @@
 
 /* --- who you are ---------------------------------------------------------- */
 
+/* The header carries Riot's art — the equipped player card — and the three coin
+ * icons, which are light-coloured PNGs of theirs. So it is a stage like any
+ * other surface with their artwork on it, and keeps `color-scheme: dark` when
+ * the page goes light. Without this the coins are white on white and the wallet
+ * reads as three bare numbers. */
 .head {
   position: relative;
   overflow: hidden;
+  color-scheme: dark;
+  color: var(--ink);
   padding: 24px var(--gut) 18px;
+  background: var(--page-top);
   border-bottom: 1px solid var(--rule);
 }
 
