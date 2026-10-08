@@ -15,6 +15,7 @@
 @import './row.css';
 @import './tile.css';
 @import './slot.css';
+@import './find.css';
 
 /* the screens */
 @import './gate.css';
@@ -31,4 +32,5 @@
 @import './weapon.css';
 @import './shelf.css';
 @import './wall.css';
+@import './spray.css';
 @import './fail.css';

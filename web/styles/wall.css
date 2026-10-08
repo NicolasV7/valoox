@@ -31,6 +31,7 @@
 .pad {
   --wash-size: 116% 92%;
   --wash-at: 50% 42%;
+  position: relative;
   color: var(--ink);
   text-decoration: none;
 }
@@ -105,65 +106,42 @@
   border-radius: 4px;
 }
 
-/* --- one of them opened --------------------------------------------------- */
+/* --- the two shelves ------------------------------------------------------ */
+/* The collection is flush, so a label row carries its own gutter rather than
+ * inheriting one. */
 
-.wall__stage {
-  --wash-at: 50% 46%;
-  --wash-size: 120% 100%;
+.wall__band {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 290px;
-  margin-top: 14px;
-  border: 1px solid var(--rule);
-  border-radius: var(--r);
-  overflow: hidden;
+  align-items: baseline;
+  gap: 10px;
+  margin: 22px var(--gut) 10px;
 }
 
-.wall__art {
-  width: 230px;
-  height: 230px;
-  object-fit: contain;
+.wall__band .faint {
+  margin-left: auto;
+  font-size: 11.5px;
 }
 
-.wall__name {
-  margin-top: 16px;
-  font-size: var(--t-section);
-  font-weight: 300;
-  letter-spacing: -0.03em;
+.wall__find {
+  margin: 16px var(--gut) 0;
 }
 
-.wall__name--waiting {
-  width: 148px;
-  height: 24px;
+.wall__none {
+  margin: 18px var(--gut) 0;
+  padding: 26px 0;
+  text-align: center;
 }
 
-.wall__is {
+/* Not hidden, and not greyed into nothing: these are the reason to be here. */
+.wall--theirs .pad {
+  opacity: 0.55;
+}
+
+/* The same mark the skin list uses, in the one corner a square has spare. */
+.pad__star {
+  position: absolute;
+  right: 7px;
+  top: 7px;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: var(--t-floor);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--ink-4);
-}
-
-/* The measured colour, shown rather than described. Square and small: it is a
- * value, not a swatch anybody is meant to pick from. */
-.wall__chip {
-  flex: none;
-  width: 9px;
-  height: 9px;
-  border-radius: 2px;
-  background: rgb(var(--art));
-}
-
-.wall__head {
-  display: block;
-  margin: 22px 0 10px;
-}
-
-.wall__note {
-  margin-top: 11px;
 }

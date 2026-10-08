@@ -28,13 +28,13 @@ export function Spray({ id, inv }: { id: string; inv: Inventory }) {
   const slot = (inv.worn?.sprays ?? []).indexOf(id) + 1;
 
   const style = artStyle(lit);
+  // On the wheel, or just yours, or not yours at all. Never both "equipped"
+  // and "slot 3": being on the wheel is what equipped means.
+  const own = (inv.byType[SPRAY] ?? []).includes(id);
   const says = [
     t().common.kind.spray,
-    slot > 0 ? t().common.equipped : null,
-    slot > 0 ? s.slot(slot) : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+    slot > 0 ? s.slot(slot) : own ? t().common.owned : t().common.notOwned,
+  ].join(' · ');
 
   return (
     <main class={lit ? 'screen piece piece--lit' : 'screen piece'} style={style}>

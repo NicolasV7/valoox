@@ -4,15 +4,23 @@
 export const sprays = {
   of: (have: number, all: number) => `${have} de ${all} grafitis`,
 
-  /** Qué ranura de la rueda ocupa. La primera se dice distinto porque es la
-   *  que sale sin elegir nada. */
+  /** Qué ranura de la rueda ocupa. Las cuatro se dicen igual: estar en la
+   *  rueda ya es estar equipado, y «equipado» al lado de «ranura 3» son dos
+   *  palabras para lo mismo. */
   slot: (n: number) => `ranura ${n}`,
+
+  search: (n: number) => `Buscar entre ${n} grafitis`,
+  nothing: 'Ninguno coincide con eso.',
+
+  yours: 'Tuyos',
+  notYours: 'No son tuyos',
 
   grid:
     'Un grafiti es cuadrado, así que acá hay una grilla y no el tablero de ' +
     'ranuras que tienen las armas. Cada celda va lavada en el color de su ' +
-    'propio dibujo — el Reaver sale índigo, el Sovereign celeste hielo — que es ' +
-    'lo único que mantiene legible una pared de cuadrados.',
+    'propio dibujo — medido del dibujo, no elegido — que es lo único que ' +
+    'mantiene legible una pared de cuadrados. Están los del juego entero, no ' +
+    'solo los tuyos: los huecos son la mitad de lo que cuenta una colección.',
   /** La rueda tiene cuatro ranuras y una puede estar vacía: Riot tiene un
    *  grafiti llamado «None» y eso es lo que manda cuando no hay nada puesto. */
   wheel: (on: number, rest: number) =>

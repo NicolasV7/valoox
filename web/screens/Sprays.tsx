@@ -1,23 +1,22 @@
 // The Sprays tab. Square art, so a grid; each tile washed in its own colour.
 //
-// Only the ones you own, which is the opposite of the weapons tab and is not
-// an inconsistency: every weapon has a slot whether or not you dressed it, and
-// a spray has no slot to be missing from. The gap that matters here is the one
-// in the heading — 18 of 921.
+// All 921, split the way the skin list splits: the ones on your wheel first,
+// then the rest of yours, then the ones that are not. A collection is as much
+// about the gaps as about what fills them, and with nine hundred of them on
+// the other side of that line the search is not a convenience.
 //
-// The four on the wheel come first, in wheel order, and the rest alphabetically
-// after them. Riot's own order for the rest is the order they were granted,
-// which is no order at all once there are eighty of them.
+// Everything here is already in the browser — one index, fetched once — so the
+// list narrows as you type and nothing goes back to the Worker for it.
 
-import { useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
+import { Search } from '../components/icons.tsx';
 import type { Spray } from '../data/sprays.ts';
 import type { Inventory } from '../data/types.ts';
 import { useSprays } from '../data/useIndex.ts';
-import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
-import { href, intercept } from '../route.ts';
 import { CollectionTabs } from './Collection.tabs.tsx';
 import { SpraysLoading } from './Sprays.loading.tsx';
+import { Tile } from './Sprays.tile.tsx';
 
 /** Riot's item type for a spray. */
 export const SPRAY = 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475';
@@ -25,73 +24,90 @@ export const SPRAY = 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475';
 export function Sprays({ inv }: { inv: Inventory }) {
   const s = t().sprays;
   const all = useSprays();
-  if (!all) return <SpraysLoading />;
+  const [find, setFind] = useState('');
 
-  const own = new Set(inv.byType[SPRAY] ?? []);
+  const own = useMemo(() => new Set(inv.byType[SPRAY] ?? []), [inv]);
   const wheel = inv.worn?.sprays ?? [];
-  // Counted off the catalogue rather than off the entitlement list: an id we
-  // cannot name is an id we cannot draw, and a heading that counts tiles that
-  // are not there is the kind of number this app is supposed to not have.
-  const mine = all.filter((spray) => own.has(spray.id));
 
-  const at = (id: string) => {
-    const on = wheel.indexOf(id);
-    return on < 0 ? wheel.length : on;
-  };
-  const tiles = [...mine].sort((a, b) => at(a.id) - at(b.id) || a.name.localeCompare(b.name));
-  // Not wheel.length: a slot can be empty, and Riot fills an empty one with a
-  // spray it publishes under the name "None" — which is in the catalogue, is
-  // not owned, and so is not a tile. Counting the tiles that landed on the
-  // wheel is the only count that matches what is on the screen.
-  const on = tiles.filter((spray) => wheel.includes(spray.id)).length;
+  const sorted = useMemo(() => {
+    if (!all) return null;
+    // Where it sits on the wheel, and everything else after the wheel ends.
+    const at = (id: string) => {
+      const on = wheel.indexOf(id);
+      return on < 0 ? wheel.length : on;
+    };
+    const mine = all
+      .filter((x) => own.has(x.id))
+      .sort((a, b) => at(a.id) - at(b.id) || a.name.localeCompare(b.name));
+    // Riot's own order is the order they shipped them, which is no order at
+    // all at nine hundred. Sorted once here rather than on every keystroke.
+    const rest = all.filter((x) => !own.has(x.id)).sort((a, b) => a.name.localeCompare(b.name));
+    return { mine, rest };
+  }, [all, own, wheel]);
+
+  if (!all || !sorted) return <SpraysLoading />;
+
+  const yours = sift(sorted.mine, find);
+  const theirs = sift(sorted.rest, find);
+  const on = sorted.mine.filter((x) => wheel.includes(x.id)).length;
 
   return (
     <main class="screen coll">
-      <CollectionTabs on="sprays" said={s.of(mine.length, all.length)} />
+      <CollectionTabs on="sprays" said={s.of(sorted.mine.length, all.length)} />
 
-      <div class="wall">
-        {tiles.map((spray) => (
-          <Tile key={spray.id} spray={spray} slot={wheel.indexOf(spray.id) + 1} />
-        ))}
+      <div class="find wall__find">
+        <span class="find__glass">
+          <Search />
+        </span>
+        <input
+          type="search"
+          value={find}
+          placeholder={s.search(all.length)}
+          aria-label={s.search(all.length)}
+          onInput={(e) => setFind((e.currentTarget as HTMLInputElement).value)}
+        />
       </div>
 
+      <Shelf said={s.yours} list={yours} wheel={wheel} mine />
+      <Shelf said={s.notYours} list={theirs} wheel={wheel} />
+      {yours.length === 0 && theirs.length === 0 && <p class="lede wall__none">{s.nothing}</p>}
+
       <p class="legal coll__note">{s.grid}</p>
-      <p class="legal coll__note coll__note--next">{s.wheel(on, tiles.length - on)}</p>
+      <p class="legal coll__note coll__note--next">{s.wheel(on, sorted.mine.length - on)}</p>
     </main>
   );
 }
 
-function Tile({ spray, slot }: { spray: Spray; slot: number }) {
-  // The colour waits for the picture, so measure() rides on loading="lazy"
-  // instead of opening its own download for every tile the moment the wall
-  // mounts. crossOrigin makes the two requests one cache entry.
-  const [shot, setShot] = useState(false);
-  const lit = useArt(shot ? spray.art : null);
-  const route = { name: 'spray', id: spray.id } as const;
-
-  return (
-    <a class="pad stage" style={artStyle(lit)} href={href(route)} onClick={intercept(route)}>
-      <span class="pad__shot">
-        {spray.art && (
-          <img
-            class={shot ? 'pad__art pad__art--on' : 'pad__art'}
-            src={spray.art}
-            alt=""
-            loading="lazy"
-            crossOrigin="anonymous"
-            onLoad={() => setShot(true)}
-          />
-        )}
-      </span>
-      <span class="pad__name">{spray.name}</span>
-      <span class="pad__slot num">{said(slot)}</span>
-    </a>
-  );
+/** By name, against what is already downloaded. */
+function sift(list: Spray[], find: string): Spray[] {
+  const hunt = find.trim().toLowerCase();
+  if (!hunt) return list;
+  return list.filter((x) => x.name.toLowerCase().includes(hunt));
 }
 
-/** The line under the name. Slot one is the one that comes up without choosing
- *  anything, which is why it is named rather than numbered. */
-function said(slot: number): string {
-  if (slot === 1) return t().common.equipped;
-  return slot > 1 ? t().sprays.slot(slot) : '';
+function Shelf({
+  said,
+  list,
+  wheel,
+  mine,
+}: {
+  said: string;
+  list: Spray[];
+  wheel: string[];
+  mine?: boolean;
+}) {
+  if (list.length === 0) return null;
+  return (
+    <>
+      <div class="wall__band">
+        <h2 class="label">{said}</h2>
+        <span class="faint num">{list.length}</span>
+      </div>
+      <div class={mine ? 'wall' : 'wall wall--theirs'}>
+        {list.map((spray) => (
+          <Tile key={spray.id} spray={spray} slot={wheel.indexOf(spray.id) + 1} mine={!!mine} />
+        ))}
+      </div>
+    </>
+  );
 }

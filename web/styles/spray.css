@@ -1,0 +1,63 @@
+/* One spray, opened from the collection. */
+
+.wall__stage {
+  --wash-at: 50% 46%;
+  --wash-size: 120% 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 290px;
+  margin-top: 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.wall__art {
+  width: 230px;
+  height: 230px;
+  object-fit: contain;
+}
+
+.wall__name {
+  margin-top: 16px;
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.wall__name--waiting {
+  width: 148px;
+  height: 24px;
+}
+
+.wall__is {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: var(--t-floor);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* The measured colour, shown rather than described. Square and small: it is a
+ * value, not a swatch anybody is meant to pick from. */
+.wall__chip {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: rgb(var(--art));
+}
+
+.wall__head {
+  display: block;
+  margin: 22px 0 10px;
+}
+
+.wall__note {
+  margin-top: 11px;
+}
+
