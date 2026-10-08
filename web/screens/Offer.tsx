@@ -21,6 +21,11 @@ import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { back } from '../route.ts';
 import { chipFor, chosen, Levels, Variants } from './Offer.levels.tsx';
+
+/** Seconds into the clip to sit on while it is still. Far enough past the
+ *  longest fade-in measured, near enough that it is still the opening shot. */
+const STILL = 1.2;
+
 import { OfferLoading } from './Offer.loading.tsx';
 
 export function Offer({ id, view }: { id: string; view: StoreView }) {
@@ -44,6 +49,13 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
   const name = found.name ?? '';
   const at = name.lastIndexOf(' ');
   const clip = family?.levels.find((l) => l.id === level)?.video ?? found.video;
+  // #t= is a media fragment: it tells the browser which frame to sit on before
+  // anyone presses anything. Measured across five clips, two of them open on a
+  // fade from black — Elderflame and Glitchpop are at 19 and 18 of 255 at
+  // frame zero — so a still of frame zero is a black box for no reason. Past
+  // the fade every clip is showing the weapon. It also makes iOS decode and
+  // paint a frame at all, which with preload=metadata alone it does not.
+  const still = clip ? clip + '#t=' + STILL : undefined;
   // The base colourway until a swatch is tapped, so the block is there from
   // the first frame rather than appearing under your thumb.
   const variant = family ? chosen(family, chroma ?? '') : null;
@@ -69,7 +81,7 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
           // biome-ignore lint/a11y/useMediaCaption: no speech, and no track to point at
           <video
             class="offer__clip"
-            src={clip}
+            src={still}
             preload="metadata"
             playsInline
             controls={playing}
@@ -128,7 +140,11 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
 
   function start(e: MouseEvent) {
     const video = (e.currentTarget as HTMLElement).previousElementSibling;
-    if (video instanceof HTMLVideoElement) void video.play();
+    if (!(video instanceof HTMLVideoElement)) return;
+    // Back to the beginning: the still is a frame chosen to look like
+    // something, and pressing play means play the clip, not the rest of it.
+    video.currentTime = 0;
+    void video.play();
   }
 }
 
