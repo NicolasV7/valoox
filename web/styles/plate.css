@@ -68,3 +68,34 @@
   color: #8b9399;
   animation: settle 260ms ease-out both;
 }
+
+/* The spent code, under whichever seal ended it.
+ *
+ * Approved: blurred almost to nothing — it worked, it is used, and leaving it
+ * readable would leave a working credential on screen. Expired: grey, and a
+ * little more visible, because the question that screen answers is "what
+ * expired". */
+.plate {
+  position: relative;
+}
+
+.plate__spent {
+  display: block;
+}
+
+.plate--done .plate__spent {
+  opacity: 0.1;
+  filter: blur(1px);
+}
+
+.plate--dead .plate__spent {
+  opacity: 0.14;
+  filter: grayscale(1);
+}
+
+.plate--done .plate__seal,
+.plate--dead .plate__seal {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+}

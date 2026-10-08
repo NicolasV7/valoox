@@ -22,8 +22,11 @@ export const POLL_EVERY = 2000;
 export type ScanState =
   | { phase: 'starting' }
   | { phase: 'ready'; url: string }
-  | { phase: 'expired' }
-  | { phase: 'approved' };
+  // The url rides along into both endings. The code is spent either way, but it
+  // is still the thing that was on screen a second ago, and a plate that empties
+  // to white loses the only continuity the three phases have.
+  | { phase: 'expired'; url?: string }
+  | { phase: 'approved'; url?: string };
 
 export function Scan({
   state,
@@ -35,8 +38,8 @@ export function Scan({
   onRetry: () => void;
 }) {
   const s = t().gate;
-  if (state.phase === 'approved') return <Approved name={name} />;
-  if (state.phase === 'expired') return <Expired onRetry={onRetry} />;
+  if (state.phase === 'approved') return <Approved name={name} url={state.url} />;
+  if (state.phase === 'expired') return <Expired url={state.url} onRetry={onRetry} />;
 
   return (
     <div class="scan rise">
@@ -91,7 +94,7 @@ export function Scan({
   );
 }
 
-function Approved({ name }: { name?: string }) {
+function Approved({ name, url }: { name?: string; url?: string }) {
   const s = t().gate;
   const [handle, tag] = (name ?? '').split('#');
 
@@ -99,6 +102,14 @@ function Approved({ name }: { name?: string }) {
     <div class="scan rise">
       <h1>{s.approved.title}</h1>
       <div class="plate plate--done">
+        {/* The code that was just used, spent: still there, no longer readable.
+            A plate that empties to white loses the only thread between the
+            three phases. */}
+        {url && (
+          <span class="plate__spent">
+            <QrCode url={url} size={190} />
+          </span>
+        )}
         <span class="plate__seal">
           <Check />
         </span>
@@ -129,14 +140,20 @@ function Approved({ name }: { name?: string }) {
   );
 }
 
-function Expired({ onRetry }: { onRetry: () => void }) {
+function Expired({ url, onRetry }: { url?: string; onRetry: () => void }) {
   const s = t().gate;
   return (
     <div class="scan rise">
       <h1>{s.expired.title}</h1>
       <p class="lede scan__lede">{s.expired.lede}</p>
 
+      {/* Greyed rather than gone, so you can see WHAT expired. */}
       <div class="plate plate--dead">
+        {url && (
+          <span class="plate__spent">
+            <QrCode url={url} size={190} />
+          </span>
+        )}
         <span class="plate__seal plate__seal--quiet">
           <Clock />
         </span>

@@ -26,6 +26,8 @@ export function useScan(onApproved: () => void) {
   const awake = useRef<(() => void) | null>(null);
   /** The handshake, started before it is needed. */
   const warm = useRef<Promise<string | null> | null>(null);
+  /** The code that is on screen, so both endings can keep showing it. */
+  const shown = useRef<string | undefined>(undefined);
 
   const stop = useCallback(() => {
     clearInterval(timer.current);
@@ -58,9 +60,10 @@ export function useScan(onApproved: () => void) {
     const url = await warm.current;
     warm.current = null;
     if (!url) {
-      setState({ phase: 'expired' });
+      setState({ phase: 'expired', url: shown.current });
       return;
     }
+    shown.current = url;
     setState({ phase: 'ready', url });
 
     const ask = async () => {
@@ -68,10 +71,10 @@ export function useScan(onApproved: () => void) {
       if (!seen || seen === NEEDS_RESEED) return;
       if (seen.status === 'expired') {
         stop();
-        setState({ phase: 'expired' });
+        setState({ phase: 'expired', url: shown.current });
       } else if (seen.status === 'ok') {
         stop();
-        setState({ phase: 'approved' });
+        setState({ phase: 'approved', url: shown.current });
         // The store starts loading now, through the hold rather than after it.
         onApproved();
         held.current = setTimeout(() => setState(null), HOLD) as unknown as number;
