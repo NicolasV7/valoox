@@ -1,0 +1,63 @@
+import * as cookie from './app/cookie.ts';
+import type { Body, Ctx } from './lib/json.ts';
+import { json } from './lib/json.ts';
+import { testAlert } from './routes/alerts.ts';
+import { logout, pollScan, startScan } from './routes/auth.ts';
+import { collection } from './routes/collection.ts';
+import { store } from './routes/store.ts';
+import { readWishlist, writeWishlist } from './routes/wishlist.ts';
+import type { Env } from './types.ts';
+
+type Handler = (c: Ctx) => Promise<Body>;
+
+/**
+ * Every route, with its method.
+ *
+ * A table rather than an if-chain, and the method is half of each entry for the
+ * same reason it is half of every rule in the egress allowlist: GET and POST on
+ * one path are two different things, and writing them as one is how a read
+ * quietly acquires a write.
+ */
+const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
+  '/api/store': { GET: store },
+  '/api/inventory': { GET: collection },
+  '/api/qr': { GET: pollScan, POST: startScan },
+  '/api/prefs': { GET: readWishlist, POST: writeWishlist },
+  '/api/test-alert': { POST: testAlert },
+  '/api/logout': { POST: logout },
+};
+
+export async function route(req: Request, env: Env): Promise<Response> {
+  const { pathname } = new URL(req.url);
+  const method = req.method === 'POST' ? 'POST' : 'GET';
+  const headers = new Headers();
+
+  // The whole CSRF defence, and it is enough: a cross-site form post cannot set
+  // this header, and a same-origin fetch always does.
+  if (method === 'POST' && !cookie.sameOrigin(req)) {
+    return json({ error: 'cross-site' }, headers, 403);
+  }
+
+  // A browser with no cookie gets one now: every route is keyed by it, so
+  // nothing is ever shared between two people.
+  let uid = cookie.read(req);
+  if (!uid) {
+    uid = cookie.mint();
+    cookie.set(headers, uid);
+  }
+
+  const handler = ROUTES[pathname]?.[method];
+  // 404 with the headers, so a first-time visitor who mistypes still keeps the
+  // uid that was just minted for them.
+  if (!handler) return json({ error: 'not found' }, headers, 404);
+
+  try {
+    return json(await handler({ env, uid, req, headers }), headers);
+  } catch (e) {
+    const err = e as Error;
+    // Full detail to the log, a status to the client, the jar to neither. The
+    // pathname here is one of ours; a Riot path would carry the puuid.
+    console.log('ERROR ' + pathname + ': ' + err.message + '\n' + err.stack);
+    return json({ error: 'upstream' }, headers, 502);
+  }
+}

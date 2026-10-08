@@ -17,11 +17,10 @@ const EXT = /\.(ts|tsx|js|jsx|css)$/;
 // Built, not written. Measuring a bundle tells you about esbuild.
 const SKIP = new Set(['public/app.js', 'public/app.css']);
 
-// The app as it stood before the rewrite from the artboards. The front end is
-// gone; src/index.ts is the last one and it goes when the routes split out.
-// This list may only ever get shorter — adding to it is how a limit stops
-// being one.
-const LEGACY = new Set(['src/index.ts']);
+// Empty, and it stays empty. It held five files from before the rewrite; the
+// last of them went when the routes split out of src/index.ts. Adding to it is
+// how a limit stops being one.
+const LEGACY = new Set<string>();
 
 function sources(dir: string, out: string[] = []) {
   if (!existsSync(dir)) return out;
