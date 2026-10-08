@@ -131,9 +131,32 @@ Module names are lowercase and single-word, no suffixes: `seal.ts`, not
 npm ci
 npm run fonts        # once — downloads the two faces into public/fonts/
 npm run dev          # builds web/ then starts the Worker
-npm run check        # typecheck + lint + tests. What CI runs.
+npm run check        # typecheck + lint + tests + build. What CI runs.
 npm run deploy       # builds, then wrangler deploy
 ```
+
+### On a phone
+
+This is a phone app and it has to be looked at on one. `npm run phone` puts the
+dev server behind Tailscale:
+
+```sh
+npm run phone        # once; the config persists
+npm run dev
+```
+
+Then open `https://<machine>.<tailnet>.ts.net` on the phone — `tailscale status`
+names it. `npm run phone:off` takes it down.
+
+It has to be HTTPS, which is the whole reason this is not just `--ip 0.0.0.0`:
+the `uid` cookie is `Secure`, so over plain http on a tailnet address the
+browser never stores it and sign-in silently never completes. Tailscale serves a
+real certificate for the MagicDNS name, so the cookie behaves exactly as it will
+in production.
+
+Nothing is exposed beyond the tailnet. `wrangler dev` stays bound to 127.0.0.1
+and the proxy runs on the same machine. **Never `tailscale funnel`** — that is
+the public internet, pointed at a dev server holding a real Riot session.
 
 The kill switch, which makes every stored session undecryptable and signs
 everybody out:

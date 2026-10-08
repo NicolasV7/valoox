@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "node scripts/build.mjs --dev && wrangler dev",
+    "phone": "tailscale serve --bg --https=443 http://127.0.0.1:8787",
+    "phone:off": "tailscale serve --https=443 off",
     "build": "node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
     "fonts": "node scripts/fonts.mjs",
