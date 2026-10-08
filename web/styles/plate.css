@@ -19,33 +19,34 @@
   line-height: 0;
 }
 
+/* Nothing scales and nothing fades as a whole. The three corners are already
+ * on the plate — grey, in the right place — so the arrival is the corners
+ * turning black and the data filling in around them. A transform on the whole
+ * svg would move those corners and break the one thing that makes this read as
+ * completing rather than replacing. */
 .plate__code {
   display: block;
-  animation: settle 260ms ease-out both;
 }
 
-/* The three corner squares, where the real ones will be. Grey rather than
- * black so it reads as absent rather than as a broken code.
+.qr__fill {
+  animation: fill 260ms ease-out both;
+}
+
+@keyframes fill {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Grey, and there from the first frame.
  *
- * Hidden for the first 300ms, and that delay is the whole point of it. The
- * handshake starts when a finger lands on the button, so the code is usually
- * in hand before this screen has finished arriving — and a placeholder that
- * flashes for eighty milliseconds does not read as loading, it reads as a
- * stale code blinking past. If the wait is real it fades in and breathes; if
- * it is not, it is never seen at all. */
+ * It used to be held back 300ms so a fast code would never flash it — which
+ * traded a flicker for a blank white plate, which is worse. Now there is
+ * nothing to flash: the corners stay put and only their colour changes. */
 .plate__wait {
   display: block;
   color: #d3d7dd;
-  opacity: 0;
-  animation:
-    appear 220ms 300ms forwards,
-    breathe 1600ms 520ms ease-in-out infinite;
-}
-
-@keyframes appear {
-  to {
-    opacity: 1;
-  }
+  animation: breathe 1600ms ease-in-out infinite;
 }
 
 .plate__seal {
