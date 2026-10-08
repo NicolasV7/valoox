@@ -91,6 +91,13 @@ p {
   color: var(--ink-6);
 }
 
+/* The weight a word gets when it is the thing to look for — 500, not the
+ * browser's 700. Bricolage at 700 next to 400 reads as two different faces. */
+b {
+  font-weight: 500;
+  color: var(--ink);
+}
+
 a {
   color: var(--ink-3);
 }

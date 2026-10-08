@@ -4,7 +4,9 @@
 
 export const gate = {
   title: 'Tu tienda de VALORANT, sin abrir el juego.',
-  lede: 'Antes de escanear, esto es lo que pasa con tu cuenta.',
+  lede:
+    'Entrás escaneando un código con Riot Mobile. Antes de hacerlo, esto es ' +
+    'exactamente lo que pasa con tu cuenta.',
 
   // One line each wherever the sentence allows it. This screen has to be read
   // in one piece on a phone, and a fact below the fold is a fact nobody read —
@@ -12,13 +14,15 @@ export const gate = {
   // it goes looking.
   facts: {
     password: 'Tu contraseña no llega acá.',
-    passwordWhy: 'Se escribe en la app de Riot, nunca en esta página.',
+    passwordWhy: 'Riot te hace entrar dentro de su propia app. Acá no hay dónde escribirla.',
     keep: 'Guardamos una sola cosa.',
-    keepWhy: 'La sesión que Riot devuelve, cifrada, con la clave fuera de la base.',
+    keepWhy: 'La sesión que Riot devuelve, cifrada, con la clave fuera de la base de datos.',
     read: 'Solo sabe leer.',
-    readWhy: 'Comprar, equipar y entrar a cola no están en el código, y un test lo prueba.',
+    readWhy:
+      'Los endpoints que cambian algo —equipar, entrar a cola, comprar— no están ' +
+      'en el código, y un test lo prueba.',
     leave: 'Te podés ir.',
-    leaveWhy: 'Desconectás y se borra al instante. En Riot vence sola.',
+    leaveWhy: 'Desconectás y tu sesión se borra al instante. Del lado de Riot vence sola.',
   },
 
   show: 'Mostrame el código',
@@ -30,7 +34,9 @@ export const gate = {
   scan: {
     title: 'Escaneá el código, o abrí la app.',
     lede: 'En cualquiera de los dos casos Riot aprueba el ingreso en tu teléfono. Acá no se escribe nada.',
-    how: 'Abrí Riot Mobile en tu teléfono: Perfil → Ajustes → Escanear código QR.',
+    // The asterisks are bold, rendered by components/Marked.tsx. They sit on
+    // the two things you have to find inside somebody else's app.
+    how: 'Abrí *Riot Mobile* en tu teléfono y andá a *Perfil → Ajustes → Escanear código QR*.',
     or: 'o',
     open: 'Abrir Riot Mobile',
     openWhy: 'Si estás leyendo esto desde el teléfono.',
@@ -39,8 +45,12 @@ export const gate = {
   },
 
   approved: {
-    title: 'Listo, entraste.',
-    as: (name: string, tag: string) => `${name}#${tag}`,
+    title: 'Escaneá esto desde Riot Mobile.',
+    lede:
+      'En la app: Perfil → Ajustes → Escanear código QR. Si ya estás en el ' +
+      'teléfono, tocá el botón y se abre sola.',
+    /** The whole sentence, tag included — the screen only dims the tag. */
+    signedIn: (name: string) => `Entraste como ${name}`,
     loading: 'Cargando tu tienda…',
     nothingTyped: 'Riot aprobó el escaneo. Nada de lo que escribiste pasó por esta página.',
   },

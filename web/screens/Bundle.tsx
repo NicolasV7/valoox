@@ -13,7 +13,6 @@
 
 import { Countdown } from '../components/Countdown.tsx';
 import { Chevron } from '../components/icons.tsx';
-import { Money } from '../components/Money.tsx';
 import { OfferRow } from '../components/OfferRow.tsx';
 import { Tile } from '../components/Tile.tsx';
 import { shapeOf, tierByPrice } from '../data/catalogue.ts';

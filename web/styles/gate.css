@@ -1,14 +1,21 @@
 /* The way in. Four screens, no tab bar — you are not in the app yet.
  *
- * None of them scrolls, and none of them can: a person deciding whether to hand
- * over a session should see the whole argument at once, and a code that is half
- * off the bottom of the screen is a code nobody scans.
+ * None of them scrolls on a phone, and none of them can: a person deciding
+ * whether to hand over a session should see the whole argument at once, and a
+ * code that is half off the bottom of the screen is a code nobody scans.
  *
  * So the spacing is not a set of numbers picked for one artboard. --v is the
  * unit these screens breathe in and it scales with the viewport, which removes
  * the cliff a media query leaves at its breakpoint: the designed rhythm on a
  * tall phone, the same rhythm proportionally tighter on a short one, and no
- * height at which the layout suddenly changes shape. */
+ * height at which the layout suddenly changes shape.
+ *
+ * `auto` rather than `hidden` is the floor under all of that. Measured: the
+ * four facts fit without scrolling down to a 664px viewport, which covers a
+ * phone held upright with the browser's own chrome on it. Below that the
+ * argument is simply longer than the glass, and `hidden` does not make it fit
+ * — it cuts "Show me the code" off the bottom, where it cannot be tapped.
+ * `auto` scrolls on exactly those screens and on no others. */
 
 .gate,
 .scan {
@@ -18,7 +25,8 @@
   display: flex;
   flex-direction: column;
   padding: calc(var(--v) * 2) 24px calc(var(--v) * 1.3);
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .wordmark {

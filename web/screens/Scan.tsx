@@ -10,6 +10,7 @@
 
 import { appLink } from '../app-link.ts';
 import { Check, Clock, Riot } from '../components/icons.tsx';
+import { Marked } from '../components/Marked.tsx';
 import { QrCode } from '../components/QrCode.tsx';
 import { Thinking } from '../components/Thinking.tsx';
 import { SPRAY } from '../design/sprays.ts';
@@ -58,7 +59,9 @@ export function Scan({
           </span>
         )}
       </div>
-      <p class="small scan__how">{s.scan.how}</p>
+      <p class="small scan__how">
+        <Marked>{s.scan.how}</Marked>
+      </p>
 
       <div class="rule-or">
         <span class="small">{s.scan.or}</span>
@@ -96,11 +99,17 @@ export function Scan({
 
 function Approved({ name, url }: { name?: string; url?: string }) {
   const s = t().gate;
-  const [handle, tag] = (name ?? '').split('#');
+  // The whole sentence comes out of i18n with the tag inside it; the only
+  // thing done to it here is dimming the tag, which is Riot's own format and
+  // cannot move away from the handle in any language.
+  const said = name ? s.approved.signedIn(name) : null;
+  const at = said ? said.indexOf('#') : -1;
 
   return (
     <div class="scan rise">
       <h1>{s.approved.title}</h1>
+      <p class="lede scan__lede">{s.approved.lede}</p>
+
       <div class="plate plate--done">
         {/* The code that was just used, spent: still there, no longer readable.
             A plate that empties to white loses the only thread between the
@@ -122,10 +131,10 @@ function Approved({ name, url }: { name?: string; url?: string }) {
             line is a placeholder at the size the name will be, rather than
             nothing: final sizes, always, so the handle lands in place instead
             of pushing everything under it down a line. */}
-        {handle ? (
+        {said ? (
           <p class="item scan__name">
-            {handle}
-            {tag && <span class="scan__tag">#{tag}</span>}
+            {at < 0 ? said : said.slice(0, at)}
+            {at >= 0 && <span class="scan__tag">{said.slice(at)}</span>}
           </p>
         ) : (
           <p class="item scan__name">

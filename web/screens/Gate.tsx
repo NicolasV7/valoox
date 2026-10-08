@@ -8,8 +8,13 @@ import { Wordmark } from '../components/Mark.tsx';
 import { t } from '../i18n/index.ts';
 
 /** The host the QR points at. Not copy — it is the thing being verified, and
- *  the whole point of the line is that it is the same string every time. */
-const RIOT = 'auth.riotgames.com';
+ *  the whole point of the line is that it is the same string every time.
+ *
+ *  The registrable domain rather than the exact host, because the exact host is
+ *  qrlogin.riotgames.com and this screen is read before a code exists. Naming a
+ *  subdomain the code does not use would be the one false sentence on the one
+ *  screen whose whole job is to be checkable. */
+const RIOT = 'riotgames.com';
 
 export function Gate({ onScan, onIntent }: { onScan: () => void; onIntent: () => void }) {
   const s = t().gate;
