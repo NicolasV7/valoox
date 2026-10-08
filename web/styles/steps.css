@@ -87,9 +87,12 @@
   color: var(--ink-5);
 }
 
+/* Not greyed. A swatch exists to show a colour, and grayscale took the one
+ * thing it is for in order to say something the dashed border and the grey
+ * label are already saying. The only concession is a touch off the white, so
+ * an owned one still reads as the brighter of two. */
 .swatch--not img {
-  filter: grayscale(1);
-  opacity: 0.4;
+  opacity: 0.88;
 }
 
 .swatch__of {

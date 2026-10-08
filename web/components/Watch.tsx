@@ -57,7 +57,7 @@ export function Watch({
       </span>
       <button
         type="button"
-        class={on ? 'watch__star watch__star--on' : 'watch__star'}
+        class={on ? 'star star--inline star--on' : 'star star--inline'}
         disabled={!on && shut}
         aria-pressed={on}
         aria-label={item.name}

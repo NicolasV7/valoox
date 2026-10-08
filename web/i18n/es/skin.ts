@@ -22,6 +22,11 @@ export const skin = {
 
   // --- lo que es para vos --------------------------------------------------
   equippedNow: 'Puesta ahora',
+  howItLooks: 'Cómo se ve',
+  notYoursPreview:
+    'Así se ve la variante que elegiste arriba. No la tenés — esto es el render ' +
+    'que publica Riot, no una foto de tu inventario.',
+  alsoOn: (which: string) => `Tenés puesto el ${which} de esta skin.`,
   yoursNotOn: 'Tuya, sin poner',
 
   readOff: (level: string, colour: string) =>

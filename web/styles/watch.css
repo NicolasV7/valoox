@@ -25,17 +25,17 @@
   background:
     linear-gradient(
       107deg,
-      rgb(0 0 0 / 0%) 0 31%,
-      rgb(var(--art) / 7.2%) 31% 45%,
-      rgb(0 0 0 / 0%) 45% 51%,
-      rgb(var(--art) / 3.8%) 51% 58%,
-      rgb(0 0 0 / 0%) 58% 72%,
-      rgb(var(--art) / 5.4%) 72% 77%,
-      rgb(0 0 0 / 0%) 77%
+      rgba(0, 0, 0, 0) 0 31%,
+      rgba(var(--art), 0.072) 31% 45%,
+      rgba(0, 0, 0, 0) 45% 51%,
+      rgba(var(--art), 0.038) 51% 58%,
+      rgba(0, 0, 0, 0) 58% 72%,
+      rgba(var(--art), 0.054) 72% 77%,
+      rgba(0, 0, 0, 0) 77%
     ),
-    repeating-linear-gradient(107deg, rgb(var(--art) / 4.3%) 0 1px, rgb(0 0 0 / 0%) 1px 23px),
-    radial-gradient(84% 128% at 30% 50%, rgb(var(--art) / 25.5%) 0%, rgb(var(--art) / 0%) 70%),
-    var(--card);
+    repeating-linear-gradient(107deg, rgba(var(--art), 0.043) 0 1px, rgba(0, 0, 0, 0) 1px 23px),
+    radial-gradient(84% 128% at 30% 50%, rgba(var(--art), 0.255) 0%, rgba(var(--art), 0) 70%),
+    var(--stage-row);
 }
 
 .watch__art {
@@ -71,25 +71,6 @@
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-
-.watch__star {
-  padding: 8px;
-  border: 0;
-  background: none;
-  color: var(--ink-4);
-  line-height: 0;
-  cursor: pointer;
-  transition: color 180ms cubic-bezier(0.22, 0.8, 0.3, 1);
-}
-
-.watch__star--on {
-  color: var(--kept);
-}
-
-.watch__star[disabled] {
-  opacity: 0.35;
-  cursor: default;
 }
 
 /* --- where it goes, as one tappable card --------------------------------- */

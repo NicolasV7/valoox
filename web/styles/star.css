@@ -28,8 +28,46 @@
     transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1);
 }
 
+/* Lit, and it says so by moving once.
+ *
+ * The animation is on the glyph and keyed on whether it is lit, so it plays
+ * on the way in and not on every render. A star is a tap on a phone against a
+ * round trip it does not wait for — the mark moves now and the POST follows —
+ * so this overshoot IS the acknowledgement, and without it the only feedback
+ * is a colour change somebody's thumb is covering.
+ *
+ * Unstarring gets the shorter one. Taking something off a list does not want
+ * a flourish; it wants to look like it happened. */
 .star--on {
   color: var(--kept);
+}
+
+.star--on svg {
+  animation: pop 260ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.star:not(.star--on) svg {
+  animation: drop 160ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.4) rotate(-28deg);
+  }
+
+  60% {
+    transform: scale(1.18) rotate(4deg);
+  }
+
+  to {
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes drop {
+  from {
+    transform: scale(1.15);
+  }
 }
 
 .star:active:not([disabled]) {

@@ -136,7 +136,16 @@ export function Skin({ id, inv }: { id: string; inv: Inventory }) {
 
       <Levels skin={skin} on={level} pick={pick} melee={melee} />
       <Colours skin={skin} on={colour} kept={kept} pick={setColour} />
-      <Worn skin={skin} weapon={weapon} inv={inv} mine={mine} melee={melee} art={art} />
+      <Worn
+        skin={skin}
+        weapon={weapon}
+        inv={inv}
+        mine={mine}
+        melee={melee}
+        art={art}
+        level={level}
+        colour={colour}
+      />
 
       <p class="legal vary__note">{s.listPrice}</p>
     </main>
