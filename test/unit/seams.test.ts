@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'vitest';
 
@@ -101,19 +101,29 @@ test('the KV namespace holds caches only, never a session', () => {
 // Same idea, other side of the wire: the page can reach a session, so a
 // third-party script or an HTML sink on it is a credential-theft path.
 
-const web = [
-  'public/app.js',
-  'public/icons.js',
-  'public/ui.js',
-  'public/items.js',
-  'public/catalogs.js',
-  'public/inventory.js',
-  'public/favs.js',
-  'public/index.html',
-].map((p) => ({
-  path: p,
-  text: readFileSync(p, 'utf8'),
-}));
+// Found rather than listed. A hardcoded list is a guard that a new module opts
+// out of by existing, which is the opposite of what this file is for: the whole
+// value of these checks is that nobody has to remember them.
+function front(dir: string, out: Array<{ path: string; text: string }> = []) {
+  if (!existsSync(dir)) return out;
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, e.name).replace(/\\/g, '/');
+    if (e.isDirectory()) front(p, out);
+    // qr.js is a vendored minified encoder, exempt from the style checks but not
+    // from the origin one — it is covered by the CSP test below like everything
+    // else the page loads.
+    else if (/\.(js|tsx?|html)$/.test(e.name) && p !== 'public/qr.js') {
+      out.push({ path: p, text: readFileSync(p, 'utf8') });
+    }
+  }
+  return out;
+}
+
+const web = [...front('public'), ...front('web')];
+
+test('the front end has files to check at all', () => {
+  assert.ok(web.length > 4, 'found only ' + web.length + ' front-end files — the roots moved');
+});
 
 test('the page builds DOM, never HTML from strings', () => {
   // Item names come from valorant-api.com, a database this project does not
