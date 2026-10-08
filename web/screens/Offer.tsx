@@ -11,7 +11,7 @@
 // screen has a skeleton while it lands — which is exactly the trade the store
 // refuses to make and this screen is the point of. See data/skins.ts.
 
-import { useState } from 'preact/hooks';
+import { useRef, useState } from 'preact/hooks';
 import { Chevron, Play } from '../components/icons.tsx';
 import { Money } from '../components/Money.tsx';
 import { tierByPrice } from '../data/tiers.ts';
@@ -39,6 +39,10 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
   const [level, setLevel] = useState(id);
   const [chroma, setChroma] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
+  // Whether the clip has a frame yet. Until it does the element paints black,
+  // which is a hole in the screen for however long the first bytes take.
+  const [lit, setLit] = useState(false);
+  const clipRef = useRef<HTMLVideoElement>(null);
 
   // The whole screen waits as one. Half of it arriving before the other half
   // is two layout shifts where the design asks for none.
@@ -58,11 +62,18 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
   const still = clip ? clip + '#t=' + STILL : undefined;
   // The base colourway until a swatch is tapped, so the block is there from
   // the first frame rather than appearing under your thumb.
-  const variant = family ? chosen(family, chroma ?? '') : null;
-  const chip = family ? chipFor(family, level) : found.level && s.levelNo(found.level);
+  // Only when there is more than one: a swatch row of one is not a choice, and
+  // the render under it would be the one already on the stage.
+  const variant = family && family.chromas.length > 1 ? chosen(family, chroma ?? '') : null;
+  // Same for the chip. "Level 1" on a skin that has exactly one level is a
+  // label that answers a question nobody could have had.
+  const chip = family && family.levels.length > 1 ? chipFor(family, level) : null;
+  // The render is a Ghost or an Odin and the row it came from knows which;
+  // without this the pistol arrives on the stage the size of a rifle.
+  const style = { ...artStyle(art), '--gun': String(found.scale) } as Record<string, string>;
 
   return (
-    <main class={art ? 'screen offer offer--lit' : 'screen offer'} style={artStyle(art)}>
+    <main class={art ? 'screen offer offer--lit' : 'screen offer'} style={style}>
       <button type="button" class="back" onClick={back}>
         <span class="offer__chev">
           <Chevron />
@@ -70,8 +81,14 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
         {t().common.nav.store}
       </button>
 
-      <div class="offer__stage stage" style={artStyle(art)}>
-        {clip ? (
+      <div class="offer__stage stage" style={style}>
+        {/* The render stands behind the clip and shows through until the clip
+            has a frame — that is the black flash, and it is also the whole
+            answer for a skin with no clip at all. Same picture either way, so
+            nothing moves when the video arrives over the top of it. */}
+        {found.icon && <img class="offer__art" src={found.icon} alt="" />}
+
+        {clip && (
           // Riot's own, streamed from their CDN — they are 13 MB each and this
           // page has no business holding a copy. Our control at rest, theirs
           // once it is running, because pause and scrub are not worth drawing.
@@ -80,15 +97,15 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
           // speech in it, and an empty <track> would claim captions exist.
           // biome-ignore lint/a11y/useMediaCaption: no speech, and no track to point at
           <video
-            class="offer__clip"
+            ref={clipRef}
+            class={lit ? 'offer__clip offer__clip--lit' : 'offer__clip'}
             src={still}
             preload="metadata"
             playsInline
             controls={playing}
+            onLoadedData={() => setLit(true)}
             onPlay={() => setPlaying(true)}
           />
-        ) : (
-          found.icon && <img class="offer__art" src={found.icon} alt="" />
         )}
 
         {clip && !playing && (
@@ -138,9 +155,9 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
     </main>
   );
 
-  function start(e: MouseEvent) {
-    const video = (e.currentTarget as HTMLElement).previousElementSibling;
-    if (!(video instanceof HTMLVideoElement)) return;
+  function start() {
+    const video = clipRef.current;
+    if (!video) return;
     // Back to the beginning: the still is a frame chosen to look like
     // something, and pressing play means play the clip, not the rest of it.
     video.currentTime = 0;
