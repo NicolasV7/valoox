@@ -29,22 +29,42 @@
   border-bottom: 1px solid var(--rule);
 }
 
-/* The equipped player card, behind everything. Masked off to the left so the
- * name is read on the page's own ground rather than on the art. */
+/* The equipped player card, across the whole band. It is the one piece of
+ * personalisation Riot gives that costs nothing to show, so it is shown — and
+ * at 0.38 it is a picture rather than a texture. */
 .head__card {
   position: absolute;
+  z-index: 0;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center 35%;
-  opacity: 0.3;
-  mask-image: linear-gradient(90deg, transparent 0%, #000 42%, #000 100%);
+  opacity: 0.38;
+}
+
+/* Darkened from the left, not masked. A mask erases the art under the name; a
+ * gradient leaves it there and puts the page's own ground in front of it, so
+ * the name is read on a flat colour and the card still runs the full width. */
+.head__who::before {
+  content: '';
+  position: absolute;
+  /* Over the card, under the name. All three are positioned siblings, so the
+   * order has to be said rather than left to the order they were written in. */
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--page) 18%,
+    rgba(14, 14, 17, 0.55) 62%,
+    rgba(14, 14, 17, 0.2) 100%
+  );
 }
 
 .head__badge,
 .head__id {
   position: relative;
+  z-index: 2;
 }
 
 .head__badge {
@@ -66,15 +86,38 @@
   margin-top: 3px;
 }
 
+/* What you can spend, and how long you have to spend it.
+ *
+ * VP at full strength and the other two a step back: VP is what the store
+ * above is priced in, and Radianite and Kingdom Credits are here because you
+ * would wonder where they went, not because you are about to use them. */
 .head__line {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 18px;
   padding: 14px var(--gut);
 }
 
+.head__line .money--rad,
+.head__line .money--kc {
+  color: var(--ink-3);
+}
+
+/* VP at its own strength, the other two dimmed with their text. */
+.head__line .money--vp img {
+  opacity: 1;
+}
+
+.head__line .money--rad img,
+.head__line .money--kc img {
+  opacity: 0.75;
+}
+
+/* The one number on the screen that is moving, so it is the one with weight. */
 .head__clock {
   margin-left: auto;
+  font-size: 13.5px;
   font-weight: 700;
+  letter-spacing: 0.01em;
   color: var(--clock);
 }

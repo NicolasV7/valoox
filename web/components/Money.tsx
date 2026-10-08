@@ -42,7 +42,7 @@ export function Money({
   // different from free.
   if (amount === null) return <span class="money num">—</span>;
   return (
-    <span class={struck ? 'money money--was num' : 'money num'}>
+    <span class={'money num money--' + of + (struck ? ' money--was' : '')}>
       {!bare && <img src={coin(of)} alt="" width={size} height={size} />}
       {amount.toLocaleString(locale())}
     </span>

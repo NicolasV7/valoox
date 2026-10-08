@@ -9,8 +9,12 @@
 // called, what it costs. The tier leads because it is the one word that says
 // how much this is going to hurt before the number does.
 //
-// The name wraps rather than truncating. "Prelude to Chaos Vandal" at one line
-// is three characters and an ellipsis, which is not a name.
+// The name breaks before the weapon, always. A VALORANT skin is called
+// "<something> <weapon>" — Reaver Vandal, Champions 2026 Dagger — and the
+// weapon is the word you are scanning the column for. Letting the line wrap
+// where it happens to run out puts it on the first line in a short name and
+// the second in a long one, so the one word you are looking for moves between
+// rows. Splitting at the last space pins it.
 
 import type { Tier } from '../data/catalogue.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
@@ -58,13 +62,25 @@ export function OfferRow({
         </span>
       )}
 
-      <span class="row__name">{name ?? t().common.loading}</span>
+      <span class="row__name">{name ? split(name) : t().common.loading}</span>
 
       <span class="row__price">
         {cut && <Money amount={was} struck size={11} bare={bare} />}
         <Money amount={cost} size={14} bare={bare} />
       </span>
     </a>
+  );
+}
+
+/** The skin line, then the weapon. A name with no space in it stays whole. */
+function split(name: string) {
+  const at = name.lastIndexOf(' ');
+  if (at < 1) return name;
+  return (
+    <>
+      <span>{name.slice(0, at)}</span>
+      <span>{name.slice(at + 1)}</span>
+    </>
   );
 }
 

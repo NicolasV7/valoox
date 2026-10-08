@@ -101,9 +101,9 @@ export function StoreHeader({
       </div>
 
       <div class="head__line">
-        <Money amount={wallet.vp} of="vp" />
-        <Money amount={wallet.rad} of="rad" />
-        <Money amount={wallet.kc} of="kc" />
+        <Money amount={wallet.vp} of="vp" size={16} />
+        <Money amount={wallet.rad} of="rad" size={16} />
+        <Money amount={wallet.kc} of="kc" size={16} />
         <Countdown from={remaining} className="head__clock" />
       </div>
     </header>
