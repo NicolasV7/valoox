@@ -14,6 +14,7 @@ import { useKept } from '../data/kept.ts';
 import type { Spray } from '../data/sprays.ts';
 import type { Inventory } from '../data/types.ts';
 import { useSprays } from '../data/useIndex.ts';
+import { warm } from '../data/warm.ts';
 import { t } from '../i18n/index.ts';
 import { CollectionTabs } from './Collection.tabs.tsx';
 import { SpraysLoading } from './Sprays.loading.tsx';
@@ -26,6 +27,7 @@ export function Sprays({ inv }: { inv: Inventory }) {
   const s = t().sprays;
   const all = useSprays();
   const [find, setFind] = useKept('sprays');
+  warm();
 
   const own = useMemo(() => new Set(inv.byType[SPRAY] ?? []), [inv]);
   const wheel = inv.worn?.sprays ?? [];

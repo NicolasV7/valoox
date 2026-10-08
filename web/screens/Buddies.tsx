@@ -14,6 +14,7 @@ import { useKept } from '../data/kept.ts';
 import type { Inventory } from '../data/types.ts';
 import { useGuns } from '../data/useGuns.ts';
 import { useBuddies } from '../data/useIndex.ts';
+import { warm } from '../data/warm.ts';
 import { t } from '../i18n/index.ts';
 import { BuddiesLoading } from './Buddies.loading.tsx';
 import { Tile } from './Buddies.tile.tsx';
@@ -26,6 +27,7 @@ export function Buddies({ inv }: { inv: Inventory }) {
   const s = t().buddies;
   const all = useBuddies();
   const [find, setFind] = useKept('buddies');
+  warm();
 
   // Two different numbers out of one list. Riot sends one entry per instance
   // and an instance is identified by its charm's level, so four copies of one
