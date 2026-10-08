@@ -9,7 +9,7 @@
 // same place and the screen changes without anything jumping.
 
 import { Check, Clock, Riot } from '../components/icons.tsx';
-import { QrCode, QrWaiting } from '../components/QrCode.tsx';
+import { QrCode } from '../components/QrCode.tsx';
 import { Thinking } from '../components/Thinking.tsx';
 import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
@@ -48,12 +48,13 @@ export function Scan({
       <p class="lede scan__lede">{s.scan.lede}</p>
 
       <div class="plate">
-        {state.phase === 'ready' ? (
+        {/* Nothing until the code is here. The plate holds its size, so the
+            screen does not move when it lands — an empty white square is a
+            better wait than a shape that has to be replaced. */}
+        {state.phase === 'ready' && (
           <span class="plate__code">
             <QrCode url={state.url} size={190} />
           </span>
-        ) : (
-          <QrWaiting size={190} />
         )}
       </div>
       <p class="small scan__how">{s.scan.how}</p>

@@ -27,17 +27,6 @@
   display: block;
 }
 
-/* Grey, and there from the first frame.
- *
- * It used to be held back 300ms so a fast code would never flash it — which
- * traded a flicker for a blank white plate, which is worse. Now there is
- * nothing to flash: the corners stay put and only their colour changes. */
-.plate__wait {
-  display: block;
-  color: #d3d7dd;
-  animation: breathe 1600ms ease-in-out infinite;
-}
-
 .plate__seal {
   display: flex;
   align-items: center;
