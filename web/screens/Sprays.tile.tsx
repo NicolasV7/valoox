@@ -4,7 +4,7 @@
 // a hook cannot run inside the map that draws the grid.
 
 import { useState } from 'preact/hooks';
-import { Star } from '../components/icons.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import type { Spray } from '../data/sprays.ts';
 import { colourOf } from '../design/measure.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
@@ -21,7 +21,10 @@ export function Tile({ spray, slot, mine }: { spray: Spray; slot: number; mine: 
   const route = { name: 'spray', id: spray.id } as const;
 
   return (
-    <a class="pad stage" style={artStyle(lit)} href={href(route)} onClick={intercept(route)}>
+    <div class="pad stage">
+      <a class="hit" href={href(route)} onClick={intercept(route)}>
+        <span class="sr">{spray.name}</span>
+      </a>
       <span class="pad__shot">
         {spray.art && (
           <img
@@ -42,11 +45,14 @@ export function Tile({ spray, slot, mine }: { spray: Spray; slot: number; mine: 
       {/* The mark that tells the two shelves apart at the end of a scroll. It
           is a mark and not a control until the wishlist exists to put it on —
           the same as the one on a skin you do not own. */}
+      {/* A thing you do not own is a thing the store can still offer
+          you, which is why this is a control and not a mark. */}
       {!mine && (
-        <span class="pad__star">
-          <Star size={15} />
-        </span>
+        <StarMark
+          size={15}
+          item={{ id: spray.id, name: spray.name, type: 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475' }}
+        />
       )}
-    </a>
+    </div>
   );
 }

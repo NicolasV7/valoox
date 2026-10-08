@@ -14,6 +14,7 @@ import { useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
 import { Check, Play } from '../components/icons.tsx';
 import { Money } from '../components/Money.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import { priceOf, tierOf } from '../data/tiers.ts';
 import type { Inventory } from '../data/types.ts';
 import { useSkinOf } from '../data/useIndex.ts';
@@ -121,6 +122,15 @@ export function Skin({ id, inv }: { id: string; inv: Inventory }) {
           <span class="vary__list">
             <Money amount={priceOf(tier?.name, melee)} size={14} />
           </span>
+          {/* Here, where you have just watched the clip and decided. A skin
+              you already own is one the daily store will never offer back,
+              so there is nothing to watch for. */}
+          {!mine && (
+            <StarMark
+              size={19}
+              item={{ id: skin.levels[0]?.id ?? id, name: skin.name, type: LEVELS }}
+            />
+          )}
         </div>
       </div>
 

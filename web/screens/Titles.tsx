@@ -8,8 +8,9 @@
 // A list rather than a grid, because what is being compared is words.
 
 import { useMemo } from 'preact/hooks';
-import { Search, Star, TitleMark } from '../components/icons.tsx';
+import { Search, TitleMark } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
 import type { Title } from '../data/titles.ts';
@@ -118,15 +119,21 @@ function Shelf({
 function Row({ title, worn, mine }: { title: Title; worn: boolean; mine: boolean }) {
   const route = { name: 'title', id: title.id } as const;
   return (
-    <a class="said__row" href={href(route)} onClick={intercept(route)}>
+    <div class="said__row">
+      <a class="hit" href={href(route)} onClick={intercept(route)}>
+        <span class="sr">{title.name}</span>
+      </a>
       <TitleMark size={24} />
       <span class="said__text">{title.name}</span>
       {worn && <span class="said__on">{t().common.equipped}</span>}
+      {/* A thing you do not own is a thing the store can still offer
+          you, which is why this is a control and not a mark. */}
       {!mine && (
-        <span class="said__star">
-          <Star size={16} />
-        </span>
+        <StarMark
+          size={16}
+          item={{ id: title.id, name: title.name, type: 'de7caa6b-adf7-4588-bbd1-143831e786c6' }}
+        />
       )}
-    </a>
+    </div>
   );
 }

@@ -22,7 +22,7 @@ import { useBundle, useSkin } from '../data/usePiece.ts';
 import { shapeOf, spans } from '../design/shapes.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
-import { href, intercept } from '../route.ts';
+import { href, intercept, type Whence } from '../route.ts';
 import { Totals } from './Bundle.totals.tsx';
 
 export function Bundle({ bundle }: { bundle: BundleData }) {
@@ -38,6 +38,13 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
   // The tier of the dearest weapon. Every piece in a bundle is sold at the same
   // tier, and a weapon is the only one whose price says which.
   const tier = tierByPrice(guns.map((g) => g.base ?? 0).sort((a, b) => b - a)[0] ?? null);
+  // Every piece in here opens a screen whose way out is this bundle, not the
+  // store behind it. Without saying so the back control falls back to its
+  // section, and opening one item out of fourteen cost you the other thirteen.
+  const from: Whence = {
+    to: { name: 'bundle', id: bundle.id },
+    said: found?.name ?? t().common.nav.store,
+  };
 
   return (
     <main
@@ -73,7 +80,7 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
 
         <div class="store__rows">
           {guns.map((it) => (
-            <Gun key={it.id} item={it} />
+            <Gun key={it.id} item={it} from={from} />
           ))}
         </div>
 
@@ -87,6 +94,7 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
             {rest.map((it, i) => (
               <Tile
                 key={it.id}
+                from={from}
                 type={it.type}
                 id={it.id}
                 cost={it.price ?? it.base}
@@ -112,8 +120,9 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
 }
 
 /** One weapon out of the bundle, in the same letterbox the store uses. */
-function Gun({ item }: { item: GroupItem }) {
+function Gun({ item, from }: { item: GroupItem; from: Whence }) {
   const found = useSkin(item.id);
+  const route = { name: 'offer', id: item.id } as const;
 
   return (
     <OfferRow
@@ -124,8 +133,11 @@ function Gun({ item }: { item: GroupItem }) {
       was={item.base}
       scale={found?.scale}
       bare
-      href={'/offer/' + item.id}
-      onClick={undefined}
+      href={href(route)}
+      // Routed rather than loaded. A plain href here was a full navigation,
+      // which throws away the history entry this bundle's name rides in — so
+      // every skin opened out of a bundle came back to the store.
+      onClick={intercept(route, from)}
     />
   );
 }

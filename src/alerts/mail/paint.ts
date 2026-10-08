@@ -16,33 +16,34 @@ const MONO = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace";
 export const FONT = { sans: SANS, mono: MONO };
 
 /**
- * The ink, brighter than the app's by one step at every level.
+ * The ink. One value for every word, and that is the whole scale.
  *
- * The same greys that read correctly on a screen you are holding at arm's
- * length read washed out in a mailbox: a message is glanced at, often at a
- * tilt, often outdoors, and it gets one pass rather than the attention a
- * screen you navigated to gets. So the reading copy is the same white as
- * the headings — there is no hierarchy to protect between a heading and the
- * two sentences under it — and everything below that moves up a step rather
- * than staying where the artboard put it.
+ * A message is not a screen. It is glanced at, often at a tilt, often
+ * outdoors, and it gets one pass — so the grey that separates a lead from a
+ * footnote on a page you navigated to just reads as washed out here. The
+ * hierarchy that survives the move is size and weight, which it does.
  *
- * The app's own palette is unchanged. These values are only ever used in a
- * message, and a message is read somewhere else.
+ * Kept as named levels rather than one token because each name still says
+ * what the line is FOR, and the day a message needs a quieter one the place
+ * to put it is written down. The app's own palette is untouched: these
+ * values are only ever used in a message.
  */
+const WORD = '#f2f4f5';
+
 export const INK = {
   page: '#0E0E11',
   stage: '#16171B',
   rule: '#1D1F25',
   line: '#24262C',
-  text: '#f2f4f5',
-  /** Reading copy: the same white. */
-  body: '#f2f4f5',
+  text: WORD,
+  /** Reading copy. */
+  body: WORD,
   /** A line that is true but secondary. */
-  faint: '#C9CFD3',
+  faint: WORD,
   /** The footer, which is there to be found rather than read. */
-  quiet: '#A7AEB3',
+  quiet: WORD,
   /** Riot's attribution, which is a legal line and nothing else. */
-  legal: '#8B9399',
+  legal: WORD,
 };
 
 /**

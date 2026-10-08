@@ -16,6 +16,10 @@ export const stopped = {
   nothingChanged: 'Nothing changed',
   stillOn: 'The alerts are still running. You can close this tab.',
 
+  alreadyUsed: 'This link has been used',
+  alreadyUsedWhy:
+    'You already answered from here, and every message carries its own. To ' +
+    'change your mind, do it in the app, or use the link in the next message.',
   couldNot: 'That link does not work',
   couldNotWhy: 'It opened no row. It may no longer be valid, or it may not be the whole link.',
 };

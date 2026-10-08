@@ -6,31 +6,61 @@
 // employer's filter opened the message first. A button cannot be pressed by
 // a scanner.
 //
+// What it does on arrival is ask the Worker whether this link is still good,
+// so nobody presses something that was never going to work.
+//
 // Nothing is thrown away either way. The list stays exactly as it was, with
 // nowhere to send, and saying so is the only reassurance this screen owes:
 // the thing people are afraid of when they unsubscribe is losing the work
 // they put in.
 
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import * as api from '../data/api.ts';
 import { reload } from '../data/channel.ts';
 import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
 
+interface Said {
+  ok?: boolean;
+  live?: boolean;
+  error?: string;
+  was?: string | null;
+  kept?: number;
+}
+
 type At =
+  | { at: 'asking' }
   | { at: 'ask' }
   | { at: 'going' }
   | { at: 'done'; to: string | null; kept: number }
   | { at: 'kept' }
+  | { at: 'used' }
   | { at: 'failed' };
+
+/** One call for all three things this screen does: ask whether the link is
+ *  still good, and answer it either way. Without an answer the Worker only
+ *  reports, so arriving spends nothing. */
+const say = (token: string, answer?: 'yes' | 'no') =>
+  api.post<Said>('/api/stop', { t: token, answer }).catch(() => null) as Promise<Said | null>;
 
 export function Stopped({ token }: { token: string }) {
   const s = t().stopped;
-  const [state, set] = useState<At>({ at: 'ask' });
+  const [state, set] = useState<At>({ at: 'asking' });
+
+  useEffect(() => {
+    let alive = true;
+    void say(token).then((r) => {
+      if (!alive) return;
+      set(r?.error === 'used' ? { at: 'used' } : r?.ok ? { at: 'ask' } : { at: 'failed' });
+    });
+    return () => {
+      alive = false;
+    };
+  }, [token]);
 
   if (state.at === 'done') {
     return (
-      <Card art={SPRAY.asleep} said={s.stopped}>
+      <Card art={SPRAY.letGo} said={s.stopped}>
         <p class="lede stop__lede">{state.to ? s.noMoreTo(state.to) : s.alreadyOff}</p>
         <p class="small stop__under">{state.kept > 0 ? s.keptCount(state.kept) : s.keptNone}</p>
       </Card>
@@ -45,6 +75,14 @@ export function Stopped({ token }: { token: string }) {
     );
   }
 
+  if (state.at === 'used') {
+    return (
+      <Card art={SPRAY.huh} said={s.alreadyUsed}>
+        <p class="lede stop__lede">{s.alreadyUsedWhy}</p>
+      </Card>
+    );
+  }
+
   if (state.at === 'failed') {
     return (
       <Card art={SPRAY.whoops} said={s.couldNot}>
@@ -53,33 +91,29 @@ export function Stopped({ token }: { token: string }) {
     );
   }
 
-  const busy = state.at === 'going';
+  // Asking and asked look the same on purpose: the check is one round trip to
+  // our own Worker, and a spinner in front of a question is a flash.
+  const busy = state.at !== 'ask';
   return (
     <Card art={SPRAY.holdOn} said={s.sure}>
       <p class="lede stop__lede">{s.sureWhy}</p>
       <div class="stop__pair">
-        <button type="button" class="btn" disabled={busy} onClick={stop}>
-          {busy ? t().common.loading : s.yesStop}
+        <button type="button" class="btn" disabled={busy} onClick={() => answer('yes')}>
+          {state.at === 'going' ? t().common.loading : s.yesStop}
         </button>
-        <button
-          type="button"
-          class="btn btn--quiet"
-          disabled={busy}
-          onClick={() => set({ at: 'kept' })}
-        >
+        <button type="button" class="btn btn--quiet" disabled={busy} onClick={() => answer('no')}>
           {s.no}
         </button>
       </div>
     </Card>
   );
 
-  async function stop() {
+  async function answer(how: 'yes' | 'no') {
     set({ at: 'going' });
-    const res = (await api
-      .post<{ ok?: boolean; was?: string | null; kept?: number }>('/api/stop', { t: token })
-      .catch(() => null)) as { ok?: boolean; was?: string | null; kept?: number } | null;
-
+    const res = await say(token, how);
+    if (res?.error === 'used') return set({ at: 'used' });
     if (!res?.ok) return set({ at: 'failed' });
+    if (how === 'no') return set({ at: 'kept' });
     // The tab that was open on the alerts screen is now wrong about the
     // address. Cheap, and it is the same row.
     await reload();
@@ -88,8 +122,8 @@ export function Stopped({ token }: { token: string }) {
 }
 
 /**
- * One shape for all four states, so the sticker and the heading do not move
- * between them — the screen reads as one place answering, not four pages.
+ * One shape for every state, so the sticker and the heading do not move
+ * between them — the screen reads as one place answering, not six pages.
  *
  * Keyed on the heading, which is what makes the answer arrive rather than
  * appear: a new key is a new subtree, so the entry animation plays again
@@ -103,7 +137,7 @@ function Card({
 }: {
   art: string;
   said: string;
-  children: preact.ComponentChildren;
+  children?: preact.ComponentChildren;
 }) {
   return (
     <main class="screen stop">

@@ -65,6 +65,16 @@ export const alerts = {
     'nueva y la vieja sigue recibiendo hasta que el código nuevo vuelva. Nada se ' +
     'corta en silencio.',
 
+  watch: (name: string) => `Vigilar ${name}`,
+
+  standby: 'Tu lista está en espera',
+  standbyKept: (n: number) =>
+    n === 1
+      ? 'La cosa que marcaste sigue acá. No sale nada hasta que haya una dirección verificada.'
+      : `Las ${n} cosas que marcaste siguen acá. No sale nada hasta que haya una dirección verificada.`,
+  standbyNone: 'Para marcar algo hace falta primero una dirección verificada.',
+  addAnAddress: 'Poner una dirección',
+
   // --- la lista andando ----------------------------------------------------
   change: 'Cambiar',
   weapons: 'Armas',

@@ -1,0 +1,106 @@
+/* The star, and the link it sits on top of.
+ *
+ * Its own file because it is not one screen's: the same control is on four
+ * collection tabs, a weapon's skins and a skin itself, and the thing that
+ * makes it work everywhere is the pair of rules below rather than the glyph.
+ */
+
+/* --- the star, wherever a thing can be watched --------------------------- */
+/* Over the corner of whatever it is about, never inside it: every one of
+ * these sits on a link, and a button nested in an anchor is markup no
+ * browser agrees about. */
+
+.star {
+  position: absolute;
+  z-index: 2;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  padding: 7px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(10 10 12 / 48%);
+  color: var(--ink-4);
+  line-height: 0;
+  cursor: pointer;
+  transition:
+    color 180ms cubic-bezier(0.22, 0.8, 0.3, 1),
+    transform 180ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+.star--on {
+  color: var(--kept);
+}
+
+.star:active:not([disabled]) {
+  transform: scale(0.88);
+}
+
+.star[disabled] {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* In a row, where there is a column for it rather than a corner to sit in. */
+.star--inline {
+  position: static;
+  padding: 8px;
+  background: none;
+}
+
+/* The link, stretched over whatever it is about.
+ *
+ * A tile that opens something and also carries a star cannot be an anchor:
+ * a button inside one is markup no spec allows, and a span with an onClick
+ * is a control the keyboard walks straight past. So the anchor is a sibling
+ * covering the tile, the content sits above it, and the star above that. */
+.hit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.hit:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Everything the tile draws sits above its own link, so a name is selectable
+ * and an image is not swallowed by it. */
+.pad > :not(.hit),
+.leaf > :not(.hit),
+.skin > :not(.hit),
+.said__row > :not(.hit) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Named for a screen reader, drawn for nobody. The stretched link has no
+ * text of its own — the tile around it carries that — and a link with no
+ * accessible name is a link that reads out as its URL. */
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* On the skin screen there is a row for it rather than a corner, and it is
+ * the one place this control is big enough to read as a verb. */
+.vary__has .star {
+  position: static;
+  margin-top: 8px;
+  padding: 9px;
+  background: var(--raised);
+}
+
+/* A weapon's skin list has a column for it, so the star sits in the column
+ * rather than over the corner — it is the row's last cell either way, and
+ * the chevron it replaces lived there too. */
+.skin__end .star {
+  position: static;
+  background: none;
+}

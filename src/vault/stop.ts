@@ -14,6 +14,12 @@
 //
 // It is not a login. All it carries is permission to stop sending, and the
 // mail it rides in was already in that mailbox.
+//
+// Each one is minted with a nonce of its own, so every message carries a
+// different link. That is what lets a link be spent: answering one closes
+// that link and leaves every other message's alone — without the nonce,
+// burning one would burn the whole account's, including the ones in mail
+// that has not been opened yet.
 
 import type { Env } from '../types.ts';
 
@@ -52,28 +58,61 @@ function signer(env: Env): Promise<CryptoKey> {
   return cache.key;
 }
 
-const tag = async (env: Env, uid: string): Promise<Uint8Array> =>
-  new Uint8Array(await crypto.subtle.sign('HMAC', await signer(env), enc.encode(uid))).slice(0, 16);
+const tag = async (env: Env, body: string): Promise<Uint8Array> =>
+  new Uint8Array(await crypto.subtle.sign('HMAC', await signer(env), enc.encode(body))).slice(
+    0,
+    16,
+  );
 
-/** `<uid>.<signature>`, url-safe. */
-export async function mintStop(env: Env, uid: string): Promise<string> {
-  return uid + '.' + b64u(await tag(env, uid));
+/** Which message this link came in. Random rather than a counter: a counter
+ *  would say how many have been sent, in a string that travels in a mailbox. */
+const nonce = () => b64u(crypto.getRandomValues(new Uint8Array(9)));
+
+export interface Stop {
+  uid: string;
+  /** The one message this link belongs to, and the thing that gets spent. */
+  id: string;
 }
 
-/** The uid a token names, or null. Constant time on the comparison, because
- *  an early return on the first wrong byte is how a signature gets forged one
+/** `<uid>.<nonce>.<signature>`, url-safe. */
+export async function mintStop(env: Env, uid: string): Promise<string> {
+  const id = nonce();
+  return uid + '.' + id + '.' + b64u(await tag(env, uid + '.' + id));
+}
+
+/** What a token names, or null. Constant time on the comparison, because an
+ *  early return on the first wrong byte is how a signature gets forged one
  *  byte at a time. */
-export async function readStop(env: Env, token: unknown): Promise<string | null> {
+export async function readStop(env: Env, token: unknown): Promise<Stop | null> {
   if (typeof token !== 'string' || token.length > 256) return null;
   const cut = token.lastIndexOf('.');
   if (cut <= 0) return null;
 
-  const uid = token.slice(0, cut);
+  const body = token.slice(0, cut);
+  const dot = body.indexOf('.');
+  if (dot <= 0) return null;
+
   const got = unb64u(token.slice(cut + 1));
-  const want = await tag(env, uid);
+  const want = await tag(env, body);
   if (got.length !== want.length) return null;
 
   let diff = 0;
   for (let i = 0; i < want.length; i++) diff |= got[i] ^ want[i];
-  return diff === 0 ? uid : null;
+  return diff === 0 ? { uid: body.slice(0, dot), id: body.slice(dot + 1) } : null;
 }
+
+/**
+ * Whether this link has already been answered.
+ *
+ * Six months, because a message is read whenever it is read and a link that
+ * quietly came back to life would be the same surprise it was built to
+ * avoid. Not atomic, and it does not need to be: two taps on one link in the
+ * same second is somebody double-tapping, and both would do the same thing.
+ */
+const SPENT = 60 * 60 * 24 * 180;
+
+export const wasSpent = async (env: Env, id: string): Promise<boolean> =>
+  (await env.VAL.get('stop:' + id)) !== null;
+
+export const spend = (env: Env, id: string, how: string): Promise<void> =>
+  env.VAL.put('stop:' + id, how, { expirationTtl: SPENT });

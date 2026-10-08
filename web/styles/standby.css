@@ -1,0 +1,44 @@
+/* --- the list, kept, with nowhere to send -------------------------------- */
+/* Not an error and not an empty state: the work is intact and one thing is
+ * missing. So it is a card inside the screen rather than a screen of its
+ * own, and the way out of it is the only control on it. */
+
+.standby {
+  margin: 18px var(--gut) 0;
+  padding: 22px 20px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--card);
+  text-align: center;
+}
+
+.standby__art {
+  width: min(104px, 28vw);
+  height: auto;
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.standby__lede {
+  margin: 12px auto 0;
+  max-width: 28ch;
+}
+
+.standby__under {
+  margin: 8px auto 0;
+  max-width: 32ch;
+  color: var(--ink-4);
+}
+
+.standby__go {
+  width: 100%;
+  margin-top: 18px;
+}
+
+/* Shut, because there is nowhere to send what you would find. Drawn and
+ * dimmed rather than removed: a door that is there and closed says more
+ * than a door that is not there. */
+.watch__find--shut {
+  opacity: 0.45;
+  cursor: default;
+}

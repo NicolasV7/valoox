@@ -34,6 +34,9 @@
  * on a screen. 86 is the row's own minimum, so the estimate is never wrong by
  * more than the one line a long name adds. */
 .skin {
+  /* The link inside it is stretched over the whole row — see star.css — so
+   * the row is what that link is measured against. */
+  position: relative;
   content-visibility: auto;
   contain-intrinsic-size: auto 86px;
   display: grid;

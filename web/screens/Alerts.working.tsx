@@ -17,6 +17,7 @@ import { MAX, useStars } from '../data/stars.ts';
 import type { Prefs, StoreView } from '../data/types.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept, type Route } from '../route.ts';
+import { AlertsStandby } from './Alerts.standby.tsx';
 
 const CHANNEL: Route = { name: 'alerts', step: 'channel' };
 const CODE: Route = { name: 'alerts', step: 'code' };
@@ -59,6 +60,8 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
         </span>
       </a>
 
+      {!ok && <AlertsStandby starred={all.length} />}
+
       <Group said={s.weapons} left={view.remaining} />
       {guns.length ? (
         <div class="watch__list">
@@ -82,10 +85,17 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
       )}
 
       <div class="watch__add">
-        <a class="find watch__find" href={href(ADD)} onClick={intercept(ADD)}>
-          <Search />
-          {s.addSomething}
-        </a>
+        {ok ? (
+          <a class="find watch__find" href={href(ADD)} onClick={intercept(ADD)}>
+            <Search />
+            {s.addSomething}
+          </a>
+        ) : (
+          <span class="find watch__find watch__find--shut">
+            <Search />
+            {s.addSomething}
+          </span>
+        )}
         <span class="watch__count num">{s.outOf(all.length, MAX)}</span>
       </div>
 

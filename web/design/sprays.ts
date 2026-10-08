@@ -3,7 +3,7 @@
 // feeling to carry, and they are the only ones where a picture is not in the
 // way of the thing you came to look at. The store and the collection stay bare.
 //
-// They are served from this origin. Twelve files that never change, fetched at
+// They are served from this origin. Fourteen files that never change, fetched at
 // build time by scripts/art.mjs — which is where Riot's uuid for each one is
 // written down — so the screen a stranger reads before scanning does not open
 // a second connection to draw a sticker on it.
@@ -38,4 +38,8 @@ export const SPRAY = {
   holdOn: art('holdon'),
   /** A gloved thumb up, with the Spike. Nothing was changed; carry on. */
   carryOn: art('carryon'),
+  /** Jett shrugging an Operator off a ledge. Something let go on purpose. */
+  letGo: art('letgo'),
+  /** Reyna, open hand, unimpressed. A link that no longer does anything. */
+  huh: art('huh'),
 } as const;

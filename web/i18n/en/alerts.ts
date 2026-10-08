@@ -64,6 +64,16 @@ export const alerts = {
     'new one, and the old one keeps receiving until the new code is typed back. ' +
     'Nothing stops silently.',
 
+  watch: (name: string) => `Watch ${name}`,
+
+  standby: 'Your list is on hold',
+  standbyKept: (n: number) =>
+    n === 1
+      ? 'The one thing you starred is still here. Nothing goes out until an address is verified.'
+      : `All ${n} things you starred are still here. Nothing goes out until an address is verified.`,
+  standbyNone: 'Starring something needs a verified address first.',
+  addAnAddress: 'Add an address',
+
   // --- the working list ----------------------------------------------------
   change: 'Change',
   weapons: 'Weapons',

@@ -14,34 +14,49 @@
 // it, and an unsubscribe that a scanner can fire is an unsubscribe nobody
 // asked for — the same reason the code is six digits and not a link. The page
 // behind the link posts this itself, which a scanner does not do.
+//
+// One answer per link, either way. A link that keeps working is one that can
+// undo a decision somebody already made by being tapped again a week later
+// from a thread they scrolled past — so `no` closes it exactly as `yes` does,
+// and the next message carries a link of its own.
 
 import { release } from '../alerts/claim.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import type { Env } from '../types.ts';
 import { setAlerts } from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
-import { readStop } from '../vault/stop.ts';
+import { readStop, spend, wasSpent } from '../vault/stop.ts';
 
 export async function stopMail({ env, uid, req }: Ctx): Promise<Body> {
-  const body = (await req.json().catch(() => null)) as { t?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { t?: unknown; answer?: unknown } | null;
 
   // No token at all is the other door: the Account screen, on the device that
-  // is already signed in, where the cookie is the answer.
+  // is already signed in, where the cookie is the answer and there is no link
+  // to spend.
   if (body?.t === undefined || body.t === '') return off(env, uid);
 
   // A token that was offered and does not verify is refused rather than
   // quietly ignored. Falling back to the cookie here would mean a link with
   // garbage in it turns off the alerts of whoever happens to open it — the
   // signature would be decoration, and the link would be the attack.
-  const who = await readStop(env, body.t);
-  if (!who) return { ok: false, error: 'bad link' };
-  return off(env, who);
+  const found = await readStop(env, body.t);
+  if (!found) return { ok: false, error: 'bad link' };
+  if (await wasSpent(env, found.id)) return { ok: false, error: 'used' };
+
+  // No answer is the page asking whether the link is still good, which it
+  // does on arrival so that nobody presses a button that was never going to
+  // work. Asking is not answering, so it spends nothing.
+  const answer = body.answer;
+  if (answer !== 'yes' && answer !== 'no') return { ok: true, live: true };
+
+  await spend(env, found.id, answer);
+  return answer === 'yes' ? off(env, found.uid) : { ok: true, kept: true };
 }
 
 async function off(env: Env, uid: string, retry = true): Promise<Body> {
   const held = await readSession(env, uid);
-  // Nothing to stop is the same answer as stopped. A link followed twice, or
-  // after the session expired, should read as done rather than as a failure.
+  // Nothing to stop is the same answer as stopped. A link followed after the
+  // session expired should read as done rather than as a failure.
   if (!held) return { ok: true, was: null };
 
   const was = held.session.mail?.to ?? null;

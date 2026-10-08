@@ -14,7 +14,14 @@ const env = {
 const UID = 'a'.repeat(32);
 
 test('a token names the row it was minted for', async () => {
-  assert.equal(await readStop(env, await mintStop(env, UID)), UID);
+  assert.equal((await readStop(env, await mintStop(env, UID)))?.uid, UID);
+});
+
+test('every link is its own link, so spending one leaves the rest alone', async () => {
+  const a = await readStop(env, await mintStop(env, UID));
+  const b = await readStop(env, await mintStop(env, UID));
+  assert.equal(a?.uid, b?.uid);
+  assert.notEqual(a?.id, b?.id);
 });
 
 test('a uid with no signature is nobody', async () => {
@@ -25,8 +32,14 @@ test('a uid with no signature is nobody', async () => {
 
 test('the signature cannot be lifted onto another uid', async () => {
   const token = await mintStop(env, UID);
-  const sig = token.slice(token.lastIndexOf('.'));
-  assert.equal(await readStop(env, 'b'.repeat(32) + sig), null);
+  const tail = token.slice(token.indexOf('.'));
+  assert.equal(await readStop(env, 'b'.repeat(32) + tail), null);
+});
+
+test('nor onto another message', async () => {
+  const token = await mintStop(env, UID);
+  const [uid, , sig] = token.split('.');
+  assert.equal(await readStop(env, [uid, 'ffffffffffff', sig].join('.')), null);
 });
 
 test('one flipped character is enough to fail', async () => {
@@ -54,7 +67,7 @@ test('rotating the key voids every outstanding link at once', async () => {
   assert.equal(await readStop(rotated, token), null);
   // ...and the same isolate goes back to answering for the old one, because
   // the derived key is cached on the secret itself and not on first use.
-  assert.equal(await readStop(env, token), UID);
+  assert.equal((await readStop(env, token))?.uid, UID);
 });
 
 test('nothing that is not a string is a token', async () => {

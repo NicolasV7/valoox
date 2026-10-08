@@ -5,13 +5,18 @@
 // list. One component per row is what makes that legal.
 
 import { useState } from 'preact/hooks';
-import { Chevron, Star } from '../components/icons.tsx';
+import { Chevron } from '../components/icons.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import { type Skin, shortName } from '../data/skins.ts';
 import { tierOf } from '../data/tiers.ts';
 import { colourOf } from '../design/measure.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
+
+/** Riot's item type for a skin level, which is what the storefront and the
+ *  wishlist both speak in. */
+const LEVELS = 'e7c63390-eda7-46e0-bb7a-a6abdacd2433';
 
 export function SkinRow({
   skin,
@@ -53,12 +58,10 @@ export function SkinRow({
     .join(' · ');
 
   return (
-    <a
-      class="skin stage stage--row"
-      style={artStyle(lit)}
-      href={href(route)}
-      onClick={intercept(route, from)}
-    >
+    <div class="skin stage stage--row" style={artStyle(lit)}>
+      <a class="hit" href={href(route)} onClick={intercept(route, from)}>
+        <span class="sr">{shortName(skin, gun)}</span>
+      </a>
       {art && (
         <img
           class={shot ? 'skin__art skin__art--on' : 'skin__art'}
@@ -79,11 +82,20 @@ export function SkinRow({
         {says && <span class="skin__what">{says}</span>}
       </span>
       {/* Where it goes, when it is yours. A star when it is not, which is
-          what tells the two lists apart at the end of a scroll. It is a mark
-          and not a control until the wishlist exists to put it on. */}
-      <span class={mine ? 'skin__end skin__end--go' : 'skin__end'}>
-        {mine ? <Chevron size={16} /> : <Star size={17} />}
-      </span>
-    </a>
+          both what tells the two lists apart at the end of a scroll and the
+          way to put it on the list. */}
+      {mine ? (
+        <span class="skin__end skin__end--go">
+          <Chevron size={16} />
+        </span>
+      ) : (
+        <span class="skin__end">
+          <StarMark
+            size={17}
+            item={{ id: skin.levels[0]?.id ?? skin.id, name: shortName(skin, gun), type: LEVELS }}
+          />
+        </span>
+      )}
+    </div>
   );
 }

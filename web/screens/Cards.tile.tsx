@@ -1,7 +1,7 @@
 // One card on the wall. Two columns, and the tile crops rather than shrinks.
 
 import { useState } from 'preact/hooks';
-import { Star } from '../components/icons.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import type { Card } from '../data/cards.ts';
 import { colourOf } from '../design/measure.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
@@ -16,7 +16,10 @@ export function Tile({ card, on, mine }: { card: Card; on: boolean; mine: boolea
   const route = { name: 'card', id: card.id } as const;
 
   return (
-    <a class="leaf stage" style={artStyle(lit)} href={href(route)} onClick={intercept(route)}>
+    <div class="leaf stage">
+      <a class="hit" href={href(route)} onClick={intercept(route)}>
+        <span class="sr">{card.name}</span>
+      </a>
       {card.tall && (
         <img
           class="leaf__art"
@@ -30,11 +33,14 @@ export function Tile({ card, on, mine }: { card: Card; on: boolean; mine: boolea
       {on && <span class="leaf__on">{t().common.equipped}</span>}
       <span class="leaf__scrim" />
       <span class="leaf__name">{card.name}</span>
+      {/* A thing you do not own is a thing the store can still offer
+          you, which is why this is a control and not a mark. */}
       {!mine && (
-        <span class="pad__star">
-          <Star size={15} />
-        </span>
+        <StarMark
+          size={15}
+          item={{ id: card.id, name: card.name, type: '3f296c07-64c3-494c-923b-fe692a4fa1bd' }}
+        />
       )}
-    </a>
+    </div>
   );
 }

@@ -14,7 +14,7 @@ import { usePiece } from '../data/usePiece.ts';
 import { kindOf, type Span, shapeOf } from '../design/shapes.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
-import { href, intercept } from '../route.ts';
+import { href, intercept, type Whence } from '../route.ts';
 import { TitleMark } from './icons.tsx';
 import { type Coin, Money } from './Money.tsx';
 
@@ -28,6 +28,7 @@ export function Tile({
   bare = false,
   captioned = false,
   span = 'normal',
+  from,
 }: {
   type: string;
   id: string;
@@ -41,6 +42,10 @@ export function Tile({
   captioned?: boolean;
   /** Grown to close a hole the grid would otherwise have. See design/shapes.ts. */
   span?: Span;
+  /** Where the back control on the screen this opens should point. Without
+   *  it that screen falls back to its section, which is right from the store
+   *  and wrong from inside a bundle. */
+  from?: Whence;
 }) {
   const found = usePiece(type, id);
   const shape = shapeOf(type);
@@ -54,7 +59,7 @@ export function Tile({
       class={'tile tile--' + shape + (span === 'normal' ? '' : ' tile--' + span) + ' stage'}
       style={artStyle(art)}
       href={href(route)}
-      onClick={intercept(route)}
+      onClick={intercept(route, from)}
     >
       {/* A title carries no art at all, and the white default weave is the
           right answer rather than a missing-image box. */}

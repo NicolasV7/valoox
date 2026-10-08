@@ -16,6 +16,7 @@ import { Back } from '../components/Back.tsx';
 import { Search } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
 import { Watch } from '../components/Watch.tsx';
+import { usePrefs } from '../data/channel.ts';
 import { bits, guns, narrow } from '../data/findable.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
@@ -25,6 +26,7 @@ import { useBuddies, useCards, useRacks, useSprays, useTitles } from '../data/us
 import { t } from '../i18n/index.ts';
 import { ALERTS } from '../route.ts';
 import { AlertsLoading } from './Alerts.loading.tsx';
+import { AlertsStandby } from './Alerts.standby.tsx';
 
 const STEP = 20;
 
@@ -39,7 +41,8 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
   const buddies = useBuddies();
   const cards = useCards();
   const titles = useTitles();
-  const { on, full, toggle } = useStars();
+  const { stars, on, full, toggle } = useStars();
+  const verified = usePrefs()?.mail?.ok === true;
 
   // Everything owned, flattened once: the indexes are keyed by item type and
   // this only ever asks "is this id mine".
@@ -57,6 +60,17 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
   const [shown, more] = useMore('alerts-add-' + kind + q, STEP);
 
   if (!all) return <AlertsLoading />;
+
+  // Nothing to find until there is somewhere to send what is found.
+  if (!verified) {
+    return (
+      <main class="screen bell">
+        <Back to={ALERTS} said={t().common.nav.alerts} />
+        <h1 class="bell__title">{s.addSomethingTitle}</h1>
+        <AlertsStandby starred={stars?.length ?? 0} />
+      </main>
+    );
+  }
 
   return (
     <main class="screen bell">

@@ -1,7 +1,7 @@
 // One charm on the wall. The spray tile with a different line under it.
 
 import { useState } from 'preact/hooks';
-import { Star } from '../components/icons.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import type { Buddy } from '../data/buddies.ts';
 import { colourOf } from '../design/measure.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
@@ -16,12 +16,10 @@ export function Tile({ buddy, on, mine }: { buddy: Buddy; on: string[]; mine: bo
   const said = on.filter(Boolean);
 
   return (
-    <a
-      class="pad pad--tall stage"
-      style={artStyle(lit)}
-      href={href(route)}
-      onClick={intercept(route)}
-    >
+    <div class="pad pad--tall stage">
+      <a class="hit" href={href(route)} onClick={intercept(route)}>
+        <span class="sr">{buddy.name}</span>
+      </a>
       <span class="pad__shot">
         {buddy.art && (
           <img
@@ -45,11 +43,18 @@ export function Tile({ buddy, on, mine }: { buddy: Buddy; on: string[]; mine: bo
         {said.length === 1 ? t().buddies.on(said[0] as string) : ''}
         {said.length > 1 ? t().buddies.onMany(said.length) : ''}
       </span>
+      {/* A thing you do not own is a thing the store can still offer
+          you, which is why this is a control and not a mark. */}
       {!mine && (
-        <span class="pad__star">
-          <Star size={15} />
-        </span>
+        <StarMark
+          size={15}
+          item={{
+            id: buddy.levels[0] ?? buddy.id,
+            name: buddy.name,
+            type: 'dd3bf334-87f3-40bd-b043-682a57a8dc3a',
+          }}
+        />
       )}
-    </a>
+    </div>
   );
 }

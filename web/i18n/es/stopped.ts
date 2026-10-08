@@ -16,6 +16,10 @@ export const stopped = {
   nothingChanged: 'No tocamos nada',
   stillOn: 'Los avisos siguen andando. Podés cerrar esta pestaña.',
 
+  alreadyUsed: 'Este enlace ya se usó',
+  alreadyUsedWhy:
+    'Ya respondiste desde acá, y cada correo trae el suyo. Si querés cambiar la ' +
+    'decisión, hacelo desde la app, o usá el enlace del correo siguiente.',
   couldNot: 'Ese enlace no sirve',
   couldNotWhy: 'No abrió ninguna fila. Puede que ya no valga, o que no sea el enlace entero.',
 };
