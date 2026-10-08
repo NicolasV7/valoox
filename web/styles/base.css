@@ -85,6 +85,12 @@ p {
   color: var(--ink-4);
 }
 
+/* A label that is not readable yet, at the size the word will be. */
+.label--waiting {
+  height: 14px;
+  border-radius: 4px;
+}
+
 .legal {
   font-size: var(--t-floor);
   line-height: 1.5;

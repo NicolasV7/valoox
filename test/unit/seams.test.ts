@@ -156,3 +156,16 @@ test('the CSP names no third-party script origin', () => {
   assert.equal(scriptSrc.trim(), "'self'", "script-src must stay exactly 'self'");
   assert.match(h, /worker-src 'none'/, 'worker-src does not inherit safely from script-src');
 });
+
+test('the only hosts the CSP names belong to Riot', () => {
+  // Three, each on one directive, each carrying Riot's own content. A fourth
+  // is a decision, not a tweak — which is what this test is for.
+  const h = readFileSync('public/_headers', 'utf8');
+  const hosts = [...new Set([...h.matchAll(/https:\/\/([a-z0-9.-]+)/g)].map((m) => m[1]))].sort();
+  assert.deepEqual(hosts, [
+    'media.valorant-api.com',
+    'valorant-api.com',
+    'valorant.dyn.riotcdn.net',
+  ]);
+  assert.match(h, /media-src https:\/\/valorant\.dyn\.riotcdn\.net;/, 'the clips, and only those');
+});

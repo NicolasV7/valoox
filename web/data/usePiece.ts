@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'preact/hooks';
 import { bundle, type Piece, piece, skin } from './catalogue.ts';
+import { type Family, familyOf } from './skins.ts';
 
 function resolve(get: () => Promise<Piece | null>, key: string): Piece | null {
   const [found, setFound] = useState<Piece | null>(null);
@@ -33,3 +34,21 @@ export const usePiece = (type: string, id: string) => resolve(() => piece(type, 
 
 /** A bundle's own name and its banner. */
 export const useBundle = (id: string) => resolve(() => bundle(id), id);
+
+/** The levels and chromas beside the one that was opened. Null until the
+ *  weapons index lands, and null forever for anything that is not a skin. */
+export function useFamily(levelId: string): Family | null {
+  const [found, setFound] = useState<Family | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    void familyOf(levelId).then((f) => {
+      if (live) setFound(f);
+    });
+    return () => {
+      live = false;
+    };
+  }, [levelId]);
+
+  return found;
+}

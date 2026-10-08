@@ -1,0 +1,99 @@
+/* Choosing one of a short row: a skin's levels, a skin's colourways.
+ *
+ * Its own file because it is the same two shapes wherever a thing has
+ * versions of itself — the collection opens a weapon onto exactly these two
+ * rows, and the offer screen is just the first place they turned up. */
+
+.offer__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 22px 0 10px;
+}
+
+.offer__head .label {
+  margin: 0;
+}
+
+.offer__head > :last-child {
+  margin-left: auto;
+}
+
+.pills {
+  display: flex;
+  gap: 6px;
+}
+
+/* One per level, naming what that level adds. The one you are watching is
+ * filled: on a row of four outlines, inverted is the only state that reads
+ * at a glance. */
+.pill {
+  flex: 1;
+  padding: 9px 0;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-sm);
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  text-align: center;
+  cursor: pointer;
+}
+
+.pill--on {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ink-inverse);
+  font-weight: 500;
+}
+
+.pill--waiting {
+  height: 36px;
+  background: var(--skel);
+  border-color: var(--rule);
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.swatch {
+  display: grid;
+  gap: 7px;
+  justify-items: center;
+  padding: 8px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--card);
+  font: inherit;
+  font-size: var(--t-floor);
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.swatch img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.swatch--on {
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+
+.swatch__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.swatch__dot--waiting {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}

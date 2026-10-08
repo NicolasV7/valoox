@@ -46,7 +46,13 @@ with `script-src 'self'` and no `unsafe-inline`, so colours are set through
 CSSOM (`style.setProperty`), never a `style` attribute.
 
 **Nothing loads from a third party.** No CDN, no font host, no analytics, no
-embedded widget. The only off-origin URL anywhere is `valorant-api.com`.
+embedded widget. Three off-origin hosts, all of them Riot's own content and
+each pinned to one CSP directive: `valorant-api.com` for the catalogue
+(`connect-src`), `media.valorant-api.com` for artwork (`img-src`), and
+`valorant.dyn.riotcdn.net` for the skin clips (`media-src`). `media-src`
+streams audio and video and executes nothing; the clips are 13 MB each and
+keeping copies of them is the alternative. No other directive names a host,
+and `script-src` is exactly `'self'`.
 
 ## The two mechanical rules
 

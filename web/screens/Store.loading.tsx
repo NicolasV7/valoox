@@ -10,9 +10,9 @@
 // a skeleton that animates is asking to be looked at, and it is the one thing
 // on screen with nothing to say.
 //
-// The labels are real. Only what is in flight is grey, which is what makes the
-// grey mean something — and "DAILY OFFERS" tells you what you are waiting for,
-// which a grey bar of the same size does not.
+// Every label is grey too, the way the board draws them: nothing on the screen
+// is readable until the screen is. The exceptions are the tab bar and the
+// disclaimer, which are not about the store at all.
 
 import { Tabs } from '../components/Tabs.tsx';
 import { t } from '../i18n/index.ts';
@@ -47,7 +47,7 @@ export function StoreLoading() {
             feature, on both screens at once. */}
 
         <section class="store__block">
-          <h2 class="label">{s.daily}</h2>
+          <span class="skel label--waiting" style={{ width: '86px' }} />
           <div class="store__rows rows--waiting">
             <Card lines={['78px', '118px', '92px']} />
             <Card lines={['64px', '136px', '104px']} />
@@ -57,7 +57,7 @@ export function StoreLoading() {
         </section>
 
         <section class="store__block">
-          <h2 class="label">{s.bundle}</h2>
+          <span class="skel label--waiting" style={{ width: '62px' }} />
           <div class="promo promo--waiting" />
         </section>
 

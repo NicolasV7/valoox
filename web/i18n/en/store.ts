@@ -39,20 +39,27 @@ export const offer = {
   star: 'Star it',
   unstar: 'Stop watching',
 
+  original: 'Original',
+
+  /** Keyed by Riot's own levelItem, lower-cased: ::Finisher -> finisher.
+   *  Six of the seventeen in the catalogue cover all but ninety skins;
+   *  the rest fall back to their level number. */
   level: {
     base: 'Base',
     vfx: 'VFX',
-    anim: 'Anim',
     finisher: 'Finisher',
+    animation: 'Anim',
+    soundeffects: 'Sound',
+    killbanner: 'Banner',
   },
 
   /** Riot hosts one clip per level and they are large. We link theirs instead
    *  of keeping copies, which is also the honest thing to say about it. */
   clips:
-    'The clip is Riot’s and it stays on their server: they are 13 MB each, so ' +
-    'we link theirs rather than keep copies. Levels and variants arrive with ' +
-    'the collection — a skin level carries no reference to its parent, and the ' +
-    'only way up is the index the collection brings anyway.',
+    'Both blocks disappear for a skin that has neither: 857 of the catalogue ' +
+    'have one level and 880 have no variants. The clip is Riot’s and streams ' +
+    'from their server; they are 13 MB each, so we point at theirs rather than ' +
+    'keep copies.',
 };
 
 // The bundle, opened. Riot sends between four and ten pieces and each carries

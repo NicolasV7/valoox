@@ -10,7 +10,6 @@
 // on the one screen whose entire job is to be quick.
 
 const V1 = 'https://valorant-api.com/v1/';
-const MEDIA = 'https://media.valorant-api.com/';
 
 export interface Piece {
   name: string | null;

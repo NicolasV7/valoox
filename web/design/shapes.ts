@@ -71,8 +71,11 @@ export type Span = 'normal' | 'tall' | 'wide';
  */
 export function spans(shapes: Shape[]): Span[] {
   const out: Span[] = shapes.map(() => 'normal');
-  const at = (want: Shape) =>
-    shapes.reduce<number[]>((found, s, i) => (s === want ? [...found, i] : found), []);
+  const at = (want: Shape) => {
+    const found: number[] = [];
+    for (const [i, s] of shapes.entries()) if (s === want) found.push(i);
+    return found;
+  };
 
   const portraits = at('portrait');
   const squares = at('tile');

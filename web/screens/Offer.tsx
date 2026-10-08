@@ -1,30 +1,39 @@
 // One offer, opened.
 //
 // The question here is never "what is it called" — the row you tapped already
-// said that. It is "what does it look like moving", which is the one thing the
-// storefront cannot answer and Riot's own clip can. Every skin level carries a
-// streamedVideo, so the clip costs no extra request and no index.
+// said that. It is "what does it do, and what does it look like in the other
+// colours", which is the one thing the storefront cannot answer and Riot's own
+// clip can.
 //
-// What is not here yet: the other levels and the variants. A skin level carries
-// no reference to its parent skin, and the only way up is the 3.5 MB weapons
-// index, which the collection needs anyway and which lands with it. The blocks
-// are absent rather than drawn empty, because a section that always reads
-// "4 of 4" whatever you opened is a section that is lying.
+// Everything on this screen after the price comes out of the weapons index: a
+// skin level carries no reference to its parent, so the levels beside this one
+// and the chromas are only reachable there. It is 426 KB over the wire and the
+// screen has a skeleton while it lands — which is exactly the trade the store
+// refuses to make and this screen is the point of. See data/skins.ts.
 
+import { useState } from 'preact/hooks';
 import { Chevron, Play } from '../components/icons.tsx';
 import { Money } from '../components/Money.tsx';
 import { tierByPrice } from '../data/tiers.ts';
 import type { StoreView } from '../data/types.ts';
-import { useSkin } from '../data/usePiece.ts';
+import { useFamily, useSkin } from '../data/usePiece.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { back } from '../route.ts';
+import { chipFor, chosen, Levels, Variants } from './Offer.levels.tsx';
 import { OfferLoading } from './Offer.loading.tsx';
 
 export function Offer({ id, view }: { id: string; view: StoreView }) {
   const s = t().offer;
   const found = useSkin(id);
+  const family = useFamily(id);
   const art = useArt(found?.icon);
+
+  // Which level's clip is playing, and which chroma is on the stage. Both
+  // start where you came in and are only ever changed by a tap.
+  const [level, setLevel] = useState(id);
+  const [chroma, setChroma] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
 
   // The whole screen waits as one. Half of it arriving before the other half
   // is two layout shifts where the design asks for none.
@@ -34,10 +43,13 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
   const tier = tierByPrice(was ?? now);
   const name = found.name ?? '';
   const at = name.lastIndexOf(' ');
+  const clip = family?.levels.find((l) => l.id === level)?.video ?? found.video;
+  // The base colourway until a swatch is tapped, so the block is there from
+  // the first frame rather than appearing under your thumb.
+  const variant = family ? chosen(family, chroma ?? '') : null;
+  const chip = family ? chipFor(family, level) : found.level && s.levelNo(found.level);
 
   return (
-    // Lit only once the colour is measured: --art defaults to white, so a glow
-    // drawn before then is a white wash over the top of the screen.
     <main class={art ? 'screen offer offer--lit' : 'screen offer'} style={artStyle(art)}>
       <button type="button" class="back" onClick={back}>
         <span class="offer__chev">
@@ -47,22 +59,33 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
       </button>
 
       <div class="offer__stage stage" style={artStyle(art)}>
-        {found.icon && <img class="offer__art" src={found.icon} alt="" />}
-
-        {/* Riot's, on Riot's CDN, opened rather than embedded — they are about
-            13 MB each and this page has no business holding a copy. */}
-        {found.video && (
-          <a
-            class="offer__play"
-            href={found.video}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={s.watch}
-          >
-            <Play />
-          </a>
+        {clip ? (
+          // Riot's own, streamed from their CDN — they are 13 MB each and this
+          // page has no business holding a copy. Our control at rest, theirs
+          // once it is running, because pause and scrub are not worth drawing.
+          // Riot publishes no caption track for these and there is nothing to
+          // caption: a weapon inspect is music and sound effects with no
+          // speech in it, and an empty <track> would claim captions exist.
+          // biome-ignore lint/a11y/useMediaCaption: no speech, and no track to point at
+          <video
+            class="offer__clip"
+            src={clip}
+            preload="metadata"
+            playsInline
+            controls={playing}
+            onPlay={() => setPlaying(true)}
+          />
+        ) : (
+          found.icon && <img class="offer__art" src={found.icon} alt="" />
         )}
-        {found.level && <span class="offer__level num">{s.levelNo(found.level)}</span>}
+
+        {clip && !playing && (
+          <button type="button" class="offer__play" aria-label={s.watch} onClick={start}>
+            <Play />
+          </button>
+        )}
+        {/* Follows the pill, not the offer: the chip names what is on screen. */}
+        {chip && <span class="offer__level num">{chip}</span>}
       </div>
 
       <div class="offer__id">
@@ -87,9 +110,26 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
         </div>
       </div>
 
+      {family && (
+        <>
+          <Levels family={family} on={level} pick={setLevel} />
+          <Variants family={family} on={chroma ?? family.chromas[0]?.id ?? ''} pick={setChroma} />
+          {variant?.render && (
+            <div class="offer__variant stage" style={artStyle(art)}>
+              <img src={variant.render} alt="" />
+            </div>
+          )}
+        </>
+      )}
+
       <p class="legal offer__note">{s.clips}</p>
     </main>
   );
+
+  function start(e: MouseEvent) {
+    const video = (e.currentTarget as HTMLElement).previousElementSibling;
+    if (video instanceof HTMLVideoElement) void video.play();
+  }
 }
 
 /** What this skin costs, and what it cost before, from whichever of the three
