@@ -143,3 +143,7 @@
   margin: 18px 0 0;
   padding: 0 var(--gut);
 }
+
+.coll__note--next {
+  margin-top: 11px;
+}

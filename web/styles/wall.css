@@ -1,0 +1,169 @@
+/* Sprays: a wall of squares, and one of them opened.
+ *
+ * Three up rather than two, which is the one place the collection breaks from
+ * the weapons board — a spray is square, so three fit where two rifles do, and
+ * a wall is what eighteen of them are. */
+
+.wall {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 16px;
+  padding: 0 var(--gut);
+}
+
+/* --- one square ----------------------------------------------------------- */
+/* Fixed height, not an aspect ratio: the art is square but the two lines under
+ * it are not, so the cell is the art plus them. Every cell the same height is
+ * what makes it a wall instead of a list. */
+
+.pad,
+.pad--waiting {
+  display: flex;
+  flex-direction: column;
+  height: 124px;
+  padding: 10px 10px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 11px;
+  overflow: hidden;
+}
+
+.pad {
+  --wash-size: 116% 92%;
+  --wash-at: 50% 42%;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.pad--waiting {
+  background: var(--card);
+}
+
+.pad__shot,
+.pad__shot--waiting {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pad__shot--waiting {
+  border-radius: var(--r-sm);
+}
+
+/* Grey until the picture paints, then out from under it — the same grey the
+ * loading screen uses, because it is the same thing. */
+.pad__art {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: var(--r-sm);
+  background: var(--skel);
+  object-fit: contain;
+}
+
+.pad__art--on {
+  background: none;
+  transition: background 220ms;
+}
+
+.pad__name,
+.pad__name--waiting {
+  flex: none;
+  display: block;
+  margin-top: 6px;
+  overflow: hidden;
+  font-size: var(--t-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pad__name--waiting {
+  width: 76%;
+  height: 11px;
+}
+
+/* Empty on most of them, and it still takes its line: without that the name
+ * sits at a different height on a tile that is on the wheel and one that is
+ * not, and eighteen of those is a ragged wall. */
+.pad__slot,
+.pad__slot--waiting {
+  flex: none;
+  display: block;
+  min-height: 15px;
+  font-size: var(--t-floor);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.pad__slot--waiting {
+  width: 48%;
+  height: 9px;
+  min-height: 0;
+  margin-top: 5px;
+  border-radius: 4px;
+}
+
+/* --- one of them opened --------------------------------------------------- */
+
+.wall__stage {
+  --wash-at: 50% 46%;
+  --wash-size: 120% 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 290px;
+  margin-top: 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.wall__art {
+  width: 230px;
+  height: 230px;
+  object-fit: contain;
+}
+
+.wall__name {
+  margin-top: 16px;
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.wall__name--waiting {
+  width: 148px;
+  height: 24px;
+}
+
+.wall__is {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: var(--t-floor);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* The measured colour, shown rather than described. Square and small: it is a
+ * value, not a swatch anybody is meant to pick from. */
+.wall__chip {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: rgb(var(--art));
+}
+
+.wall__head {
+  display: block;
+  margin: 22px 0 10px;
+}
+
+.wall__note {
+  margin-top: 11px;
+}

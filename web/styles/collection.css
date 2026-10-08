@@ -1,7 +1,10 @@
 /* The collection: five tabs, and the first one is every weapon the game has. */
 
+/* Flush, because every block inside it carries its own gutter — the header,
+ * a rack, the wall, the notes. Without this they get the screen's as well and
+ * the wall sits one gutter in from the heading above it. */
 .coll {
-  padding-top: 0;
+  padding: 0 0 calc(84px + env(safe-area-inset-bottom));
 }
 
 /* --- the header, which all five tabs wear --------------------------------- */

@@ -21,6 +21,9 @@ import { Gate } from './screens/Gate.tsx';
 import { Offer } from './screens/Offer.tsx';
 import { Piece } from './screens/Piece.tsx';
 import { Scan } from './screens/Scan.tsx';
+import { Spray } from './screens/Spray.tsx';
+import { SpraysLoading } from './screens/Sprays.loading.tsx';
+import { Sprays } from './screens/Sprays.tsx';
 import { StoreLoading } from './screens/Store.loading.tsx';
 import { Store } from './screens/Store.tsx';
 import { WeaponLoading } from './screens/Weapon.loading.tsx';
@@ -57,7 +60,7 @@ export function App() {
     void load();
   }, [load]);
 
-  const wants = route.name === 'collection' || route.name === 'weapon';
+  const wants = route.name === 'collection' || route.name === 'weapon' || route.name === 'spray';
   useEffect(() => {
     if (!wants || inv) return;
     void api
@@ -110,7 +113,11 @@ export function App() {
 
   function open(view: StoreView) {
     if (route.name === 'collection') {
+      if (route.tab === 'sprays') return inv ? <Sprays inv={inv} /> : <SpraysLoading />;
       return inv ? <Collection inv={inv} /> : <CollectionLoading />;
+    }
+    if (route.name === 'spray') {
+      return inv ? <Spray id={route.id} inv={inv} /> : <SpraysLoading />;
     }
     if (route.name === 'weapon') {
       return inv ? <Weapon id={route.id} inv={inv} /> : <WeaponLoading />;

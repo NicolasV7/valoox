@@ -1,10 +1,11 @@
-// The weapons index, as hooks.
+// The catalogue indexes, as hooks.
 //
-// One download behind all of them — see data/skins.ts — so a tab change or a
-// weapon opening costs nothing after the first.
+// One download behind each — see data/skins.ts and data/sprays.ts — so a tab
+// change or a weapon opening costs nothing after the first.
 
 import { useEffect, useState } from 'preact/hooks';
 import { type Rack, racks, type Weapon, weaponOf } from './skins.ts';
+import { type Spray, sprays } from './sprays.ts';
 
 function held<T>(get: () => Promise<T>, key: string): T | null {
   const [found, setFound] = useState<T | null>(null);
@@ -28,3 +29,6 @@ export const useRacks = (): Rack[] | null => held(racks, 'racks');
 
 /** One weapon and all of its skins. */
 export const useWeapon = (id: string): Weapon | null => held(() => weaponOf(id), id);
+
+/** Every spray the game has, which is also where the total comes from. */
+export const useSprays = (): Spray[] | null => held(sprays, 'sprays');
