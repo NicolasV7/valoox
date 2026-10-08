@@ -43,6 +43,17 @@
   grid-column: span 2;
 }
 
+/* Grown to close a hole the week's mix of shapes would otherwise leave. The
+ * art is flex: 1 and a portrait's is `cover`, so a piece that grows simply
+ * gets the room rather than floating in it. See design/shapes.ts. */
+.tile--tall {
+  grid-row: span 2;
+}
+
+.tile--wide {
+  grid-column: span 2;
+}
+
 .tile__art {
   flex: 1;
   min-height: 0;

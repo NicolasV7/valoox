@@ -101,38 +101,6 @@ const BY_TYPE: Record<string, string> = {
   'de7caa6b-adf7-4588-bbd1-143831e786c6': 'playertitles',
 };
 
-/** Which of the four shapes a piece takes. Shape follows the kind of thing,
- *  never the slot it came from — that is what lets a ten-piece bundle and a
- *  random accessory drop share one grid. */
-export type Shape = 'row' | 'tile' | 'portrait' | 'text';
-
-const SHAPE: Record<string, Shape> = {
-  'e7c63390-eda7-46e0-bb7a-a6abdacd2433': 'row', // a gun
-  'dd3bf334-87f3-40bd-b043-682a57a8dc3a': 'tile', // a charm
-  'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475': 'tile', // a spray
-  '3f296c07-64c3-494c-923b-fe692a4fa1bd': 'portrait', // a card
-  'de7caa6b-adf7-4588-bbd1-143831e786c6': 'text', // a title
-};
-
-export const shapeOf = (type: string): Shape => SHAPE[type] ?? 'tile';
-
-/** What a piece IS, as a key rather than a word — the word lives in i18n.
- *
- *  Shape and kind are not the same question: a spray and a charm are both
- *  squares and are not the same thing, and "Dragon" inside a bundle is a name
- *  that says nothing at all without one of these under it. */
-export type Kind = 'skin' | 'buddy' | 'spray' | 'card' | 'title';
-
-const KIND: Record<string, Kind> = {
-  'e7c63390-eda7-46e0-bb7a-a6abdacd2433': 'skin',
-  'dd3bf334-87f3-40bd-b043-682a57a8dc3a': 'buddy',
-  'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475': 'spray',
-  '3f296c07-64c3-494c-923b-fe692a4fa1bd': 'card',
-  'de7caa6b-adf7-4588-bbd1-143831e786c6': 'title',
-};
-
-export const kindOf = (type: string): Kind | null => KIND[type] ?? null;
-
 export const piece = (type: string, id: string): Promise<Piece | null> =>
   BY_TYPE[type] ? one(BY_TYPE[type] as string, id) : Promise.resolve(null);
 

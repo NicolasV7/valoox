@@ -10,8 +10,8 @@
 // says what it is ("Glitchpop Spray"); the same square inside a bundle holds a
 // piece called "Dragon", which says nothing without it.
 
-import { kindOf, shapeOf } from '../data/catalogue.ts';
 import { usePiece } from '../data/usePiece.ts';
+import { kindOf, type Span, shapeOf } from '../design/shapes.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { TitleMark } from './icons.tsx';
@@ -26,6 +26,7 @@ export function Tile({
   of = 'kc',
   bare = false,
   captioned = false,
+  span = 'normal',
 }: {
   type: string;
   id: string;
@@ -37,6 +38,8 @@ export function Tile({
   bare?: boolean;
   /** Whether there is room under the name for what the thing is. */
   captioned?: boolean;
+  /** Grown to close a hole the grid would otherwise have. See design/shapes.ts. */
+  span?: Span;
 }) {
   const found = usePiece(type, id);
   const shape = shapeOf(type);
@@ -45,7 +48,10 @@ export function Tile({
   const cut = was != null && was !== cost;
 
   return (
-    <div class={'tile tile--' + shape + ' stage'} style={artStyle(art)}>
+    <div
+      class={'tile tile--' + shape + (span === 'normal' ? '' : ' tile--' + span) + ' stage'}
+      style={artStyle(art)}
+    >
       {/* A title carries no art at all, and the white default weave is the
           right answer rather than a missing-image box. */}
       {found?.icon && <img class="tile__art" src={found.icon} alt="" loading="lazy" />}
