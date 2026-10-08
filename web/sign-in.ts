@@ -9,11 +9,7 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import * as api from './data/api.ts';
 import { NEEDS_RESEED } from './data/api.ts';
-import type { ScanState } from './screens/Scan.tsx';
-
-/** Riot's codes last about two minutes. Polling faster than this buys nothing
- *  and is the shape that gets throttled. */
-const EVERY = 2000;
+import { POLL_EVERY, type ScanState } from './screens/Scan.tsx';
 
 /** How long the approved screen stays before the store takes over.
  *
@@ -82,7 +78,7 @@ export function useScan(onApproved: () => void) {
       }
     };
 
-    timer.current = setInterval(ask, EVERY) as unknown as number;
+    timer.current = setInterval(ask, POLL_EVERY) as unknown as number;
     // Coming back from the Riot app is the moment the answer changed, and a
     // background tab's timers are throttled to about once a minute. Asking the
     // instant the page is looked at again is the difference between landing on

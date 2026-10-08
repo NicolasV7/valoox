@@ -13,6 +13,12 @@ import { QrCode, QrWaiting } from '../components/QrCode.tsx';
 import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
 
+/** How often the Worker asks Riot whether the phone has approved it.
+ *
+ *  Exported because the waiting indicator rings out on exactly this beat, and
+ *  two numbers that have to match are one number. */
+export const POLL_EVERY = 2000;
+
 export type ScanState =
   | { phase: 'starting' }
   | { phase: 'ready'; url: string }
@@ -52,15 +58,19 @@ export function Scan({
         <span class="small">{s.scan.or}</span>
       </div>
 
-      {/* A new tab, not this one. Riot Mobile opens from a universal link, and
-          if that link navigates the page away the poll dies with it — the scan
-          is approved, nobody is listening, and coming back lands on a reload
-          that never shows the screen saying you got in. */}
+      {/* This tab, deliberately. The url is a universal link, and iOS only
+          hands one to the app on a plain same-tab navigation — opened in a new
+          tab Safari keeps it and shows Riot's web page instead, which is the
+          app not opening.
+          
+          With the app installed nothing navigates at all: iOS switches to it
+          and this page is simply backgrounded, so the poll survives and the
+          visibilitychange handler in sign-in.ts asks again the moment you come
+          back. Without the app, the navigation to Riot's own login is the right
+          fallback anyway. */}
       <a
         class="btn btn--riot"
         href={state.phase === 'ready' ? state.url : undefined}
-        target="_blank"
-        rel="noopener noreferrer"
         aria-disabled={state.phase === 'ready' ? undefined : 'true'}
       >
         <Riot />
@@ -70,8 +80,11 @@ export function Scan({
 
       <div class="scan__waiting">
         <img src={SPRAY.holdUp} alt="" width="76" height="76" />
-        <p class="small">
-          <span class="dot" /> {s.scan.waiting}
+        <p class="small waiting">
+          {/* The ring leaves the dot once per poll. It is the request going
+              out, drawn — not a spinner filling time. */}
+          <span class="dot" style={{ animationDuration: POLL_EVERY + 'ms' }} />
+          {s.scan.waiting}
         </p>
       </div>
     </div>
