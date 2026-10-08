@@ -9,7 +9,8 @@ import { useEffect, useState } from 'preact/hooks';
 export type Route =
   | { name: 'store' }
   | { name: 'offer'; id: string }
-  | { name: 'bundle'; id: string };
+  | { name: 'bundle'; id: string }
+  | { name: 'piece'; id: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -21,6 +22,7 @@ export function parse(path: string): Route {
   // reload of /offer/<uuid> arrives here rather than at its 404.
   if (head === 'offer' && id && UUID.test(id)) return { name: 'offer', id };
   if (head === 'bundle' && id && UUID.test(id)) return { name: 'bundle', id };
+  if (head === 'piece' && id && UUID.test(id)) return { name: 'piece', id };
   return { name: 'store' };
 }
 

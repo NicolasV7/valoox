@@ -1,0 +1,187 @@
+/* A card, a spray, a charm or a title, opened.
+ *
+ * The light is sampled from the artwork, not from a tier: an accessory has no
+ * rarity, so the only honest source of a colour for one of these is the thing
+ * itself. A title has no artwork at all and keeps the neutral weave. */
+
+.piece {
+  position: relative;
+  padding-top: 0;
+}
+
+.piece--lit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    132% 56% at 50% 0%,
+    rgba(var(--art), 0.3) 0%,
+    rgba(var(--art), 0.14) 36%,
+    rgba(var(--art), 0) 74%
+  );
+}
+
+/* --- the item, at the size it is actually met at -------------------------- */
+/* Four heights, because a spray is a wall and a charm hangs off a gun. */
+
+.piece__stage {
+  position: relative;
+  margin-top: 16px;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.piece__stage--waiting {
+  background: var(--card);
+}
+
+.piece__stage--buddy {
+  height: 330px;
+}
+.piece__stage--spray {
+  height: 392px;
+}
+.piece__stage--title {
+  height: 300px;
+  border-color: var(--rule-strong);
+}
+/* A card is its own proportion and is not put in a box: it IS the box. */
+.piece__stage--card {
+  height: 468px;
+  border: 0;
+  background: none;
+}
+
+/* Sized, not capped. Riot publishes a buddy at 128×128 and a spray not much
+ * larger, so max-width alone leaves them at their natural size in the middle
+ * of a 330px stage — a thumbnail with a lot of room around it. These are the
+ * board's numbers, and they are also the ceiling on how large this can
+ * honestly go: past them it is upscaling. */
+.piece__art {
+  object-fit: contain;
+}
+
+.piece__stage--buddy .piece__art {
+  width: 236px;
+  height: 236px;
+}
+
+.piece__stage--spray .piece__art {
+  width: 300px;
+  height: 300px;
+}
+
+.piece__stage--card .piece__art {
+  max-width: none;
+  max-height: none;
+  width: 196px;
+  height: 468px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+}
+
+/* A title is the one item in the game with no artwork. So the word is set at
+ * display size and the game's own mark sits over it: the mark says what it is,
+ * the word is the item. */
+.piece__word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  font-size: 56px;
+  font-weight: 200;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.piece__word svg {
+  color: var(--ink-2);
+}
+
+.piece__aside {
+  position: absolute;
+  left: 12px;
+  bottom: 11px;
+  font-size: var(--t-floor);
+  color: var(--ink-4);
+}
+
+/* --- what it is, and what it costs ---------------------------------------- */
+
+.piece__name {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+}
+
+.piece__name > span {
+  display: block;
+}
+
+.piece__kind {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.piece__price {
+  font-size: 22px;
+}
+
+.piece__price .money {
+  font-size: inherit;
+}
+
+.piece__coin {
+  font-size: 12px;
+  color: var(--ink-4);
+}
+
+.piece__head {
+  display: block;
+  margin: 24px 0 11px;
+}
+
+.piece__note {
+  margin: 22px 0 0;
+}
+
+/* --- a charm's three facts ------------------------------------------------ */
+/* One hairline between rows, drawn as a gap over the border colour, so the
+ * rules meet the rounded corner instead of running past it. */
+
+.facts--boxed {
+  display: grid;
+  gap: 1px;
+  margin: 22px 0 0;
+  border: 1px solid var(--rule);
+  border-radius: 11px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.facts__box {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 13px 15px;
+  background: var(--card);
+  font-size: var(--t-small);
+}
+
+.facts__box dt {
+  color: var(--ink-3);
+}
+
+.facts__box dd {
+  margin: 0 0 0 auto;
+}

@@ -1,0 +1,83 @@
+/* The other two crops of a player card.
+ *
+ * Riot ships three and they are cropped differently, not scaled. Each is drawn
+ * where you actually meet it — behind your name in the lobby, beside it on the
+ * scoreboard — because "wide crop" means nothing and the place does. */
+
+.crop {
+  position: relative;
+  border: 1px solid var(--rule);
+  border-radius: 11px;
+  overflow: hidden;
+  /* Riot's art, lit for a dark ground, so it stays one when the page is pale. */
+  color-scheme: dark;
+  color: var(--ink);
+}
+
+.crop--wide {
+  height: 92px;
+  margin-bottom: 9px;
+}
+
+.crop--wide img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Dark on the left, where the name is, and out of the way on the right. */
+.crop--wide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(14, 14, 17, 0.9) 0%,
+    rgba(14, 14, 17, 0.25) 62%,
+    rgba(14, 14, 17, 0.1) 100%
+  );
+}
+
+.crop--wide .crop__who {
+  position: absolute;
+  z-index: 1;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.crop--small {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 11px 13px;
+  background: var(--card);
+}
+
+.crop--small img {
+  flex: none;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+}
+
+.crop__name {
+  margin: 0;
+  font-size: 15px;
+}
+
+.crop--wide .crop__name {
+  font-size: 16px;
+}
+
+.crop__where {
+  margin: 3px 0 0;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.crop__size {
+  margin-left: auto;
+  font-size: 12.5px;
+}

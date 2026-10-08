@@ -24,6 +24,17 @@ export interface Piece {
    *  payload does not carry the number and the parent skin is a 3.5 MB index
    *  away. Null when the path does not say. */
   level: number | null;
+  /** A player card ships in three crops and you meet it in three places — the
+   *  tall one on your profile, the wide one behind your name in the lobby, the
+   *  square one on the scoreboard. They are cropped, not scaled. */
+  wide: string | null;
+  small: string | null;
+  /** The tall crop, which is the one a card is. displayIcon on a player card
+   *  is the wide one, so the stage would letterbox it without this. */
+  tall: string | null;
+  /** A spray that moves in game. Riot publishes the frames for those and most
+   *  sprays have none. */
+  gif: string | null;
 }
 
 // .../AK_Soulstealer_Lv1_PrimaryAsset
@@ -88,6 +99,10 @@ function one(kind: string, id: string): Promise<Piece | null> {
         scale: sizeOf(d.assetPath),
         video: d.streamedVideo || null,
         level: Number(LEVEL.exec(d.assetPath ?? '')?.[1]) || null,
+        wide: d.wideArt || null,
+        small: d.smallArt || null,
+        tall: d.largeArt || null,
+        gif: d.animationGif || null,
       };
     })
     .catch(() => null);

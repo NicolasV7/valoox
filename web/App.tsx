@@ -17,6 +17,7 @@ import { Bundle } from './screens/Bundle.tsx';
 import { Fail } from './screens/Fail.tsx';
 import { Gate } from './screens/Gate.tsx';
 import { Offer } from './screens/Offer.tsx';
+import { Piece } from './screens/Piece.tsx';
 import { Scan } from './screens/Scan.tsx';
 import { StoreLoading } from './screens/Store.loading.tsx';
 import { Store } from './screens/Store.tsx';
@@ -89,6 +90,7 @@ export function App() {
 
   function open(view: StoreView) {
     if (route.name === 'offer') return <Offer id={route.id} view={view} />;
+    if (route.name === 'piece') return <Piece id={route.id} view={view} />;
     if (route.name === 'bundle') {
       // A bundle rotates out, so a link to last week's lands here with nothing
       // behind it. The store is the honest answer rather than an empty screen

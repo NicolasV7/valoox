@@ -14,6 +14,7 @@ import { usePiece } from '../data/usePiece.ts';
 import { kindOf, type Span, shapeOf } from '../design/shapes.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
+import { href, intercept } from '../route.ts';
 import { TitleMark } from './icons.tsx';
 import { type Coin, Money } from './Money.tsx';
 
@@ -46,11 +47,14 @@ export function Tile({
   const kind = kindOf(type);
   const art = useArt(found?.icon);
   const cut = was != null && was !== cost;
+  const route = { name: 'piece', id } as const;
 
   return (
-    <div
+    <a
       class={'tile tile--' + shape + (span === 'normal' ? '' : ' tile--' + span) + ' stage'}
       style={artStyle(art)}
+      href={href(route)}
+      onClick={intercept(route)}
     >
       {/* A title carries no art at all, and the white default weave is the
           right answer rather than a missing-image box. */}
@@ -74,7 +78,7 @@ export function Tile({
           </span>
         </span>
       </div>
-    </div>
+    </a>
   );
 }
 
