@@ -40,13 +40,20 @@
   color: var(--ink);
 }
 
-/* Nothing equipped: no weave, because there is no skin to take a colour from. */
+/* Nothing equipped. The weave stays and only the wash goes: the bands are the
+ * surface this app is made of, and the wash is the colour of a particular
+ * piece of art. There is no art, so there is no wash — and the ground steps
+ * down a shade, which is what makes a full slot read as full from across the
+ * screen rather than only up close. */
 .slot--bare {
-  background: var(--card);
+  --wash-size: 0 0;
+  --stage: var(--stage-bare);
 }
 
+/* Waiting is not the same as empty: no weave at all, because the weave is a
+ * surface and there is nothing on this one yet. */
 .slot--waiting {
-  background: var(--card);
+  background: var(--stage);
 }
 
 .slot--big,

@@ -36,6 +36,7 @@
   --sunk: light-dark(#f7f8fa, #0b0c0f); /* a well: an input, a code box */
   --card: light-dark(#f7f8fa, #131419); /* a panel on the page */
   --stage: light-dark(#ffffff, #16171b); /* what art sits on */
+  --stage-bare: light-dark(#fbfbfd, #141519); /* and what nothing sits on */
   --stage-row: light-dark(#ffffff, #191b20); /* the same, for a row */
   --raised: light-dark(#e7e9ee, #232630); /* lighter than its ground */
 

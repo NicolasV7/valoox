@@ -10,18 +10,27 @@
 
 import { CollectionTabs } from './Collection.tabs.tsx';
 
-/** Sidearms, SMGs, Shotguns, Rifles, Snipers, Heavies, and the one melee. */
-const RACKS = [6, 2, 2, 5, 3, 2];
+/** Sidearms, SMGs, Shotguns, Rifles, Snipers, Heavies — slots and the width of
+ *  the word over them, both off the board. The melee rack is drawn separately
+ *  because its one slot is a different height. */
+const RACKS: Array<[slots: number, label: string]> = [
+  [6, '94px'],
+  [2, '74px'],
+  [2, '94px'],
+  [5, '84px'],
+  [3, '89px'],
+  [2, '89px'],
+];
 
 export function CollectionLoading() {
   return (
     <main class="screen coll">
       <CollectionTabs on="weapons" />
 
-      {RACKS.map((slots, rack) => (
+      {RACKS.map(([slots, label], rack) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: the rack IS its position
         <section class="coll__rack" key={rack}>
-          <span class="skel label--waiting" style={{ width: 62 + ((rack * 13) % 34) + 'px' }} />
+          <span class="skel label--waiting" style={{ width: label }} />
           <div class="slots">
             {Array.from({ length: slots }, (_, slot) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: likewise

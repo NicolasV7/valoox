@@ -85,7 +85,7 @@ function Slot({ weapon, on, big }: { weapon: Weapon; on?: string; big?: boolean 
 
   return (
     <a
-      class={tier ? 'slot stage' : 'slot slot--bare'}
+      class={tier ? 'slot stage' : 'slot slot--bare stage'}
       style={artStyle(lit)}
       href={href(route)}
       onClick={intercept(route)}
