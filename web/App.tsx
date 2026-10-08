@@ -23,6 +23,8 @@ import { Piece } from './screens/Piece.tsx';
 import { Scan } from './screens/Scan.tsx';
 import { StoreLoading } from './screens/Store.loading.tsx';
 import { Store } from './screens/Store.tsx';
+import { WeaponLoading } from './screens/Weapon.loading.tsx';
+import { Weapon } from './screens/Weapon.tsx';
 import { useScan } from './sign-in.ts';
 
 type State =
@@ -109,6 +111,9 @@ export function App() {
   function open(view: StoreView) {
     if (route.name === 'collection') {
       return inv ? <Collection inv={inv} /> : <CollectionLoading />;
+    }
+    if (route.name === 'weapon') {
+      return inv ? <Weapon id={route.id} inv={inv} /> : <WeaponLoading />;
     }
     if (route.name === 'offer') return <Offer id={route.id} view={view} />;
     if (route.name === 'piece') return <Piece id={route.id} view={view} />;

@@ -1,0 +1,170 @@
+/* One weapon, opened: every skin the game has for it. */
+
+.gun {
+  padding-top: 0;
+}
+
+.gun__id {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.gun__count,
+.gun__count--waiting {
+  margin-left: auto;
+  font-size: var(--t-label);
+  color: var(--ink-4);
+}
+
+.gun__name--waiting {
+  width: 112px;
+  height: 24px;
+}
+
+.gun__count--waiting {
+  width: 74px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.gun__note {
+  margin-top: 10px;
+}
+
+.gun__none {
+  margin-top: 18px;
+  padding: 26px 0;
+  text-align: center;
+}
+
+/* --- the one you carry ---------------------------------------------------- */
+/* 152px, and the same 152px while it waits, so the list below does not slide
+ * when the names land. The wash sits low because the render does. */
+
+.worn,
+.worn--waiting {
+  display: block;
+  height: 152px;
+  margin-top: 14px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.worn {
+  --wash-at: 50% 74%;
+  position: relative;
+  text-decoration: none;
+}
+
+.worn--waiting {
+  background: var(--stage-bare);
+}
+
+/* Ink on the page's ink, which is the one chip in the app that inverts: it
+ * names the state rather than labelling a thing, so it reads before the art. */
+.worn__on {
+  position: absolute;
+  left: 13px;
+  top: 12px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: var(--ink);
+  color: var(--ink-inverse);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.worn__art {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  width: 322px;
+  height: 98px;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+}
+
+.worn__foot {
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  bottom: 11px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.worn__id {
+  min-width: 0;
+}
+
+.worn__name {
+  display: block;
+  font-size: var(--t-item);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.worn__what {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.worn__chev {
+  display: flex;
+  margin: 0 0 3px auto;
+  color: var(--ink-3);
+  transform: rotate(-90deg);
+}
+
+/* --- the search ----------------------------------------------------------- */
+
+.find {
+  position: relative;
+  margin-top: 16px;
+}
+
+.find--waiting {
+  opacity: 0.5;
+}
+
+.find__glass {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  display: flex;
+  transform: translateY(-50%);
+  color: var(--ink-4);
+  pointer-events: none;
+}
+
+.find input {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-sm);
+  background: var(--stage);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14.5px;
+}
+
+.find input::placeholder {
+  color: var(--ink-4);
+}
+
+.find input[disabled] {
+  border-color: var(--rule);
+  background: var(--stage-bare);
+  color: var(--ink-5);
+  cursor: default;
+}

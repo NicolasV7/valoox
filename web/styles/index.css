@@ -28,4 +28,6 @@
 @import './piece.css';
 @import './crops.css';
 @import './collection.css';
+@import './weapon.css';
+@import './shelf.css';
 @import './fail.css';

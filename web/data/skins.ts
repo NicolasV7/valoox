@@ -41,7 +41,12 @@ export interface Skin extends Family {
   name: string;
   /** Riot's content tier uuid, or null for a battle-pass or default skin. */
   tier: string | null;
-  icon: string | null;
+  /** The picture of the skin, and not `displayIcon`: measured across the 1,415
+   *  in the catalogue, 47 have none at all and Riot publishes a 512x512 cross
+   *  placeholder in place of some of the rest — 3 of the Guardian's 67. Every
+   *  one of the 1,415 has a first chroma with a real full render, so that is
+   *  the field, and the other two are only ever a fallback that is not used. */
+  render: string | null;
 }
 
 export interface Weapon {
@@ -134,7 +139,7 @@ function build(rows: Raw[]): Index {
           id: s.uuid,
           name: s.displayName,
           tier: s.contentTierUuid ?? null,
-          icon: s.displayIcon ?? null,
+          render: s.chromas?.[0]?.fullRender ?? s.levels?.[0]?.displayIcon ?? s.displayIcon ?? null,
           ...f,
         };
       }),
@@ -177,3 +182,10 @@ export const racks = (): Promise<Rack[]> => index().then((i) => i.racks);
 /** One weapon and all of its skins. */
 export const weaponOf = (id: string): Promise<Weapon | null> =>
   index().then((i) => i.racks.flatMap((r) => r.weapons).find((w) => w.id === id) ?? null);
+
+/** The skin line without the weapon on the end of it. "Reaver Vandal" in the
+ *  Vandal's own slot is the word "Vandal" twice. */
+export function shortName(skin: Skin, weapon: string): string {
+  const cut = skin.name.lastIndexOf(' ' + weapon);
+  return cut > 0 ? skin.name.slice(0, cut) : skin.name;
+}

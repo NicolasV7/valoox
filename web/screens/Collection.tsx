@@ -78,7 +78,7 @@ function Slot({ weapon, on, big }: { weapon: Weapon; on?: string; big?: boolean 
   // levels — downloaded one and looked at it — so going through the level there
   // draws a cross in twenty slots.
   const art = tier
-    ? (skin?.levels.find((l) => l.id === on)?.icon ?? skin?.icon ?? weapon.icon)
+    ? (skin?.levels.find((l) => l.id === on)?.icon ?? skin?.render ?? weapon.icon)
     : weapon.icon;
   const lit = useArt(tier ? art : null);
   const route = { name: 'weapon', id: weapon.id } as const;
