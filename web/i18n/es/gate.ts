@@ -30,7 +30,7 @@ export const gate = {
   scan: {
     title: 'Escaneá el código, o abrí la app.',
     lede: 'En cualquiera de los dos casos Riot aprueba el ingreso en tu teléfono. Acá no se escribe nada.',
-    how: 'Abrí Riot Mobile en tu teléfono y entrá a Cuenta → Escanear código QR.',
+    how: 'Abrí Riot Mobile en tu teléfono: Perfil → Ajustes → Escanear código QR.',
     or: 'o',
     open: 'Abrir Riot Mobile',
     openWhy: 'Si estás leyendo esto desde el teléfono.',
