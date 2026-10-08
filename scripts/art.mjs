@@ -1,16 +1,21 @@
 // Fetches the app's fixed artwork into public/art/.
 //
-// Fifteen images that never change and appear on nearly every screen: the
-// three coins, the five content tiers, and the seven sprays the empty and
-// waiting states are drawn with. They are chrome rather than content — a
-// Kingdom Credits coin is a symbol this interface is built out of, the way a
-// chevron is, and it does not rotate.
+// The images that never change and appear on nearly every screen: the three
+// coins, the five content tiers, the seven sprays the empty and waiting states
+// are drawn with, and one stock render per weapon. They are chrome rather than
+// content — a Kingdom Credits coin is a symbol this interface is built out of,
+// the way a chevron is, and a stock Vandal is what an empty slot means. None
+// of them rotates.
 //
 // Taking them off valorant-api.com costs the DNS lookup and the TLS handshake
 // to a second origin on first paint, which is the slowest part of showing the
 // gate on a phone. Everything that DOES rotate — skin renders, bundle banners,
-// card art, a weapon's stock render — stays remote, because pinning a moving
-// thing is how a page starts lying about what Riot is selling today.
+// card art — stays remote, because pinning a moving thing is how a page starts
+// lying about what Riot is selling today.
+//
+// The weapons are fetched from the live index rather than listed here, so the
+// day Riot ships a gun this picks it up. Until someone re-runs it the app falls
+// back to the url it came from, which is why the slot has an onError on it.
 //
 // Not committed, exactly as public/fonts/ is not: wrangler uploads public/
 // wholesale at deploy, so the bytes reach production without passing through
@@ -50,13 +55,42 @@ const ART = {
   'spray-seeyou': 'sprays/081262e8-42db-ac4a-c94b-a89b623525c0/fulltransparenticon.png',
 };
 
+/**
+ * One stock render per weapon, keyed by the weapon's uuid.
+ *
+ * Not `displayIcon` on the weapon, which runs from 168 to 512 across — a
+ * Classic at 188 drawn into a 148px slot is upscaled on any 2× screen. And not
+ * the default skin's level icon either: Riot publishes a 512×512 × placeholder
+ * for 18 of the 21.
+ *
+ * It is the default skin's chroma render. All 21 are real, all 21 are 512
+ * across, and they are the pictures the artboard was drawn with — its own
+ * comment names their sizes.
+ */
+async function weapons() {
+  const res = await fetch('https://valorant-api.com/v1/weapons');
+  if (!res.ok) throw new Error('weapons index: ' + res.status);
+  const { data } = await res.json();
+
+  const out = {};
+  for (const w of data ?? []) {
+    const stock = (w.skins ?? []).find((s) => s.uuid === w.defaultSkinUuid);
+    const url = stock?.chromas?.[0]?.fullRender ?? w.displayIcon;
+    if (url) out['weapon-' + w.uuid] = url;
+  }
+  return out;
+}
+
 async function main() {
   await mkdir(OUT, { recursive: true });
 
+  const all = { ...Object.fromEntries(Object.entries(ART).map(([k, v]) => [k, CDN + v])) };
+  Object.assign(all, await weapons());
+
   let total = 0;
-  for (const [name, path] of Object.entries(ART)) {
-    const res = await fetch(CDN + path);
-    if (!res.ok) throw new Error(name + ': ' + res.status + ' for ' + path);
+  for (const [name, url] of Object.entries(all)) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(name + ': ' + res.status + ' for ' + url);
     const bytes = Buffer.from(await res.arrayBuffer());
     await writeFile(OUT + '/' + name + '.png', bytes);
     total += bytes.length;
@@ -73,7 +107,7 @@ async function main() {
       'than two.\n',
   );
   console.log(OUT + '/NOTICE.txt');
-  console.log(Object.keys(ART).length + ' files, ' + (total / 1024).toFixed(0) + ' KB');
+  console.log(Object.keys(all).length + ' files, ' + (total / 1024).toFixed(0) + ' KB');
 }
 
 main().catch((e) => {

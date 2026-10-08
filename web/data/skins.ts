@@ -47,9 +47,16 @@ export interface Skin extends Family {
 export interface Weapon {
   id: string;
   name: string;
-  /** The stock gun. Riot publishes a 512×512 × placeholder as the displayIcon
-   *  of most standard skin levels — downloaded one and looked at it — so this
-   *  is the only real picture of a weapon with nothing on it. */
+  /** The stock gun, at 512 across.
+   *
+   *  Not `displayIcon` on the weapon, which is between 168 and 512 wide — a
+   *  Classic at 188 drawn into a 148px slot is upscaled on any 2× screen. And
+   *  not the default skin's level icon either: Riot publishes a 512×512 ×
+   *  placeholder for 18 of the 21, which I downloaded and looked at.
+   *
+   *  It is the default skin's chroma render. All 21 are real and all 21 are
+   *  512 across — a Classic is 512×340 and a Marshal is 512×96, which is why
+   *  one box with `contain` is the only way to size them together. */
   icon: string | null;
   /** What it costs in the buy menu, which is also the order the buy menu lists
    *  it in. Null for melee, which is not bought. */
@@ -68,6 +75,7 @@ export interface Rack {
 
 interface Raw {
   uuid: string;
+  defaultSkinUuid?: string;
   displayName: string;
   levelItem: string | null;
   streamedVideo: string | null;
@@ -113,10 +121,11 @@ function build(rows: Raw[]): Index {
   const byCategory = new Map<string, Weapon[]>();
 
   for (const w of rows) {
+    const stock = (w.skins ?? []).find((s) => s.uuid === w.defaultSkinUuid);
     const weapon: Weapon = {
       id: w.uuid,
       name: w.displayName,
-      icon: w.displayIcon ?? null,
+      icon: stock?.chromas?.[0]?.fullRender ?? w.displayIcon ?? null,
       cost: w.shopData?.cost ?? null,
       skins: (w.skins ?? []).map((s) => {
         const f = family(s);

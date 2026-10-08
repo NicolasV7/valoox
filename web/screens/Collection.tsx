@@ -100,7 +100,21 @@ function Slot({ weapon, on, big }: { weapon: Weapon; on?: string; big?: boolean 
           height={big ? 14 : 13}
         />
       )}
-      {art && <img class="slot__art" src={art} alt="" loading="lazy" />}
+      {art && (
+        <img
+          class="slot__art"
+          src={stock(weapon, tier ? art : null)}
+          alt=""
+          loading="lazy"
+          // The stock renders are fetched into public/art/ by `npm run art`,
+          // so the day Riot ships a gun its slot falls back to the url the
+          // index gave rather than drawing nothing until someone re-runs it.
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            if (art && img.src !== art) img.src = art;
+          }}
+        />
+      )}
       <span class={tier ? 'slot__name' : 'slot__name slot__name--bare'}>
         {tier ? line(skin as Skin, weapon) : t().collection.standard}
       </span>
@@ -120,4 +134,11 @@ function skinOn(weapon: Weapon, level?: string): Skin | undefined {
 function line(skin: Skin, weapon: Weapon): string {
   const cut = skin.name.lastIndexOf(' ' + weapon.name);
   return cut > 0 ? skin.name.slice(0, cut) : skin.name;
+}
+
+/** Where the picture comes from. A dressed slot is whatever skin is on, which
+ *  rotates and stays remote; an empty one is the stock gun, which does not and
+ *  is served from here. */
+function stock(weapon: Weapon, dressed: string | null): string {
+  return dressed ?? '/art/weapon-' + weapon.id + '.png';
 }
