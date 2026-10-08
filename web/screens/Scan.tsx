@@ -10,6 +10,7 @@
 
 import { Check, Clock, Riot } from '../components/icons.tsx';
 import { QrCode, QrWaiting } from '../components/QrCode.tsx';
+import { Thinking } from '../components/Thinking.tsx';
 import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
 
@@ -87,7 +88,7 @@ export function Scan({
           {/* The ring leaves the dot once per poll. It is the request going
               out, drawn — not a spinner filling time. */}
           <span class="dot" style={{ animationDuration: POLL_EVERY + 'ms' }} />
-          {s.scan.waiting}
+          <Thinking>{s.scan.waiting}</Thinking>
         </p>
       </div>
     </div>
@@ -126,10 +127,12 @@ function Approved({ name, url }: { name?: string; url?: string }) {
             {tag && <span class="scan__tag">#{tag}</span>}
           </p>
         )}
-        <p class="small">{s.approved.loading}</p>
+        <p class="small">
+          <Thinking>{s.approved.loading}</Thinking>
+        </p>
       </div>
 
-      <div class="bars" aria-hidden="true">
+      <div class="bars bars--waiting" aria-hidden="true">
         <span class="skel" />
         <span class="skel" />
         <span class="skel" />

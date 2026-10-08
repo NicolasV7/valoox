@@ -122,9 +122,13 @@ a send can say is the status the channel returned.
 
 ## Waiting
 
-- **One grey, no shimmer.** `--raised` and nothing else. A skeleton that animates
-  is a skeleton asking to be looked at, and it is the one thing on screen with
-  nothing to say.
+- **One grey, no shimmer** — on a screen you are reading. `--raised` and nothing
+  else. A skeleton standing in for text competes with the thing you came for,
+  and it is the one element on screen with nothing to say.
+
+  The exception is narrow: a screen whose *entire* content is "wait a second"
+  has nothing to compete with. The code arriving, and the bars under "you're
+  in", may breathe. Anywhere else they hold still.
 - **Final sizes, always.** Every box is already the size the real thing will be,
   so nothing jumps when the data lands. Where the shape genuinely cannot be known
   — a bundle holds between four and ten pieces — the screen says so rather than
