@@ -58,12 +58,17 @@ const HEAD =
   // A phone is where this is read. The table is fluid to 600 rather than
   // pinned at it, so the only thing left to do here is take the gutters
   // down and stop the six digits running off the edge of a 320px screen.
+  //
+  // Nothing stacks. A two-column table told to become one at a breakpoint is
+  // the classic mail layout and it is the one that broke here: `display:block`
+  // on a `<td>` leaves the `<tr>` a table row, the client invents an anonymous
+  // cell around it, and the paragraph came out centred, ragged and over the
+  // edge on a phone. So the blocks that pair a picture with a sentence are
+  // one column in the first place — picture on its own row, sentence under
+  // it — which needs no breakpoint and cannot come apart.
   '@media (max-width:600px){' +
   '.pad{padding-left:18px!important;padding-right:18px!important}' +
   '.big{font-size:38px!important;letter-spacing:0.12em!important}' +
-  '.stack{display:block!important;width:100%!important;max-width:100%!important;' +
-  'padding-left:18px!important;padding-right:18px!important;text-align:center!important}' +
-  '.stack img{margin:0 auto}' +
   '}' +
   '</style>';
 
@@ -93,6 +98,22 @@ export const weave = (rgb: string, under: string): string =>
 const mark = (origin: string) =>
   `<img src="${origin}/brand/mark.png" width="22" height="22" alt=""` +
   ' style="display:block;border:0;width:22px;height:22px">';
+
+/**
+ * A picture over a sentence, on the weave.
+ *
+ * One column on purpose: see the note by the media query. The picture is
+ * `alt=""` and the sentence carries the whole meaning, because every client
+ * worth the name blocks images until asked.
+ */
+export const note = (art: string, size: number, said: string, rgb: string): string =>
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
+  ` style="border-radius:14px;${weave(rgb, INK.stage)}">` +
+  `<tr><td align="center" style="padding:20px 22px 0">` +
+  `<img src="${art}" width="${size}" height="${size}" alt=""` +
+  ` style="display:block;border:0;width:${size}px;height:${size}px"></td></tr>` +
+  `<tr><td style="padding:14px 22px 20px;font-size:14px;line-height:1.6;color:#D2D6D9">` +
+  `${said}</td></tr></table>`;
 
 export function shell({
   aside,

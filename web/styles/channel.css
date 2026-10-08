@@ -142,3 +142,10 @@
   margin: 0 var(--gut);
 }
 
+
+/* A verified address, shut. Readable rather than dimmed: it is the thing the
+ * screen is reporting, not a control that happens to be unavailable. */
+.bell__input--shut {
+  border-color: var(--rule);
+  color: var(--ink-2);
+}

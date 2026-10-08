@@ -41,6 +41,7 @@ export const alerts = {
   verified: 'Verificado',
   notVerified: 'Sin verificar',
   notVerifiedYet: 'Guardado, sin verificar todavía.',
+  pickSomething: 'Elegí qué vigilar.',
   comingNext: 'El buscador de skins es lo que sigue.',
   anAddress: 'Una dirección que puedas abrir ahora mismo.',
   sendATest: 'Mandar el código',
@@ -62,6 +63,42 @@ export const alerts = {
     'Si la cambiás después, la nueva arranca sin verificar: el código va a la ' +
     'nueva y la vieja sigue recibiendo hasta que el código nuevo vuelva. Nada se ' +
     'corta en silencio.',
+
+  // --- la lista andando ----------------------------------------------------
+  change: 'Cambiar',
+  weapons: 'Armas',
+  accessories: 'Accesorios',
+  rotatesIn: 'rota en',
+  noGuns: 'Ninguna skin de arma marcada todavía.',
+  noBits: 'Ningún accesorio marcado todavía.',
+  addSomething: 'Agregar algo…',
+  addSomethingTitle: 'Agregar algo',
+  outOf: (n: number, max: number) => `${n} / ${max}`,
+  onlyWhatTurnsUp:
+    'La lista solo guarda cosas que pueden aparecer de verdad. Riot vende un ' +
+    'conjunto fijo de skins y la tienda sale de ahí — una skin de pase de batalla ' +
+    'o de evento nunca está, y un cuchillo tampoco, porque el panel diario son ' +
+    'cuatro armas. Lo que ya tenés queda afuera por lo mismo.',
+  hundredWhy:
+    'Cien es el techo para las dos listas juntas. El trabajo diario es una ' +
+    'intersección de conjuntos y la lista entera viaja en una sola fila, así que ' +
+    'el límite es por mantener esa fila chica — no por cómputo, que este trabajo ' +
+    'casi no usa.',
+
+  // --- agregar -------------------------------------------------------------
+  kinds: { spray: 'Spray', buddy: 'Colgante', card: 'Tarjeta', title: 'Título' },
+  sellsCount: (n: number) => `${n} que Riot vende y no tenés.`,
+  listFull: (max: number) =>
+    `La lista está llena: ${max} entre las dos. Sacá una para poder marcar otra.`,
+  notInThisList:
+    'Lo que no está en esta lista: todo lo que ya tenés, cada cuchillo — el panel ' +
+    'diario son cuatro armas y nunca un melee — y cada skin que Riot no vende, ' +
+    'que es casi todo el pase de batalla y cada premio de evento. Marcar una de ' +
+    'esas sería una fila que no puede dispararse nunca.',
+  searchIsLocal:
+    'El buscador corre contra el catálogo que el navegador ya tiene, así que ' +
+    'filtra mientras escribís sin preguntarle nada al Worker. Lo que Riot vende ' +
+    'sale de una lista que es la misma para todos, pedida una vez al día.',
 
   // --- el código -----------------------------------------------------------
   sentAs: (said: string) => `Enviado · ${said}`,

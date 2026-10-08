@@ -21,6 +21,19 @@ export interface Words {
   neverPassword: string;
   foot: string;
   text: (code: string, mins: number) => string;
+
+  // --- the morning message -------------------------------------------------
+  hitSubject: (first: string, n: number) => string;
+  inYourStore: string;
+  openYourStore: string;
+  goneIn: string;
+  goneInAside: (clock: string) => string;
+  alsoToday: string;
+  youStarred: string;
+  oneADay: string;
+  hitFoot: string;
+  stopThese: string;
+  hitText: (names: string[], link: string) => string;
 }
 
 const es: Words = {
@@ -52,6 +65,33 @@ const es: Words = {
     'Nadie de valoox te va a pedir este código. Ni por respuesta, ni en el ' +
     'juego, en ningún lado. Tampoco tu contraseña de Riot: no la tenemos, el ' +
     'ingreso es por QR dentro de la app de Riot.\n',
+  hitSubject: (first, n) =>
+    n > 1 ? first + ' y ' + (n - 1) + ' más están en tu tienda' : first + ' está en tu tienda',
+  inYourStore: 'Está en tu tienda ahora mismo.',
+  openYourStore: 'Abrir tu tienda',
+  goneIn: 'Se va en',
+  goneInAside: (clock) => 'Se va en ' + clock,
+  alsoToday: 'También hoy',
+  youStarred:
+    'Lo marcaste en valoox y esta mañana coincidió. El trabajo diario cruza tu ' +
+    'lista con tu tienda y manda solo los nombres que coinciden.',
+  oneADay:
+    'Un correo por día como máximo, y solo cuando algo de tu lista está ' +
+    'efectivamente delante tuyo. Los accesorios corren con su propio reloj semanal ' +
+    'y llegan igual.',
+  hitFoot:
+    'Marcaste esto en valoox. Este correo lleva nombres de skins y nada más: ' +
+    'ningún id de cuenta, ninguna sesión, nada con lo que alguien pueda entrar ' +
+    'como vos.',
+  stopThese: 'Dejar de recibir estos correos',
+  hitText: (names, link) =>
+    (names.length === 1
+      ? names[0] + ' está en tu tienda hoy.'
+      : names.join(', ') + ' están en tu tienda hoy.') +
+    '\n\nAbrí tu tienda en https://valoox.store\n\n' +
+    'Para dejar de recibir estos correos: ' +
+    link +
+    '\n',
 };
 
 const en: Words = {
@@ -83,6 +123,32 @@ const en: Words = {
     'Nobody at valoox will ever ask you for this code. Not in a reply, not in ' +
     'game, nowhere. Nor your Riot password: we do not have one, signing in ' +
     'happens by QR inside Riot’s own app.\n',
+  hitSubject: (first, n) =>
+    n > 1 ? first + ' and ' + (n - 1) + ' more are in your store' : first + ' is in your store',
+  inYourStore: 'It is in your store right now.',
+  openYourStore: 'Open your store',
+  goneIn: 'Gone in',
+  goneInAside: (clock) => 'Gone in ' + clock,
+  alsoToday: 'Also today',
+  youStarred:
+    'You starred this at valoox and this morning it matched. The daily job ' +
+    'crosses your list with your store and sends only the names that match.',
+  oneADay:
+    'One mail a day at most, and only when something on your list is actually ' +
+    'in front of you. Accessories run on their own weekly clock and arrive the ' +
+    'same way.',
+  hitFoot:
+    'You starred this at valoox. This mail carries skin names and nothing else ' +
+    '— no account id, no session, nothing that would let anyone sign in as you.',
+  stopThese: 'Stop these emails',
+  hitText: (names, link) =>
+    (names.length === 1
+      ? names[0] + ' is in your store today.'
+      : names.join(', ') + ' are in your store today.') +
+    '\n\nOpen your store at https://valoox.store\n\n' +
+    'To stop these emails: ' +
+    link +
+    '\n',
 };
 
 export const words = { es, en };

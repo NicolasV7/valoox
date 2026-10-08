@@ -1,6 +1,6 @@
+import { deliver } from '../alerts/post.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
-import { deliver } from '../vault/alerts.ts';
 import { readSession } from '../vault/session.ts';
 
 /**

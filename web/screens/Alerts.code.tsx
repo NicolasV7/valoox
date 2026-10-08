@@ -26,10 +26,11 @@ export function AlertsCode() {
   const sent = prefs?.mail?.said ?? '';
   const bad = refused(sent);
   // It is in the mailbox and the code in it is the one these boxes want, so
-  // another send would only add a second code to the same thread. The Worker
-  // refuses it too; this is the half that says so without the round trip.
+  // another send would only add a second code to the same thread. The control
+  // goes away rather than greying out with a reason on it: there is nothing to
+  // decide here, and Verify is the only thing left to do. The Worker refuses a
+  // second send too — this is only the half that stops you asking for one.
   const here = landed(sent);
-  const why = said ?? (here ? s.alreadyThere : null);
 
   // Six empty boxes and a message that already bounced is the one state this
   // screen could sit in for ever without saying so: the answer arrives at the
@@ -81,12 +82,14 @@ export function AlertsCode() {
         <button type="button" class="btn" disabled={code.length !== 6 || busy} onClick={check}>
           {s.verify}
         </button>
-        <button type="button" class="btn btn--quiet" disabled={busy || here} onClick={more}>
-          {s.sendItAgain}
-        </button>
+        {!here && (
+          <button type="button" class="btn btn--quiet" disabled={busy} onClick={more}>
+            {s.sendItAgain}
+          </button>
+        )}
       </div>
 
-      {why && <p class="bell__why bell__why--bad">{why}</p>}
+      {said && <p class="bell__why bell__why--bad">{said}</p>}
 
       <p class="legal bell__note">{s.tenAndFive}</p>
 
@@ -122,7 +125,6 @@ export function AlertsCode() {
     setBusy(false);
     setCode('');
     if (res?.error === 'wait') return setSaid(s.waitSeconds(res.wait ?? 0));
-    if (res?.error === 'opened') return setSaid(s.alreadyThere);
     await reload();
     if (res?.error === 'bounced' || !res?.sent) go(ALERTS);
   }

@@ -6,6 +6,8 @@ import { logout, pollScan, startScan } from './routes/auth.ts';
 import { resend, setChannel, verify } from './routes/channel.ts';
 import { collection } from './routes/collection.ts';
 import { resendHook } from './routes/hook.ts';
+import { sellable } from './routes/sells.ts';
+import { stopMail } from './routes/stop.ts';
 import { store } from './routes/store.ts';
 import { readWishlist, writeWishlist } from './routes/wishlist.ts';
 import type { Env } from './types.ts';
@@ -23,11 +25,13 @@ type Handler = (c: Ctx) => Promise<Body>;
 const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
   '/api/store': { GET: store },
   '/api/inventory': { GET: collection },
+  '/api/sellable': { GET: sellable },
   '/api/qr': { GET: pollScan, POST: startScan },
   '/api/prefs': { GET: readWishlist, POST: writeWishlist },
   '/api/channel': { POST: setChannel },
   '/api/channel/again': { POST: resend },
   '/api/channel/verify': { POST: verify },
+  '/api/stop': { POST: stopMail },
   '/api/test-alert': { POST: testAlert },
   '/api/logout': { POST: logout },
 };
@@ -35,8 +39,36 @@ const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
 /** The same request, pointed at the one asset that is the application. */
 const shell = (req: Request) => new Request(new URL('/', req.url), req);
 
+/**
+ * Where the app lives.
+ *
+ * The apex is the landing page's address, not the app's, and the two are
+ * different things: one is read by somebody deciding whether to sign in, the
+ * other holds a Riot session. Keeping them on separate hosts means the cookie
+ * is scoped to the app alone and the landing page can be a flat file with no
+ * reason to touch it.
+ *
+ * Until the landing exists, the apex is a signpost. 308 and not 302 so the
+ * method and body survive — anything POSTing to the old address still lands,
+ * and the browser remembers for next time.
+ */
+const APP = 'drop.valoox.store';
+
+function signpost(url: URL): Response | null {
+  if (url.hostname !== 'valoox.store' && url.hostname !== 'www.valoox.store') return null;
+  const to = new URL(url.toString());
+  to.hostname = APP;
+  return Response.redirect(to.toString(), 308);
+}
+
 export async function route(req: Request, env: Env): Promise<Response> {
-  const { pathname } = new URL(req.url);
+  const url = new URL(req.url);
+  const { pathname } = url;
+
+  // Before anything reads a cookie: the apex has no session of its own and
+  // must not be given one.
+  const away = signpost(url);
+  if (away) return away;
   const method = req.method === 'POST' ? 'POST' : 'GET';
   const headers = new Headers();
 

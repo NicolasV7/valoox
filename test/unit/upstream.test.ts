@@ -104,5 +104,8 @@ test('the list stays short enough to read in one sitting', () => {
   // the six digits that prove an address and the morning alert to it once
   // proved. It is the second non-Riot rule here, after the Discord webhook,
   // and like that one it carries no puuid, no jar and no Riot credential.
-  assert.equal(allowCount, 18);
+  // 18 -> 19 on 2026-10-08: GET /store/v1/offers/, the fixed set of items the
+  // store can draw from. A read with no uuid in its path at all, which is why
+  // one answer serves everybody and it is fetched once a day.
+  assert.equal(allowCount, 19);
 });

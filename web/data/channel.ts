@@ -11,11 +11,16 @@ import * as api from './api.ts';
 import { NEEDS_RESEED } from './api.ts';
 import type { Prefs } from './types.ts';
 
-let held: Prefs | null = null;
+let kept: Prefs | null = null;
 const listeners = new Set<(p: Prefs | null) => void>();
 
-function tell(next: Prefs | null) {
-  held = next;
+/** The copy every screen is rendering. Exposed because the wishlist writes
+ *  through it: the stars and the address are one row and one fetch, and two
+ *  copies of that row is how a screen ends up disagreeing with itself. */
+export const held = (): Prefs | null => kept;
+
+export function tell(next: Prefs | null) {
+  kept = next;
   for (const fn of listeners) fn(next);
 }
 
@@ -26,7 +31,7 @@ export async function reload(): Promise<void> {
 }
 
 export function usePrefs(): Prefs | null {
-  const [prefs, set] = useState<Prefs | null>(held);
+  const [prefs, set] = useState<Prefs | null>(kept);
 
   useEffect(() => {
     listeners.add(set);

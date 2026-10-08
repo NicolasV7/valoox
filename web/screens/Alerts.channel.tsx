@@ -8,7 +8,7 @@
 // again by the Worker, which is the one that counts. What this one buys is the
 // difference between being told now and being told after a round trip.
 
-import { useState } from 'preact/hooks';
+import { useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
 import { Mail } from '../components/icons.tsx';
 import { again, open, refused, reload, usePrefs } from '../data/channel.ts';
@@ -25,6 +25,8 @@ export function AlertsChannel() {
   const [to, setTo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [said, setSaid] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const field = useRef<HTMLInputElement>(null);
 
   const now = to ?? prefs?.mail?.to ?? '';
   const ok = prefs?.mail?.ok === true && now === prefs.mail.to;
@@ -39,6 +41,11 @@ export function AlertsChannel() {
   // Nothing has a state until there is something to have a state about. An
   // empty field labelled "not verified" is an accusation about a blank.
   const stated = now.trim().length > 0;
+  // A verified address has nothing to send: the code it would carry has
+  // already been carried back. So the only control is the one that changes it,
+  // and the field stays shut until that is what you asked for — which also
+  // means a stray tap cannot quietly unverify the address you rely on.
+  const locked = ok && !editing;
 
   return (
     <main class="screen bell">
@@ -61,12 +68,14 @@ export function AlertsChannel() {
           {s.anAddress}
         </label>
         <input
+          ref={field}
           id="addr"
           type="email"
           inputMode="email"
           autocomplete="email"
           spellcheck={false}
-          class="bell__input"
+          readOnly={locked}
+          class={locked ? 'bell__input bell__input--shut' : 'bell__input'}
           value={now}
           onInput={(e) => {
             setTo((e.currentTarget as HTMLInputElement).value);
@@ -74,14 +83,20 @@ export function AlertsChannel() {
           }}
         />
 
-        <button
-          type="button"
-          class="btn bell__go"
-          disabled={!valid || busy || stuck}
-          onClick={start}
-        >
-          {busy ? t().common.loading : s.sendATest}
-        </button>
+        {locked ? (
+          <button type="button" class="btn btn--quiet bell__go" onClick={edit}>
+            {s.editAddress}
+          </button>
+        ) : (
+          <button
+            type="button"
+            class="btn bell__go"
+            disabled={!valid || busy || stuck}
+            onClick={start}
+          >
+            {busy ? t().common.loading : s.sendATest}
+          </button>
+        )}
 
         <p class={said || stuck ? 'bell__why bell__why--bad' : 'bell__why'}>
           {/* The dot only joins once there is a state it is reporting. */}
@@ -95,6 +110,12 @@ export function AlertsChannel() {
       <p class="legal bell__note">{s.changeItLater}</p>
     </main>
   );
+
+  function edit() {
+    setEditing(true);
+    setSaid(null);
+    field.current?.focus();
+  }
 
   async function start() {
     setBusy(true);

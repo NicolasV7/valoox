@@ -13,29 +13,30 @@
 //
 // The words come from words.ts in the language of the tab that asked.
 
-import { FONT, INK, shell, weave } from './layout.ts';
+import { FONT, INK, note, shell, weave } from './layout.ts';
 import type { Lang } from './words.ts';
 import { words } from './words.ts';
 
 /** The purple the sign-in screens use for a thing being proved. */
 const HUE = '152, 96, 192';
 
-/** Killjoy with her hands up. Picked for what it is OF, like the rest: this
- *  is the block that says do not hand the code over, and that is the gesture.
- *  Served from our own origin so there is no third party in a message, and
- *  absolute because a mail client has no page to be relative to.
+/** Cypher, one finger up, telling you to keep it. Picked for what it is OF,
+ *  like the rest: this is the block that says do not hand the code over, and
+ *  that is the gesture. Served from our own origin so there is no third party
+ *  in a message, and absolute because a mail client has no page to be
+ *  relative to.
  *
  *  Every client worth the name blocks images until asked, so the block has to
  *  read without it — which is why the sentence is the block and the sticker is
- *  alt="" beside it. */
-const STICKER = '/art/spray-holdup.png';
+ *  alt="" above it. */
+const STICKER = '/art/spray-shh.png';
 
 export const subject = (code: string, lang: Lang): string => words[lang].subject(code);
 
 export const text = (code: string, mins: number, lang: Lang): string =>
   words[lang].text(code, mins);
 
-export function html(code: string, mins: number, lang: Lang, origin: string): string {
+export function html(code: string, mins: number, lang: Lang, origin: string, stop: string): string {
   const w = words[lang];
   const body =
     // the code, at the size of the message
@@ -55,20 +56,21 @@ export function html(code: string, mins: number, lang: Lang, origin: string): st
     `<p style="margin:10px 0 0;font-size:14px;line-height:1.65;color:${INK.body}">` +
     `${w.askedWhy}</p></td></tr>` +
     // the line that matters if somebody later asks for the code, with the one
-    // picture in the message beside it
+    // picture in the message over it
     `<tr><td class="pad" style="padding:22px 28px 0">` +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
-    ` style="border-radius:14px;${weave(HUE, INK.stage)}"><tr>` +
-    `<td width="120" class="stack" style="padding:18px 0 18px 22px" valign="middle">` +
-    `<img src="${origin}${STICKER}" width="120" height="120" alt=""` +
-    ` style="display:block;border:0;width:120px;height:120px"></td>` +
-    `<td class="stack" style="padding:18px 22px;font-size:14px;line-height:1.6;color:#D2D6D9" valign="middle">` +
-    `${w.neverAsk}</td></tr></table></td></tr>` +
+    `${note(origin + STICKER, 120, w.neverAsk, HUE)}</td></tr>` +
     `<tr><td class="pad" style="padding:22px 28px 24px">` +
     `<p style="margin:0;font-size:13.5px;line-height:1.65;color:${INK.faint}">` +
     `${w.neverPassword}</p></td></tr>`;
 
-  const foot = `<p style="margin:0;font-size:12px;line-height:1.6;color:${INK.quiet}">${w.foot}</p>`;
+  // The link belongs here more than it does on the alert: this is the message
+  // somebody gets when a stranger typed their address, and the one thing they
+  // want is for it to stop. It takes the pending address off the row, so the
+  // code it carries can never be the one that verifies it.
+  const foot =
+    `<p style="margin:0;font-size:12px;line-height:1.6;color:${INK.quiet}">${w.foot}</p>` +
+    `<p style="margin:10px 0 0;font-size:12px;line-height:1.6">` +
+    `<a href="${stop}" style="color:${INK.faint}">${w.stopThese}</a></p>`;
 
   // A duration, not a clock time. The board shows "Expires 10:14", which is a
   // time in the sender's timezone printed for a reader in another one.

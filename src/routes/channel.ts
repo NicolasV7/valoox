@@ -24,6 +24,8 @@ import type { Env } from '../types.ts';
 import { gotThere, looksLikeAddress, refused, send } from '../vault/mail.ts';
 import * as repo from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
+import { mintStop } from '../vault/stop.ts';
+import { stopLink } from './stop.ts';
 
 /** Ties the provider's id for a message back to the browser it was sent for,
  *  so its webhook can find the row. Kept out of D1 on purpose: it is a short-
@@ -38,15 +40,17 @@ export const trail = (id: string) => 'sent:' + id;
  *  to tell that from a real one. Anything that is not https falls back to the
  *  address the app actually answers on. */
 const artFrom = (origin: string) =>
-  origin.startsWith('https://') ? origin : 'https://valoox.store';
+  origin.startsWith('https://') ? origin : 'https://drop.valoox.store';
 
 async function mail(env: Env, uid: string, to: string, lang: Lang, origin: string) {
   const { code, until } = await mint(env, uid);
+  const home = artFrom(origin);
+  const stop = stopLink(home, await mintStop(env, uid));
   const sent = await send(
     env,
     to,
     subject(code, lang),
-    html(code, LIFE.minutes, lang, artFrom(origin)),
+    html(code, LIFE.minutes, lang, home, stop),
     text(code, LIFE.minutes, lang),
   );
   // Nothing carried it, so nothing should be outstanding: the code is thrown

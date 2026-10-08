@@ -7,14 +7,17 @@
 // through a listener somebody has to remember to wire up.
 
 import { useCallback, useEffect, useLayoutEffect, useState } from 'preact/hooks';
+import { needsOwned } from './belong.ts';
 import { Tabs } from './components/Tabs.tsx';
 import type { ApiError } from './data/api.ts';
 import * as api from './data/api.ts';
 import { NEEDS_RESEED } from './data/api.ts';
 import type { Fault, Inventory, StoreView } from './data/types.ts';
-import { section, useRoute, wasAt } from './route.ts';
+import { useRoute, wasAt } from './route.ts';
 import { AlertsChannel } from './screens/Alerts.channel.tsx';
 import { AlertsCode } from './screens/Alerts.code.tsx';
+import { AlertsLoading } from './screens/Alerts.loading.tsx';
+import { AlertsSearch } from './screens/Alerts.search.tsx';
 import { Alerts } from './screens/Alerts.tsx';
 import { BuddiesLoading } from './screens/Buddies.loading.tsx';
 import { Buddies } from './screens/Buddies.tsx';
@@ -35,6 +38,7 @@ import { Skin } from './screens/Skin.tsx';
 import { Spray } from './screens/Spray.tsx';
 import { SpraysLoading } from './screens/Sprays.loading.tsx';
 import { Sprays } from './screens/Sprays.tsx';
+import { Stopped } from './screens/Stopped.tsx';
 import { StoreLoading } from './screens/Store.loading.tsx';
 import { Store } from './screens/Store.tsx';
 import { Title } from './screens/Title.tsx';
@@ -81,9 +85,9 @@ export function App() {
     void load();
   }, [load]);
 
-  // Every collection screen needs it, and which those are lives in one table
-  // rather than in a condition that has to be remembered — see route.ts.
-  const wants = section(route.name) === 'collection';
+  // Which screens need it lives in one place rather than in a condition that
+  // has to be remembered — see route.ts.
+  const wants = needsOwned(route);
   useEffect(() => {
     if (!wants || inv) return;
     void api
@@ -105,6 +109,12 @@ export function App() {
   return <div class={locked ? 'shell shell--lock' : 'shell'}>{inside()}</div>;
 
   function inside() {
+    // Before everything, including the session check. This screen arrives
+    // from the footer of a message, which is read on whatever device reads
+    // mail — usually not the one that is signed in. A sign-in wall in front
+    // of an unsubscribe link is the oldest trick in the genre.
+    if (route.name === 'stopped') return <Stopped token={route.token} />;
+
     if (state.at === 'loading' && !scan.state) return <StoreLoading />;
 
     if (state.at === 'fail') {
@@ -151,7 +161,8 @@ export function App() {
     if (route.name === 'alerts') {
       if (route.step === 'channel') return <AlertsChannel />;
       if (route.step === 'code') return <AlertsCode />;
-      return <Alerts />;
+      if (route.step === 'add') return inv ? <AlertsSearch inv={inv} /> : <AlertsLoading />;
+      return <Alerts view={view} />;
     }
     if (route.name === 'skin') {
       return inv ? <Skin id={route.id} inv={inv} /> : <SkinLoading />;

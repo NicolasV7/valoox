@@ -41,6 +41,7 @@ export const alerts = {
   verified: 'Verified',
   notVerified: 'Not verified',
   notVerifiedYet: 'Saved, not verified yet.',
+  pickSomething: 'Pick what to watch.',
   comingNext: 'The skin search is what comes next.',
   anAddress: 'An address you can open right now.',
   sendATest: 'Send the code',
@@ -61,6 +62,41 @@ export const alerts = {
     'Change it later and the new address starts unverified — a code goes to the ' +
     'new one, and the old one keeps receiving until the new code is typed back. ' +
     'Nothing stops silently.',
+
+  // --- the working list ----------------------------------------------------
+  change: 'Change',
+  weapons: 'Weapons',
+  accessories: 'Accessories',
+  rotatesIn: 'rotates in',
+  noGuns: 'No gun skin starred yet.',
+  noBits: 'No accessory starred yet.',
+  addSomething: 'Add something…',
+  addSomethingTitle: 'Add something',
+  outOf: (n: number, max: number) => `${n} / ${max}`,
+  onlyWhatTurnsUp:
+    'The list only holds things that can actually turn up. Riot sells a fixed ' +
+    'set of skins and the store draws from that set — a battle pass or event ' +
+    'skin is never in it, and neither is a knife, because the daily panel is ' +
+    'four guns. Anything you already own is left out for the same reason.',
+  hundredWhy:
+    'A hundred is the ceiling for both lists together. The daily job is a set ' +
+    'intersection and the whole list rides in one row, so the limit is about ' +
+    'keeping that row small — not about compute, which this job barely uses.',
+
+  // --- adding --------------------------------------------------------------
+  kinds: { spray: 'Spray', buddy: 'Buddy', card: 'Card', title: 'Title' },
+  sellsCount: (n: number) => `${n} Riot sells that you do not own.`,
+  listFull: (max: number) =>
+    `The list is full at ${max} across both. Take one off to star another.`,
+  notInThisList:
+    'What is not in this list: anything you already own, every knife — the ' +
+    'daily panel is four guns and never a melee — and every skin Riot does not ' +
+    'sell, which is most of the battle pass and every event reward. Starring ' +
+    'one of those would be a row that can never fire.',
+  searchIsLocal:
+    'The search runs against the catalogue the browser already holds, so it ' +
+    'narrows as you type without asking the Worker anything. What Riot sells ' +
+    'comes from one list that is the same for everybody, fetched once a day.',
 
   // --- the code ------------------------------------------------------------
   sentAs: (said: string) => `Sent · ${said}`,

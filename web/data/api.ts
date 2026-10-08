@@ -53,6 +53,10 @@ export const inventory = () => call<Inventory>('/api/inventory');
  *  outside this origin. */
 export const prefs = () => call<Prefs>('/api/prefs');
 
+/** The set of item ids Riot's store can ever offer. One answer for everybody,
+ *  cached a day by the Worker. */
+export const sellable = () => call<{ ids: string[] }>('/api/sellable');
+
 /** Opens a scan and returns the URL the QR encodes. */
 export const startScan = () => call<Scan>('/api/qr', { method: 'POST' });
 

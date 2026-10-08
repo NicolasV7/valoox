@@ -6,8 +6,9 @@
 // the three; a missing tab would hide the shape of the app from somebody
 // deciding whether it is worth signing into.
 
+import { section } from '../belong.ts';
 import { t } from '../i18n/index.ts';
-import { go, type Route, section, useRoute } from '../route.ts';
+import { go, type Route, useRoute } from '../route.ts';
 
 /** Which tab a screen belongs to. The offer and the bundle are reached from
  *  the store, a weapon from the collection — the bar marks where you are, not

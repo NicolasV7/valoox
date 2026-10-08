@@ -3,7 +3,7 @@
 // feeling to carry, and they are the only ones where a picture is not in the
 // way of the thing you came to look at. The store and the collection stay bare.
 //
-// They are served from this origin. Seven files that never change, fetched at
+// They are served from this origin. Ten files that never change, fetched at
 // build time by scripts/art.mjs — which is where Riot's uuid for each one is
 // written down — so the screen a stranger reads before scanning does not open
 // a second connection to draw a sticker on it.
@@ -28,4 +28,10 @@ export const SPRAY = {
   whoops: art('whoops'),
   /** Being teleported out, waving. Disconnecting. */
   seeYou: art('seeyou'),
+  /** Cypher, one finger up. The block that says never hand this code over. */
+  shh: art('shh'),
+  /** Somebody delighted with the gun they are holding. A wishlist hit. */
+  thisGun: art('thisgun'),
+  /** Yoru asleep, with the Zzz. The list is kept and nothing is being sent. */
+  asleep: art('asleep'),
 } as const;

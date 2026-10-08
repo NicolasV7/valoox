@@ -2,15 +2,22 @@ name = "val"
 main = "src/index.ts"
 compatibility_date = "2026-09-01"
 
-# The app answers on the apex. A Custom Domain rather than a route pattern so
-# Cloudflare issues and renews the certificate itself — the uid cookie is
-# Secure, so over plain http the browser never stores it and sign-in silently
-# never completes.
-routes = [{ pattern = "valoox.store", custom_domain = true }]
+# The app answers on drop.valoox.store, and the apex answers only to point at
+# it — see the signpost in src/router.ts. Two hosts on purpose: the landing
+# page is read by somebody deciding whether to sign in, the app holds a Riot
+# session, and keeping them apart scopes the uid cookie to the app alone.
+#
+# Custom Domains rather than route patterns so Cloudflare issues and renews
+# the certificates itself — the uid cookie is Secure, so over plain http the
+# browser never stores it and sign-in silently never completes.
+routes = [
+  { pattern = "drop.valoox.store", custom_domain = true },
+  { pattern = "valoox.store", custom_domain = true },
+]
 
-# Off, and said out loud rather than left to the default. One address for one
-# app: a second hostname serving the same Worker is a second place the uid
-# cookie can be set and a second origin to reason about in the CSP.
+# Off, and said out loud rather than left to the default. Every hostname that
+# serves this Worker is a place the uid cookie can be set and an origin to
+# reason about in the CSP, so the list above is the whole list.
 workers_dev = false
 preview_urls = false
 
@@ -29,19 +36,6 @@ crons = ["30 0 * * *"]
 # Printed on every message, so it is a var and not a secret. It has to be an
 # address on a domain verified in Resend — the subdomain keeps the sending
 # reputation off valoox.store, which can then hold a strict DMARC of its own.
-# The apex, once valoox.store is a zone on this account. A Custom Domain
-# rather than a route pattern so Cloudflare issues and renews the certificate
-# itself — the uid cookie is Secure, so without HTTPS sign-in silently never
-# completes. Commented rather than deleted because the only thing missing is
-# the nameserver change: uncomment it and deploy.
-# routes = [{ pattern = "valoox.store", custom_domain = true }]
-
-# Off, and said out loud rather than left to the default. One address for one
-# app: a second hostname serving the same Worker is a second place the uid
-# cookie can be set and a second origin to reason about in the CSP.
-workers_dev = false
-preview_urls = false
-
 [vars]
 MAIL_FROM = "valoox <alerts@mail.valoox.store>"
 

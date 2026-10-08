@@ -107,6 +107,11 @@ const ALLOW: Rule[] = [
   },
   {
     method: 'GET',
+    pattern: new RegExp('^https://' + PD + '/store/v1/offers/$'),
+    why: 'the fixed set of items the store can ever draw from. The same list for everybody, so it is fetched once a day and shared — it is what makes the wishlist refuse to hold a skin that can never turn up',
+  },
+  {
+    method: 'GET',
     pattern: new RegExp('^https://' + PD + '/mmr/v1/players/' + UUID + '$'),
     why: 'your own rank. The puuid can only come from your own sealed session — looking up anyone else is scouting, which Riot names as a prohibited use',
   },

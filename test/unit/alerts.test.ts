@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
+import { deliver, message } from '../../src/alerts/post.ts';
 import type { StoreView } from '../../src/types.ts';
-import { deliver, hits, message } from '../../src/vault/alerts.ts';
+import { hits } from '../../src/vault/alerts.ts';
 
 // The whole alert engine is this one pure function. It matches on skin LEVEL
 // uuids because that is what the storefront returns — the browser resolved the

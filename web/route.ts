@@ -21,22 +21,26 @@ export type Route =
   | { name: 'card'; id: string }
   | { name: 'title'; id: string }
   | { name: 'skin'; id: string }
-  | { name: 'alerts'; step?: Step };
+  | { name: 'alerts'; step?: Step }
+  /** Arrived from the footer of a message. The token is what names the row:
+   *  the phone reading that mail may never have had this app's cookie. */
+  | { name: 'stopped'; token: string };
 
 export type Tab = 'weapons' | 'sprays' | 'buddies' | 'cards' | 'titles';
 
-/** The two screens inside the alerts tab that are their own place: setting an
- *  address, and carrying its code back. */
-export type Step = 'channel' | 'code';
+/** The three screens inside the alerts tab that are their own place: setting
+ *  an address, carrying its code back, and finding something to watch. */
+export type Step = 'channel' | 'code' | 'add';
 
-const STEPS: Step[] = ['channel', 'code'];
+const STEPS: Step[] = ['channel', 'code', 'add'];
 
 const TABS: Tab[] = ['weapons', 'sprays', 'buddies', 'cards', 'titles'];
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-export function parse(path: string): Route {
+export function parse(path: string, query = location.search): Route {
   const [, head, id] = path.split('/');
+  if (head === 'stop') return { name: 'stopped', token: new URLSearchParams(query).get('t') ?? '' };
   // Anything unrecognised is the store. A 404 screen for a typo in a one-column
   // app would be a screen nobody reaches on purpose — and this only holds
   // because the Worker hands every non-/api/ path back as the shell, so a
@@ -63,6 +67,7 @@ export function parse(path: string): Route {
 
 export const href = (route: Route): string => {
   if (route.name === 'store') return '/';
+  if (route.name === 'stopped') return '/stop?t=' + encodeURIComponent(route.token);
   if (route.name === 'alerts') return route.step ? '/alerts/' + route.step : '/alerts';
   if (route.name === 'collection') {
     return route.tab === 'weapons' ? '/collection' : '/collection/' + route.tab;
@@ -100,24 +105,6 @@ function mark(): void {
 /** Where the screen that is arriving belongs. Zero for one being opened for
  *  the first time, which has never been anywhere. */
 export const wasAt = (): number => (history.state as { y?: number } | null)?.y ?? 0;
-
-/**
- * Which section of the app a screen belongs to.
- *
- * One table, because two lists of the same thing drift and this pair already
- * did: the tab bar marks where you are with it and the shell decides whether
- * to fetch your inventory with it, and every detail screen added to the
- * collection had to be remembered in both. Three of them were not, so a cold
- * link to a charm, a card or a title sat on its loader for ever.
- */
-const UNDER: Array<[section: string, screens: Array<Route['name']>]> = [
-  ['store', ['store', 'offer', 'bundle', 'piece']],
-  ['collection', ['collection', 'weapon', 'skin', 'spray', 'buddy', 'card', 'title']],
-  ['alerts', ['alerts']],
-];
-
-export const section = (name: Route['name']): string | undefined =>
-  UNDER.find(([, screens]) => screens.includes(name))?.[0];
 
 const listeners = new Set<(r: Route) => void>();
 

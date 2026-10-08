@@ -1,0 +1,62 @@
+/* The page the footer of a message leads to.
+ *
+ * One column, centred, and nothing else on it. It is read once, on a phone,
+ * by somebody who has just pressed a link in a mailbox — so the whole answer
+ * is above the fold and there is no tab bar under it, because this screen is
+ * not inside the app's navigation. */
+
+.stop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(var(--v) * 1.6) var(--gut) calc(var(--v) * 1.4);
+  text-align: center;
+}
+
+.stop__art {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.stop__title {
+  margin: calc(var(--v) * 0.7) 0 0;
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.stop__lede {
+  margin: 10px 0 0;
+  max-width: 34ch;
+}
+
+/* The half people are actually anxious about. It gets a box so the eye finds
+ * it without reading: the list is kept, and that is the news. */
+.stop__kept {
+  width: 100%;
+  margin-top: calc(var(--v) * 1.1);
+  padding: 16px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.stop__kept .label {
+  margin: 0;
+}
+
+.stop__kept p {
+  margin: 7px 0 0;
+  color: var(--ink-3);
+}
+
+.stop__back {
+  width: 100%;
+  margin-top: calc(var(--v) * 0.8);
+}
+
+.stop__note {
+  margin: 14px 0 0;
+  text-align: left;
+}

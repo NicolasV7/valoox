@@ -1,9 +1,9 @@
 // Alerts, first run.
 //
 // Two steps in the order they have to happen: a channel, then a star. The
-// search is drawn and shut, because starring with nowhere to send is a row
-// that can only disappoint — and a notifier quietly sending to nowhere is the
-// one failure it must not hide.
+// search stays shut until there is a channel, because starring with nowhere
+// to send is a row that can only disappoint — and a notifier quietly sending
+// to nowhere is the one failure it must not hide.
 
 import { Chevron, Mail } from '../components/icons.tsx';
 import type { Prefs } from '../data/types.ts';
@@ -14,6 +14,7 @@ import { href, intercept } from '../route.ts';
 export function AlertsFirst({ mail, starred }: { mail: Prefs['mail']; starred: number }) {
   const s = t().alerts;
   const to = { name: 'alerts', step: 'channel' } as const;
+  const ADD = { name: 'alerts', step: 'add' } as const;
   const ok = mail?.ok === true;
 
   return (
@@ -46,13 +47,25 @@ export function AlertsFirst({ mail, starred }: { mail: Prefs['mail']; starred: n
       </a>
 
       <h2 class="label bell__step">{s.stepTwo}</h2>
-      {/* Shut until step one is done, and the reason is on it. */}
-      <div class="bell__row bell__row--shut">
-        <span class="bell__id">
-          <span class="bell__name">{s.searchASkin}</span>
-          <span class="bell__said">{ok ? s.comingNext : s.opensOnce}</span>
-        </span>
-      </div>
+      {ok ? (
+        <a class="bell__row" href={href(ADD)} onClick={intercept(ADD)}>
+          <span class="bell__id">
+            <span class="bell__name">{s.searchASkin}</span>
+            <span class="bell__said">{s.pickSomething}</span>
+          </span>
+          <span class="bell__chev">
+            <Chevron size={16} />
+          </span>
+        </a>
+      ) : (
+        /* Shut until step one is done, and the reason is on it. */
+        <div class="bell__row bell__row--shut">
+          <span class="bell__id">
+            <span class="bell__name">{s.searchASkin}</span>
+            <span class="bell__said">{s.opensOnce}</span>
+          </span>
+        </div>
+      )}
 
       <p class="legal bell__note">{s.whatAStarIs}</p>
     </main>

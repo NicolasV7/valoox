@@ -11,6 +11,7 @@ import { gate } from './gate.ts';
 import { piece } from './piece.ts';
 import { skin } from './skin.ts';
 import { sprays } from './sprays.ts';
+import { stopped } from './stopped.ts';
 import { bundle, offer, store } from './store.ts';
 import { titles } from './titles.ts';
 import { weapon } from './weapon.ts';
@@ -29,5 +30,6 @@ export const en = {
   cards,
   titles,
   skin,
+  stopped,
   alerts,
 };

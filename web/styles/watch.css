@@ -1,0 +1,193 @@
+/* The alerts list: hairline-separated rows, each on the colour of its own art.
+ *
+ * A grid and not a flex row, because the three columns have to line up down
+ * the list — a 96px letterbox beside a 46px square beside nothing at all is
+ * what a wishlist actually holds, and only a fixed first column keeps the
+ * names from stepping left and right as you scroll. */
+
+.watch__list {
+  display: grid;
+  gap: 1px;
+  margin: 10px var(--gut) 0;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.watch {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  align-items: center;
+  gap: 0 12px;
+  min-height: 64px;
+  padding: 10px 8px 10px 4px;
+  background:
+    linear-gradient(
+      107deg,
+      rgb(0 0 0 / 0%) 0 31%,
+      rgb(var(--art) / 7.2%) 31% 45%,
+      rgb(0 0 0 / 0%) 45% 51%,
+      rgb(var(--art) / 3.8%) 51% 58%,
+      rgb(0 0 0 / 0%) 58% 72%,
+      rgb(var(--art) / 5.4%) 72% 77%,
+      rgb(0 0 0 / 0%) 77%
+    ),
+    repeating-linear-gradient(107deg, rgb(var(--art) / 4.3%) 0 1px, rgb(0 0 0 / 0%) 1px 23px),
+    radial-gradient(84% 128% at 30% 50%, rgb(var(--art) / 25.5%) 0%, rgb(var(--art) / 0%) 70%),
+    var(--card);
+}
+
+.watch__art {
+  display: block;
+  width: 96px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.watch__art--square {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto;
+}
+
+.watch__id {
+  display: block;
+  min-width: 0;
+}
+
+.watch__name {
+  display: block;
+  overflow: hidden;
+  font-size: 14.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.watch__note {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink-4);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.watch__star {
+  padding: 8px;
+  border: 0;
+  background: none;
+  color: var(--ink-4);
+  line-height: 0;
+  cursor: pointer;
+  transition: color 180ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+.watch__star--on {
+  color: var(--kept);
+}
+
+.watch__star[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* --- where it goes, as one tappable card --------------------------------- */
+
+.watch__to {
+  display: block;
+  margin: 18px var(--gut) 0;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--card);
+  color: inherit;
+  text-decoration: none;
+}
+
+.watch__cap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.watch__cap--sect {
+  margin: 22px var(--gut) 0;
+}
+
+.watch__cap .label {
+  margin: 0;
+}
+
+.watch__change,
+.watch__clock {
+  margin-left: auto;
+  color: var(--ink-4);
+  font-size: 12.5px;
+}
+
+.watch__clock {
+  font-size: 11.5px;
+}
+
+.watch__who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--ink-4);
+}
+
+.watch__addr {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.watch__who .bell__state {
+  margin-left: auto;
+}
+
+.watch__last {
+  display: block;
+  margin-top: 9px;
+  color: var(--ink-4);
+  font-size: 12.5px;
+}
+
+/* --- the way in, and how much room is left ------------------------------- */
+
+.watch__add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px var(--gut) 0;
+}
+
+.watch__find {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0;
+  padding: 13px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink-5);
+  font-size: 14.5px;
+  text-decoration: none;
+}
+
+.watch__count {
+  flex: none;
+  color: var(--ink-4);
+  font-size: 12px;
+}
+
+.watch__field,
+.watch__picks {
+  margin: 14px var(--gut) 0;
+}

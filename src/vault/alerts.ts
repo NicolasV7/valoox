@@ -1,6 +1,6 @@
-import type { Env, Session, StoreView } from '../types.ts';
+import { post } from '../alerts/post.ts';
+import type { Env, Hit, Session, StoreView } from '../types.ts';
 import { reauth } from './auth.ts';
-import { rf } from './http.ts';
 import * as repo from './repo.ts';
 import { CURRENT_KID, open, seal } from './seal.ts';
 import { fetchStore } from './storefront.ts';
@@ -25,94 +25,11 @@ import { fetchStore } from './storefront.ts';
 const FAIL_STOP = 0.5;
 const MIN_BEFORE_STOP = 4;
 
-export interface Hit {
-  id: string;
-  name: string;
-}
-
 /** Pure: which wishlist entries are in today's store. Unit-testable, no network. */
 export function hits(view: StoreView, wishlist: Array<{ id: string; name: string }>): Hit[] {
   const offered = new Set(view.offers.map((o) => o.id));
   for (const n of view.night?.items ?? []) if (n.id) offered.add(n.id);
   return wishlist.filter((w) => offered.has(w.id));
-}
-
-export function message(found: Hit[]): string {
-  const names = found.map((h) => h.name);
-  return names.length === 1
-    ? names[0] + ' está en tu tienda hoy.'
-    : names.join(', ') + ' están en tu tienda hoy.';
-}
-
-type Notify = NonNullable<Session['notify']>;
-
-/**
- * One channel, with a bounded retry.
- *
- * A 5xx or a connection that never opens is worth another go; a 4xx is the
- * channel telling us the request is wrong, and it will stay wrong. The timeout
- * is the important half: ntfy used to hang 19 to 39 seconds before Cloudflare
- * gave up on it, and a notifier that blocks for a minute is its own outage.
- */
-const TRIES = 3;
-const TIMEOUT = 6000;
-
-async function post(url: string, init: RequestInit): Promise<Response> {
-  let last: Response | null = null;
-  for (let i = 0; i < TRIES; i++) {
-    try {
-      const res = await rf(url, { ...init, signal: AbortSignal.timeout(TIMEOUT) });
-      if (res.status < 500) return res;
-      last = res;
-    } catch {
-      // Aborted, or the connection never opened. Neither is worth logging: the
-      // status of the last attempt is the whole story.
-    }
-  }
-  // Ours, not the channel's: every attempt timed out before anything answered.
-  return last ?? new Response(null, { status: 504 });
-}
-
-/**
- * Delivery. The payload carries no puuid, no uid and no credential — only skin
- * names the user themselves chose.
- *
- * Shaped as a list of channels, with either one landing counting as delivered,
- * because the list has been two long and one long and will be again. Today it is
- * Discord: it throttles per webhook, and a webhook is a thing each user has one
- * of. ntfy was here until it turned out to throttle per source IP, which a
- * Worker cannot own at any price below a paid tier.
- */
-export async function deliver(to: Notify, text: string): Promise<string[]> {
-  const tries: Array<[string, Promise<Response>]> = [];
-
-  if (to.discord) {
-    tries.push([
-      'discord',
-      post('https://discord.com/api/webhooks/' + to.discord, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text }),
-      }),
-    ]);
-  }
-  // Reporting success for a message with nowhere to go is the same bug as
-  // reporting success for a throttled one, so it fails the same way.
-  if (!tries.length) throw new Error('no hay ningún canal configurado');
-
-  const results = await Promise.allSettled(tries.map(([, p]) => p));
-  // Every outcome is named. A bare "429" sent us measuring the wrong thing once;
-  // "discord 429" says which door was shut.
-  const report = results.map((r, i) =>
-    r.status === 'fulfilled' ? tries[i][0] + ' ' + r.value.status : tries[i][0] + ' sin respuesta',
-  );
-
-  // A throttled push counted as delivered is the worst bug a notifier can have:
-  // it reports success for something nobody received.
-  if (!results.some((r) => r.status === 'fulfilled' && r.value.ok)) {
-    throw new Error(report.join(', '));
-  }
-  return report;
 }
 
 export async function runAlerts(env: Env): Promise<{ checked: number; sent: number }> {
@@ -131,8 +48,11 @@ export async function runAlerts(env: Env): Promise<{ checked: number; sent: numb
     checked++;
     try {
       const session = await open<Session>(env, row.uid, row.kid, row.blob);
-      const to = session.notify;
-      if (!session.wishlist?.length || !to?.discord) continue;
+      // A verified address or a webhook. An unverified address is not a
+      // channel: nothing is ever sent to one, which is the rule the whole
+      // OTP flow exists to keep.
+      if (!session.wishlist?.length) continue;
+      if (!session.notify?.discord && session.mail?.ok !== true) continue;
 
       const t = await reauth(session.jar);
       if (!t) {
@@ -145,10 +65,7 @@ export async function runAlerts(env: Env): Promise<{ checked: number; sent: numb
 
       const view = await fetchStore(env, session, t);
       const found = hits(view, session.wishlist);
-      if (found.length) {
-        await deliver(to, message(found));
-        sent++;
-      }
+      if (found.length && (await post(env, row.uid, session, found, view.remaining))) sent++;
       // Persist the rolled-forward jar; a lost CAS just means a tab beat us.
       await repo.update(env, row.uid, await seal(env, row.uid, CURRENT_KID, session), row.ver);
     } catch (e) {

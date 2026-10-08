@@ -23,7 +23,7 @@ export interface Session {
   name?: string;
   /** Skin LEVEL uuids with their display name, so the alert job never needs the
    *  3.5 MB catalogue — the browser resolves names once, at save time. */
-  wishlist?: Array<{ id: string; name: string }>;
+  wishlist?: Array<{ id: string; name: string; type?: string }>;
   /**
    * Where to send a hit: a Discord webhook's `id/token`, never a URL. The host is
    * pinned in the egress allowlist, so this field cannot turn the notifier into
@@ -126,4 +126,11 @@ export interface Env extends Cloudflare.Env {
   // MAIL_FROM from [vars] — and declaring them again as optional contradicts
   // the generated required ones. The code still guards against a missing key,
   // because a type is a promise about the local file and not about production.
+}
+
+/** One wishlist entry that is in today's store. The name is the browser's,
+ *  saved when it was starred: the Worker has no catalogue to look one up in. */
+export interface Hit {
+  id: string;
+  name: string;
 }

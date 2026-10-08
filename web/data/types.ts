@@ -71,7 +71,9 @@ export interface StoreView {
  *  which is why neither waits on Riot or on the catalogue. A starred skin is
  *  an id and the name you saw when you starred it, and nothing else. */
 export interface Prefs {
-  wishlist: Array<{ id: string; name: string }>;
+  /** `type` is Riot's item type uuid, so a row can draw itself without an
+   *  index. Absent on anything starred before it was kept. */
+  wishlist: Array<{ id: string; name: string; type?: string }>;
   discord: string;
   /** The address an alert would go to, whether it has carried a code back,
    *  and the last thing the provider said about the last message sent to it.

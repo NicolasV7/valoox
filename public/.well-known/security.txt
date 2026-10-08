@@ -1,7 +1,7 @@
 # Si encontrás algo, quiero saberlo antes que cualquier otra persona.
 Contact: mailto:npava@visbl.com
 Preferred-Languages: es, en
-Canonical: https://val.xz5zcpvkdr.workers.dev/.well-known/security.txt
+Canonical: https://drop.valoox.store/.well-known/security.txt
 
 # Lo que más me interesa, en orden:
 #  1. Cualquier forma de leer la sesión de otro usuario.

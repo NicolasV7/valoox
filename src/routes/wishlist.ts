@@ -5,7 +5,10 @@ import { setAlerts } from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const MAX = 60;
+/** Both lists together. The ceiling is about the row, not the compute: the
+ *  whole wishlist rides in one sealed blob, and the daily job's work is a set
+ *  intersection either way. */
+const MAX = 100;
 
 /**
  * A Discord webhook, from whatever was pasted.
@@ -25,12 +28,21 @@ function cleanHook(body: unknown): string | undefined {
   return HOOK.exec(raw)?.[1];
 }
 
-/** Validated at the edge, before anything is sealed. */
-function cleanWishlist(body: unknown): Array<{ id: string; name: string }> {
+/**
+ * Validated at the edge, before anything is sealed.
+ *
+ * Three fields and all three are the browser's: the Worker has no catalogue to
+ * check a uuid against and never will. `type` is Riot's own item type, kept so
+ * the list can draw itself without downloading a 3.5 MB index to find out what
+ * each row is of; `name` is what was on screen when it was starred, which is
+ * what the morning mail carries, because the daily job has nowhere to look one
+ * up either.
+ */
+function cleanWishlist(body: unknown): Array<{ id: string; name: string; type?: string }> {
   const raw = ((body ?? {}) as { wishlist?: unknown }).wishlist;
   return (Array.isArray(raw) ? raw : [])
     .filter(
-      (w): w is { id: string; name: string } =>
+      (w): w is { id: string; name: string; type?: string } =>
         !!w &&
         typeof w === 'object' &&
         typeof (w as { id?: unknown }).id === 'string' &&
@@ -38,7 +50,11 @@ function cleanWishlist(body: unknown): Array<{ id: string; name: string }> {
         typeof (w as { name?: unknown }).name === 'string',
     )
     .slice(0, MAX)
-    .map((w) => ({ id: w.id, name: w.name.slice(0, 80) }));
+    .map((w) => ({
+      id: w.id,
+      name: w.name.slice(0, 80),
+      ...(typeof w.type === 'string' && UUID.test(w.type) ? { type: w.type } : {}),
+    }));
 }
 
 export const readWishlist = ({ env, uid }: Ctx): Promise<Body> => wishlist(env, uid, null);
