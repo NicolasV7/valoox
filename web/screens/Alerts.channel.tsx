@@ -13,6 +13,7 @@ import { Back } from '../components/Back.tsx';
 import { useLeft } from '../components/Countdown.tsx';
 import { Mail } from '../components/icons.tsx';
 import { again, open, refused, reload, usePrefs } from '../data/channel.ts';
+import { sameMailbox } from '../data/mailbox.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS, go } from '../route.ts';
 
@@ -31,10 +32,13 @@ export function AlertsChannel() {
   const field = useRef<HTMLInputElement>(null);
 
   const now = to ?? prefs?.mail?.to ?? '';
-  const ok = prefs?.mail?.ok === true && now === prefs.mail.to;
+  // Same INBOX, not same string — see data/mailbox.ts. Typing a `+` is not
+  // changing the address, and neither is a dot inside a gmail local part.
+  const here = sameMailbox(now, prefs?.mail?.to);
+  const ok = prefs?.mail?.ok === true && here;
   // The refusal belongs to the address it was about. Typing a different one
   // makes it somebody else's history, so the chip stops reporting it.
-  const bad = refused(prefs?.mail?.said) && now.trim() === prefs?.mail?.to;
+  const bad = refused(prefs?.mail?.said) && here;
   const valid = ADDRESS.test(now.trim()) && now.trim().length <= 254;
   // The address that failed is the one send that cannot work, so the button
   // is shut until it is a different one. The Worker refuses it too; this is
