@@ -44,34 +44,38 @@
 }
 
 /* --- a line that is still waiting ----------------------------------------- */
-/* Three dots, lit one after another. The `…` in the string cannot be animated a
- * third at a time, so Thinking.tsx strips it and draws these instead. */
+/* Three full stops from the sentence's own font, hopping in turn. They inherit
+ * everything — face, size, weight, colour — so the line is the line, and the
+ * only difference from rest is that it is moving.
+ *
+ * The lift is in `em`, so it scales with whatever text it ends up after. */
 
 .dots {
-  display: inline-flex;
-  gap: 2px;
-  margin-left: 1px;
-  vertical-align: baseline;
+  display: inline;
+  font-style: normal;
 }
 
 .dots i {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.25;
-  animation: think 1300ms ease-in-out infinite;
+  display: inline-block;
+  font-style: normal;
+  animation: hop 1200ms cubic-bezier(0.3, 0.1, 0.3, 1) infinite;
 }
 .dots i:nth-child(2) {
-  animation-delay: 180ms;
+  animation-delay: 150ms;
 }
 .dots i:nth-child(3) {
-  animation-delay: 360ms;
+  animation-delay: 300ms;
 }
 
-@keyframes think {
-  30% {
-    opacity: 1;
+/* Up, down, and then wait while the other two take their turn. */
+@keyframes hop {
+  0%,
+  45%,
+  100% {
+    transform: translateY(0);
+  }
+  22% {
+    transform: translateY(-0.38em);
   }
 }
 
