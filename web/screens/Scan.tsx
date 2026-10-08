@@ -8,6 +8,7 @@
 // square in every phase, so the code, the tick and the clock all land in the
 // same place and the screen changes without anything jumping.
 
+import { appLink } from '../app-link.ts';
 import { Check, Clock, Riot } from '../components/icons.tsx';
 import { QrCode } from '../components/QrCode.tsx';
 import { Thinking } from '../components/Thinking.tsx';
@@ -63,19 +64,16 @@ export function Scan({
         <span class="small">{s.scan.or}</span>
       </div>
 
-      {/* This tab, deliberately. The url is a universal link, and iOS only
-          hands one to the app on a plain same-tab navigation — opened in a new
-          tab Safari keeps it and shows Riot's web page instead, which is the
-          app not opening.
-          
-          With the app installed nothing navigates at all: iOS switches to it
-          and this page is simply backgrounded, so the poll survives and the
-          visibilitychange handler in sign-in.ts asks again the moment you come
-          back. Without the app, the navigation to Riot's own login is the right
-          fallback anyway. */}
+      {/* This tab, deliberately. The link is the app's own, and a phone only
+          hands one over on a plain same-tab navigation — opened in a new tab
+          the browser keeps it and shows Riot's web page instead, which is the
+          app not opening. When it does open, nothing navigates: the phone
+          switches to it, this page is backgrounded, and the visibilitychange
+          handler in sign-in.ts asks again the moment you come back.
+          appLink() is what happens when you say no. */}
       <a
         class="btn btn--riot"
-        href={state.phase === 'ready' ? state.url : undefined}
+        href={state.phase === 'ready' ? appLink(state.url) : undefined}
         aria-disabled={state.phase === 'ready' ? undefined : 'true'}
       >
         <Riot />
