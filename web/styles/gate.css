@@ -19,7 +19,6 @@
 
 .gate,
 .scan {
-  --v: clamp(7px, 2.1vh, 22px);
   flex: 1;
   min-height: 0;
   display: flex;

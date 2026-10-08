@@ -3,7 +3,7 @@
 // feeling to carry, and they are the only ones where a picture is not in the
 // way of the thing you came to look at. The store and the collection stay bare.
 //
-// They are served from this origin. Ten files that never change, fetched at
+// They are served from this origin. Eleven files that never change, fetched at
 // build time by scripts/art.mjs — which is where Riot's uuid for each one is
 // written down — so the screen a stranger reads before scanning does not open
 // a second connection to draw a sticker on it.
@@ -34,4 +34,6 @@ export const SPRAY = {
   thisGun: art('thisgun'),
   /** Yoru asleep, with the Zzz. The list is kept and nothing is being sent. */
   asleep: art('asleep'),
+  /** Jett, palm up, unimpressed. The one question before something is undone. */
+  holdOn: art('holdon'),
 } as const;

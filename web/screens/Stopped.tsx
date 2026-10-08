@@ -1,72 +1,110 @@
-// Stopped, from the footer of a message.
+// The page the footer of a message leads to.
 //
-// It acts on arrival rather than behind a button, and that is deliberate in
-// both directions. A link in a mail is followed by scanners before a person
-// sees it, so the Worker refuses a GET and this posts instead — a scanner
-// does not run the page. And once a person has pressed Stop, asking them to
-// press it again is a dark pattern with a confirmation dialog on it.
+// It asks before it does anything, and that is not politeness. A link in a
+// mail is followed by scanners before a person sees it, so a page that acted
+// on arrival would be a page that turned somebody's alerts off because their
+// employer's filter opened the message first. A button cannot be pressed by
+// a scanner.
 //
-// What it does not do is throw anything away. The list stays exactly as it
-// was, with nowhere to send, which is the only part of this worth a whole
-// screen: the thing people are actually afraid of when they unsubscribe is
-// losing the work they put in.
+// Nothing is thrown away either way. The list stays exactly as it was, with
+// nowhere to send, and saying so is the only reassurance this screen owes:
+// the thing people are afraid of when they unsubscribe is losing the work
+// they put in.
 
-import { useEffect, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import * as api from '../data/api.ts';
 import { reload } from '../data/channel.ts';
 import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
-import { ALERTS, href, intercept } from '../route.ts';
 
-type Done = { was: string | null; kept: number };
+type At =
+  | { at: 'ask' }
+  | { at: 'going' }
+  | { at: 'done'; to: string | null; kept: number }
+  | { at: 'kept' }
+  | { at: 'failed' };
 
 export function Stopped({ token }: { token: string }) {
   const s = t().stopped;
-  const [done, setDone] = useState<Done | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [state, set] = useState<At>({ at: 'ask' });
 
-  useEffect(() => {
-    let alive = true;
-    void api
+  if (state.at === 'done') {
+    return (
+      <Card art={SPRAY.asleep} said={s.stopped}>
+        <p class="lede stop__lede">{state.to ? s.noMoreTo(state.to) : s.alreadyOff}</p>
+        <p class="small stop__under">{state.kept > 0 ? s.keptCount(state.kept) : s.keptNone}</p>
+      </Card>
+    );
+  }
+
+  if (state.at === 'kept') {
+    return (
+      <Card art={SPRAY.peace} said={s.nothingChanged}>
+        <p class="lede stop__lede">{s.stillOn}</p>
+      </Card>
+    );
+  }
+
+  if (state.at === 'failed') {
+    return (
+      <Card art={SPRAY.whoops} said={s.couldNot}>
+        <p class="lede stop__lede">{s.couldNotWhy}</p>
+      </Card>
+    );
+  }
+
+  const busy = state.at === 'going';
+  return (
+    <Card art={SPRAY.holdOn} said={s.sure}>
+      <p class="lede stop__lede">{s.sureWhy}</p>
+      <div class="stop__pair">
+        <button type="button" class="btn" disabled={busy} onClick={stop}>
+          {busy ? t().common.loading : s.yesStop}
+        </button>
+        <button
+          type="button"
+          class="btn btn--quiet"
+          disabled={busy}
+          onClick={() => set({ at: 'kept' })}
+        >
+          {s.no}
+        </button>
+      </div>
+    </Card>
+  );
+
+  async function stop() {
+    set({ at: 'going' });
+    const res = (await api
       .post<{ ok?: boolean; was?: string | null; kept?: number }>('/api/stop', { t: token })
-      .then(async (r) => {
-        if (!alive) return;
-        const got = r as { ok?: boolean; was?: string | null; kept?: number };
-        if (!got?.ok) return setFailed(true);
-        setDone({ was: got.was ?? null, kept: got.kept ?? 0 });
-        // The tab that was open on the alerts screen is now wrong about the
-        // address. Cheap, and it is the same row.
-        await reload();
-      })
-      .catch(() => {
-        if (alive) setFailed(true);
-      });
-    return () => {
-      alive = false;
-    };
-  }, [token]);
+      .catch(() => null)) as { ok?: boolean; was?: string | null; kept?: number } | null;
 
+    if (!res?.ok) return set({ at: 'failed' });
+    // The tab that was open on the alerts screen is now wrong about the
+    // address. Cheap, and it is the same row.
+    await reload();
+    set({ at: 'done', to: res.was ?? null, kept: res.kept ?? 0 });
+  }
+}
+
+/** One shape for all four states, so the sticker and the heading do not move
+ *  between them — the screen reads as one place answering, not four pages. */
+function Card({
+  art,
+  said,
+  children,
+}: {
+  art: string;
+  said: string;
+  children: preact.ComponentChildren;
+}) {
   return (
     <main class="screen stop">
-      <img class="stop__art" src={SPRAY.asleep} alt="" width="120" height="120" />
-      <h1 class="stop__title">{failed ? s.couldNot : done ? s.stopped : s.stopping}</h1>
-
-      {failed && <p class="lede stop__lede">{s.couldNotWhy}</p>}
-
-      {done && (
-        <>
-          <p class="lede stop__lede">{done.was ? s.noMoreTo(done.was) : s.alreadyOff}</p>
-          <div class="stop__kept">
-            <span class="label">{s.standby}</span>
-            <p class="small">{done.kept > 0 ? s.keptCount(done.kept) : s.keptNone}</p>
-          </div>
-          <a class="btn stop__back" href={href(ALERTS)} onClick={intercept(ALERTS)}>
-            {s.putOneBack}
-          </a>
-          <p class="legal stop__note">{s.whatWeDid}</p>
-          <p class="legal stop__note">{s.riotIsSeparate}</p>
-        </>
-      )}
+      <div class="stop__mid">
+        <img class="stop__art" src={art} alt="" width="132" height="132" />
+        <h1 class="stop__title">{said}</h1>
+        {children}
+      </div>
     </main>
   );
 }

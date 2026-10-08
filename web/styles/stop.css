@@ -1,62 +1,64 @@
 /* The page the footer of a message leads to.
  *
- * One column, centred, and nothing else on it. It is read once, on a phone,
- * by somebody who has just pressed a link in a mailbox — so the whole answer
- * is above the fold and there is no tab bar under it, because this screen is
- * not inside the app's navigation. */
+ * It is read once, on a phone, by somebody who has just pressed a link in a
+ * mailbox. So it is the whole viewport with one thing in the middle of it:
+ * no tab bar under it, because this screen is not inside the app's
+ * navigation, and nothing below the fold, because there is nothing else. */
 
 .stop {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: calc(var(--v) * 1.6) var(--gut) calc(var(--v) * 1.4);
+  justify-content: center;
+  /* dvh and not vh: on iOS the address bar makes vh taller than the screen,
+   * so a centred thing sits low and the button lands under the chrome. */
+  min-height: 100dvh;
+  padding: calc(var(--v) * 1.4) var(--gut) calc(var(--v) * 1.4 + env(safe-area-inset-bottom));
+}
+
+.stop__mid {
+  width: 100%;
+  max-width: 30rem;
   text-align: center;
 }
 
+/* Scales down on a narrow screen instead of pushing the button off it.
+ * `margin-inline` because base.css makes every img a block, and a centred
+ * block is a margin, not a text-align. */
 .stop__art {
-  width: 120px;
-  height: 120px;
+  width: min(132px, 34vw);
+  height: auto;
+  margin-inline: auto;
   object-fit: contain;
 }
 
 .stop__title {
-  margin: calc(var(--v) * 0.7) 0 0;
+  margin: calc(var(--v) * 0.55) 0 0;
   font-size: var(--t-section);
   font-weight: 300;
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .stop__lede {
-  margin: 10px 0 0;
-  max-width: 34ch;
+  margin: 10px auto 0;
+  max-width: 28ch;
+  text-wrap: pretty;
 }
 
-/* The half people are actually anxious about. It gets a box so the eye finds
- * it without reading: the list is kept, and that is the news. */
-.stop__kept {
-  width: 100%;
-  margin-top: calc(var(--v) * 1.1);
-  padding: 16px;
-  border: 1px solid var(--rule);
-  border-radius: 12px;
-  background: var(--card);
+.stop__under {
+  margin: 8px 0 0;
+  color: var(--ink-4);
 }
 
-.stop__kept .label {
-  margin: 0;
+/* Side by side where there is room, stacked where there is not — and the
+ * primary stays first either way, which is the thing a thumb finds. */
+.stop__pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: calc(var(--v) * 0.9);
 }
 
-.stop__kept p {
-  margin: 7px 0 0;
-  color: var(--ink-3);
-}
-
-.stop__back {
-  width: 100%;
-  margin-top: calc(var(--v) * 0.8);
-}
-
-.stop__note {
-  margin: 14px 0 0;
-  text-align: left;
+.stop__pair .btn {
+  flex: 1 1 10rem;
 }

@@ -105,6 +105,11 @@
 
   /* --- space -------------------------------------------------------------- */
   --gut: 20px; /* the page gutter on a phone */
+  /* The vertical rhythm of a screen that is locked to the viewport: the same
+   * proportions on a tall phone and a short one, with no height at which the
+   * layout changes shape. Used by the sign-in screens and by the one the
+   * footer of a message leads to. */
+  --v: clamp(7px, 2.1vh, 22px);
   --gut-web: 56px; /* and on the site */
   --r-sm: 8px;
   --r: 12px;
