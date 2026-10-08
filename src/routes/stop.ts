@@ -24,10 +24,17 @@ import { readStop } from '../vault/stop.ts';
 
 export async function stopMail({ env, uid, req }: Ctx): Promise<Body> {
   const body = (await req.json().catch(() => null)) as { t?: unknown } | null;
-  // The token names the row, because the browser reading the mail may never
-  // have had this app's cookie. Falling back to the cookie covers the other
-  // door: the Account screen, on the device that is signed in.
-  const who = (await readStop(env, body?.t)) ?? uid;
+
+  // No token at all is the other door: the Account screen, on the device that
+  // is already signed in, where the cookie is the answer.
+  if (body?.t === undefined || body.t === '') return off(env, uid);
+
+  // A token that was offered and does not verify is refused rather than
+  // quietly ignored. Falling back to the cookie here would mean a link with
+  // garbage in it turns off the alerts of whoever happens to open it — the
+  // signature would be decoration, and the link would be the attack.
+  const who = await readStop(env, body.t);
+  if (!who) return { ok: false, error: 'bad link' };
   return off(env, who);
 }
 
