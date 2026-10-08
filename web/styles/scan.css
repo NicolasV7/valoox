@@ -1,0 +1,148 @@
+/* The code, and the three things that happen to it: approved, waiting,
+ * dead. One screen, and the only thing that changes is what is on the
+ * plate. */
+
+/* --- the code ------------------------------------------------------------- */
+
+.scan {
+  padding-top: 50px;
+}
+
+.scan__lede {
+  margin-top: 15px;
+}
+
+/* White in both themes, and that is not an oversight: a QR inverted to match a
+ * dark page fails to scan on a good share of phones. */
+.plate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin: 24px auto 0;
+  padding: 14px;
+  border-radius: 14px;
+  background: #ffffff;
+  line-height: 0;
+}
+
+.plate__wait,
+.plate--done,
+.plate--dead {
+  position: relative;
+}
+
+.plate__wait {
+  width: 190px;
+  height: 190px;
+  border-radius: var(--r-sm);
+  background: #eceef1;
+}
+
+.plate--done,
+.plate--dead {
+  width: 218px;
+  height: 218px;
+}
+
+.plate__seal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0e0e11;
+}
+
+.plate__seal--quiet {
+  width: 60px;
+  height: 60px;
+  border: 1.5px solid #c9ced2;
+  background: none;
+  color: #8b9399;
+}
+
+.scan__how {
+  margin-top: 13px;
+  text-align: center;
+}
+
+.rule-or {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  color: var(--ink-4);
+}
+.rule-or::before,
+.rule-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+.btn--riot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  background: var(--riot);
+  color: #ffffff;
+}
+
+.scan__waiting,
+.scan__who {
+  margin-top: auto;
+  padding-top: 14px;
+  text-align: center;
+}
+
+.scan__who {
+  margin-top: 18px;
+}
+
+.scan__waiting img,
+.scan__who img,
+.scan__spray {
+  margin: 0 auto 10px;
+}
+
+.scan__waiting .dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--ink-4);
+}
+
+.scan__spray {
+  margin: 20px auto 14px;
+}
+
+/* The shape the store rows will take, at the size they will be. */
+.bars {
+  display: grid;
+  gap: 10px;
+  margin-top: 26px;
+}
+.bars .skel {
+  height: 10px;
+  border-radius: 5px;
+}
+.bars .skel:nth-child(2) {
+  width: 72%;
+}
+.bars .skel:nth-child(3) {
+  width: 46%;
+}
+
+.scan__foot {
+  margin-top: auto;
+  padding-top: 24px;
+  text-align: center;
+}

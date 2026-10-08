@@ -1,0 +1,22 @@
+/* The cascade, in the order it is meant to be read.
+ *
+ * One file listing every import beats co-locating a stylesheet next to each
+ * component: with co-location the output order is whatever the bundler's import
+ * graph happened to produce, and the day two rules collide nobody can say which
+ * wins without building. Here it is a list and it is the answer. */
+
+@import '../../design/tokens.css'; /* every value, once */
+@import '../../design/fonts.css'; /* the two faces, self-hosted */
+@import './base.css'; /* the ground, the scale, focus */
+@import './shell.css'; /* the column and the tab bar */
+
+/* the four shapes, and the things that sit on them */
+@import './row.css';
+@import './tile.css';
+
+/* the screens */
+@import './gate.css';
+@import './scan.css';
+@import './store.css';
+@import './offer.css';
+@import './fail.css';

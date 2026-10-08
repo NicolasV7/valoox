@@ -1,0 +1,55 @@
+/* One offer, opened. */
+
+/* --- one offer, opened ---------------------------------------------------- */
+
+.offer {
+  padding-top: 0;
+}
+
+.offer__chev {
+  display: inline-flex;
+  transform: rotate(90deg);
+}
+
+.offer__stage {
+  position: relative;
+  height: 236px;
+  margin: 14px calc(var(--gut) * -1) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.offer__art {
+  width: 88%;
+  height: 120px;
+  object-fit: contain;
+}
+
+.offer__id {
+  padding-top: 22px;
+}
+
+.offer__name {
+  font-size: var(--t-screen);
+}
+
+.offer__line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.offer__tier {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--t-small);
+  color: var(--ink-3);
+}
+
+.offer__price {
+  margin-left: auto;
+  font-size: var(--t-item);
+}

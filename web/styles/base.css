@@ -1,0 +1,134 @@
+/* The ground, the type scale, and the few things every screen inherits. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* On html rather than body, so it paints the canvas and covers a short page
+   * too. Not `fixed`: a fixed attachment paints only the viewport box, and
+   * everything past the first screenful of a long store comes out blank. */
+  min-height: 100%;
+  background: var(--ground);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--ui);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  /* Riot's renders are wide. Nothing should ever scroll sideways. */
+  overflow-x: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* --- the scale ------------------------------------------------------------ */
+/* Defaults on the tags, so a screen that writes an h1 gets the right one and a
+ * class is only needed where the role and the tag disagree. */
+
+h1 {
+  margin: 0;
+  font-size: var(--t-screen);
+  font-weight: 200;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+p {
+  margin: 0;
+}
+
+.lede {
+  color: var(--ink-3);
+  line-height: 1.55;
+}
+
+.item {
+  font-size: var(--t-item);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.small {
+  font-size: var(--t-small);
+  color: var(--ink-3);
+}
+
+.faint {
+  font-size: var(--t-small);
+  color: var(--ink-4);
+}
+
+/* The one place 11px is allowed, and it is a label rather than a sentence. */
+.label {
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.legal {
+  font-size: var(--t-floor);
+  line-height: 1.5;
+  color: var(--ink-6);
+}
+
+a {
+  color: var(--ink-3);
+}
+a:hover {
+  color: var(--ink);
+}
+
+/* --- focus ---------------------------------------------------------------- */
+/* Visible, and on the ink rather than a colour: a focus ring is not data. */
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --- motion --------------------------------------------------------------- */
+/* 120ms, and only on a state change. Nothing here is decorative. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- waiting -------------------------------------------------------------- */
+/* One grey, no shimmer. A skeleton that animates is asking to be looked at, and
+ * it is the one thing on screen with nothing to say. */
+
+.skel {
+  background: var(--raised);
+  border-radius: var(--r-sm);
+}

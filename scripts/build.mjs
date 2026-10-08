@@ -14,7 +14,7 @@ const dev = watch || process.argv.includes('--dev');
 
 /** @type {import('esbuild').BuildOptions} */
 const options = {
-  entryPoints: ['web/main.ts'],
+  entryPoints: ['web/main.tsx'],
   bundle: true,
   outfile: 'public/app.js',
   format: 'esm',
@@ -23,7 +23,12 @@ const options = {
   jsx: 'automatic',
   jsxImportSource: 'preact',
   // The CSS comes out beside it, named after the entry: public/app.css.
-  loader: { '.woff2': 'file' },
+  //
+  // The font urls are absolute paths the Worker serves at runtime, not assets
+  // to resolve now — `npm run fonts` puts them there and git never sees them.
+  // Without this esbuild tries to read them off disk at build time and fails on
+  // a clean checkout, which is the one machine that must work.
+  external: ['/fonts/*'],
   minify: !dev,
   sourcemap: dev ? 'inline' : false,
   legalComments: 'none',

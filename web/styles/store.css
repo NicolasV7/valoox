@@ -1,0 +1,92 @@
+/* The store: a header, four rows, and everything else below the fold. */
+
+.store {
+  padding-top: 0;
+}
+
+.store__block {
+  padding: 0 var(--gut);
+  margin-top: 26px;
+}
+
+.store__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.store__head .label {
+  margin: 0;
+}
+.store__head > :last-child {
+  margin-left: auto;
+}
+
+.store__rows {
+  display: grid;
+  gap: 9px;
+  margin-top: 11px;
+}
+
+.store__total {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 11px;
+  font-size: var(--t-item);
+}
+
+.store__foot {
+  padding: 30px var(--gut) 0;
+}
+
+/* --- who you are ---------------------------------------------------------- */
+
+.head {
+  position: relative;
+  overflow: hidden;
+  padding: 24px var(--gut) 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* The equipped player card, behind everything. Masked off to the right so the
+ * wallet never has to be read against a bright corner of somebody's art. */
+.head__card {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.2;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 42%, #000 100%);
+}
+
+.head__who,
+.head__line {
+  position: relative;
+}
+
+.head__who {
+  display: flex;
+  flex-direction: column;
+}
+
+.head__tag {
+  color: var(--ink-4);
+}
+
+.head__rank {
+  margin-top: 3px;
+}
+
+.head__line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.head__clock {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--clock);
+}

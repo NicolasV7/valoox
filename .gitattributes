@@ -15,3 +15,6 @@
 *.woff2 binary
 *.png binary
 *.ico binary
+
+# Pixel buffers for the colour-measurement test. Binary, and small.
+*.gz binary

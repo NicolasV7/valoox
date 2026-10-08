@@ -1,0 +1,75 @@
+/* The way in. Four screens, no tab bar — you are not in the app yet. */
+
+/* flex: 1 rather than min-height: 100dvh. .shell already fills the viewport,
+ * and a child that also asks for a full viewport makes the document two of
+ * them tall — which looks like a page with a seam halfway down it. */
+.gate,
+.scan {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 48px 24px 28px;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+
+/* --- the trust page ------------------------------------------------------- */
+
+.gate__title {
+  margin-top: 34px;
+  font-size: var(--t-hero);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.gate__lede {
+  margin-top: 18px;
+}
+
+/* Four facts as text. They were four identical icon-and-paragraph cards, which
+ * is the stock container doing the thinking: a rule between lines separates
+ * them just as well and claims nothing. */
+.facts {
+  margin: 22px 0 0;
+}
+
+.facts__row {
+  padding: 15px 0;
+  border-top: 1px solid var(--rule);
+}
+.facts__row:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.facts__row:last-child {
+  padding-bottom: 0;
+}
+
+.facts__term {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.facts__why {
+  margin: 5px 0 0;
+  font-size: var(--t-small);
+  color: var(--ink-3);
+}
+
+.gate__foot {
+  margin-top: auto;
+  padding-top: 26px;
+}
+
+.gate__dest {
+  margin-top: 14px;
+  text-align: center;
+  color: var(--ink-4);
+}

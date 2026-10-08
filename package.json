@@ -13,10 +13,10 @@
     "fonts": "node scripts/fonts.mjs",
     "deploy": "npm run build && wrangler deploy",
     "test": "vitest run",
-    "typecheck": "wrangler types && tsc --noEmit",
+    "typecheck": "wrangler types && tsc --noEmit && tsc --noEmit -p web/tsconfig.json",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test && npm run build"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
@@ -28,6 +28,7 @@
     "wrangler": "^4.148.0"
   },
   "dependencies": {
-    "preact": "^11.0.0"
+    "preact": "^11.0.0",
+    "uqr": "^0.1.3"
   }
 }

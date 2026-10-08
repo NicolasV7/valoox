@@ -8,3 +8,7 @@ worker-configuration.d.ts
 # Fetched by `npm run fonts`. SIL OFL 1.1 permits shipping them; keeping a
 # binary out of a public repo is the reason, not the licence.
 public/fonts/
+
+# Built by `npm run build` from web/. wrangler uploads public/ at deploy.
+public/app.js
+public/app.css

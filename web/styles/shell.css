@@ -1,0 +1,109 @@
+/* The column the whole app lives in, and the bar at the bottom of it.
+ *
+ * The artboards are 390 wide because that is a phone, and that is where this is
+ * used — once a day, for ten seconds, usually while doing something else. On a
+ * wider screen the column stays a column rather than spreading into a layout
+ * nobody designed. */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* Everything above the tab bar. The padding-bottom keeps the last row clear of
+ * it, and of the home indicator underneath. */
+.screen {
+  flex: 1;
+  padding: 0 var(--gut) calc(84px + env(safe-area-inset-bottom));
+}
+
+.screen--flush {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* --- the tab bar ---------------------------------------------------------- */
+/* Fixed, because the store is a long scroll and the way out of it should not
+ * require reaching the end. */
+
+.tabs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  gap: 2px;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 12px var(--gut) calc(20px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--rule);
+  background: var(--page);
+}
+
+.tab {
+  flex: 1;
+  padding: 11px 0;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--ink-4);
+  font-family: inherit;
+  font-size: var(--t-label);
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+
+.tab[aria-current='page'] {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+/* --- the back link -------------------------------------------------------- */
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 18px 0 0;
+  font-size: var(--t-small);
+  color: var(--ink-3);
+  text-decoration: none;
+}
+
+/* --- the one button shape ------------------------------------------------- */
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: 0;
+  border-radius: var(--r);
+  background: var(--ink);
+  color: var(--ink-inverse);
+  font-family: inherit;
+  font-size: var(--t-body);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn--quiet {
+  background: none;
+  border: 1px solid var(--rule-strong);
+  color: var(--ink-3);
+}
+
+.btn[disabled] {
+  cursor: default;
+  background: var(--raised);
+  color: var(--ink-5);
+}

@@ -1,0 +1,88 @@
+/* The letterbox row — a rifle, on its own colour — and the price beside it. */
+
+/* --- the letterbox row ---------------------------------------------------- */
+
+.row {
+  position: relative;
+  display: block;
+  height: 118px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+}
+
+.row--waiting {
+  background: var(--card);
+}
+
+.row__art {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  width: 86%;
+  height: 62px;
+  object-fit: contain;
+}
+
+.row__foot {
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  bottom: 11px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.row__id {
+  display: block;
+  min-width: 0;
+}
+
+/* It wraps rather than truncating. "Prelude to Chaos Vandal" cut to one line is
+ * three characters and an ellipsis, which is not a name. */
+.row__name {
+  display: block;
+  font-size: var(--t-small);
+  line-height: 1.2;
+}
+
+.row__tier {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-size: var(--t-floor);
+  color: var(--ink-4);
+}
+
+.row__price {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* --- money ---------------------------------------------------------------- */
+
+.money {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--t-small);
+}
+
+.money img {
+  opacity: 0.85;
+}
+
+.money--was {
+  font-size: var(--t-floor);
+  color: var(--ink-4);
+  text-decoration: line-through;
+}
+

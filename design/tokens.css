@@ -69,10 +69,19 @@
   --exclusive: 245, 149, 91;
   --ultra: 250, 214, 99;
 
+  /* Riot's own red, on the one button that opens their app. It is their mark,
+   * which puts it in the same category as the tier hues: data, not decoration.
+   * Nothing else in the interface may use it. */
+  --riot: #e32c1f;
+
   /* --- type --------------------------------------------------------------- */
   --ui: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
   --num: "Azeret Mono", ui-monospace, "SF Mono", "Cascadia Mono", monospace;
 
+  /* The one screen that has to persuade rather than inform — the gate a
+   * stranger reads before scanning — opts up to this. Named so the
+   * exception is visible rather than typed into a component. */
+  --t-hero: 38px; /* 300 */
   --t-screen: 32px; /* 200 — one per screen */
   --t-section: 28px; /* 300 */
   --t-item: 20px; /* 500 — the name of a thing */

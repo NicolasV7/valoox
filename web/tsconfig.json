@@ -1,0 +1,20 @@
+{
+  "//": "Separate from the root config on purpose. The Worker has no DOM — its lib is ES2022 and the platform types come from worker-configuration.d.ts — so letting `document` resolve in src/ would be a real regression. Two configs, two libs, one `npm run typecheck`.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": false,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "types": []
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}
