@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "valstore — arquitectura",
+    "title": "valoox — arquitectura",
     "quality_profile": "showcase",
     "viewBox": [
       1220,
@@ -43,7 +43,7 @@
       }
     ],
     "repository": {
-      "url": "https://github.com/NicolasV7/valstore",
+      "url": "https://github.com/NicolasV7/valoox",
       "provider": "github",
       "link_mode": "web",
       "revision": "965210f439e42db90963bab8ceb3633481901567"

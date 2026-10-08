@@ -193,7 +193,7 @@ export default {
         if (!held) return json({ needsReseed: true }, headers);
         const via = await deliver(
           held.session.notify ?? {},
-          'Prueba de valstore. Los avisos te llegan bien.',
+          'Prueba de valoox. Los avisos te llegan bien.',
         );
         return json({ ok: true, via }, headers);
       }

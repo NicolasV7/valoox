@@ -8,7 +8,7 @@ web
 
 ## What it is
 
-valstore shows a VALORANT player their own daily store, bundles, accessory store
+valoox shows a VALORANT player their own daily store, bundles, accessory store
 and collection from a phone, without opening the game or turning on a PC.
 
 ## Unique mechanism

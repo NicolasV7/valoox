@@ -18,6 +18,6 @@ CREATE TABLE IF NOT EXISTS s (
 );
 
 -- Plaintext flag so the cron can find the rows to poll with one indexed query.
--- It reveals only "this browser wants alerts" — the wishlist and the ntfy topic
--- live INSIDE the sealed blob, because a topic is a capability to message you.
+-- It reveals only "this browser wants alerts" — the wishlist and the webhook
+-- live INSIDE the sealed blob, because a webhook is a capability to message you.
 ALTER TABLE s ADD COLUMN alerts INTEGER NOT NULL DEFAULT 0;

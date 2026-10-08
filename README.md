@@ -1,4 +1,4 @@
-# valstore
+# valoox
 
 Tu tienda diaria y tu colección de VALORANT desde el celular, sin prender el PC.
 
