@@ -1,9 +1,26 @@
-/* One offer, opened. */
-
-/* --- one offer, opened ---------------------------------------------------- */
+/* One offer, opened: Riot's clip, the name, the price. */
 
 .offer {
+  position: relative;
   padding-top: 0;
+}
+
+/* The ground takes the skin's own measured colour, the way the bundle's takes
+ * its banner's. Sized to the screen rather than the viewport so it is still
+ * doing something below the fold. */
+.offer--lit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    132% 58% at 50% 0%,
+    rgba(var(--art), 0.38) 0%,
+    rgba(var(--art), 0.17) 34%,
+    rgba(var(--art), 0.06) 56%,
+    rgba(var(--art), 0) 76%
+  );
 }
 
 .offer__chev {
@@ -11,13 +28,24 @@
   transform: rotate(90deg);
 }
 
+/* --- the clip ------------------------------------------------------------- */
+/* 196px, and the same 196px in the skeleton. The render stands in for a frame
+ * of the clip: a real poster would mean decoding a 13 MB video to get one. */
+
 .offer__stage {
   position: relative;
-  height: 236px;
-  margin: 14px calc(var(--gut) * -1) 0;
+  height: 196px;
+  margin-top: 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.offer__stage--waiting {
+  background: var(--card);
 }
 
 .offer__art {
@@ -26,30 +54,93 @@
   object-fit: contain;
 }
 
-.offer__id {
-  padding-top: 22px;
-}
-
-.offer__name {
-  font-size: var(--t-screen);
-}
-
-.offer__line {
+.offer__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(242, 244, 245, 0.92);
+  color: #0e0e11;
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+.offer__seal--waiting {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+}
+
+/* A chip, because it sits on artwork nobody chose. */
+.offer__level {
+  position: absolute;
+  left: 12px;
+  top: 11px;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  background: rgba(10, 10, 12, 0.66);
+  font-size: var(--t-floor);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #e4e8ea;
+}
+
+/* --- what it is, and what it costs ---------------------------------------- */
+
+.offer__id {
+  display: flex;
+  align-items: flex-end;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 15px;
+}
+
+.offer__who {
+  min-width: 0;
+}
+
+/* Two lines, the skin above and the weapon below, the same break the store
+ * rows make. The one word you came looking for is in the same place on both. */
+.offer__name {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+}
+
+.offer__name > span {
+  display: block;
 }
 
 .offer__tier {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: var(--t-small);
+  margin: 7px 0 0;
+  font-size: 12.5px;
   color: var(--ink-3);
 }
 
-.offer__price {
+.offer__paid {
   margin-left: auto;
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  text-align: right;
+}
+
+.offer__price {
   font-size: var(--t-item);
+}
+
+.offer__price .money {
+  font-size: inherit;
+}
+
+.offer__note {
+  margin: 14px 0 0;
 }

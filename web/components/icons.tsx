@@ -112,3 +112,17 @@ export const TitleMark = ({ size = 30 }: P) => (
     </g>
   </svg>
 );
+
+/** The one control on the offer screen: Riot's clip of the skin, opened. */
+export const Play = ({ size = 22 }: P) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="currentColor"
+    aria-hidden="true"
+    style={{ flex: 'none', marginLeft: '3px' }}
+  >
+    <path d="M4 2.6l9 5.4-9 5.4z" />
+  </svg>
+);

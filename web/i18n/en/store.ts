@@ -30,6 +30,8 @@ export const store = {
 };
 
 export const offer = {
+  watch: 'Watch Riot’s clip',
+  levelNo: (n: number) => `Level ${n}`,
   levels: 'Levels',
   levelsOf: (have: number, all: number) => `${have} of ${all}`,
   variants: 'Variants',
@@ -47,9 +49,10 @@ export const offer = {
   /** Riot hosts one clip per level and they are large. We link theirs instead
    *  of keeping copies, which is also the honest thing to say about it. */
   clips:
-    'Both blocks disappear for a skin that has neither: 857 of the catalogue ' +
-    'have one level and 880 have no variants. Riot hosts a clip per level; we ' +
-    'link theirs rather than keep copies, they are 13 MB each.',
+    'The clip is Riot’s and it stays on their server: they are 13 MB each, so ' +
+    'we link theirs rather than keep copies. Levels and variants arrive with ' +
+    'the collection — a skin level carries no reference to its parent, and the ' +
+    'only way up is the index the collection brings anyway.',
 };
 
 // The bundle, opened. Riot sends between four and ten pieces and each carries

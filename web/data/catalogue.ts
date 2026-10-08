@@ -18,7 +18,17 @@ export interface Piece {
   /** How long the thing really is, relative to the longest weapon. 1 for
    *  anything that is not a weapon. See sizeOf(). */
   scale: number;
+  /** Riot's own clip of this level, on their CDN. Null for anything that has
+   *  none, which is most of the catalogue outside weapon skins. */
+  video: string | null;
+  /** Which level of its skin this is, 1-5. From the asset path, because the
+   *  payload does not carry the number and the parent skin is a 3.5 MB index
+   *  away. Null when the path does not say. */
+  level: number | null;
 }
+
+// .../AK_Soulstealer_Lv1_PrimaryAsset
+const LEVEL = /_Lv(\d)_/;
 
 /**
  * How long a weapon really is, relative to the longest one.
@@ -77,6 +87,8 @@ function one(kind: string, id: string): Promise<Piece | null> {
         // A title carries no art at all; a spray prefers the transparent cut.
         icon: d.displayIcon || d.fullTransparentIcon || d.largeArt || null,
         scale: sizeOf(d.assetPath),
+        video: d.streamedVideo || null,
+        level: Number(LEVEL.exec(d.assetPath ?? '')?.[1]) || null,
       };
     })
     .catch(() => null);

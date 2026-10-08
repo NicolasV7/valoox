@@ -38,7 +38,12 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
   const tier = tierByPrice(guns.map((g) => g.base ?? 0).sort((a, b) => b - a)[0] ?? null);
 
   return (
-    <main class="screen screen--flush bundle" style={artStyle(art)}>
+    <main
+      // Lit only once the banner's colour is measured: --art defaults to
+      // white, and a glow drawn before then is a white wash over the hero.
+      class={art ? 'screen screen--flush bundle bundle--lit' : 'screen screen--flush bundle'}
+      style={artStyle(art)}
+    >
       <div class="bundle__hero">
         {found?.icon && <img class="bundle__art" src={found.icon} alt="" />}
 

@@ -54,6 +54,11 @@
   color: var(--ink);
 }
 
+/* The banner's hole, at the height the banner will be. */
+.promo--waiting {
+  background: var(--card);
+}
+
 .promo__art {
   position: absolute;
   inset: 0;

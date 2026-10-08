@@ -77,14 +77,22 @@
 
 /* --- the back link -------------------------------------------------------- */
 
+/* It is a <button>, because it goes back rather than to a place — so it needs
+ * the reset a <button> comes with: without it the browser paints its own grey
+ * face behind the word, and the padding that holds the link off the top of the
+ * screen makes that a box. */
 .back {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 18px 0 0;
+  border: 0;
+  background: none;
+  font: inherit;
   font-size: var(--t-small);
   color: var(--ink-3);
   text-decoration: none;
+  cursor: pointer;
 }
 
 /* --- the one button shape ------------------------------------------------- */

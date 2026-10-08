@@ -135,7 +135,12 @@ a:hover {
 /* One grey, no shimmer. A skeleton that animates is asking to be looked at, and
  * it is the one thing on screen with nothing to say. */
 
+/* A hole in the shape of what is coming. `block` because it is always a box
+ * with a width and a height on it: as an inline span those are ignored, and
+ * the hole comes out 0×0 anywhere its parent is not already a flex or a grid.
+ * That is a bug you only see on the screens that are rarely slow. */
 .skel {
+  display: block;
   background: var(--skel);
   border-radius: var(--r-sm);
 }
