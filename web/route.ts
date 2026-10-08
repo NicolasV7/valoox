@@ -19,7 +19,8 @@ export type Route =
   | { name: 'spray'; id: string }
   | { name: 'buddy'; id: string }
   | { name: 'card'; id: string }
-  | { name: 'title'; id: string };
+  | { name: 'title'; id: string }
+  | { name: 'skin'; id: string };
 
 export type Tab = 'weapons' | 'sprays' | 'buddies' | 'cards' | 'titles';
 
@@ -41,6 +42,7 @@ export function parse(path: string): Route {
   if (head === 'buddy' && id && UUID.test(id)) return { name: 'buddy', id };
   if (head === 'card' && id && UUID.test(id)) return { name: 'card', id };
   if (head === 'title' && id && UUID.test(id)) return { name: 'title', id };
+  if (head === 'skin' && id && UUID.test(id)) return { name: 'skin', id };
   if (head === 'collection') {
     const tab = TABS.find((t) => t === id) ?? 'weapons';
     return { name: 'collection', tab };
@@ -86,6 +88,23 @@ function mark(): void {
 /** Where the screen that is arriving belongs. Zero for one being opened for
  *  the first time, which has never been anywhere. */
 export const wasAt = (): number => (history.state as { y?: number } | null)?.y ?? 0;
+
+/**
+ * Which section of the app a screen belongs to.
+ *
+ * One table, because two lists of the same thing drift and this pair already
+ * did: the tab bar marks where you are with it and the shell decides whether
+ * to fetch your inventory with it, and every detail screen added to the
+ * collection had to be remembered in both. Three of them were not, so a cold
+ * link to a charm, a card or a title sat on its loader for ever.
+ */
+const UNDER: Array<[section: string, screens: Array<Route['name']>]> = [
+  ['store', ['store', 'offer', 'bundle', 'piece']],
+  ['collection', ['collection', 'weapon', 'skin', 'spray', 'buddy', 'card', 'title']],
+];
+
+export const section = (name: Route['name']): string | undefined =>
+  UNDER.find(([, screens]) => screens.includes(name))?.[0];
 
 const listeners = new Set<(r: Route) => void>();
 

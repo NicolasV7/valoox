@@ -12,7 +12,7 @@ import type { ApiError } from './data/api.ts';
 import * as api from './data/api.ts';
 import { NEEDS_RESEED } from './data/api.ts';
 import type { Fault, Inventory, StoreView } from './data/types.ts';
-import { useRoute, wasAt } from './route.ts';
+import { section, useRoute, wasAt } from './route.ts';
 import { BuddiesLoading } from './screens/Buddies.loading.tsx';
 import { Buddies } from './screens/Buddies.tsx';
 import { Buddy } from './screens/Buddy.tsx';
@@ -27,6 +27,8 @@ import { Gate } from './screens/Gate.tsx';
 import { Offer } from './screens/Offer.tsx';
 import { Piece } from './screens/Piece.tsx';
 import { Scan } from './screens/Scan.tsx';
+import { SkinLoading } from './screens/Skin.loading.tsx';
+import { Skin } from './screens/Skin.tsx';
 import { Spray } from './screens/Spray.tsx';
 import { SpraysLoading } from './screens/Sprays.loading.tsx';
 import { Sprays } from './screens/Sprays.tsx';
@@ -76,7 +78,9 @@ export function App() {
     void load();
   }, [load]);
 
-  const wants = route.name === 'collection' || route.name === 'weapon' || route.name === 'spray';
+  // Every collection screen needs it, and which those are lives in one table
+  // rather than in a condition that has to be remembered — see route.ts.
+  const wants = section(route.name) === 'collection';
   useEffect(() => {
     if (!wants || inv) return;
     void api
@@ -140,6 +144,9 @@ export function App() {
     }
     if (route.name === 'buddy') {
       return inv ? <Buddy id={route.id} inv={inv} /> : <BuddiesLoading />;
+    }
+    if (route.name === 'skin') {
+      return inv ? <Skin id={route.id} inv={inv} /> : <SkinLoading />;
     }
     if (route.name === 'card') {
       return inv ? <Card id={route.id} inv={inv} /> : <CardsLoading />;
