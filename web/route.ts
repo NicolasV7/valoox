@@ -15,7 +15,8 @@ export type Route =
    *  are, and because the back swipe out of a weapon has to land on the one you
    *  came from rather than on whichever was first. */
   | { name: 'collection'; tab: Tab }
-  | { name: 'weapon'; id: string };
+  | { name: 'weapon'; id: string }
+  | { name: 'spray'; id: string };
 
 export type Tab = 'weapons' | 'sprays' | 'buddies' | 'cards' | 'titles';
 
@@ -33,6 +34,7 @@ export function parse(path: string): Route {
   if (head === 'bundle' && id && UUID.test(id)) return { name: 'bundle', id };
   if (head === 'piece' && id && UUID.test(id)) return { name: 'piece', id };
   if (head === 'weapon' && id && UUID.test(id)) return { name: 'weapon', id };
+  if (head === 'spray' && id && UUID.test(id)) return { name: 'spray', id };
   if (head === 'collection') {
     const tab = TABS.find((t) => t === id) ?? 'weapons';
     return { name: 'collection', tab };
@@ -59,14 +61,6 @@ export function go(route: Route): void {
   history.pushState(null, '', href(route));
   announce();
   scrollTo(0, 0);
-}
-
-export function back(): void {
-  // Straight into the app rather than out of it: a deep link opened from a
-  // message has nothing behind it, and leaving the site is not what the back
-  // link on a screen means.
-  if (history.length > 1) history.back();
-  else go({ name: 'store' });
 }
 
 export function useRoute(): Route {

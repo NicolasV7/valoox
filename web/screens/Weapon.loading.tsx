@@ -10,9 +10,9 @@
 // that is still in flight. Riot answers with ids, and an id does not say which
 // gun it belongs to.
 
-import { Chevron, Search } from '../components/icons.tsx';
+import { Back, COLLECTION } from '../components/Back.tsx';
+import { Search } from '../components/icons.tsx';
 import { t } from '../i18n/index.ts';
-import { back } from '../route.ts';
 
 const ROWS = [0, 1, 2, 3, 4];
 
@@ -21,12 +21,7 @@ export function WeaponLoading() {
 
   return (
     <main class="screen gun">
-      <button type="button" class="back" onClick={back}>
-        <span class="offer__chev">
-          <Chevron />
-        </span>
-        {t().collection.title}
-      </button>
+      <Back to={COLLECTION} />
 
       <div class="gun__id">
         <h1>

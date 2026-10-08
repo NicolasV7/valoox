@@ -17,22 +17,15 @@
 // wait is the plain ground and the colour arrives with the art rather than
 // being guessed and corrected.
 
-import { Chevron } from '../components/icons.tsx';
+import { Back, STORE } from '../components/Back.tsx';
 import type { Kind } from '../design/shapes.ts';
-import { t } from '../i18n/index.ts';
-import { back } from '../route.ts';
 
 const THREE = [0, 1, 2];
 
 export function PieceLoading({ kind }: { kind?: Kind | null }) {
   return (
     <main class="screen piece">
-      <button type="button" class="back" onClick={back}>
-        <span class="offer__chev">
-          <Chevron />
-        </span>
-        {t().common.nav.store}
-      </button>
+      <Back to={STORE} />
 
       <div class={'piece__stage piece__stage--' + (kind ?? 'card') + ' piece__stage--waiting'} />
 

@@ -11,6 +11,7 @@
 // arrived with the store — so this screen opens with its numbers already real
 // and only the names and the artwork resolving against the catalogue.
 
+import { STORE } from '../components/Back.tsx';
 import { Countdown } from '../components/Countdown.tsx';
 import { Chevron } from '../components/icons.tsx';
 import { OfferRow } from '../components/OfferRow.tsx';
@@ -21,7 +22,7 @@ import { useBundle, useSkin } from '../data/usePiece.ts';
 import { shapeOf, spans } from '../design/shapes.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
-import { back } from '../route.ts';
+import { href, intercept } from '../route.ts';
 import { Totals } from './Bundle.totals.tsx';
 
 export function Bundle({ bundle }: { bundle: BundleData }) {
@@ -48,12 +49,12 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
       <div class="bundle__hero">
         {found?.icon && <img class="bundle__art" src={found.icon} alt="" />}
 
-        <button type="button" class="chip chip--back" onClick={back}>
+        <a class="chip chip--back" href={href(STORE)} onClick={intercept(STORE)}>
           <span class="chip__chev">
             <Chevron />
           </span>
           {t().common.nav.store}
-        </button>
+        </a>
         <Countdown from={bundle.remaining} className="chip chip--clock" />
 
         <div class="bundle__id">

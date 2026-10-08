@@ -23,11 +23,6 @@
   );
 }
 
-.offer__chev {
-  display: inline-flex;
-  transform: rotate(90deg);
-}
-
 /* --- the clip ------------------------------------------------------------- */
 /* 196px, and the same 196px in the skeleton. The render stands in for a frame
  * of the clip: a real poster would mean decoding a 13 MB video to get one. */

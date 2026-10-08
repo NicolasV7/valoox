@@ -10,14 +10,14 @@
 // colour for one of these is the thing itself. The title is the exception
 // twice over — it has no artwork at all, so it keeps the neutral weave.
 
-import { Chevron, TitleMark } from '../components/icons.tsx';
+import { Back, STORE } from '../components/Back.tsx';
+import { TitleMark } from '../components/icons.tsx';
 import { type Coin, Money } from '../components/Money.tsx';
 import type { StoreView } from '../data/types.ts';
 import { usePiece } from '../data/usePiece.ts';
 import { kindOf } from '../design/shapes.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
-import { back } from '../route.ts';
 import { Crops } from './Piece.card.tsx';
 import { PieceLoading } from './Piece.loading.tsx';
 import { Store } from './Store.tsx';
@@ -45,12 +45,7 @@ export function Piece({ id, view }: { id: string; view: StoreView }) {
 
   return (
     <main class={lit ? 'screen piece piece--lit' : 'screen piece'} style={style}>
-      <button type="button" class="back" onClick={back}>
-        <span class="offer__chev">
-          <Chevron />
-        </span>
-        {t().common.nav.store}
-      </button>
+      <Back to={STORE} />
 
       {/* The item, at the only size that does it justice. A title has no
           artwork of any kind, so it is set rather than shown. */}

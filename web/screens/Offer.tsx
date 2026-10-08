@@ -12,14 +12,14 @@
 // refuses to make and this screen is the point of. See data/skins.ts.
 
 import { useRef, useState } from 'preact/hooks';
-import { Chevron, Play } from '../components/icons.tsx';
+import { Back, STORE } from '../components/Back.tsx';
+import { Play } from '../components/icons.tsx';
 import { Money } from '../components/Money.tsx';
 import { tierByPrice } from '../data/tiers.ts';
 import type { StoreView } from '../data/types.ts';
 import { useFamily, useSkin } from '../data/usePiece.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
-import { back } from '../route.ts';
 import { chipFor, chosen, Levels, Variants } from './Offer.levels.tsx';
 
 /** Seconds into the clip to sit on while it is still. Far enough past the
@@ -79,12 +79,7 @@ export function Offer({ id, view }: { id: string; view: StoreView }) {
 
   return (
     <main class={art ? 'screen offer offer--lit' : 'screen offer'} style={style}>
-      <button type="button" class="back" onClick={back}>
-        <span class="offer__chev">
-          <Chevron />
-        </span>
-        {t().common.nav.store}
-      </button>
+      <Back to={STORE} />
 
       <div class="offer__stage stage" style={style}>
         {/* The render stands behind the clip and shows through until the clip

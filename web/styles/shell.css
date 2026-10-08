@@ -77,22 +77,23 @@
 
 /* --- the back link -------------------------------------------------------- */
 
-/* It is a <button>, because it goes back rather than to a place — so it needs
- * the reset a <button> comes with: without it the browser paints its own grey
- * face behind the word, and the padding that holds the link off the top of the
- * screen makes that a box. */
+/* It is an <a>, because it goes to a place rather than back: see
+ * components/Back.tsx. That also means middle-click and open-in-new-tab work
+ * on it, which they never did while it was a button. */
 .back {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 18px 0 0;
-  border: 0;
-  background: none;
-  font: inherit;
   font-size: var(--t-small);
   color: var(--ink-3);
   text-decoration: none;
   cursor: pointer;
+}
+
+.back__chev {
+  display: inline-flex;
+  transform: rotate(90deg);
 }
 
 /* --- the one button shape ------------------------------------------------- */

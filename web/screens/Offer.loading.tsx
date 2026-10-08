@@ -12,9 +12,8 @@
 // all. Drawing the common case and settling down beats drawing nothing and
 // springing open.
 
-import { Chevron } from '../components/icons.tsx';
+import { Back, STORE } from '../components/Back.tsx';
 import { t } from '../i18n/index.ts';
-import { back } from '../route.ts';
 
 /** Four of each, which is the common case. */
 const FOUR = [0, 1, 2, 3];
@@ -23,12 +22,7 @@ export function OfferLoading() {
   return (
     <main class="screen offer">
       {/* Real: it needs no data, and it is the one control on the screen. */}
-      <button type="button" class="back" onClick={back}>
-        <span class="offer__chev">
-          <Chevron />
-        </span>
-        {t().common.nav.store}
-      </button>
+      <Back to={STORE} />
 
       <div class="offer__stage offer__stage--waiting">
         <span class="skel offer__seal--waiting" />

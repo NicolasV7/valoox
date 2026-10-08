@@ -10,6 +10,7 @@
 // a melee is the same screen with one slot behind it.
 
 import { useMemo, useState } from 'preact/hooks';
+import { Back, COLLECTION } from '../components/Back.tsx';
 import { Chevron, Search } from '../components/icons.tsx';
 import { type Weapon as Gun, type Skin, shortName } from '../data/skins.ts';
 import { tierOf } from '../data/tiers.ts';
@@ -17,7 +18,6 @@ import type { Inventory } from '../data/types.ts';
 import { useWeapon } from '../data/useIndex.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
-import { back } from '../route.ts';
 import { WeaponLoading } from './Weapon.loading.tsx';
 import { SkinRow } from './Weapon.row.tsx';
 
@@ -52,12 +52,7 @@ export function Weapon({ id, inv }: { id: string; inv: Inventory }) {
 
   return (
     <main class="screen gun">
-      <button type="button" class="back" onClick={back}>
-        <span class="offer__chev">
-          <Chevron />
-        </span>
-        {t().collection.title}
-      </button>
+      <Back to={COLLECTION} />
 
       <div class="gun__id">
         <h1>{gun.name}</h1>
