@@ -16,7 +16,8 @@ export type Route =
    *  came from rather than on whichever was first. */
   | { name: 'collection'; tab: Tab }
   | { name: 'weapon'; id: string }
-  | { name: 'spray'; id: string };
+  | { name: 'spray'; id: string }
+  | { name: 'buddy'; id: string };
 
 export type Tab = 'weapons' | 'sprays' | 'buddies' | 'cards' | 'titles';
 
@@ -35,6 +36,7 @@ export function parse(path: string): Route {
   if (head === 'piece' && id && UUID.test(id)) return { name: 'piece', id };
   if (head === 'weapon' && id && UUID.test(id)) return { name: 'weapon', id };
   if (head === 'spray' && id && UUID.test(id)) return { name: 'spray', id };
+  if (head === 'buddy' && id && UUID.test(id)) return { name: 'buddy', id };
   if (head === 'collection') {
     const tab = TABS.find((t) => t === id) ?? 'weapons';
     return { name: 'collection', tab };
@@ -97,19 +99,25 @@ addEventListener('popstate', announce);
 
 export function go(route: Route, from?: Whence): void {
   mark();
-  history.pushState(from ?? null, '', href(route));
+  // Which screen is behind this one. Not the same question as `from`, which is
+  // where a screen says its back control should point — a spray tile sends you
+  // somewhere without naming a destination, and the entry behind it is still
+  // the wall you tapped it on.
+  const came = href(parse(location.pathname));
+  history.pushState({ ...(from ?? {}), came }, '', href(route));
   announce();
 }
 
-/** The back control's click. Pops when the entry behind us is the place being
- *  pointed at — which is exactly when `whence` is set, because that is the only
- *  thing that sets it — so the list you came from comes back at the scroll
- *  position you left it. Otherwise it is an ordinary navigation. */
+/** The back control's click. Pops when the entry behind us really is the place
+ *  being pointed at, so the list comes back at the scroll position you left it
+ *  rather than at the top of a new copy of itself. Otherwise — a deep link, a
+ *  reload — it is an ordinary navigation. */
 export function retreat(to: Route) {
   return (e: MouseEvent) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
-    if (whence()) history.back();
+    const back = (history.state as { came?: string } | null)?.came;
+    if (back === href(to)) history.back();
     else go(to);
   };
 }

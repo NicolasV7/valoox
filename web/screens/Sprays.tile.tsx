@@ -6,6 +6,7 @@
 import { useState } from 'preact/hooks';
 import { Star } from '../components/icons.tsx';
 import type { Spray } from '../data/sprays.ts';
+import { colourOf } from '../design/measure.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
@@ -14,7 +15,8 @@ export function Tile({ spray, slot, mine }: { spray: Spray; slot: number; mine: 
   // The colour waits for the picture, so measure() rides on loading="lazy"
   // rather than opening its own download for all 921 the moment the wall
   // mounts. crossOrigin makes the two requests one cache entry.
-  const [shot, setShot] = useState(false);
+  // Already measured means already decoded, so a revisit skips the grey.
+  const [shot, setShot] = useState(() => colourOf(spray.art) !== null);
   const lit = useArt(shot ? spray.art : null);
   const route = { name: 'spray', id: spray.id } as const;
 

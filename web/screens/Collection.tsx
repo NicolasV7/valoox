@@ -15,6 +15,7 @@ import type { Rack, Skin, Weapon } from '../data/skins.ts';
 import { tierOf } from '../data/tiers.ts';
 import type { Inventory } from '../data/types.ts';
 import { useRacks } from '../data/useIndex.ts';
+import { colourOf } from '../design/measure.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
@@ -89,7 +90,8 @@ function Slot({ weapon, on, big }: { weapon: Weapon; on?: Worn[string]; big?: bo
   // measure() opens its own Image, so firing it at mount means every slot is
   // downloaded twice, in parallel, before anything can paint. crossOrigin on
   // the visible one makes the two requests one cache entry.
-  const [shot, setShot] = useState(false);
+  // Already measured means already decoded, so a revisit skips the grey.
+  const [shot, setShot] = useState(() => colourOf(art) !== null);
   const lit = useArt(shot && tier ? art : null);
   const route = { name: 'weapon', id: weapon.id } as const;
 

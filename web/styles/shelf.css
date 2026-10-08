@@ -30,7 +30,12 @@
   opacity: 0.55;
 }
 
+/* Same reason as the spray wall: a weapon has up to 174 of these and six fit
+ * on a screen. 86 is the row's own minimum, so the estimate is never wrong by
+ * more than the one line a long name adds. */
 .skin {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 86px;
   display: grid;
   grid-template-columns: 150px 1fr auto;
   align-items: center;

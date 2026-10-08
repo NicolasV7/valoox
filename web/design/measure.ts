@@ -17,6 +17,15 @@ const BOX = 96;
 
 const seen = new Map<string, Promise<string>>();
 
+/** What each url already came out as. The promise above is remembered too, but
+ *  a settled promise is still a tick away — and a tick is a frame of grey on
+ *  every screen you come back to. This is the answer without the wait. */
+const known = new Map<string, string>();
+
+/** The colour, if it has already been read. Null means "ask", not "grey". */
+export const colourOf = (url: string | null | undefined): string | null =>
+  (url && known.get(url)) ?? null;
+
 /** `r, g, b` for `--art`, measured once per URL and remembered.
  *
  *  Never rejects: a render that will not load is not a reason for a screen to
@@ -24,7 +33,12 @@ const seen = new Map<string, Promise<string>>();
 export function measure(url: string): Promise<string> {
   const held = seen.get(url);
   if (held) return held;
-  const run = read(url).catch(() => NEUTRAL);
+  const run = read(url)
+    .catch(() => NEUTRAL)
+    .then((rgb) => {
+      known.set(url, rgb);
+      return rgb;
+    });
   seen.set(url, run);
   return run;
 }

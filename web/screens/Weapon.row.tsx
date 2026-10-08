@@ -8,6 +8,7 @@ import { useState } from 'preact/hooks';
 import { Chevron, Star } from '../components/icons.tsx';
 import { type Skin, shortName } from '../data/skins.ts';
 import { tierOf } from '../data/tiers.ts';
+import { colourOf } from '../design/measure.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
@@ -32,7 +33,8 @@ export function SkinRow({
   // already making. Hanging it off the <img>'s own load hands the scheduling
   // to loading="lazy" — nothing below the fold is fetched or measured at all,
   // and crossOrigin makes both requests the same cache entry instead of two.
-  const [shot, setShot] = useState(false);
+  // Already measured means already decoded, so a revisit skips the grey.
+  const [shot, setShot] = useState(() => colourOf(art) !== null);
   const lit = useArt(shot ? art : null);
   const tier = tierOf(skin.tier);
   const route = { name: 'offer', id: skin.levels[0]?.id ?? skin.id } as const;
