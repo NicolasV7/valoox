@@ -1,64 +1,36 @@
 <!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#0a0c0d">
-<meta name="referrer" content="no-referrer">
-<meta name="description" content="Tu tienda diaria y tu colección de VALORANT, desde el celular, sin abrir el juego.">
-<title>valoox</title>
-<link rel="stylesheet" href="/app.css">
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>valoox</title>
+    <meta
+      name="description"
+      content="Tu tienda diaria y tu colección de VALORANT desde el celular, sin abrir el juego."
+    />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0e0e11" />
+    <meta name="referrer" content="no-referrer" />
 
-<nav id="nav" aria-label="Secciones"></nav>
+    <!--
+      Both faces, ahead of the stylesheet that asks for them. They are the only
+      two files on the critical path that are not generated, and a swap on the
+      first paint of a screen whose whole job is to be quick is exactly the
+      flicker worth one line each to avoid.
+    -->
+    <link rel="preload" href="/fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/azeret.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
 
-<main id="app">
-  <div class="skel"></div><div class="skel"></div><div class="skel"></div>
-</main>
-
-<!-- Two locks, and never the word "revocado" on its own: deleting our row
-     revokes OUR access, not the credential. The jar keeps working at Riot. -->
-<dialog id="bye" aria-labelledby="bye-h">
-  <div class="body">
-    <h3 id="bye-h">Desconectar este dispositivo</h3>
-    <p class="keep">Borramos tu sesión de nuestro servidor ahora mismo. Nuestro acceso se corta al
-      instante y no se puede deshacer.</p>
-    <p>Hay una segunda cerradura que no es nuestra: del lado de Riot esa sesión sigue viva hasta que
-      vence sola, y puede tardar hasta tres semanas.</p>
-    <p>¿Es un problema? Solo si alguien más ya tenía una copia. Si simplemente dejás de usar el
-      sitio, con esto alcanza.</p>
-    <p>¿Preferís cerrarla también en Riot? Riot Mobile → tu perfil → Ajustes → Cerrar sesión en
-      todos los dispositivos.</p>
-  </div>
-  <div class="actions">
-    <button id="bye-no" class="ghost" type="button">Cancelar</button>
-    <button id="bye-yes" type="button">Desconectar</button>
-  </div>
-</dialog>
-
-<dialog id="sec" aria-labelledby="sec-h">
-  <div class="body">
-    <h3 id="sec-h">Qué guardamos</h3>
-    <p class="keep">Tu contraseña, nunca. No la tenemos ni la vemos: Riot te autentica dentro de su
-      propia app cuando escaneás el código.</p>
-    <p>Guardamos tu sesión de Riot, cifrada. La clave para abrirla no está en la misma base, así que
-      un volcado de la base por sí solo devuelve texto cifrado.</p>
-    <p>Mientras tu pedido se ejecuta, nuestro servidor la descifra y la usa para preguntarle a Riot
-      por tu tienda. Tenemos la clave. Cualquier servicio que te diga que «no puede ver» una
-      credencial que necesita usar te está mintiendo.</p>
-    <p>El código solo sabe leer. Los endpoints de Riot que cambian cosas —loadout, cola, party,
-      chat, compras— no existen en él, y hay una prueba automática que lo verifica.</p>
-    <p>Si usás los avisos, dentro del mismo sobre cifrado guardamos las skins que marcaste y el
-      webhook de Discord que pegaste. El aviso lo recibe Discord, así que ellos ven el texto: solo
-      nombres de skins que elegiste vos, nunca tu cuenta ni nada que te identifique.</p>
-    <p>Lo que no podemos apagar: Cloudflare corre este sitio y ve el tráfico. Las imágenes se cargan
-      desde valorant-api.com, así que ellos ven tu IP. No les llega ninguna credencial.</p>
-  </div>
-  <div class="actions"><button id="sec-ok" class="ghost" type="button">Cerrar</button></div>
-</dialog>
-
-<script src="/app.js" type="module"></script>
-</body>
+  <body>
+    <!--
+      Empty on purpose. The DOM is built in web/, never from a string: item
+      names come from a community database this project does not control, and
+      innerHTML with those is stored XSS with extra steps. test/unit/seams.test.ts
+      fails the build if one appears.
+    -->
+    <div id="app"></div>
+    <script src="/app.js" type="module"></script>
+  </body>
 </html>
