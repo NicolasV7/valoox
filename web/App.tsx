@@ -11,9 +11,11 @@ import { Tabs } from './components/Tabs.tsx';
 import type { ApiError } from './data/api.ts';
 import * as api from './data/api.ts';
 import { NEEDS_RESEED } from './data/api.ts';
-import type { Fault, StoreView } from './data/types.ts';
+import type { Fault, Inventory, StoreView } from './data/types.ts';
 import { useRoute } from './route.ts';
 import { Bundle } from './screens/Bundle.tsx';
+import { CollectionLoading } from './screens/Collection.loading.tsx';
+import { Collection } from './screens/Collection.tsx';
 import { Fail } from './screens/Fail.tsx';
 import { Gate } from './screens/Gate.tsx';
 import { Offer } from './screens/Offer.tsx';
@@ -33,6 +35,11 @@ export function App() {
   const route = useRoute();
   const [state, setState] = useState<State>({ at: 'loading' });
 
+  // What you own, fetched the first time a collection tab is opened and held
+  // for the life of the page. The store does not wait on it and it does not
+  // wait on the store.
+  const [inv, setInv] = useState<Inventory | null>(null);
+
   const load = useCallback(async () => {
     setState({ at: 'loading' });
     try {
@@ -47,6 +54,17 @@ export function App() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const wants = route.name === 'collection' || route.name === 'weapon';
+  useEffect(() => {
+    if (!wants || inv) return;
+    void api
+      .inventory()
+      .then((got) => {
+        if (got !== NEEDS_RESEED) setInv(got);
+      })
+      .catch(() => undefined);
+  }, [wants, inv]);
 
   const scan = useScan(load);
 
@@ -89,6 +107,9 @@ export function App() {
   }
 
   function open(view: StoreView) {
+    if (route.name === 'collection') {
+      return inv ? <Collection inv={inv} /> : <CollectionLoading />;
+    }
     if (route.name === 'offer') return <Offer id={route.id} view={view} />;
     if (route.name === 'piece') return <Piece id={route.id} view={view} />;
     if (route.name === 'bundle') {

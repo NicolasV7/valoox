@@ -1,0 +1,138 @@
+/* A weapon in a rack: the one shape the collection adds.
+ *
+ * Every weapon the game has gets one, dressed or not — so the slot has to read
+ * as full or empty at a glance, and that is the whole job of the dimming and
+ * of the tier mark in the corner. */
+
+.coll__rack {
+  padding: 0 var(--gut);
+}
+
+.coll__rack .label {
+  display: block;
+  margin: 20px 0 9px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+}
+
+.coll__rack .label--waiting {
+  margin: 20px 0 9px;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.slots--one {
+  grid-template-columns: 1fr;
+}
+
+.slot {
+  position: relative;
+  display: block;
+  height: 104px;
+  border: 1px solid var(--rule);
+  border-radius: 11px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+/* Nothing equipped: no weave, because there is no skin to take a colour from. */
+.slot--bare {
+  background: var(--card);
+}
+
+.slot--waiting {
+  background: var(--card);
+}
+
+.slot--big,
+.slots--one .slot {
+  height: 118px;
+}
+
+.slot__of {
+  position: absolute;
+  left: 10px;
+  top: 9px;
+  font-size: var(--t-floor);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.slot__tier {
+  position: absolute;
+  right: 9px;
+  top: 8px;
+}
+
+/* One box for every gun. A Classic is 512×340 and a Marshal is 512×96, so
+ * sizing by width alone made one look twice the other. */
+.slot__art {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 148px;
+  height: 52px;
+  object-fit: contain;
+}
+
+/* The stock gun, dimmed, so a gap reads as a gap rather than as a mistake. */
+.slot--bare .slot__art {
+  opacity: 0.62;
+}
+
+.slot__name {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.slot__name--bare {
+  font-weight: 400;
+  color: var(--ink-4);
+}
+
+/* The melee slot is the only one on its own row, so it gets the room. */
+.slots--one .slot__of {
+  left: 13px;
+  top: 11px;
+}
+
+.slots--one .slot__tier {
+  right: 12px;
+  top: 11px;
+}
+
+.slots--one .slot__art {
+  left: auto;
+  right: 18px;
+  transform: translateY(-50%);
+  width: 140px;
+  height: 90px;
+}
+
+.slots--one .slot__name {
+  left: 13px;
+  bottom: 11px;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.coll__note {
+  margin: 18px 0 0;
+  padding: 0 var(--gut);
+}

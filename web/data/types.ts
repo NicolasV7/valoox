@@ -76,3 +76,19 @@ export interface Scan {
 /** The three things that can go wrong, which is all a person needs to be told
  *  apart. The server's own message is for the log and never reaches a screen. */
 export type Fault = 'expired' | 'riot' | 'us';
+
+/** What you have, and what you have on.
+ *
+ *  `byType` is keyed by Riot's item type uuid and the values are every id owned
+ *  of that type — owning one skin lists its base plus each level and chroma
+ *  separately, so these are larger than they look. */
+export interface Inventory {
+  byType: Record<string, string[]>;
+  worn: {
+    guns: Record<string, { level: string; chroma: string | null; buddy: string | null }>;
+    sprays: string[];
+    card: string | null;
+    title: string | null;
+  } | null;
+  fetchedAt: number;
+}

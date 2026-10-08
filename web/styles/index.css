@@ -14,6 +14,7 @@
 /* the four shapes, and the things that sit on them */
 @import './row.css';
 @import './tile.css';
+@import './slot.css';
 
 /* the screens */
 @import './gate.css';
@@ -26,4 +27,5 @@
 @import './offer.css';
 @import './piece.css';
 @import './crops.css';
+@import './collection.css';
 @import './fail.css';

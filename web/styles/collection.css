@@ -1,0 +1,102 @@
+/* The collection: five tabs, and the first one is every weapon the game has. */
+
+.coll {
+  padding-top: 0;
+}
+
+/* --- the header, which all five tabs wear --------------------------------- */
+
+.coll__head {
+  padding: 24px var(--gut) 0;
+}
+
+.coll__title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.coll__title h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 200;
+  letter-spacing: -0.035em;
+}
+
+.coll__count,
+.coll__count--waiting {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.coll__count--waiting {
+  width: 96px;
+  height: 13px;
+  border-radius: 4px;
+}
+
+.coll__tabs {
+  display: flex;
+  gap: 20px;
+  margin-top: 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* The underline is an inset shadow rather than a border, so it sits on the
+ * rule rather than pushing the row off it. */
+.coll__tab {
+  padding-bottom: 11px;
+  font-size: 14.5px;
+  color: var(--ink-4);
+  text-decoration: none;
+}
+
+.coll__tab--on {
+  font-weight: 500;
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+
+/* --- a rack of weapons ---------------------------------------------------- */
+
+/* --- nothing there -------------------------------------------------------- */
+
+.nothing {
+  margin: 20px var(--gut) 0;
+  padding: 34px 22px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r);
+  text-align: center;
+}
+
+.nothing img {
+  display: block;
+  margin: 0 auto 12px;
+  object-fit: contain;
+}
+
+.nothing p + p {
+  margin-top: 10px;
+}
+
+.coll__also {
+  display: block;
+  margin: 30px var(--gut) 11px;
+}
+
+.coll .card {
+  margin: 0 var(--gut);
+  padding: 15px 16px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--card);
+}
+
+.coll__types {
+  margin: 9px 0 0;
+  font-size: var(--t-floor);
+  line-height: 1.6;
+  color: var(--ink-4);
+  white-space: pre-line;
+  word-break: break-all;
+}

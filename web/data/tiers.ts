@@ -50,3 +50,13 @@ const BY_PRICE = new Map<number, Tier>(
 
 export const tierByPrice = (cost: number | null): Tier | null =>
   cost === null ? null : (BY_PRICE.get(cost) ?? null);
+
+/** The reverse lookup: Riot's content tier uuid -> the tier. Null for a skin
+ *  with no tier at all, which is every default and every battle-pass one — and
+ *  is how a bare collection slot is told apart from a dressed one. */
+const BY_UUID = new Map<string, Tier>(
+  (Object.entries(UUID) as Array<[TierName, string]>).map(([name, id]) => [id, tier(name)]),
+);
+
+export const tierOf = (uuid: string | null): Tier | null =>
+  uuid ? (BY_UUID.get(uuid) ?? null) : null;

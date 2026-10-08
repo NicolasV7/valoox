@@ -2,9 +2,10 @@
 // no file grows past a screenful and so a translator opens the screen they are
 // translating rather than a thousand-line map.
 
+import { collection } from './collection.ts';
 import { common } from './common.ts';
 import { gate } from './gate.ts';
 import { piece } from './piece.ts';
 import { bundle, offer, store } from './store.ts';
 
-export const es = { common, gate, store, offer, bundle, piece };
+export const es = { common, gate, store, offer, bundle, piece, collection };
