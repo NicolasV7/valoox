@@ -129,6 +129,6 @@ a:hover {
  * it is the one thing on screen with nothing to say. */
 
 .skel {
-  background: var(--raised);
+  background: var(--skel);
   border-radius: var(--r-sm);
 }

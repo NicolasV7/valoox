@@ -118,13 +118,19 @@ function Approved({ name, url }: { name?: string; url?: string }) {
 
       <div class="scan__who">
         <img src={SPRAY.peace} alt="" width="78" height="78" />
-        {/* The name arrives with the store, which is loading underneath this.
-            If it beats the hold it fills in; if it does not, the line below
-            already says what is happening. */}
-        {handle && (
+        {/* The name arrives with the store, loading underneath this screen —
+            a full Riot round trip, so it is a second or two. Until then the
+            line is a placeholder at the size the name will be, rather than
+            nothing: final sizes, always, so the handle lands in place instead
+            of pushing everything under it down a line. */}
+        {handle ? (
           <p class="item scan__name">
             {handle}
             {tag && <span class="scan__tag">#{tag}</span>}
+          </p>
+        ) : (
+          <p class="item scan__name">
+            <span class="skel scan__name--waiting" />
           </p>
         )}
         <p class="small">

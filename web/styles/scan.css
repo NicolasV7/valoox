@@ -181,3 +181,14 @@
     display: none;
   }
 }
+
+/* The handle, before the store has said what it is. At the size the name will
+ * be, and breathing with the bars under it — this screen's whole content is
+ * "a second", so there is nothing for it to compete with. */
+.scan__name--waiting {
+  display: inline-block;
+  width: 132px;
+  height: 17px;
+  vertical-align: -2px;
+  animation: settling 1700ms ease-in-out infinite;
+}

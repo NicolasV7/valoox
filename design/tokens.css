@@ -39,6 +39,13 @@
   --stage-row: light-dark(#ffffff, #191b20); /* the same, for a row */
   --raised: light-dark(#e7e9ee, #232630); /* lighter than its ground */
 
+  /* The one grey a placeholder is allowed to be, and it is not --raised: that
+   * one is a chip lighter than the page, which on a light page makes a skeleton
+   * six units from its background and invisible. A skeleton is darker than the
+   * page in light and lighter in dark, because what it has to read as is a
+   * hole. */
+  --skel: light-dark(#dcdfe6, #1b1d23);
+
   /* --- lines -------------------------------------------------------------- */
   --hair: light-dark(#ebedf1, #1d1f25); /* between rows. Barely there */
   --rule: light-dark(#e3e5ea, #24262c); /* a real border */
