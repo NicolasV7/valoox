@@ -1,0 +1,17 @@
+# .editorconfig has said `end_of_line = lf` since the first commit, but nothing
+# enforced it: with no attributes file, core.autocrlf converts on checkout and
+# the working tree on Windows is CRLF against an LF-declared convention.
+#
+# That is not cosmetic. test/workers/setup.ts strips SQL comments with /--.*$/,
+# and in JavaScript `.` does not match \r while `$` does not match before one —
+# so on a CRLF checkout every comment in schema.sql survives the strip, the
+# whole file collapses into one commented-out line, and the D1 tests fail with
+# "SQL code did not contain a statement". On Linux CI the same code is green,
+# which is the worst shape a bug can have.
+
+* text=auto eol=lf
+
+# Binary, and the first two never reach git anyway.
+*.woff2 binary
+*.png binary
+*.ico binary

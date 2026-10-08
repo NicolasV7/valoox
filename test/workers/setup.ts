@@ -22,8 +22,12 @@ export async function freshDb(): Promise<Env> {
   // D1's exec() wants one statement per line, so newlines get collapsed — which
   // means `--` comments must be stripped first, or the comment swallows the rest
   // of the statement and SQLite reports "did not contain a statement".
+  // Split on \r?\n, not \n. `.` does not match \r and `$` does not match before
+  // one, so on a CRLF checkout `/--.*$/` matches nothing and every comment in
+  // schema.sql survives into the statement. .gitattributes now pins the working
+  // tree to LF; this stays because a clone that predates it still has to work.
   const sql = inject('schema')
-    .split('\n')
+    .split(/\r?\n/)
     .map((line) => line.replace(/--.*$/, ''))
     .join('\n');
 
