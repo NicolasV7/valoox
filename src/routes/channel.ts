@@ -14,12 +14,14 @@
 // A 2xx means Resend accepted the message. It does not mean an inbox has it,
 // and no field here says otherwise.
 
+import { claim, heldBy, release } from '../alerts/claim.ts';
 import { html, subject, text } from '../alerts/mail/code.ts';
 import { check, clear, LIFE, left, mint, waitFor } from '../alerts/otp.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
 import type { Env } from '../types.ts';
 import { looksLikeAddress, send } from '../vault/mail.ts';
+import * as repo from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
 
 /** Ties the provider's id for a message back to the browser it was sent for,
@@ -122,7 +124,24 @@ export async function verify({ env, uid, req }: Ctx): Promise<Body> {
   const verdict = await check(env, uid, code);
   if (verdict !== 'ok') return { error: verdict, left: await left(env, uid) };
 
+  // The code was right, so this person holds the mailbox — which is the only
+  // point at which it is safe to say whether somebody else already does. See
+  // alerts/claim.ts for why this is not checked at send time.
+  const to = held.session.mail.to;
+  const by = await heldBy(env, to);
+  if (by && by !== uid) {
+    // Unless that browser is gone. A pruned row must not hold an address
+    // hostage: whoever can still read the mailbox should get it.
+    if (await repo.get(env, by)) return { error: 'taken' };
+  }
+
+  // Letting go of the old one first, so changing address frees the previous.
+  const was = held.session.mailWas;
+  if (was && was !== to) await release(env, was, uid);
+  await claim(env, to, uid);
+
   held.session.mail = { ...held.session.mail, ok: true };
+  held.session.mailWas = to;
   await saveSession(env, uid, held.session, held.ver);
-  return { ok: true, to: held.session.mail.to };
+  return { ok: true, to };
 }

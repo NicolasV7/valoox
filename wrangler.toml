@@ -2,6 +2,18 @@ name = "val"
 main = "src/index.ts"
 compatibility_date = "2026-09-01"
 
+# The app answers on the apex. A Custom Domain rather than a route pattern so
+# Cloudflare issues and renews the certificate itself — the uid cookie is
+# Secure, so over plain http the browser never stores it and sign-in silently
+# never completes.
+routes = [{ pattern = "valoox.store", custom_domain = true }]
+
+# Off, and said out loud rather than left to the default. One address for one
+# app: a second hostname serving the same Worker is a second place the uid
+# cookie can be set and a second origin to reason about in the CSP.
+workers_dev = false
+preview_urls = false
+
 # Load-bearing for the privacy claim: Workers Logs defaults to ON for new Workers
 # and persists method + URL for 3 days. The storefront path carries the puuid.
 [observability]
@@ -23,6 +35,12 @@ crons = ["30 0 * * *"]
 # completes. Commented rather than deleted because the only thing missing is
 # the nameserver change: uncomment it and deploy.
 # routes = [{ pattern = "valoox.store", custom_domain = true }]
+
+# Off, and said out loud rather than left to the default. One address for one
+# app: a second hostname serving the same Worker is a second place the uid
+# cookie can be set and a second origin to reason about in the CSP.
+workers_dev = false
+preview_urls = false
 
 [vars]
 MAIL_FROM = "valoox <alerts@mail.valoox.store>"

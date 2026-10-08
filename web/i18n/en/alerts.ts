@@ -98,6 +98,10 @@ export const alerts = {
     'The message went out and the receiving server sent it back. That is the ' +
     'mailbox itself saying no, so sending the same thing again is the one piece ' +
     'of advice that cannot help: it needs a different address.',
+  taken:
+    'That address is already verified on another account. One mailbox receives ' +
+    'for one account, so this needs a different one — or disconnect the other ' +
+    'account first.',
   sendAnother: 'Send another code',
   editAddress: 'Edit the address',
   oneChannelMeans:

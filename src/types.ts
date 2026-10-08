@@ -55,6 +55,10 @@ export interface Session {
     send?: string;
     said?: string;
   };
+  /** The last address this browser actually proved, which is not always the
+   *  one in `mail`: changing it leaves the old one receiving until the new
+   *  code comes back. It is what tells the claim which key to release. */
+  mailWas?: string;
 }
 
 /** Headers every authenticated Riot data call must carry. Extends Record so it
@@ -114,14 +118,9 @@ export interface StoreView {
 export interface Env extends Cloudflare.Env {
   /** 32 random bytes, base64. Set with `wrangler secret put JAR_KEY`. */
   JAR_KEY: string;
-  /** Resend's API key. `wrangler secret put RESEND_KEY`. */
-  RESEND_KEY?: string;
-  /** The signing secret Resend shows when you add a webhook, `whsec_…`.
-   *  `wrangler secret put RESEND_HOOK`. Without it the hook refuses every
-   *  request, which is the right way for a verifier to fail. */
-  RESEND_HOOK?: string;
-  // MAIL_FROM is not here on purpose: it is a [vars] entry in wrangler.toml,
-  // so `wrangler types` already has it. A var rather than a secret because it
-  // is printed on every message — and it has to be an address on a domain
-  // verified in Resend.
+  // RESEND_KEY, RESEND_HOOK and MAIL_FROM are not listed here on purpose.
+  // `wrangler types` already has them — the two secrets from .dev.vars and
+  // MAIL_FROM from [vars] — and declaring them again as optional contradicts
+  // the generated required ones. The code still guards against a missing key,
+  // because a type is a promise about the local file and not about production.
 }

@@ -98,6 +98,10 @@ export const alerts = {
     'El mensaje salió y el servidor del otro lado lo devolvió. Eso es la casilla ' +
     'misma diciendo que no, así que mandar lo mismo otra vez es el único consejo ' +
     'que no puede ayudar: hace falta otra dirección.',
+  taken:
+    'Esa dirección ya está verificada en otra cuenta. Una casilla recibe los ' +
+    'avisos de una sola, así que hace falta otra — o desconectá la otra cuenta ' +
+    'primero.',
   sendAnother: 'Mandar otro código',
   editAddress: 'Cambiar la dirección',
   oneChannelMeans:

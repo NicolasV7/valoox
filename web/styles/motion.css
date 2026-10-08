@@ -101,3 +101,56 @@
     opacity: 0.45;
   }
 }
+
+/* --- alerts --------------------------------------------------------------- */
+/* The one flow in the app with steps: an address, a code, a result. Each of
+ * the four movements below is tied to a state — arriving, waiting, a keypress,
+ * a refusal — and none of them runs for decoration. */
+
+/* Three screens that are one errand, so each arrives rather than appears. */
+.bell {
+  animation: rise 220ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+/* The dot beside an address that has not proved itself yet, and beside the
+ * line explaining why. A slow loop at low contrast — the shape this design
+ * reserves for a thing still being waited on — and it stops the moment the
+ * address is verified, which is the whole message it carries. */
+.bell__state--wait .bell__dot,
+.bell__why:not(.bell__why--bad) .bell__dot {
+  animation: breathe 2200ms ease-in-out infinite;
+}
+
+/* A box that has just taken a digit. 140ms, because it is acknowledging a
+ * keypress: anything slower reads as lag rather than as an answer. */
+.pin__box:not(:empty) {
+  animation: tap 140ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+@keyframes tap {
+  from {
+    transform: scale(0.86);
+  }
+}
+
+/* Where the next digit goes. The border is already the brighter one; this is
+ * what makes it read as a caret rather than as a selection. */
+.pin__box--on {
+  animation: breathe 1600ms ease-in-out infinite;
+}
+
+/* A refusal and a send, arriving. Each replaces a line that was already there,
+ * so the distance is short: a long one would read as a different element
+ * rather than as the same one changing its mind. */
+.bell__why--bad,
+.bell__sent {
+  animation: rise 200ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+/* Verified. The one colour change on this screen worth easing, because it is
+ * the moment the errand is over. */
+.bell__state,
+.bell__dot,
+.bell__said {
+  transition: color 220ms, background-color 220ms;
+}

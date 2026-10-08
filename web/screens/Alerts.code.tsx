@@ -92,7 +92,13 @@ export function AlertsCode() {
     setCode('');
     const how = res?.error;
     setSaid(
-      how === 'gone' ? s.codeGone : how === 'spent' ? s.codeSpent : s.codeWrong(res?.left ?? 0),
+      how === 'gone'
+        ? s.codeGone
+        : how === 'spent'
+          ? s.codeSpent
+          : how === 'taken'
+            ? s.taken
+            : s.codeWrong(res?.left ?? 0),
     );
   }
 

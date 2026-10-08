@@ -30,6 +30,9 @@ export function AlertsChannel() {
   const ok = prefs?.mail?.ok === true && now === prefs.mail.to;
   const bad = refused(prefs?.mail?.said);
   const valid = ADDRESS.test(now.trim()) && now.trim().length <= 254;
+  // Nothing has a state until there is something to have a state about. An
+  // empty field labelled "not verified" is an accusation about a blank.
+  const stated = now.trim().length > 0;
 
   return (
     <main class="screen bell">
@@ -40,10 +43,12 @@ export function AlertsChannel() {
         <p class="bell__kind">
           <Mail />
           {s.email}
-          <span class={state(ok, bad)}>
-            <span class="bell__dot" />
-            {ok ? s.verified : bad ? (prefs?.mail?.said ?? '') : s.notVerified}
-          </span>
+          {stated && (
+            <span class={state(ok, bad)}>
+              <span class="bell__dot" />
+              {ok ? s.verified : bad ? (prefs?.mail?.said ?? '') : s.notVerified}
+            </span>
+          )}
         </p>
 
         <label class="bell__label" for="addr">
@@ -68,7 +73,8 @@ export function AlertsChannel() {
         </button>
 
         <p class={said ? 'bell__why bell__why--bad' : 'bell__why'}>
-          <span class="bell__dot" />
+          {/* The dot only joins once there is a state it is reporting. */}
+          {(stated || said) && <span class="bell__dot" />}
           <span>{said ?? s.testIsProof}</span>
         </p>
       </div>
@@ -92,6 +98,7 @@ export function AlertsChannel() {
     const out = res as { error?: string; wait?: number; sent?: boolean; said?: string };
     if (out.error === 'wait') return setSaid(s.waitSeconds(out.wait ?? 0));
     if (out.error === 'address') return setSaid(s.badAddress);
+    if (out.error === 'taken') return setSaid(s.taken);
     await reload();
 
     // It went: the next screen is the one that asks for the code.
