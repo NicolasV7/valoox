@@ -13,7 +13,8 @@
 //
 // The words come from words.ts in the language of the tab that asked.
 
-import { FONT, INK, note, shell, weave } from './layout.ts';
+import { shell } from './layout.ts';
+import { FONT, INK, note, weave } from './paint.ts';
 import type { Lang } from './words.ts';
 import { words } from './words.ts';
 

@@ -16,7 +16,8 @@
 // render for an accessory here, only for the one skin it leads with.
 
 import type { Hit } from '../../types.ts';
-import { FONT, INK, note, shell, solid, weave } from './layout.ts';
+import { shell } from './layout.ts';
+import { FONT, INK, note, solid, weave } from './paint.ts';
 import type { Lang } from './words.ts';
 import { words } from './words.ts';
 

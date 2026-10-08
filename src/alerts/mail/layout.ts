@@ -1,4 +1,10 @@
+import { FONT, INK, solid } from './paint.ts';
+
 // The shell every message is built in.
+//
+// How its surfaces are painted is paint.ts, which is the other half of this
+// and a different subject: that one is about clients with opinions about
+// colour, this one is about clients with opinions about layout.
 //
 // Tables and inline CSS, not because it is pretty but because Outlook on
 // Windows renders through Word: no flexbox, no grid, no `gap`, and a `<div>`
@@ -13,50 +19,43 @@
 // the thing the message is about, and the rule that the number which decides
 // whether you act is next to the thing you do, never in a footnote.
 
-const SANS =
-  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
-const MONO = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace";
-
-export const FONT = { sans: SANS, mono: MONO };
-
-export const INK = {
-  page: '#0E0E11',
-  stage: '#16171B',
-  rule: '#1D1F25',
-  line: '#24262C',
-  text: '#f2f4f5',
-  body: '#A7AEB3',
-  faint: '#8B9399',
-  quiet: '#6E757B',
-  legal: '#565C64',
-};
-
 /**
- * Telling the client to leave the colours alone.
+ * Telling the client not to have an opinion.
  *
- * `light dark`, and the message is dark in both. That reads backwards and is
- * the point: these declarations are not a request for a scheme, they are a
- * claim about who handles them. A client runs its own dark-mode pass over
- * any message that does not claim to handle the scheme the reader is in, so
- * naming only one leaves the other unclaimed — and the unclaimed one is
- * exactly where a dark design comes back inverted.
+ * `only light`, on a message every colour of which is dark. That reads
+ * backwards twice over and each half is deliberate.
  *
- * There are no light colours behind the claim. A message is read once and
- * archived; matching the reader's current setting buys nothing and doubles
- * what can go wrong, and every colour in here is a colour from the app,
- * which has one theme.
+ * `only` is the CSS escape hatch: it means this content supports exactly the
+ * scheme named and the user agent must not run its own adaptation over it.
+ * Without it a client in dark mode darkens an already-dark design further,
+ * which is the bug — the same message was one tone in light mode and another
+ * in dark, and the light one was the designed one.
  *
- * Apple Mail and Outlook honour this. Gmail honours none of it and runs its
- * pass regardless — see solid() below, which is the half that holds there.
+ * `light` rather than `dark` because that is the pass that leaves us alone.
+ * Nothing about it reaches the page: every surface and every line of type
+ * here carries its own colour, so what the scheme actually decides is only
+ * the user agent's own defaults, and those are all overridden.
+ *
+ * All but one, which is the trap and is why TEXT below exists. An element
+ * that sets no colour of its own inherits the user agent's, and that one is
+ * black under light and white under dark — so a single line of type written
+ * without a colour would be the one thing in here that changed with the
+ * reader's phone. Setting it on <body> means there is nothing to inherit but
+ * ours.
+ *
+ * Apple Mail and Outlook honour all of this. Gmail honours none of it and
+ * runs its pass regardless — see solid() below, which is the half that holds
+ * there.
  */
-const SCHEMES = 'light dark';
+const SCHEME = 'only light';
 
 const HEAD =
   '<meta charset="utf-8">' +
   '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-  `<meta name="color-scheme" content="${SCHEMES}">` +
-  `<meta name="supported-color-schemes" content="${SCHEMES}">` +
-  `<style>:root{color-scheme:${SCHEMES};supported-color-schemes:${SCHEMES}}` +
+  `<meta name="color-scheme" content="${SCHEME}">` +
+  // The legacy Apple name takes no `only` keyword, so it names the scheme.
+  '<meta name="supported-color-schemes" content="light">' +
+  `<style>:root{color-scheme:${SCHEME};supported-color-schemes:light}` +
   // Gmail's dark pass marks what it has touched; these put it back.
   'u+#body a{color:inherit}' +
   '[data-ogsc] .ground{background-color:#0E0E11!important}' +
@@ -79,39 +78,6 @@ const HEAD =
   '</style>';
 
 /**
- * A background colour Gmail cannot take away.
- *
- * Gmail's dark mode runs its own pass over every message and ignores
- * `color-scheme` entirely. What that pass rewrites is `background-color`;
- * what it leaves alone is `background-image`. So a dark design comes out of
- * it half-inverted — this message kept its colour exactly where the weave
- * had painted a gradient and lost it everywhere a flat colour was declared,
- * which is why a phone in dark mode was reading a light email.
- *
- * A one-stop gradient is an image as far as that pass is concerned and a
- * flat colour as far as the eye is concerned. The colour stays too, for the
- * clients that drop gradients.
- */
-export const solid = (c: string): string =>
-  `background-color:${c};background-image:linear-gradient(${c},${c});`;
-
-/** The weave, at the one angle the whole product uses, in whatever colour the
- *  message is about. A mail client that drops gradients falls back to the flat
- *  colour underneath, which is why that is given too.
- *
- *  The last layer is the opaque one, because the layer listed last is the one
- *  underneath — and every layer above it is translucent, so without it the
- *  colour showing through is a `background-color` and Gmail rewrites it. */
-export const weave = (rgb: string, under: string): string =>
-  `background-color: ${under}; background-image:` +
-  `linear-gradient(107deg, rgba(0,0,0,0) 0 31%, rgba(${rgb},0.085) 31% 45%,` +
-  ` rgba(0,0,0,0) 45% 51%, rgba(${rgb},0.045) 51% 58%, rgba(0,0,0,0) 58% 72%,` +
-  ` rgba(${rgb},0.064) 72% 77%, rgba(0,0,0,0) 77%),` +
-  `repeating-linear-gradient(107deg, rgba(${rgb},0.05) 0 1px, rgba(0,0,0,0) 1px 23px),` +
-  `radial-gradient(104% 150% at 50% 50%, rgba(${rgb},0.3) 0%, rgba(${rgb},0) 70%),` +
-  `linear-gradient(${under},${under})`;
-
-/**
  * The mark.
  *
  * A PNG and not the inline SVG the app uses, because Gmail strips `<svg>`
@@ -127,21 +93,10 @@ const mark = (origin: string) =>
   `<img src="${origin}/brand/mark.png" width="22" height="22" alt=""` +
   ' style="display:block;border:0;width:22px;height:22px">';
 
-/**
- * A picture over a sentence, on the weave.
- *
- * One column on purpose: see the note by the media query. The picture is
- * `alt=""` and the sentence carries the whole meaning, because every client
- * worth the name blocks images until asked.
- */
-export const note = (art: string, size: number, said: string, rgb: string): string =>
-  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
-  ` style="border-radius:14px;${weave(rgb, INK.stage)}">` +
-  `<tr><td align="center" style="padding:20px 22px 0">` +
-  `<img src="${art}" width="${size}" height="${size}" alt=""` +
-  ` style="display:block;border:0;width:${size}px;height:${size}px"></td></tr>` +
-  `<tr><td style="padding:14px 22px 20px;font-size:14px;line-height:1.6;color:#D2D6D9">` +
-  `${said}</td></tr></table>`;
+/** What anything that sets no colour of its own will inherit. Without it that
+ *  is the user agent's default, which is the one value in this message that
+ *  would change with the reader's phone. */
+const TEXT = `color:${INK.body};`;
 
 export function shell({
   aside,
@@ -162,20 +117,20 @@ export function shell({
 }): string {
   return (
     `<!doctype html><html lang="${lang}"><head>${HEAD}</head>` +
-    `<body id="body" class="ground" style="margin:0;padding:0;${solid(INK.page)}">` +
+    `<body id="body" class="ground" style="margin:0;padding:0;${TEXT}${solid(INK.page)}">` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
-    ` class="ground" style="${solid(INK.page)}"><tr><td align="center">` +
+    ` class="ground" style="${TEXT}${solid(INK.page)}"><tr><td align="center">` +
     // Fluid to 600 rather than pinned at it: a fixed 600 on a 390px phone is
     // either a scaled-down page or a sideways scroll, and both read as narrow.
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
-    ` style="width:100%;max-width:600px;${solid(INK.page)}font-family:${SANS}">` +
+    ` style="width:100%;max-width:600px;${TEXT}${solid(INK.page)}font-family:${FONT.sans}">` +
     // the mark, and the one number worth knowing before you read anything
     `<tr><td class="pad" style="padding:22px 28px 18px;border-bottom:1px solid ${INK.rule}">` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>` +
     `<td style="width:22px">${mark(origin)}</td>` +
     `<td class="said" style="padding-left:11px;font-size:17px;font-weight:500;` +
     `letter-spacing:-0.02em;color:${INK.text}">valoox</td>` +
-    `<td align="right" style="font-family:${MONO};font-size:11.5px;color:${INK.quiet}">${aside}</td>` +
+    `<td align="right" style="font-family:${FONT.mono};font-size:11.5px;color:${INK.quiet}">${aside}</td>` +
     `</tr></table></td></tr>` +
     body +
     `<tr><td class="pad" style="padding:20px 28px 26px;border-top:1px solid ${INK.rule}">${foot}` +
