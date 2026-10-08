@@ -22,9 +22,11 @@ test('each message tells the client not to adapt it', () => {
   for (const [what, body] of BOTH) {
     // `only` is the keyword that does the work: without it a client in dark
     // mode runs its own pass over an already-dark design and darkens it
-    // further, which is exactly the report.
-    assert.ok(body.includes('color-scheme:only light'), what + ' css');
-    assert.ok(body.includes('content="only light"'), what + ' meta');
+    // further. `dark` is the scheme, because the scheme also decides the
+    // surface the client paints around the message — `only light` pinned the
+    // page and left a white border round it.
+    assert.ok(body.includes('color-scheme:only dark'), what + ' css');
+    assert.ok(body.includes('content="only dark"'), what + ' meta');
   }
 });
 

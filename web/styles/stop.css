@@ -62,3 +62,25 @@
 .stop__pair .btn {
   flex: 1 1 10rem;
 }
+
+/* The answer landing.
+ *
+ * The card rises as a whole — the shared movement, from motion.css — and the
+ * sticker settles into it a beat later. Two things rather than one because
+ * the sticker is what changes between states and the eye should go there;
+ * 40ms is enough for it to read as following rather than as a second
+ * animation. Both are flattened by prefers-reduced-motion in base.css. */
+.stop__mid .stop__art {
+  animation: settle 300ms cubic-bezier(0.22, 0.8, 0.3, 1) 40ms both;
+}
+
+/* Pressed. The button acknowledges before the card answers, because the
+ * round trip is not instant and a control that does nothing for a moment
+ * reads as one that did not take the tap. */
+.stop__pair .btn:active:not([disabled]) {
+  transform: scale(0.97);
+}
+
+.stop__pair .btn {
+  transition: transform 120ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}

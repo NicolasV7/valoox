@@ -22,19 +22,19 @@ import { FONT, INK, solid } from './paint.ts';
 /**
  * Telling the client not to have an opinion.
  *
- * `only light`, on a message every colour of which is dark. That reads
- * backwards twice over and each half is deliberate.
+ * `only` is the whole mechanism and the word after it is a separate
+ * decision. `only` is the CSS escape hatch: this content supports exactly
+ * the scheme named and the user agent must not run its own adaptation over
+ * it. Plain `dark` on its own was not enough — a client in dark mode still
+ * darkened an already-dark design further, which was the bug.
  *
- * `only` is the CSS escape hatch: it means this content supports exactly the
- * scheme named and the user agent must not run its own adaptation over it.
- * Without it a client in dark mode darkens an already-dark design further,
- * which is the bug — the same message was one tone in light mode and another
- * in dark, and the light one was the designed one.
- *
- * `light` rather than `dark` because that is the pass that leaves us alone.
- * Nothing about it reaches the page: every surface and every line of type
- * here carries its own colour, so what the scheme actually decides is only
- * the user agent's own defaults, and those are all overridden.
+ * `dark` is the scheme, because a scheme is not only about our own colours.
+ * It also decides the surface the client paints AROUND the message, and
+ * `only light` left a white border on a dark message: the page was pinned
+ * and the frame around it was not. Every surface and every line of type in
+ * here carries its own colour, so this choice reaches nothing inside the
+ * message; what it governs is the user agent's own defaults, which are the
+ * frame, the canvas, and whatever would otherwise be inherited.
  *
  * All but one, which is the trap and is why TEXT below exists. An element
  * that sets no colour of its own inherits the user agent's, and that one is
@@ -47,15 +47,15 @@ import { FONT, INK, solid } from './paint.ts';
  * runs its pass regardless — see solid() below, which is the half that holds
  * there.
  */
-const SCHEME = 'only light';
+const SCHEME = 'only dark';
 
 const HEAD =
   '<meta charset="utf-8">' +
   '<meta name="viewport" content="width=device-width,initial-scale=1">' +
   `<meta name="color-scheme" content="${SCHEME}">` +
   // The legacy Apple name takes no `only` keyword, so it names the scheme.
-  '<meta name="supported-color-schemes" content="light">' +
-  `<style>:root{color-scheme:${SCHEME};supported-color-schemes:light}` +
+  '<meta name="supported-color-schemes" content="dark">' +
+  `<style>:root{color-scheme:${SCHEME};supported-color-schemes:dark}` +
   // Gmail's dark pass marks what it has touched; these put it back.
   'u+#body a{color:inherit}' +
   '[data-ogsc] .ground{background-color:#0E0E11!important}' +

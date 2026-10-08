@@ -90,12 +90,15 @@ export const refused = (said: string | undefined): boolean =>
 export const waiting = (prefs: Prefs | null): boolean =>
   !!prefs?.code && prefs.code.until > Date.now();
 
-/** The provider saying the message reached a mailbox — its pictures were
- *  fetched from one. Not that a person read it: Apple Mail loads them for
+/** The provider saying the message got where it was going: the receiving
+ *  server took it, or its pictures were fetched from a mailbox. Neither is
+ *  evidence a person read anything — Apple Mail fetches the pictures for
  *  every message whether or not anybody looks. It is enough to stop a second
- *  code going out after the first one landed, and nothing more is claimed of
- *  it. Same two lines as src/vault/mail.ts, which is the one that enforces. */
-export const landed = (said: string | undefined): boolean => said === 'email.opened';
+ *  code going out beside the first, and nothing more is claimed of it. Same
+ *  list as src/vault/mail.ts, which is the one that enforces. */
+const THERE = ['email.delivered', 'email.opened'];
+
+export const landed = (said: string | undefined): boolean => !!said && THERE.includes(said);
 
 /** Set it and send a code to it. */
 export const open = (to: string) =>

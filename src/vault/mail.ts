@@ -67,19 +67,25 @@ export const refused = (said: string | undefined): boolean =>
 /**
  * Whether the provider says the message got where it was going.
  *
- * One event, deliberately. `email.delivered` only means the receiving server
- * took it, which a spam folder also does, and blocking on that would strand
- * somebody whose code is sitting in one. Adding it here is a one-word change
- * if that trade ever looks worth making.
+ * Two events, and the weaker one is doing the work. `email.opened` is the
+ * one that means a mailbox was looked in, and it needs open tracking turned
+ * on at the provider — which it is not, so in practice it never arrives.
+ * `email.delivered` needs nothing turned on and means the receiving server
+ * took it.
  *
- * Read this with a clear head: an open is mostly a machine. Apple Mail
- * Privacy Protection fetches the pixel for every message whether or not a
- * person looks at it, and Gmail prefetches through its proxy. So this is
- * evidence the message reached a mailbox, not that anybody read it — which is
- * why what it gates is bounded by the code's own ten minutes rather than
- * being a door that locks.
+ * Which a spam folder also does. That trade was refused once and is taken
+ * now, because the thing it costs is bounded and the thing it buys is not:
+ * a code in a spam folder cannot be asked for again until it expires, ten
+ * minutes at the outside, and changing the address was never blocked. What
+ * it buys is that nobody ends up with two live-looking codes in one thread
+ * and no way to tell which set of digits counts.
+ *
+ * Read the stronger one with a clear head too: an open is mostly a machine.
+ * Apple Mail Privacy Protection fetches the pixel for every message whether
+ * or not a person looks, and Gmail prefetches through its proxy. Neither
+ * event is evidence anybody read anything, and nothing here claims they are.
  */
-const GOT_THERE = ['email.opened'];
+const GOT_THERE = ['email.delivered', 'email.opened'];
 
 export const gotThere = (said: string | undefined): boolean => !!said && GOT_THERE.includes(said);
 

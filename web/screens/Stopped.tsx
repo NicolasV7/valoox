@@ -39,7 +39,7 @@ export function Stopped({ token }: { token: string }) {
 
   if (state.at === 'kept') {
     return (
-      <Card art={SPRAY.peace} said={s.nothingChanged}>
+      <Card art={SPRAY.carryOn} said={s.nothingChanged}>
         <p class="lede stop__lede">{s.stillOn}</p>
       </Card>
     );
@@ -87,8 +87,15 @@ export function Stopped({ token }: { token: string }) {
   }
 }
 
-/** One shape for all four states, so the sticker and the heading do not move
- *  between them — the screen reads as one place answering, not four pages. */
+/**
+ * One shape for all four states, so the sticker and the heading do not move
+ * between them — the screen reads as one place answering, not four pages.
+ *
+ * Keyed on the heading, which is what makes the answer arrive rather than
+ * appear: a new key is a new subtree, so the entry animation plays again
+ * instead of the old card silently becoming the new one. Nothing else on the
+ * page moves, and prefers-reduced-motion flattens all of it.
+ */
 function Card({
   art,
   said,
@@ -100,7 +107,7 @@ function Card({
 }) {
   return (
     <main class="screen stop">
-      <div class="stop__mid">
+      <div class="stop__mid rise" key={said}>
         <img class="stop__art" src={art} alt="" width="132" height="132" />
         <h1 class="stop__title">{said}</h1>
         {children}

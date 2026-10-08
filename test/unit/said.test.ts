@@ -28,10 +28,14 @@ test('nothing else counts as a refusal, least of all silence', () => {
   }
 });
 
-test('only an open says the message reached a mailbox', () => {
+test('two events say the message got where it was going', () => {
+  // opened needs tracking switched on at the provider and in practice never
+  // arrives; delivered needs nothing and is what actually does the work.
   assert.equal(gotThere('email.opened'), true);
-  // delivered is the receiving server, which a spam folder also is
-  assert.equal(gotThere('email.delivered'), false);
+  assert.equal(gotThere('email.delivered'), true);
+  // Everything before and beside those is still in flight.
+  assert.equal(gotThere('email.sent'), false);
+  assert.equal(gotThere('email.delivery_delayed'), false);
   assert.equal(gotThere(undefined), false);
 });
 
