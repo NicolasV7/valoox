@@ -1,3 +1,4 @@
+import { pending } from '../alerts/otp.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
 import type { Env } from '../types.ts';
@@ -96,5 +97,8 @@ async function wishlist(env: Env, uid: string, body: unknown | null, retry = tru
     mail: session.mail
       ? { to: session.mail.to, ok: session.mail.ok, said: session.mail.said ?? '' }
       : null,
+    // Whether six digits are already sitting in that mailbox. A screen that
+    // did not know this offered to send a second one beside the first.
+    code: await pending(env, uid),
   };
 }

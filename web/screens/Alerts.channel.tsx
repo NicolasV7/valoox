@@ -12,7 +12,7 @@ import { useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
 import { useLeft } from '../components/Countdown.tsx';
 import { Mail } from '../components/icons.tsx';
-import { again, open, refused, reload, usePrefs } from '../data/channel.ts';
+import { again, open, refused, reload, usePrefs, waiting } from '../data/channel.ts';
 import { sameMailbox } from '../data/mailbox.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS, go } from '../route.ts';
@@ -36,6 +36,12 @@ export function AlertsChannel() {
   // changing the address, and neither is a dot inside a gmail local part.
   const here = sameMailbox(now, prefs?.mail?.to);
   const ok = prefs?.mail?.ok === true && here;
+  // A code is already in that mailbox. Sending a second one beside it is the
+  // move that makes somebody read two messages to find out which digits
+  // count, so the button stops offering it and points at the boxes instead.
+  // Typing a different address brings the send back, because the code that
+  // is out is not for that one.
+  const typing = here && !ok && waiting(prefs);
   // The refusal belongs to the address it was about. Typing a different one
   // makes it somebody else's history, so the chip stops reporting it.
   const bad = refused(prefs?.mail?.said) && here;
@@ -93,6 +99,14 @@ export function AlertsChannel() {
           <button type="button" class="btn btn--quiet bell__go" onClick={edit}>
             {s.editAddress}
           </button>
+        ) : typing ? (
+          <button
+            type="button"
+            class="btn bell__go"
+            onClick={() => go({ name: 'alerts', step: 'code' })}
+          >
+            {s.typeTheCode}
+          </button>
         ) : (
           <button
             type="button"
@@ -108,7 +122,9 @@ export function AlertsChannel() {
           {/* The dot only joins once there is a state it is reporting. */}
           {(stated || said) && <span class="bell__dot" />}
           <span>
-            {wait > 0 ? s.waitSeconds(wait) : (said ?? (stuck ? s.changeIt : s.testIsProof))}
+            {wait > 0
+              ? s.waitSeconds(wait)
+              : (said ?? (stuck ? s.changeIt : typing ? s.oneIsOut : s.testIsProof))}
           </span>
         </p>
       </div>

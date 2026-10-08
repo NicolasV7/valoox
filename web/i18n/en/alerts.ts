@@ -47,6 +47,7 @@ export const alerts = {
   sendATest: 'Send the code',
   badAddress: 'That is not the shape of an address. Check the @ and the dot.',
   waitSeconds: (n: number) => `Wait ${n} seconds before asking for another code.`,
+  oneIsOut: 'A code is already on its way to that mailbox.',
   testIsProof:
     'That code is the verification: you type it back and only then is the ' +
     'address proved. Until that happens, nothing else is sent here.',

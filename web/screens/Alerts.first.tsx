@@ -11,9 +11,19 @@ import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
 
-export function AlertsFirst({ mail, starred }: { mail: Prefs['mail']; starred: number }) {
+export function AlertsFirst({
+  mail,
+  starred,
+  coded,
+}: {
+  mail: Prefs['mail'];
+  starred: number;
+  /** Six digits already in that mailbox: step one is typing them, not
+   *  asking for them again. */
+  coded: boolean;
+}) {
   const s = t().alerts;
-  const to = { name: 'alerts', step: 'channel' } as const;
+  const to = { name: 'alerts', step: coded ? 'code' : 'channel' } as const;
   const ADD = { name: 'alerts', step: 'add' } as const;
   const ok = mail?.ok === true;
 
@@ -38,7 +48,7 @@ export function AlertsFirst({ mail, starred }: { mail: Prefs['mail']; starred: n
         <span class="bell__id">
           <span class="bell__name">{mail?.to || s.yourEmail}</span>
           <span class={ok ? 'bell__said bell__said--ok' : 'bell__said'}>
-            {ok ? s.verified : mail?.to ? s.notVerifiedYet : s.oneAddress}
+            {ok ? s.verified : coded ? s.oneIsOut : mail?.to ? s.notVerifiedYet : s.oneAddress}
           </span>
         </span>
         <span class="bell__chev">

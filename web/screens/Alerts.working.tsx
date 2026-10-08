@@ -11,6 +11,7 @@
 import { Countdown } from '../components/Countdown.tsx';
 import { Chevron, Mail, Search } from '../components/icons.tsx';
 import { Watch } from '../components/Watch.tsx';
+import { waiting } from '../data/channel.ts';
 import { LEVELS } from '../data/findable.ts';
 import { MAX, useStars } from '../data/stars.ts';
 import type { Prefs, StoreView } from '../data/types.ts';
@@ -18,10 +19,15 @@ import { t } from '../i18n/index.ts';
 import { href, intercept, type Route } from '../route.ts';
 
 const CHANNEL: Route = { name: 'alerts', step: 'channel' };
+const CODE: Route = { name: 'alerts', step: 'code' };
 const ADD: Route = { name: 'alerts', step: 'add' };
 
-export function AlertsWorking({ mail, view }: { mail: Prefs['mail']; view: StoreView }) {
+export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }) {
   const s = t().alerts;
+  const mail = prefs.mail;
+  // Six digits already out: the card leads to the boxes rather than back to
+  // the field they were asked for in.
+  const to = waiting(prefs) && mail?.ok !== true ? CODE : CHANNEL;
   const { stars, on, full, toggle } = useStars();
   const all = stars ?? [];
   // Anything starred before the type was kept is a gun: that is all the app
@@ -37,7 +43,7 @@ export function AlertsWorking({ mail, view }: { mail: Prefs['mail']; view: Store
         <p class="small">{s.what}</p>
       </header>
 
-      <a class="watch__to" href={href(CHANNEL)} onClick={intercept(CHANNEL)}>
+      <a class="watch__to" href={href(to)} onClick={intercept(to)}>
         <span class="watch__cap">
           <span class="label">{s.whereItGoes}</span>
           <span class="watch__change">{s.change}</span>
@@ -47,7 +53,7 @@ export function AlertsWorking({ mail, view }: { mail: Prefs['mail']; view: Store
           <span class="watch__addr">{mail?.to || s.yourEmail}</span>
           <span class={ok ? 'bell__state bell__state--ok' : 'bell__state bell__state--wait'}>
             <span class="bell__dot" />
-            {ok ? s.verified : s.notVerified}
+            {ok ? s.verified : waiting(prefs) ? s.oneIsOut : s.notVerified}
           </span>
           <Chevron size={15} />
         </span>

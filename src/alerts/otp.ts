@@ -116,3 +116,25 @@ export async function left(env: Env, uid: string): Promise<number | null> {
   const raw = await env.VAL.get(key(uid));
   return raw ? (JSON.parse(raw) as Held).left : null;
 }
+
+/**
+ * The outstanding code's shape, never its digits.
+ *
+ * What a screen does with it is skip the send: a code already in a mailbox
+ * is a code to type, not a reason to put a second one beside it. Both halves
+ * are already visible to whoever holds this browser's cookie — the message
+ * is in their inbox — so neither says anything new, and the one thing that
+ * would is not here.
+ *
+ * Keyed by uid alone, so a live code always belongs to the address on the
+ * row: setting a different one mints over it.
+ */
+export async function pending(
+  env: Env,
+  uid: string,
+): Promise<{ until: number; tries: number } | null> {
+  const raw = await env.VAL.get(key(uid));
+  if (!raw) return null;
+  const held = JSON.parse(raw) as Held;
+  return held.until > Date.now() ? { until: held.until, tries: held.left } : null;
+}

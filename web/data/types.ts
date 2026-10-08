@@ -81,6 +81,10 @@ export interface Prefs {
    *  a fault code on a screen is something to look up, not something to read.
    *  Screens branch on it and say the outcome in their own words. */
   mail: { to: string; ok: boolean; said: string } | null;
+  /** An outstanding code: when it dies, and how many tries are left on it.
+   *  Never the digits. Null when there is none, or when the last one has
+   *  expired. */
+  code: { until: number; tries: number } | null;
 }
 
 /** What `/api/qr` answers. `url` only on start; `shard` only once approved. */

@@ -47,6 +47,7 @@ export const alerts = {
   sendATest: 'Mandar el código',
   badAddress: 'Eso no tiene forma de dirección. Revisá el arroba y el punto.',
   waitSeconds: (n: number) => `Esperá ${n} segundos antes de pedir otro código.`,
+  oneIsOut: 'Ya te mandamos un código. Está en esa casilla.',
   testIsProof:
     'Ese código es la verificación: lo escribís de vuelta y recién ahí la ' +
     'dirección queda probada. Hasta que eso pase, acá no se manda nada más.',

@@ -82,6 +82,14 @@ const DEAD = ['email.bounced', 'email.complained', 'email.suppressed'];
 export const refused = (said: string | undefined): boolean =>
   !!said && (/^resend 4/.test(said) || DEAD.includes(said));
 
+/** Whether six digits are already in that mailbox, waiting to be typed.
+ *
+ *  The server sends when the code dies rather than how long is left, so a
+ *  page left open does not go on believing in a code that expired while it
+ *  sat there. */
+export const waiting = (prefs: Prefs | null): boolean =>
+  !!prefs?.code && prefs.code.until > Date.now();
+
 /** The provider saying the message reached a mailbox — its pictures were
  *  fetched from one. Not that a person read it: Apple Mail loads them for
  *  every message whether or not anybody looks. It is enough to stop a second
