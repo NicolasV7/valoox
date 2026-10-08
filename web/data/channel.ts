@@ -30,7 +30,12 @@ export function usePrefs(): Prefs | null {
 
   useEffect(() => {
     listeners.add(set);
-    if (!held) void reload();
+    // Always, not only when there is nothing yet. The row changes behind this
+    // page's back — a bounce arrives at the webhook seconds after a send — so
+    // a cached copy from before that is exactly the copy that would show a
+    // screen saying everything is fine. The held value still paints first, so
+    // re-reading costs a request and no flash.
+    void reload();
     return () => {
       listeners.delete(set);
     };
@@ -39,7 +44,27 @@ export function usePrefs(): Prefs | null {
   return prefs;
 }
 
+/**
+ * Keep asking while a screen is waiting on something only the provider can
+ * tell us. Used by the code screen: you are sitting there with six empty
+ * boxes and the message has already bounced, and nothing on the page would
+ * ever say so.
+ */
+export function useWatch(on: boolean, every = 4000): void {
+  useEffect(() => {
+    if (!on) return;
+    const id = setInterval(() => {
+      void reload();
+    }, every);
+    return () => clearInterval(id);
+  }, [on, every]);
+}
+
 /** What the provider last said, read as a verdict rather than a sentence.
+ *
+ *  src/vault/mail.ts holds the same two lines for the send side, which is the
+ *  one that enforces them. Two runtimes, so the duplicate is deliberate; if
+ *  one changes, change both.
  *
  *  A 4xx is the address being wrong and it will stay wrong; a bounce or a
  *  complaint is the far end refusing it after the fact. Both mean the same

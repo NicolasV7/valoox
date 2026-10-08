@@ -44,6 +44,21 @@ const ADDRESS = /^[^\s@,;:<>"']{1,64}@[^\s@,;:<>"'.]{1,63}(\.[^\s@,;:<>"'.]{1,63
 
 export const looksLikeAddress = (to: string): boolean => to.length <= 254 && ADDRESS.test(to);
 
+/**
+ * Whether the last word about an address means it cannot receive.
+ *
+ * A 4xx is the provider refusing the address before anything left; a bounce or
+ * a complaint is the far end refusing it after looking. Both mean the same
+ * thing to the sender — this address does not work — and both have to stop a
+ * resend, because sending the same message to the same mailbox again is the
+ * one action that cannot help.
+ *
+ * web/data/channel.ts holds the same two lines for the screens. They are two
+ * runtimes and the duplicate is deliberate; if one changes, change both.
+ */
+export const refused = (said: string | undefined): boolean =>
+  !!said && (/^resend 4/.test(said) || said === 'email.bounced' || said === 'email.complained');
+
 export async function send(
   env: Env,
   to: string,

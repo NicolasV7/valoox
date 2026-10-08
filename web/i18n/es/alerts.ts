@@ -102,6 +102,10 @@ export const alerts = {
     'Esa dirección ya está verificada en otra cuenta. Una casilla recibe los ' +
     'avisos de una sola, así que hace falta otra — o desconectá la otra cuenta ' +
     'primero.',
+  changeIt:
+    'Esa dirección rebotó: el servidor del otro lado la devolvió. Mandarle lo ' +
+    'mismo otra vez es lo único que no puede funcionar, así que hace falta ' +
+    'cambiarla.',
   sendAnother: 'Mandar otro código',
   editAddress: 'Cambiar la dirección',
   oneChannelMeans:

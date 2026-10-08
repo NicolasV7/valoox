@@ -21,7 +21,7 @@ import { check, clear, LIFE, left, mint, waitFor } from '../alerts/otp.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
 import type { Env } from '../types.ts';
-import { looksLikeAddress, send } from '../vault/mail.ts';
+import { looksLikeAddress, refused, send } from '../vault/mail.ts';
 import * as repo from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
 
@@ -77,10 +77,15 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
   const lang = langOf(body?.lang);
   if (!looksLikeAddress(to)) return { error: 'address' };
 
+  const was = held.session.mail;
+  // Asked before the cooldown, because it is the more useful answer: telling
+  // somebody to wait thirty seconds points them back at a button that will
+  // never work. The same address that bounced is the one send that cannot
+  // work; a different one is always allowed, and changing it is the way out.
+  if (was?.to === to && refused(was.said)) return { error: 'bounced', said: was.said };
+
   const wait = await waitFor(env, uid);
   if (wait > 0) return { error: 'wait', wait };
-
-  const was = held.session.mail;
   // Re-sending to an address already proved must not un-prove it: the code is
   // how you change an address, not how you keep one.
   const keep = was?.ok === true && was.to === to;
@@ -104,6 +109,13 @@ export async function resend({ env, uid, req }: Ctx): Promise<Body> {
   if (!held) return RESEED;
   const to = held.session.mail?.to;
   if (!to) return { error: 'address' };
+
+  // Same rule as setChannel and in the same order, and it has to live here
+  // too: this route takes no address, so without it "send it again" is a way
+  // around the block.
+  if (refused(held.session.mail?.said)) {
+    return { error: 'bounced', said: held.session.mail?.said };
+  }
 
   const wait = await waitFor(env, uid);
   if (wait > 0) return { error: 'wait', wait };

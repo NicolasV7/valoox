@@ -102,6 +102,10 @@ export const alerts = {
     'That address is already verified on another account. One mailbox receives ' +
     'for one account, so this needs a different one — or disconnect the other ' +
     'account first.',
+  changeIt:
+    'That address bounced: the receiving server sent it back. Sending it the ' +
+    'same thing again is the one thing that cannot work, so it needs to ' +
+    'change.',
   sendAnother: 'Send another code',
   editAddress: 'Edit the address',
   oneChannelMeans:

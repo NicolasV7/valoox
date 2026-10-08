@@ -28,8 +28,14 @@ export function AlertsChannel() {
 
   const now = to ?? prefs?.mail?.to ?? '';
   const ok = prefs?.mail?.ok === true && now === prefs.mail.to;
-  const bad = refused(prefs?.mail?.said);
+  // The refusal belongs to the address it was about. Typing a different one
+  // makes it somebody else's history, so the chip stops reporting it.
+  const bad = refused(prefs?.mail?.said) && now.trim() === prefs?.mail?.to;
   const valid = ADDRESS.test(now.trim()) && now.trim().length <= 254;
+  // The address that bounced is the one send that cannot work, so the button
+  // is shut until it is a different one. The Worker refuses it too; this is
+  // only the half that says so before the round trip.
+  const stuck = bad;
   // Nothing has a state until there is something to have a state about. An
   // empty field labelled "not verified" is an accusation about a blank.
   const stated = now.trim().length > 0;
@@ -68,14 +74,19 @@ export function AlertsChannel() {
           }}
         />
 
-        <button type="button" class="btn bell__go" disabled={!valid || busy} onClick={start}>
+        <button
+          type="button"
+          class="btn bell__go"
+          disabled={!valid || busy || stuck}
+          onClick={start}
+        >
           {busy ? t().common.loading : s.sendATest}
         </button>
 
-        <p class={said ? 'bell__why bell__why--bad' : 'bell__why'}>
+        <p class={said || stuck ? 'bell__why bell__why--bad' : 'bell__why'}>
           {/* The dot only joins once there is a state it is reporting. */}
           {(stated || said) && <span class="bell__dot" />}
-          <span>{said ?? s.testIsProof}</span>
+          <span>{said ?? (stuck ? s.changeIt : s.testIsProof)}</span>
         </p>
       </div>
 
@@ -99,6 +110,7 @@ export function AlertsChannel() {
     if (out.error === 'wait') return setSaid(s.waitSeconds(out.wait ?? 0));
     if (out.error === 'address') return setSaid(s.badAddress);
     if (out.error === 'taken') return setSaid(s.taken);
+    if (out.error === 'bounced') return setSaid(s.changeIt);
     await reload();
 
     // It went: the next screen is the one that asks for the code.

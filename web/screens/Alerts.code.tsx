@@ -6,9 +6,9 @@
 // the keyboard's own one-time-code suggestion all work — six separate inputs
 // break all three.
 
-import { useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
-import { again, prove, refused, reload, usePrefs } from '../data/channel.ts';
+import { again, prove, refused, reload, usePrefs, useWatch } from '../data/channel.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS, go } from '../route.ts';
 
@@ -24,6 +24,15 @@ export function AlertsCode() {
 
   const to = prefs?.mail?.to ?? '';
   const sent = prefs?.mail?.said ?? '';
+  const bad = refused(sent);
+
+  // Six empty boxes and a message that already bounced is the one state this
+  // screen could sit in for ever without saying so: the answer arrives at the
+  // webhook, not here. So it asks, and leaves the moment there is an answer.
+  useWatch(!bad);
+  useEffect(() => {
+    if (bad) go(ALERTS);
+  }, [bad]);
 
   return (
     <main class="screen bell">
@@ -109,6 +118,6 @@ export function AlertsCode() {
     setCode('');
     if (res?.error === 'wait') return setSaid(s.waitSeconds(res.wait ?? 0));
     await reload();
-    if (!res?.sent) go(ALERTS);
+    if (res?.error === 'bounced' || !res?.sent) go(ALERTS);
   }
 }
