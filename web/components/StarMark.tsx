@@ -1,11 +1,16 @@
 // The star, as a control — and as a mark when there is nothing behind it.
 //
 // Starring with no verified address builds a list the daily job steps over,
-// so the star is a mark until there is somewhere to send. That is not a
+// so an unlit star is a mark until there is somewhere to send. That is not a
 // disabled button: a disabled button is a control you are being kept from,
 // and this is a thing that is not a control yet. It says the same thing it
 // always said — this one is not yours — and the alerts tab is where the
 // reason lives, because that is the screen that can do something about it.
+//
+// A LIT one stays a control whatever the state of the address. Taking
+// something off your own list is not an action that needs a reason, and a
+// list you can only add to is a trap: lose the address after starring forty
+// things and every one of them is stuck there.
 //
 // Where it is a control, it sits on top of a link rather than inside one:
 // every place it appears is a tile or a row that opens something, and a
@@ -27,10 +32,10 @@ export function StarMark({ item, size = 15 }: { item: Star; size?: number }) {
   const lit = on(item.id);
   const live = usePrefs()?.mail?.ok === true;
 
-  if (!live) {
+  if (!live && !lit) {
     return (
-      <span class={lit ? 'star star--mark star--on' : 'star star--mark'}>
-        <Glyph size={size} on={lit} />
+      <span class="star star--mark">
+        <Glyph size={size} on={false} />
       </span>
     );
   }

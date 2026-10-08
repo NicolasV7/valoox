@@ -16,7 +16,7 @@ export function Tile({ card, on, mine }: { card: Card; on: boolean; mine: boolea
   const route = { name: 'card', id: card.id } as const;
 
   return (
-    <div class="leaf stage">
+    <div class="leaf stage" style={artStyle(lit)}>
       <a class="hit" href={href(route)} onClick={intercept(route)}>
         <span class="sr">{card.name}</span>
       </a>

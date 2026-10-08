@@ -132,4 +132,8 @@ export interface Env extends Cloudflare.Env {
 export interface Hit {
   id: string;
   name: string;
+  /** Riot's item type. Only a skin level has a picture whose address can be
+   *  derived from the id, so this is what decides whether a row in a message
+   *  is drawn or only named. Absent on anything starred before it was kept. */
+  type?: string;
 }

@@ -60,6 +60,8 @@ export function Skin({ id, inv }: { id: string; inv: Inventory }) {
   const on = skin.chromas.find((c) => c.id === colour) ?? null;
   const step = skin.levels.findIndex((l) => l.id === level);
   const reel = on?.video ?? skin.levels[step]?.video ?? null;
+  // What the pickers are showing, whether or not there is a clip of it.
+  const shown = on?.render ?? skin.levels[step]?.icon ?? skin.render;
   // #t= is a media fragment: which frame to sit on before anyone presses
   // anything, and on iOS the thing that makes a frame get decoded at all.
   const still = reel ? reel + '#t=' + STILL : undefined;
@@ -71,7 +73,11 @@ export function Skin({ id, inv }: { id: string; inv: Inventory }) {
     <main class={tier ? 'screen vary vary--lit vary--' + tier.name : 'screen vary'}>
       <Back to={{ name: 'weapon', id: weapon.id }} said={weapon.name} />
 
-      <div class="reel">
+      {/* Without a clip the box IS the picture, so it stops being a letterbox
+          cropping a video frame and becomes a stage holding a render whole.
+          That also means there is nothing left for the block at the foot to
+          add — see below, where it is not drawn. */}
+      <div class={reel ? 'reel' : 'reel reel--still stage'}>
         {reel ? (
           // biome-ignore lint/a11y/useMediaCaption: no speech, and no track to point at
           <video
@@ -86,7 +92,7 @@ export function Skin({ id, inv }: { id: string; inv: Inventory }) {
             onPlay={() => setPlaying(true)}
           />
         ) : (
-          skin.render && <img class="reel__still" src={skin.render} alt="" />
+          shown && <img class="reel__still" src={shown} alt="" />
         )}
 
         {reel && !playing && (
@@ -136,16 +142,20 @@ export function Skin({ id, inv }: { id: string; inv: Inventory }) {
 
       <Levels skin={skin} on={level} pick={pick} melee={melee} />
       <Colours skin={skin} on={colour} kept={kept} pick={setColour} />
-      <Worn
-        skin={skin}
-        weapon={weapon}
-        inv={inv}
-        mine={mine}
-        melee={melee}
-        art={art}
-        level={level}
-        colour={colour}
-      />
+      {/* Only where the top of the screen is a clip. Where it is already the
+          render, this would be the same picture twice. */}
+      {reel && (
+        <Worn
+          skin={skin}
+          weapon={weapon}
+          inv={inv}
+          mine={mine}
+          melee={melee}
+          art={art}
+          level={level}
+          colour={colour}
+        />
+      )}
 
       <p class="legal vary__note">{s.listPrice}</p>
     </main>

@@ -112,3 +112,22 @@
   font-size: 11.5px;
 }
 
+
+/* A skin with no clip. The box stops being a letterbox over a video frame and
+ * becomes a stage with a render on it: `cover` was cutting the ends off every
+ * knife in the catalogue that Riot never filmed. */
+.reel--still {
+  height: auto;
+  min-height: 196px;
+  background: none;
+}
+
+.reel--still .reel__still {
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  padding: 18px 16px;
+  box-sizing: border-box;
+  object-fit: contain;
+  object-position: center;
+}

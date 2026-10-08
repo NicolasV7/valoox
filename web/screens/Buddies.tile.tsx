@@ -16,7 +16,7 @@ export function Tile({ buddy, on, mine }: { buddy: Buddy; on: string[]; mine: bo
   const said = on.filter(Boolean);
 
   return (
-    <div class="pad pad--tall stage">
+    <div class="pad pad--tall stage" style={artStyle(lit)}>
       <a class="hit" href={href(route)} onClick={intercept(route)}>
         <span class="sr">{buddy.name}</span>
       </a>

@@ -144,6 +144,13 @@ const ALLOW: Rule[] = [
     pattern: /^https:\/\/valorant-api\.com\/v1\/version$/,
     why: 'the X-Riot-ClientVersion header; public data, no credential sent',
   },
+  {
+    method: 'GET',
+    pattern: new RegExp(
+      '^https://media.valorant-api.com/weaponskinlevels/' + UUID + '/displayicon.png$',
+    ),
+    why: "one skin's picture, so a message can carry it from our own origin instead of pointing every reader's mail client at somebody else's CDN. The uuid is built into the url here and never taken from a request; the page fetches these directly, which is what img-src in the CSP is for",
+  },
 ];
 
 export class BlockedUpstream extends Error {

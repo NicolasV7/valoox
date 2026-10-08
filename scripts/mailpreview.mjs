@@ -14,6 +14,7 @@ const bundled = await build({
 const mod = await import(
   'data:text/javascript;base64,' + Buffer.from(bundled.outputFiles[0].text).toString('base64')
 );
-writeFileSync(out + '/mail-code.html', mod.code());
-writeFileSync(out + '/mail-alert.html', mod.alert());
-console.log('wrote', out + '/mail-code.html', 'and', out + '/mail-alert.html');
+for (const [name, make] of Object.entries(mod)) {
+  writeFileSync(out + '/mail-' + name + '.html', make());
+  console.log('wrote', out + '/mail-' + name + '.html');
+}

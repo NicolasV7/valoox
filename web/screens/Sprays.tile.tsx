@@ -21,7 +21,7 @@ export function Tile({ spray, slot, mine }: { spray: Spray; slot: number; mine: 
   const route = { name: 'spray', id: spray.id } as const;
 
   return (
-    <div class="pad stage">
+    <div class="pad stage" style={artStyle(lit)}>
       <a class="hit" href={href(route)} onClick={intercept(route)}>
         <span class="sr">{spray.name}</span>
       </a>

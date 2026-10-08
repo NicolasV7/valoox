@@ -28,7 +28,6 @@ export interface Words {
   openYourStore: string;
   goneIn: string;
   goneInAside: (clock: string) => string;
-  alsoToday: string;
   youStarred: string;
   oneADay: string;
   hitFoot: string;
@@ -72,7 +71,6 @@ const es: Words = {
   openYourStore: 'Abrir tu tienda',
   goneIn: 'Se va en',
   goneInAside: (clock) => 'Se va en ' + clock,
-  alsoToday: 'También hoy',
   youStarred:
     'Lo marcaste en valoox y esta mañana coincidió. El trabajo diario cruza tu ' +
     'lista con tu tienda y manda solo los nombres que coinciden.',
@@ -130,7 +128,6 @@ const en: Words = {
   openYourStore: 'Open your store',
   goneIn: 'Gone in',
   goneInAside: (clock) => 'Gone in ' + clock,
-  alsoToday: 'Also today',
   youStarred:
     'You starred this at valoox and this morning it matched. The daily job ' +
     'crosses your list with your store and sends only the names that match.',

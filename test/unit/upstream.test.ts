@@ -111,5 +111,10 @@ test('the list stays short enough to read in one sitting', () => {
   // skin has a content tier and a theme exactly like a sold one, and the
   // contentEdition field is set on 159 skins out of 1,415 and separates
   // nothing. So the filter went, and so did the sentence that promised it.
-  assert.equal(allowCount, 18);
+  // 18 -> 19 on 2026-10-08: GET media.valorant-api.com/weaponskinlevels/<uuid>
+  // /displayicon.png. A message cannot carry a third party, so the one
+  // picture in the morning mail is proxied through this origin. No session,
+  // no credential, and the uuid is built into the url rather than read off a
+  // request — the same rule the Discord webhook follows.
+  assert.equal(allowCount, 19);
 });

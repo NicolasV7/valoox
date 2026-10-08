@@ -6,6 +6,7 @@ import { logout, pollScan, startScan } from './routes/auth.ts';
 import { resend, setChannel, verify } from './routes/channel.ts';
 import { collection } from './routes/collection.ts';
 import { resendHook } from './routes/hook.ts';
+import { render } from './routes/render.ts';
 import { stopMail } from './routes/stop.ts';
 import { store } from './routes/store.ts';
 import { readWishlist, writeWishlist } from './routes/wishlist.ts';
@@ -76,6 +77,13 @@ export async function route(req: Request, env: Env): Promise<Response> {
   // and it is strictly the stronger of the two — see routes/hook.ts.
   if (pathname === '/api/hook/resend') {
     return method === 'POST' ? resendHook(req, env) : json({ error: 'not found' }, headers, 404);
+  }
+
+  // The one route that answers with a picture rather than JSON, and the one
+  // whose answer is the same for everybody. Before the cookie, because it
+  // needs no session and a message should not be minting one.
+  if (pathname.startsWith('/render/')) {
+    return method === 'GET' ? render(req) : json({ error: 'not found' }, headers, 404);
   }
 
   // The whole CSRF defence, and it is enough: a cross-site form post cannot set

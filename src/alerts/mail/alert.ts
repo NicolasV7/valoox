@@ -2,19 +2,23 @@
 //
 // It opens on the thing, not on a sentence about the thing. A mail about a
 // gun whose first line is "You have 1 new alert" is a mail nobody opens
-// twice — so the render is the top of it, at the size the store shows, on the
-// colour of the skin.
+// twice — so the render is the top of it, on the colour of the skin.
+//
+// The picture comes from this origin, built from the skin level's uuid: see
+// routes/render.ts. The Worker still has no catalogue and needs none, because
+// a uuid is the whole address.
 //
 // The one number that decides whether you act is how long is left, and it
 // sits beside the button rather than in a footnote. That number is Riot's
 // own, carried from the storefront payload, which is why it can be stated at
 // all: a countdown we invented would be a countdown that drifts.
 //
-// Names come from the browser that starred them. The Worker has no catalogue
-// and never will, so what the mail can say about an item is exactly what was
-// on screen when somebody pressed the star — which is also why there is no
-// render for an accessory here, only for the one skin it leads with.
+// Names come from the browser that starred them. What the mail can say about
+// an item is exactly what was on screen when somebody pressed the star, which
+// is also why an accessory gets a line and a gun gets a picture: only a gun's
+// render has an address that can be derived.
 
+import { renderAt } from '../../routes/render.ts';
 import type { Hit } from '../../types.ts';
 import { shell } from './layout.ts';
 import { FONT, INK, note, solid, weave } from './paint.ts';
@@ -27,6 +31,10 @@ const CLOCK = '#F0CB74';
 
 /** Somebody delighted with the gun they are holding. */
 const STICKER = '/art/spray-thisgun.png';
+
+/** Riot's item type for a skin level. Only these have a render this can
+ *  build an address for; everything else is named and not drawn. */
+const LEVELS = 'e7c63390-eda7-46e0-bb7a-a6abdacd2433';
 
 export const subject = (found: Hit[], lang: Lang, who?: string | null): string =>
   words[lang].hitSubject(found[0]?.name ?? '', found.length) + (who ? ' · ' + who : '');
@@ -47,16 +55,13 @@ export function html(
   who?: string | null,
 ): string {
   const w = words[lang];
-  const lead = found[0]?.name ?? '';
-  const rest = found.slice(1);
 
   const body =
-    // the thing, on its own colour, at the size the store shows it
-    `<tr><td align="center" style="padding:34px 28px 30px;${weave(HUE, INK.page)}">` +
-    `<div style="font-size:27px;font-weight:500;letter-spacing:-0.02em;` +
-    `color:${INK.text};line-height:1.2">${lead}</div>` +
-    `<div style="font-size:13px;color:${INK.faint};padding-top:8px">${w.inYourStore}</div>` +
-    `</td></tr>` +
+    // Every match, each on its own band, each the same size. There is no
+    // appendix: a message about four things that shows one of them and lists
+    // the rest under a heading is a message that decided which three you
+    // cared about less, and it has no way to know that.
+    found.map((h) => band(h, origin, w.inYourStore)).join('') +
     // the one number that decides whether you act, next to the thing you do
     `<tr><td class="pad" style="padding:22px 28px 0">` +
     `<a href="${origin}/" style="display:block;padding:15px 20px;border-radius:10px;` +
@@ -67,20 +72,6 @@ export function html(
     `text-transform:uppercase;color:${INK.faint}">${w.goneIn} </span>` +
     `<span style="font-family:${FONT.mono};font-size:17px;font-weight:700;color:${CLOCK}">` +
     `${hours(left)}</span></div></td></tr>` +
-    // everything else that matched, named rather than counted
-    (rest.length
-      ? `<tr><td class="pad" style="padding:22px 28px 0">` +
-        `<div style="font-family:${FONT.mono};font-size:11px;letter-spacing:0.12em;` +
-        `text-transform:uppercase;color:${INK.faint};padding-bottom:10px">${w.alsoToday}</div>` +
-        rest
-          .map(
-            (h) =>
-              `<div style="font-size:15px;color:${INK.text};padding:7px 0;` +
-              `border-top:1px solid ${INK.rule}">${h.name}</div>`,
-          )
-          .join('') +
-        `</td></tr>`
-      : '') +
     `<tr><td class="pad" style="padding:22px 28px 0">` +
     `${note(origin + STICKER, 104, w.youStarred, HUE)}</td></tr>` +
     `<tr><td class="pad" style="padding:22px 28px 24px">` +
@@ -94,6 +85,34 @@ export function html(
 
   return shell({ aside: w.goneInAside(hours(left)), body, foot, lang, origin, who });
 }
+
+/** Whether a row has a picture this can address. A spray, a charm, a card
+ *  and a title all have renders somewhere; none of them has one whose url is
+ *  derivable from the id alone, which is the whole constraint here. */
+const drawable = (h: Hit | undefined): h is Hit => !!h && (h.type ?? LEVELS) === LEVELS;
+
+/** One match: the thing, on the colour of a clock running out, with its name
+ *  under it. A gun is drawn because a skin level's uuid is the whole address
+ *  of its render; an accessory is named, because none of theirs is. */
+function band(h: Hit, origin: string, said: string): string {
+  const art = drawable(h)
+    ? `<img src="${renderAt(origin, h.id)}" width="460" alt="${esc(h.name)}"` +
+      ' style="display:block;border:0;width:100%;max-width:460px;height:auto;margin:0 auto">'
+    : '';
+  return (
+    `<tr><td align="center" class="pad" style="padding:30px 28px 26px;${weave(HUE, INK.page)}">` +
+    art +
+    `<div style="font-size:26px;font-weight:500;letter-spacing:-0.02em;color:${INK.text};` +
+    `line-height:1.2;padding-top:${art ? 14 : 0}px">${esc(h.name)}</div>` +
+    `<div style="font-size:13px;color:${INK.faint};padding-top:7px">${said}</div>` +
+    `</td></tr>`
+  );
+}
+
+/** Names come from a catalogue this project does not control and go into
+ *  markup, which is the same reason the page builds DOM and never strings. */
+const esc = (said: string): string =>
+  said.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /** `13:52:06`, or `2d 04:11:09` past a day — the same spelling the app uses,
  *  because the two are read within a minute of each other. */
