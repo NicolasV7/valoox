@@ -106,6 +106,9 @@ export const alerts = {
     'Esa dirección rebotó: el servidor del otro lado la devolvió. Mandarle lo ' +
     'mismo otra vez es lo único que no puede funcionar, así que hace falta ' +
     'cambiarla.',
+  alreadyThere:
+    'Resend dice que ese mensaje se abrió, así que llegó a la casilla, y el ' +
+    'código que lleva sigue vivo. Buscalo ahí. Cuando se venza, el botón vuelve.',
   sendAnother: 'Mandar otro código',
   editAddress: 'Cambiar la dirección',
   oneChannelMeans:

@@ -21,7 +21,7 @@ import { check, clear, LIFE, left, mint, waitFor } from '../alerts/otp.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
 import type { Env } from '../types.ts';
-import { looksLikeAddress, refused, send } from '../vault/mail.ts';
+import { gotThere, looksLikeAddress, refused, send } from '../vault/mail.ts';
 import * as repo from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
 
@@ -83,6 +83,12 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
   // never work. The same address that bounced is the one send that cannot
   // work; a different one is always allowed, and changing it is the way out.
   if (was?.to === to && refused(was.said)) return { error: 'bounced', said: was.said };
+  // It arrived and there is still a live code in it, so another one would be
+  // a second code for a message already in a mailbox. Bounded by the ten
+  // minutes: once the code dies this lifts on its own.
+  if (was?.to === to && gotThere(was.said) && (await left(env, uid)) !== null) {
+    return { error: 'opened', said: was.said };
+  }
 
   const wait = await waitFor(env, uid);
   if (wait > 0) return { error: 'wait', wait };
@@ -115,6 +121,9 @@ export async function resend({ env, uid, req }: Ctx): Promise<Body> {
   // around the block.
   if (refused(held.session.mail?.said)) {
     return { error: 'bounced', said: held.session.mail?.said };
+  }
+  if (gotThere(held.session.mail?.said) && (await left(env, uid)) !== null) {
+    return { error: 'opened', said: held.session.mail?.said };
   }
 
   const wait = await waitFor(env, uid);

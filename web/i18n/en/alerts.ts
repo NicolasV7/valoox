@@ -106,6 +106,10 @@ export const alerts = {
     'That address bounced: the receiving server sent it back. Sending it the ' +
     'same thing again is the one thing that cannot work, so it needs to ' +
     'change.',
+  alreadyThere:
+    'Resend says that message was opened, so it reached the mailbox, and the ' +
+    'code it carries is still live. Look there. When it expires, the button ' +
+    'comes back.',
   sendAnother: 'Send another code',
   editAddress: 'Edit the address',
   oneChannelMeans:

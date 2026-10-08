@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
-import { again, prove, refused, reload, usePrefs, useWatch } from '../data/channel.ts';
+import { again, landed, prove, refused, reload, usePrefs, useWatch } from '../data/channel.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS, go } from '../route.ts';
 
@@ -25,6 +25,11 @@ export function AlertsCode() {
   const to = prefs?.mail?.to ?? '';
   const sent = prefs?.mail?.said ?? '';
   const bad = refused(sent);
+  // It is in the mailbox and the code in it is the one these boxes want, so
+  // another send would only add a second code to the same thread. The Worker
+  // refuses it too; this is the half that says so without the round trip.
+  const here = landed(sent);
+  const why = said ?? (here ? s.alreadyThere : null);
 
   // Six empty boxes and a message that already bounced is the one state this
   // screen could sit in for ever without saying so: the answer arrives at the
@@ -76,12 +81,12 @@ export function AlertsCode() {
         <button type="button" class="btn" disabled={code.length !== 6 || busy} onClick={check}>
           {s.verify}
         </button>
-        <button type="button" class="btn btn--quiet" disabled={busy} onClick={more}>
+        <button type="button" class="btn btn--quiet" disabled={busy || here} onClick={more}>
           {s.sendItAgain}
         </button>
       </div>
 
-      {said && <p class="bell__why bell__why--bad">{said}</p>}
+      {why && <p class="bell__why bell__why--bad">{why}</p>}
 
       <p class="legal bell__note">{s.tenAndFive}</p>
 
@@ -117,6 +122,7 @@ export function AlertsCode() {
     setBusy(false);
     setCode('');
     if (res?.error === 'wait') return setSaid(s.waitSeconds(res.wait ?? 0));
+    if (res?.error === 'opened') return setSaid(s.alreadyThere);
     await reload();
     if (res?.error === 'bounced' || !res?.sent) go(ALERTS);
   }

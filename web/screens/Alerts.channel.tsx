@@ -111,6 +111,7 @@ export function AlertsChannel() {
     if (out.error === 'address') return setSaid(s.badAddress);
     if (out.error === 'taken') return setSaid(s.taken);
     if (out.error === 'bounced') return setSaid(s.changeIt);
+    if (out.error === 'opened') return setSaid(s.alreadyThere);
     await reload();
 
     // It went: the next screen is the one that asks for the code.

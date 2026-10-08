@@ -59,6 +59,45 @@ export const looksLikeAddress = (to: string): boolean => to.length <= 254 && ADD
 export const refused = (said: string | undefined): boolean =>
   !!said && (/^resend 4/.test(said) || said === 'email.bounced' || said === 'email.complained');
 
+/**
+ * Whether the provider says the message got where it was going.
+ *
+ * One event, deliberately. `email.delivered` only means the receiving server
+ * took it, which a spam folder also does, and blocking on that would strand
+ * somebody whose code is sitting in one. Adding it here is a one-word change
+ * if that trade ever looks worth making.
+ *
+ * Read this with a clear head: an open is mostly a machine. Apple Mail
+ * Privacy Protection fetches the pixel for every message whether or not a
+ * person looks at it, and Gmail prefetches through its proxy. So this is
+ * evidence the message reached a mailbox, not that anybody read it — which is
+ * why what it gates is bounded by the code's own ten minutes rather than
+ * being a door that locks.
+ */
+const GOT_THERE = ['email.opened'];
+
+export const gotThere = (said: string | undefined): boolean => !!said && GOT_THERE.includes(said);
+
+/**
+ * How much a given event is worth, so a slower one cannot overwrite a faster
+ * one. Resend does not promise order, and a `delivered` arriving after an
+ * `opened` would otherwise walk the state backwards; a bounce outranks
+ * everything because it is the only one that changes what the app allows.
+ */
+const WEIGHT: Record<string, number> = {
+  'email.sent': 1,
+  'email.delivery_delayed': 2,
+  'email.delivered': 3,
+  'email.opened': 4,
+  'email.clicked': 5,
+  'email.failed': 8,
+  'email.bounced': 9,
+  'email.complained': 9,
+};
+
+export const outranks = (next: string, was: string | undefined): boolean =>
+  (WEIGHT[next] ?? 0) >= (WEIGHT[was ?? ''] ?? 0);
+
 export async function send(
   env: Env,
   to: string,

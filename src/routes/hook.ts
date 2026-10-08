@@ -19,6 +19,7 @@
 
 import { verify } from '../alerts/svix.ts';
 import type { Env } from '../types.ts';
+import { outranks } from '../vault/mail.ts';
 import { readSession, saveSession } from '../vault/session.ts';
 import { trail } from './channel.ts';
 
@@ -58,6 +59,11 @@ export async function resendHook(req: Request, env: Env): Promise<Response> {
   if (!held?.session.mail || held.session.mail.send !== id) {
     return new Response(null, { status: 204 });
   }
+
+  // Order is not promised, so a slower event is dropped rather than allowed
+  // to walk the state backwards — a `delivered` arriving after an `opened`
+  // must not un-open it.
+  if (!outranks(kind, held.session.mail.said)) return new Response(null, { status: 204 });
 
   // The provider's own event name, stored as theirs. A bounce also drops the
   // proof: an address that refused the code never carried one back, and

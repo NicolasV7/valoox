@@ -73,6 +73,13 @@ export function useWatch(on: boolean, every = 4000): void {
 export const refused = (said: string | undefined): boolean =>
   !!said && (/^resend 4/.test(said) || said === 'email.bounced' || said === 'email.complained');
 
+/** The provider saying the message reached a mailbox — its pictures were
+ *  fetched from one. Not that a person read it: Apple Mail loads them for
+ *  every message whether or not anybody looks. It is enough to stop a second
+ *  code going out after the first one landed, and nothing more is claimed of
+ *  it. Same two lines as src/vault/mail.ts, which is the one that enforces. */
+export const landed = (said: string | undefined): boolean => said === 'email.opened';
+
 /** Set it and send a code to it. */
 export const open = (to: string) =>
   api.post<{ said?: string; error?: string; wait?: number; sent?: boolean }>('/api/channel', {
