@@ -1,9 +1,8 @@
 // The store, waiting.
 //
-// The skeleton is the store with its content removed, measured against it:
-// same band heights, same paddings, same card heights, same gaps. A loading
-// state that does not match is worse than none — the page reflows the moment
-// the data lands, and the thing you were about to tap moves.
+// Drawn from the Loading board rather than from the store: same band heights,
+// same paddings, same card height, same gaps, same bar widths. Every number in
+// here and in its half of store.css is the board's.
 //
 // The four cards step down in weight rather than pulsing. The eye reads a
 // column that fades as something arriving, and it needs no animation to do it:
@@ -17,9 +16,16 @@
 import { Tabs } from '../components/Tabs.tsx';
 import { t } from '../i18n/index.ts';
 
-export function StoreLoading() {
-  const s = t().store;
+/** The bars inside each card, at the board's widths. The fourth has two rather
+ *  than three, which is what makes the column look like it is still filling. */
+const CARDS = [
+  ['78px', '118px', '92px'],
+  ['64px', '136px', '104px'],
+  ['70px', '102px', '88px'],
+  ['66px', '126px'],
+];
 
+export function StoreLoading() {
   return (
     <>
       <main class="screen screen--flush store">
@@ -40,19 +46,25 @@ export function StoreLoading() {
           </div>
         </header>
 
-        {/* The board holds a slot up here for the wishlist line — "Reaver
-            Vandal is here today". It is not drawn: the line needs a wishlist,
-            which is not built, so a skeleton for it would promise something
-            that never arrives and then collapse. It comes back with the
-            feature, on both screens at once. */}
+        {/* The headline's slot, held whether or not there is anything in it, so
+            nothing below it moves on the day there is. */}
+        <div class="hit--waiting">
+          <span class="skel skel--tight" style={{ width: '16px', height: '16px' }} />
+          <span class="skel" style={{ width: '212px', height: '17px' }} />
+        </div>
 
         <section class="store__block">
           <span class="skel label--waiting" style={{ width: '86px' }} />
-          <div class="store__rows rows--waiting">
-            <Card lines={['78px', '118px', '92px']} />
-            <Card lines={['64px', '136px', '104px']} />
-            <Card lines={['70px', '102px', '88px']} />
-            <Card lines={['66px', '126px']} />
+          <div class="cards--waiting">
+            {CARDS.map((bars) => (
+              <div class="card--waiting" key={bars[1]} aria-hidden="true">
+                <span class="skel skel--tight" style={{ width: bars[0], height: '12px' }} />
+                <span class="skel" style={{ width: bars[1], height: '18px', marginTop: '10px' }} />
+                {bars[2] && (
+                  <span class="skel" style={{ width: bars[2], height: '18px', marginTop: '4px' }} />
+                )}
+              </div>
+            ))}
           </div>
         </section>
 
@@ -62,22 +74,10 @@ export function StoreLoading() {
         </section>
 
         <footer class="store__foot">
-          <p class="legal">{s.notice}</p>
+          <p class="legal">{t().store.notice}</p>
         </footer>
       </main>
       <Tabs />
     </>
-  );
-}
-
-/** One offer-shaped hole: the tier, the name, the price, at the widths a real
- *  one takes. The row is the same 130px, so nothing moves when it fills. */
-function Card({ lines }: { lines: string[] }) {
-  return (
-    <div class="row row--waiting" aria-hidden="true">
-      <span class="skel" style={{ width: lines[0], height: '12px' }} />
-      <span class="skel" style={{ width: lines[1], height: '18px' }} />
-      {lines[2] && <span class="skel" style={{ width: lines[2], height: '18px' }} />}
-    </div>
   );
 }

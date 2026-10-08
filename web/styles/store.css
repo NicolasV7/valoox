@@ -59,6 +59,47 @@
   background: var(--card);
 }
 
+/* --- the store, waiting --------------------------------------------------- */
+/* Every number in here is the Loading board's. */
+
+.hit--waiting {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 26px;
+  margin-top: 18px;
+  padding: 0 var(--gut);
+}
+
+.cards--waiting {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Not .row. The real row spreads its three things top, middle and bottom; the
+ * board stacks the skeleton's three at the top. Its own class, so the hole
+ * does not quietly inherit a change to the thing it stands in for. */
+.card--waiting {
+  height: 120px;
+  padding: 13px 16px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--card);
+}
+
+/* A column that fades as it goes down. The eye reads that as something
+ * arriving, and it reads it without anything moving. One grey, four weights. */
+.cards--waiting .card--waiting:nth-child(2) .skel {
+  opacity: 0.78;
+}
+.cards--waiting .card--waiting:nth-child(3) .skel {
+  opacity: 0.58;
+}
+.cards--waiting .card--waiting:nth-child(4) .skel {
+  opacity: 0.42;
+}
+
 .promo__art {
   position: absolute;
   inset: 0;

@@ -88,6 +88,7 @@ p {
 /* A label that is not readable yet, at the size the word will be. */
 .label--waiting {
   height: 14px;
+  margin-top: 20px;
   border-radius: 4px;
 }
 
@@ -148,5 +149,11 @@ a:hover {
 .skel {
   display: block;
   background: var(--skel);
-  border-radius: var(--r-sm);
+  /* 5, not --r-sm. At 8 a 12px bar is a capsule; the boards draw these at 5
+   * and the small ones at 4, which reads as a hole rather than a pill. */
+  border-radius: 5px;
+}
+
+.skel--tight {
+  border-radius: 4px;
 }

@@ -24,20 +24,6 @@
   background: var(--card);
 }
 
-/* A column of four, fading as it goes down. The eye reads that as something
- * arriving, and it reads it without anything moving — which is the whole
- * point: a skeleton that animates is asking to be looked at, and it is the
- * one thing on the screen with nothing to say. One grey, four weights. */
-.rows--waiting .row:nth-child(2) .skel {
-  opacity: 0.78;
-}
-.rows--waiting .row:nth-child(3) .skel {
-  opacity: 0.58;
-}
-.rows--waiting .row:nth-child(4) .skel {
-  opacity: 0.42;
-}
-
 /* One box, every weapon, melee included.
  *
  * Measured against four live renders: Riot crops each one tight — the opaque
