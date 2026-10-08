@@ -24,7 +24,7 @@ import { POLL_EVERY, type ScanState } from './screens/Scan.tsx';
  * screen rather than after it, so everything before this is time that was being
  * spent anyway.
  */
-const LINGER = 900;
+const LINGER = 1400;
 
 export function useScan(onApproved: () => Promise<void>) {
   const [state, setState] = useState<ScanState | null>(null);
