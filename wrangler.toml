@@ -47,6 +47,26 @@ directory = "./public"
 # the page that knows what to do with it.
 binding = "ASSETS"
 
+# Pages reach the Worker first; files do not.
+#
+# Without this the asset layer answers before any code runs, and the apex
+# served the app at / instead of pointing at it — every other path redirected
+# and the front page did not, which is the worst shape that bug could take.
+#
+# The exclusions are the files themselves, so a bundle, a font or a sticker is
+# still handed straight off the edge with no invocation behind it. It also
+# means artwork keeps working on the apex, which is what the links in every
+# message sent before today point at.
+run_worker_first = [
+  "/*",
+  "!/app.js",
+  "!/app.css",
+  "!/art/*",
+  "!/brand/*",
+  "!/fonts/*",
+  "!/.well-known/*",
+]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "val-sessions"
