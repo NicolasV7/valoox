@@ -11,15 +11,22 @@ import * as api from './data/api.ts';
 import { NEEDS_RESEED } from './data/api.ts';
 import { POLL_EVERY, type ScanState } from './screens/Scan.tsx';
 
-/** How long the approved screen stays before the store takes over.
+/**
+ * How long the approved screen stays after the store has landed.
  *
- *  A deliberate pause, and the only one in the app. The store load runs through
- *  it rather than after it, so it costs nothing — but without it the screen
- *  that says "you are in" is replaced in the same frame it appears, and the
- *  only thing a person sees of a successful sign-in is a flicker. */
-const HOLD = 1100;
+ * Measured from the store arriving, not from the approval, and that is the
+ * whole point: the name comes back with the store, so a timer started at
+ * approval dismisses the screen at whatever moment the name happens to appear.
+ * This way the tick, the handle and the rank are all on screen together for
+ * long enough to read, however long Riot took.
+ *
+ * It is the only deliberate pause in the app. The load runs underneath the
+ * screen rather than after it, so everything before this is time that was being
+ * spent anyway.
+ */
+const LINGER = 900;
 
-export function useScan(onApproved: () => void) {
+export function useScan(onApproved: () => Promise<void>) {
   const [state, setState] = useState<ScanState | null>(null);
   const timer = useRef(0);
   const held = useRef(0);
@@ -75,9 +82,12 @@ export function useScan(onApproved: () => void) {
       } else if (seen.status === 'ok') {
         stop();
         setState({ phase: 'approved', url: shown.current });
-        // The store starts loading now, through the hold rather than after it.
-        onApproved();
-        held.current = setTimeout(() => setState(null), HOLD) as unknown as number;
+        // The store loads underneath this screen rather than after it. Waiting
+        // for it is what lets the name be shown at all; lingering afterwards is
+        // what makes it readable. load() catches its own failures, so a Riot
+        // that never answers still lets go of the screen.
+        await onApproved();
+        held.current = setTimeout(() => setState(null), LINGER) as unknown as number;
       }
     };
 
