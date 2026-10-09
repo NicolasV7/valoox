@@ -11,6 +11,7 @@ import { useMemo } from 'preact/hooks';
 import { Search } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
 import type { Buddy } from '../data/buddies.ts';
+import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
 import type { Inventory } from '../data/types.ts';
@@ -106,11 +107,7 @@ export function Buddies({ inv }: { inv: Inventory }) {
 }
 
 /** By name, against what is already downloaded. */
-function sift(list: Buddy[], find: string): Buddy[] {
-  const hunt = find.trim().toLowerCase();
-  if (!hunt) return list;
-  return list.filter((b) => b.name.toLowerCase().includes(hunt));
-}
+const sift = (list: Buddy[], find: string): Buddy[] => pick(list, find, (x) => x.name);
 
 function Shelf({
   said,

@@ -11,6 +11,7 @@
 import { useMemo } from 'preact/hooks';
 import { Search } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
+import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
 import type { Spray } from '../data/sprays.ts';
@@ -88,11 +89,7 @@ export function Sprays({ inv }: { inv: Inventory }) {
 }
 
 /** By name, against what is already downloaded. */
-function sift(list: Spray[], find: string): Spray[] {
-  const hunt = find.trim().toLowerCase();
-  if (!hunt) return list;
-  return list.filter((x) => x.name.toLowerCase().includes(hunt));
-}
+const sift = (list: Spray[], find: string): Spray[] => pick(list, find, (x) => x.name);
 
 function Shelf({
   said,

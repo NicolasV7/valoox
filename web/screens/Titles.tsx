@@ -11,6 +11,7 @@ import { useMemo } from 'preact/hooks';
 import { Search, TitleMark } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
 import { StarMark } from '../components/StarMark.tsx';
+import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
 import type { Title } from '../data/titles.ts';
@@ -81,11 +82,7 @@ export function Titles({ inv }: { inv: Inventory }) {
 }
 
 /** By the string itself, which is all a title has. */
-function sift(list: Title[], find: string): Title[] {
-  const hunt = find.trim().toLowerCase();
-  if (!hunt) return list;
-  return list.filter((x) => x.name.toLowerCase().includes(hunt));
-}
+const sift = (list: Title[], find: string): Title[] => pick(list, find, (x) => x.name);
 
 function Shelf({
   said,

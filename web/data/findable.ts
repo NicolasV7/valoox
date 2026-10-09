@@ -16,6 +16,7 @@
 
 import { type Buddy, bare as bareBuddy } from './buddies.ts';
 import { bare as bareCard, type Card } from './cards.ts';
+import { fold, hits } from './find.ts';
 import type { Rack } from './skins.ts';
 import { bare as bareSpray, type Spray } from './sprays.ts';
 import type { Title } from './titles.ts';
@@ -33,7 +34,7 @@ export interface Findable {
   /** The weapon it is for, or the kind of accessory. Shown under the name. */
   of: string;
   cost: number | null;
-  /** Lower-cased name plus `of`, so one pass answers the field. */
+  /** Folded name plus `of`, so one pass answers the field. See data/find.ts. */
   hay: string;
 }
 
@@ -49,7 +50,7 @@ const row = (
   type,
   of,
   cost,
-  hay: (name + ' ' + of).toLowerCase(),
+  hay: fold(name + ' ' + of),
 });
 
 /** Guns only, and only the base level: the store sells a skin, and level 2 is
@@ -90,8 +91,10 @@ export function bits(
   return out;
 }
 
-/** Narrowed by the field. Empty query means everything, which the caller caps. */
+/** Narrowed by the field. Empty query means everything, which the caller
+ *  caps. `hay` is folded once at build time — see row() — because it does not
+ *  change between keystrokes and the query does. */
 export const narrow = (all: Findable[], q: string): Findable[] => {
-  const needle = q.trim().toLowerCase();
-  return needle ? all.filter((f) => f.hay.includes(needle)) : all;
+  const needle = fold(q);
+  return needle ? all.filter((f) => hits(f.hay, needle)) : all;
 };

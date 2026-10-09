@@ -9,6 +9,7 @@ import { useMemo } from 'preact/hooks';
 import { Search } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
 import type { Card } from '../data/cards.ts';
+import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
 import type { Inventory } from '../data/types.ts';
@@ -78,11 +79,7 @@ export function Cards({ inv }: { inv: Inventory }) {
 }
 
 /** By name, against what is already downloaded. */
-function sift(list: Card[], find: string): Card[] {
-  const hunt = find.trim().toLowerCase();
-  if (!hunt) return list;
-  return list.filter((c) => c.name.toLowerCase().includes(hunt));
-}
+const sift = (list: Card[], find: string): Card[] => pick(list, find, (x) => x.name);
 
 function Shelf({
   said,

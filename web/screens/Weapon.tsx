@@ -12,6 +12,7 @@
 import { useMemo } from 'preact/hooks';
 import { Back, COLLECTION } from '../components/Back.tsx';
 import { Search } from '../components/icons.tsx';
+import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import type { Skin } from '../data/skins.ts';
 import { tierOf } from '../data/tiers.ts';
@@ -89,15 +90,7 @@ export function Weapon({ id, inv }: { id: string; inv: Inventory }) {
 /** Name or tier, against what is already downloaded. The theme is in the name
  *  on all but a handful — "Reaver Vandal" is the Reaver theme — so this is one
  *  pass over an array rather than a second index holding the themes. */
-function sift(list: Skin[], find: string): Skin[] {
-  const hunt = find.trim().toLowerCase();
-  if (!hunt) return list;
-  const tier = (k: Skin) => {
-    const of = tierOf(k.tier);
-    return of ? t().common.tier[of.name].toLowerCase() : '';
-  };
-  return list.filter((k) => k.name.toLowerCase().includes(hunt) || tier(k).includes(hunt));
-}
+const sift = (list: Skin[], find: string): Skin[] => pick(list, find, (x) => x.name);
 
 function Shelf({
   said,
