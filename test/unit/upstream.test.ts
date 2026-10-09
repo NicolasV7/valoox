@@ -118,3 +118,32 @@ test('the list stays short enough to read in one sitting', () => {
   // request — the same rule the Discord webhook follows.
   assert.equal(allowCount, 19);
 });
+
+// The two the file's own comment names as the clearest cases, and neither was
+// tested. The loadout one matters most: v3 IS on the list, as a GET, and the
+// comment calls that "the clearest example of why the method is half of every
+// rule here". Nothing asserted it until now — the test above blocks the v2
+// path, which is not the path the product uses.
+test('the write half of an endpoint whose read half is allowed', () => {
+  const loadout = 'https://pd.na.a.pvp.net/personalization/v3/players/' + PUUID + '/playerloadout';
+  ok('GET', loadout);
+  for (const m of ['PUT', 'POST', 'PATCH', 'DELETE']) no(m, loadout);
+  no('POST', 'https://glz-na-1.na.a.pvp.net/matchmaking/v1/parties/' + PUUID + '/matchmaking/join');
+});
+
+// A rule built with new RegExp from a string is a rule where a bare dot is a
+// wildcard, and the media rule's were unescaped: it matched any host of that
+// shape. Unreachable — render.ts builds the url from a constant prefix and a
+// uuid — but the claim on that file is that the PATTERN pins the host, not
+// that it does so while every caller behaves.
+test('a host pattern pins its host', () => {
+  const tail = '/weaponskinlevels/' + TYPE + '/displayicon.png';
+  ok('GET', 'https://media.valorant-api.com' + tail);
+  no('GET', 'https://mediaXvalorant-apiYcom' + tail);
+  no('GET', 'https://media-valorant-api-com' + tail);
+  // And the extension, which was the same bug one character later.
+  no('GET', 'https://media.valorant-api.com/weaponskinlevels/' + TYPE + '/displayiconXpng');
+  // The other two built this way were already escaped. Pinned so they stay.
+  no('POST', 'https://discordXcom/api/webhooks/123456789012345/' + 'a'.repeat(60));
+  no('POST', 'https://pdXnaXaXpvp.net/store/v3/storefront/' + PUUID);
+});
