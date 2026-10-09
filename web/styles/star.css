@@ -13,13 +13,17 @@
 .star {
   position: absolute;
   z-index: 2;
-  top: 6px;
-  right: 6px;
+  /* Zero plus padding, not 7px and bare: it puts the glyph exactly where the
+   * boards put the mark it replaces, and wraps a 29px target around it. A
+   * negative offset would buy a bigger one and the tile clips its overflow,
+   * so the part outside would not take a tap anyway. */
+  top: 0;
+  right: 0;
   display: flex;
   padding: 7px;
   border: 0;
   border-radius: 999px;
-  background: rgb(10 10 12 / 48%);
+  background: none;
   color: var(--ink-4);
   line-height: 0;
   cursor: pointer;
@@ -104,14 +108,33 @@
   outline-offset: 2px;
 }
 
-/* Everything the tile draws sits above its own link, so a name is selectable
- * and an image is not swallowed by it. */
-.pad > :not(.hit),
-.leaf > :not(.hit),
-.skin > :not(.hit),
-.said__row > :not(.hit) {
-  position: relative;
-  z-index: 1;
+/* NOTHING raises the tile's content above its link, and the absence is the
+ * fix. A rule that did — `.pad > :not(.hit) { position: relative }` — broke
+ * three things at once and each one was reported separately.
+ *
+ * It out-specified `position: absolute` on the star, so the star stopped
+ * being positioned and became a flex child stretched across the tile: 105px
+ * wide on a 127px square, sitting under the name. It put the content at the
+ * link's own stacking level and later in the DOM, so every tap landed on an
+ * <img> and the link only answered in the few pixels of margin around it.
+ *
+ * None of it was needed. The link is transparent and empty, so it hides
+ * nothing whatever the paint order is, and being last in that order is
+ * exactly what makes the whole tile clickable. The star is positioned and
+ * sits above it on purpose. */
+
+/* A card is full-bleed artwork, so the one glyph on it needs a ground of its
+ * own. Everything else is a dark tile with the art inset, where the mark the
+ * boards drew is bare. */
+.leaf > .star {
+  background: rgb(10 10 12 / 52%);
+}
+
+/* A title is a row with a column for it, not a square with a spare corner —
+ * which is where `.said__star` put it before this control existed. */
+.said__row > .star {
+  position: static;
+  margin-left: auto;
 }
 
 /* Named for a screen reader, drawn for nobody. The stretched link has no
@@ -150,4 +173,24 @@
   background: none;
   cursor: default;
   pointer-events: none;
+}
+
+/* On a detail screen there is a title row rather than a corner, and the star
+ * is a control big enough to read as a verb. */
+.wall__title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wall__title .wall__name {
+  min-width: 0;
+}
+
+.wall__title .star {
+  position: static;
+  flex: none;
+  margin-left: auto;
+  padding: 9px;
+  background: var(--raised);
 }

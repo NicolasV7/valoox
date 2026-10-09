@@ -7,6 +7,7 @@
 
 import { Back, TITLES } from '../components/Back.tsx';
 import { TitleMark } from '../components/icons.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import type { Inventory } from '../data/types.ts';
 import { useTitles } from '../data/useIndex.ts';
 import { t } from '../i18n/index.ts';
@@ -33,7 +34,17 @@ export function Title({ id, inv }: { id: string; inv: Inventory }) {
         <span class="said__word">{found?.name ?? ''}</span>
       </div>
 
-      <h1 class="wall__name">{found?.name ?? <span class="skel wall__name--waiting" />}</h1>
+      <div class="wall__title">
+        <h1 class="wall__name">{found?.name ?? <span class="skel wall__name--waiting" />}</h1>
+        {/* The tile that opened this carries one, and a mark that
+            only exists in a grid reads as a property of the grid. */}
+        {!own && found && (
+          <StarMark
+            size={19}
+            item={{ id, name: found.name, type: 'de7caa6b-adf7-4588-bbd1-143831e786c6' }}
+          />
+        )}
+      </div>
       <p class="wall__is">
         <span class="wall__chip wall__chip--grey" />
         <span class="num">{says}</span>

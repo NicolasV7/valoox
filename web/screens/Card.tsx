@@ -5,6 +5,7 @@
 // screen and the grid use two different ones.
 
 import { Back, CARDS } from '../components/Back.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import type { Inventory } from '../data/types.ts';
 import { useCards } from '../data/useIndex.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
@@ -43,7 +44,17 @@ export function Card({ id, inv, who }: { id: string; inv: Inventory; who: string
         )}
       </div>
 
-      <h1 class="wall__name">{found?.name ?? <span class="skel wall__name--waiting" />}</h1>
+      <div class="wall__title">
+        <h1 class="wall__name">{found?.name ?? <span class="skel wall__name--waiting" />}</h1>
+        {/* The tile that opened this carries one, and a mark that
+            only exists in a grid reads as a property of the grid. */}
+        {!own && found && (
+          <StarMark
+            size={19}
+            item={{ id, name: found.name, type: '3f296c07-64c3-494c-923b-fe692a4fa1bd' }}
+          />
+        )}
+      </div>
       <p class="wall__is">
         <span class="wall__chip" style={style} />
         <span class="num">{says}</span>

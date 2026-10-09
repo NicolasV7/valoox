@@ -11,6 +11,7 @@
 // to one pays for it once.
 
 import { Back, BUDDIES } from '../components/Back.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import type { Inventory } from '../data/types.ts';
 import { useGuns } from '../data/useGuns.ts';
 import { useBuddies } from '../data/useIndex.ts';
@@ -54,7 +55,21 @@ export function Buddy({ id, inv }: { id: string; inv: Inventory }) {
         )}
       </div>
 
-      <h1 class="wall__name">{found?.name ?? <span class="skel wall__name--waiting" />}</h1>
+      <div class="wall__title">
+        <h1 class="wall__name">{found?.name ?? <span class="skel wall__name--waiting" />}</h1>
+        {/* The tile that opened this carries one, and a mark that
+            only exists in a grid reads as a property of the grid. */}
+        {mine === 0 && found && (
+          <StarMark
+            size={19}
+            item={{
+              id: found.levels[0] ?? id,
+              name: found.name,
+              type: 'dd3bf334-87f3-40bd-b043-682a57a8dc3a',
+            }}
+          />
+        )}
+      </div>
       <p class="wall__is">
         <span class="wall__chip" style={style} />
         <span class="num">{says}</span>

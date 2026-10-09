@@ -10,6 +10,7 @@
 // show one picture.
 
 import { Back, SPRAYS } from '../components/Back.tsx';
+import { StarMark } from '../components/StarMark.tsx';
 import { bare } from '../data/sprays.ts';
 import type { Inventory } from '../data/types.ts';
 import { usePiece } from '../data/usePiece.ts';
@@ -44,7 +45,14 @@ export function Spray({ id, inv }: { id: string; inv: Inventory }) {
         {art && <img class="wall__art" src={art} alt={name ?? ''} crossOrigin="anonymous" />}
       </div>
 
-      <h1 class="wall__name">{name ?? <span class="skel wall__name--waiting" />}</h1>
+      <div class="wall__title">
+        <h1 class="wall__name">{name ?? <span class="skel wall__name--waiting" />}</h1>
+        {/* The tile that opened this carries one, and a mark that
+            only exists in a grid reads as a property of the grid. */}
+        {!own && name && (
+          <StarMark size={19} item={{ id, name, type: 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475' }} />
+        )}
+      </div>
       <p class="wall__is">
         {/* The colour, as itself. A swatch is the one place a measured value
             can be shown rather than only described. */}
