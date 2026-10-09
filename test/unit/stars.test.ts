@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
 import { cleanWishlist } from '../../src/routes/wishlist.ts';
-import { sold } from '../../web/data/sellable.ts';
+import { keepHidden, sold } from '../../web/data/sellable.ts';
 
 // Two things that are easy to get wrong and expensive when they are.
 //
@@ -65,4 +65,15 @@ test('an index that would not load refuses nothing', () => {
   // feature is the acceptable failure; withholding the app is not.
   assert.equal(sold(null, SPRAY), true);
   assert.equal(sold(new Set(), SPRAY), true);
+});
+
+test('a thing the catalogue marks as awarded is refused on its own', () => {
+  // The second source, and it arrives differently from the first: the index
+  // modules register the flag as they parse, so this needs no set passed in.
+  // A Radiant buddy is not a contract reward — it is a competitive-act one —
+  // so the contracts half let every one of them through.
+  keepHidden('a-radiant-buddy-level');
+  assert.equal(sold(null, 'a-radiant-buddy-level'), false, 'flagged, with no contracts set loaded');
+  assert.equal(sold(new Set(), 'a-radiant-buddy-level'), false, 'flagged, with an empty one');
+  assert.equal(sold(null, 'something-else'), true, 'and it refuses nothing else');
 });

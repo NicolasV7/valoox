@@ -5,6 +5,8 @@
 // so the tall one has detail the square never shows. The tab draws the tall
 // one cropped rather than the square scaled up, which is why it keeps both.
 
+import { keepHidden } from './sellable.ts';
+
 const V1 = 'https://valorant-api.com/v1/';
 
 export interface Card {
@@ -25,6 +27,9 @@ interface Raw {
   wideArt: string | null;
   smallArt: string | null;
   largeArt: string | null;
+  /** Riot's mark for a thing that is awarded rather than offered. See
+   *  data/sellable.ts. */
+  isHiddenIfNotOwned?: boolean;
 }
 
 // 1,009 of the 1,016 end in the word itself.
@@ -40,13 +45,16 @@ export function cards(): Promise<Card[]> {
   held ??= fetch(V1 + 'playercards')
     .then((r) => (r.ok ? r.json() : null))
     .then((j: { data?: Raw[] } | null) =>
-      (j?.data ?? []).map((c) => ({
-        id: c.uuid,
-        name: bare(c.displayName),
-        tall: c.largeArt ?? c.displayIcon ?? null,
-        wide: c.wideArt ?? c.largeArt ?? null,
-        small: c.smallArt ?? c.displayIcon ?? null,
-      })),
+      (j?.data ?? []).map((c) => {
+        if (c.isHiddenIfNotOwned) keepHidden(c.uuid);
+        return {
+          id: c.uuid,
+          name: bare(c.displayName),
+          tall: c.largeArt ?? c.displayIcon ?? null,
+          wide: c.wideArt ?? c.largeArt ?? null,
+          small: c.smallArt ?? c.displayIcon ?? null,
+        };
+      }),
     )
     .catch(() => []);
   return held;

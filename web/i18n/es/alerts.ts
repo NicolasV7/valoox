@@ -79,9 +79,7 @@ export const alerts = {
   // es que ese objeto se entrega por un contrato y una tienda no lo vende
   // nunca, así que el aviso no podría sonar jamás. Ver data/sellable.ts.
   notSoldOne: (name: string) => `${name} no sale en la tienda`,
-  notSoldWhy:
-    'Esto se consigue en un pase o un contrato, no en la tienda, así que un ' +
-    'aviso nunca sonaría.',
+  notSoldWhy: 'Esto se gana, no se vende, así que un aviso nunca sonaría.',
 
   standby: 'Tu lista está en espera',
   standbyKept: (n: number) =>
@@ -124,9 +122,9 @@ export const alerts = {
   sellsCount: (n: number) => (n === 1 ? '1 que no tienes.' : `${n} que no tienes.`),
   listFull: (max: number) => `Esta lista está llena: ${max}. Saca una para marcar otra.`,
   notInThisList:
-    'No está lo que ya tienes, y no se puede marcar lo que entrega un pase o un ' +
-    'contrato: eso no lo vende ninguna tienda. Lo demás sí se muestra, aunque ' +
-    'que esté aquí no quiere decir que vaya a salir esta semana.',
+    'No está lo que ya tienes, y no se puede marcar lo que se gana: un pase, un ' +
+    'contrato, un rango o un premio de VCT. Lo demás sí se muestra, aunque que ' +
+    'esté aquí no quiere decir que vaya a salir esta semana.',
   searchIsLocal:
     'El buscador corre contra el catálogo que el navegador ya tiene, así que ' +
     'filtra mientras escribes sin preguntar nada al Worker ni a Riot.',

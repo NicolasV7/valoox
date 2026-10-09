@@ -9,6 +9,9 @@
 // downloading an index. Four offers is four small requests; the index is 3.5 MB
 // on the one screen whose entire job is to be quick.
 
+import { byLevel } from './buddies.ts';
+import { sizeOf } from './scale.ts';
+
 const V1 = 'https://valorant-api.com/v1/';
 
 export interface Piece {
@@ -44,43 +47,6 @@ export interface Piece {
 
 // .../AK_Soulstealer_Lv1_PrimaryAsset
 const LEVEL = /_Lv(\d)_/;
-
-/**
- * How long a weapon really is, relative to the longest one.
- *
- * Riot draws every render at the same file width — measured: every skin level
- * icon is 512px across, whatever it is of — so a Ghost arrives the same length
- * as an Operator, and a column of four offers reads as an oversized pistol next
- * to a correctly sized rifle. The game does not look like that.
- *
- * The asset path says which family the skin came from, and seven of them cover
- * the whole catalogue: Sidearms, Rifles, SniperRifles, SubMachineGuns,
- * Shotguns, HvyMachineGuns, Melee. That is enough to give each one its size
- * back, with no index to download and no name to parse.
- *
- * Compressed, not literal. A Ghost really is about half a Vandal, and at half
- * it sat in the middle of a 350px row with nothing around it — the row read as
- * empty rather than as a small gun. The floor is 0.66, which is where the
- * artboard put its own smallest render, so the order is the game's and the
- * weight on the page is the design's.
- */
-const SIZE: Record<string, number> = {
-  SniperRifles: 1,
-  HvyMachineGuns: 0.98,
-  Rifles: 0.95,
-  Shotguns: 0.85,
-  SubMachineGuns: 0.82,
-  Melee: 0.7,
-  Sidearms: 0.66,
-};
-
-// .../Equippables/Guns/Rifles/AK/... and .../Equippables/Melee/Cyberpunk/...
-const FAMILY = /\/Equippables\/(?:Guns\/)?([^/]+)\//;
-
-export function sizeOf(assetPath: string | undefined): number {
-  const found = assetPath ? FAMILY.exec(assetPath) : null;
-  return (found && SIZE[found[1] as string]) || 1;
-}
 
 const seen = new Map<string, Promise<Piece | null>>();
 
@@ -141,8 +107,45 @@ const BY_TYPE: Record<string, string> = {
   'de7caa6b-adf7-4588-bbd1-143831e786c6': 'playertitles',
 };
 
+/** Riot's item type for a charm level. */
+const CHARM = 'dd3bf334-87f3-40bd-b043-682a57a8dc3a';
+
+/**
+ * A charm, from the index rather than one request.
+ *
+ * The exception to this file's rule, and narrow on purpose. A charm level's
+ * own record can carry a placeholder icon where its parent carries the art —
+ * see byLevel() in data/buddies.ts — so the parent is the only correct
+ * source. The index is 77 KB gzipped and fetched once per page, only when a
+ * charm actually needs resolving; the rule this breaks is about the weapons
+ * index, which is 3.5 MB and a different order of thing.
+ *
+ * Falls back to the single request if the index will not load, which is the
+ * behaviour this had before.
+ */
+const charm = async (id: string): Promise<Piece | null> => {
+  const b = (await byLevel()).get(id);
+  if (!b?.art) return one('buddies/levels', id);
+  return {
+    name: b.name,
+    icon: b.art,
+    scale: 1,
+    video: null,
+    level: null,
+    wide: null,
+    small: null,
+    tall: null,
+    gif: null,
+    banner: null,
+  };
+};
+
 export const piece = (type: string, id: string): Promise<Piece | null> =>
-  BY_TYPE[type] ? one(BY_TYPE[type] as string, id) : Promise.resolve(null);
+  type === CHARM
+    ? charm(id)
+    : BY_TYPE[type]
+      ? one(BY_TYPE[type] as string, id)
+      : Promise.resolve(null);
 
 /** The icon for a competitive tier, from the table Riot is using right now.
  *

@@ -80,8 +80,7 @@ export const alerts = {
   // handed out by a contract, so no store ever carries it and the alert could
   // never fire. See data/sellable.ts.
   notSoldOne: (name: string) => `${name} is not sold in the store`,
-  notSoldWhy:
-    'This comes from a pass or a contract, not the store, so an alert would ' + 'never fire.',
+  notSoldWhy: 'This is earned, not sold, so an alert would never fire.',
 
   standby: 'Your list is on hold',
   standbyKept: (n: number) =>
@@ -124,9 +123,9 @@ export const alerts = {
   sellsCount: (n: number) => (n === 1 ? '1 you do not own.' : `${n} you do not own.`),
   listFull: (max: number) => `This list is full at ${max}. Take one off to star another.`,
   notInThisList:
-    'What you already own is not here, and anything a pass or a contract hands ' +
-    'out cannot be starred: no store carries those. The rest is shown, though ' +
-    'being here does not mean it turns up this week.',
+    'What you already own is not here, and anything earned cannot be starred: a ' +
+    'pass, a contract, a rank or a VCT reward. The rest is shown, though being ' +
+    'here does not mean it turns up this week.',
   searchIsLocal:
     'The search runs against the catalogue the browser already holds, so it ' +
     'narrows as you type without asking the Worker or Riot anything.',

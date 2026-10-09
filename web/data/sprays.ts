@@ -9,6 +9,8 @@
 // store's trade, where four items must not cost an index. This is the other
 // side of it.
 
+import { keepHidden } from './sellable.ts';
+
 const V1 = 'https://valorant-api.com/v1/';
 
 export interface Spray {
@@ -28,6 +30,9 @@ interface Raw {
   displayIcon: string | null;
   fullTransparentIcon: string | null;
   animationGif: string | null;
+  /** Riot's mark for a thing that is awarded rather than offered. See
+   *  data/sellable.ts. */
+  isHiddenIfNotOwned?: boolean;
 }
 
 // Riot ends all 921 displayNames in the word itself — "Reaver Spray" — and
@@ -49,12 +54,15 @@ export function sprays(): Promise<Spray[]> {
   held ??= fetch(V1 + 'sprays')
     .then((r) => (r.ok ? r.json() : null))
     .then((j: { data?: Raw[] } | null) =>
-      (j?.data ?? []).map((s) => ({
-        id: s.uuid,
-        name: bare(s.displayName),
-        art: s.fullTransparentIcon ?? s.displayIcon ?? null,
-        gif: s.animationGif ?? null,
-      })),
+      (j?.data ?? []).map((s) => {
+        if (s.isHiddenIfNotOwned) keepHidden(s.uuid);
+        return {
+          id: s.uuid,
+          name: bare(s.displayName),
+          art: s.fullTransparentIcon ?? s.displayIcon ?? null,
+          gif: s.animationGif ?? null,
+        };
+      }),
     )
     .catch(() => []);
   return held;
