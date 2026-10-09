@@ -22,7 +22,11 @@ import { BUDDY } from './Buddies.tsx';
 export function Buddy({ id, inv }: { id: string; inv: Inventory }) {
   const s = t().buddies;
   const all = useBuddies();
-  const found = all?.find((b) => b.id === id) ?? null;
+  // By either uuid. A charm is STARRED and ROUTED under its first level — see
+  // findable.ts and Buddies.tile.tsx, which both store `levels[0] ?? id` — but
+  // the index is keyed by the charm uuid, so opening one from the alerts list
+  // or from the wall found nothing and the screen stayed blank forever.
+  const found = all?.find((b) => b.id === id || b.levels.includes(id)) ?? null;
   const lit = useArt(found?.art);
 
   // How many you hold of this one: instances, so the list is counted rather

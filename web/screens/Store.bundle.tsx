@@ -15,7 +15,7 @@ import { useBundle } from '../data/usePiece.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
 
-export function BundleCard({ bundle }: { bundle: Bundle }) {
+export function BundleCard({ bundle, since }: { bundle: Bundle; since?: number }) {
   const found = useBundle(bundle.id);
   const route = { name: 'bundle', id: bundle.id } as const;
 
@@ -36,7 +36,7 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
           />
         )}
 
-        <Countdown from={bundle.remaining} className="promo__clock" />
+        <Countdown from={bundle.remaining} since={since} className="promo__clock" />
 
         <span class="promo__foot">
           <span class="promo__name">

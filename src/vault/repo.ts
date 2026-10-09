@@ -49,11 +49,23 @@ export async function upsert(env: Env, uid: string, kid: number, blob: string): 
  * loser must re-read rather than overwrite, or it persists a jar Riot has already
  * superseded and the session dies early. Returns false when someone else won.
  */
-export async function update(env: Env, uid: string, blob: string, ver: number): Promise<boolean> {
+export async function update(
+  env: Env,
+  uid: string,
+  kid: number,
+  blob: string,
+  ver: number,
+): Promise<boolean> {
   const r = await env.DB.prepare(
-    'UPDATE s SET blob = ?, ver = ver + 1, last_used = ? WHERE uid = ? AND ver = ?',
+    // `kid` is written with the blob, not left behind it. Every save re-seals
+    // under CURRENT_KID, so an update that did not move the kid made the row
+    // describe the wrong key the moment CURRENT_KID was bumped — the first
+    // request per user would store a kid:2 blob under a row saying kid:1, and
+    // every later read would derive the wrong subkey and fail closed. The
+    // migration path the comment on saveSession promises is this column.
+    'UPDATE s SET kid = ?, blob = ?, ver = ver + 1, last_used = ? WHERE uid = ? AND ver = ?',
   )
-    .bind(blob, now(), uid, ver)
+    .bind(kid, blob, now(), uid, ver)
     .run();
   return r.meta.changes > 0;
 }

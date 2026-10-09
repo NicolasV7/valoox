@@ -1,4 +1,4 @@
-import { FONT, INK, solid } from './paint.ts';
+import { esc, FONT, INK, solid } from './paint.ts';
 
 // The shell every message is built in.
 //
@@ -137,7 +137,11 @@ export function shell({
     `letter-spacing:-0.02em;color:${INK.text}">valoox` +
     (who
       ? `<div style="font-family:${FONT.mono};font-size:11.5px;font-weight:400;` +
-        `letter-spacing:0.02em;padding-top:3px">${who}</div>`
+        // Escaped like every other interpolated name in these builders. Riot's
+        // own charset makes this unreachable today; the point is that the mail
+        // is the one place in this app that makes markup out of a string, so
+        // every value that enters it goes through the same door.
+        `letter-spacing:0.02em;padding-top:3px">${esc(who)}</div>`
       : '') +
     '</td>' +
     `<td align="right" style="font-family:${FONT.mono};font-size:11.5px;color:${INK.quiet}">${aside}</td>` +

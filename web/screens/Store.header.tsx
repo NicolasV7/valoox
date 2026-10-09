@@ -48,10 +48,13 @@ export function StoreHeader({
   account,
   wallet,
   remaining,
+  since,
 }: {
   account: Account;
   wallet: Wallet;
   remaining: number;
+  /** When `remaining` was true — see components/Countdown.tsx. */
+  since?: number;
 }) {
   const [art, setArt] = useState<string | null>(null);
   const [badge, setBadge] = useState<string | null>(null);
@@ -104,7 +107,7 @@ export function StoreHeader({
         <Money amount={wallet.vp} of="vp" size={16} />
         <Money amount={wallet.rad} of="rad" size={16} />
         <Money amount={wallet.kc} of="kc" size={16} />
-        <Countdown from={remaining} className="head__clock" />
+        <Countdown from={remaining} since={since} className="head__clock" />
       </div>
     </header>
   );

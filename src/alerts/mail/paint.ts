@@ -15,6 +15,16 @@ const MONO = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace";
 
 export const FONT = { sans: SANS, mono: MONO };
 
+/** Every value that enters the markup goes through here.
+ *
+ *  A message is the one thing this app builds out of a string — the page
+ *  builds DOM and cannot be made to do otherwise — so the escaping is a
+ *  module-level function rather than a private helper in whichever builder
+ *  remembered it. Skin names come from a community catalogue this project
+ *  does not control; the Riot name comes from Riot. Neither is ours. */
+export const esc = (said: string): string =>
+  said.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 /**
  * The ink. One value for every word, and that is the whole scale.
  *

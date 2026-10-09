@@ -70,7 +70,12 @@ function cleanWishlist(body: unknown, was: Starred[]): Starred[] {
     )
     .slice(0, MAX)
     .map((w) => {
-      const keep: Starred = { id: w.id, name: w.name.slice(0, 80), at: when.get(w.id) ?? now };
+      // Control characters out before the length cap. This string is the one
+      // piece of free text the browser stores, and it is read back into an
+      // email subject and an email body — a newline in a subject is a header
+      // in anything that is not Resend's JSON API.
+      const name = w.name.replace(/[\p{Cc}\p{Zl}\p{Zp}]/gu, ' ');
+      const keep: Starred = { id: w.id, name: name.slice(0, 80), at: when.get(w.id) ?? now };
       if (typeof w.type === 'string' && UUID.test(w.type)) keep.type = w.type;
       if (typeof w.tier === 'string' && TIER.test(w.tier)) keep.tier = w.tier;
       // Three numbers and nothing else: it goes straight into a style

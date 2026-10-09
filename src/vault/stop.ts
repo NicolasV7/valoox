@@ -2,18 +2,35 @@
 //
 // A link that turns alerts off has to work from a phone that has never had
 // this app's cookie: the mail is read wherever mail is read. So the row it
-// acts on is named in the link itself, with a signature beside it — the uid
-// alone would be a bearer token anybody could guess at, and a signed one is
-// only ever good for the one thing this file is for.
+// acts on travels in the link itself — and that is the whole difficulty,
+// because the name of the row IS the session cookie. There is one identifier
+// in this app and `uid` is it.
 //
-// Derived from JAR_KEY with its own info string, which means two things worth
-// stating. The link can do nothing a stored session can do: a different key
-// opens nothing. And rotating JAR_KEY voids every outstanding link at the
-// same moment it voids every session — which is correct, because after a
-// rotation there is no row left for one to act on.
+// It used to travel in the clear, signed: `<uid>.<nonce>.<hmac>`. The
+// signature answered the question the module was thinking about — nobody can
+// forge a link for a row they do not know — and missed the one it was not:
+// anyone who READS the message gets a working `Cookie: uid=…` for an account
+// whose storefront, collection, wallet and alert address are one GET away.
+// Resend keeps the rendered html of everything it sends, mail gets forwarded,
+// screenshotted and scanned, and `HttpOnly` protects none of that.
 //
-// It is not a login. All it carries is permission to stop sending, and the
-// mail it rides in was already in that mailbox.
+// So the body is encrypted rather than signed. AES-256-GCM under a key
+// derived from JAR_KEY with an info string of its own, which keeps every
+// property the signed version had and drops the disclosure:
+//
+//   · unforgeable — GCM's tag is the signature, and verifying it is constant
+//     time by construction rather than by a loop somebody has to get right
+//   · opaque — the link names nobody. It is ciphertext to everyone but this
+//     Worker, including to whatever handled the mail on the way
+//   · bounded by the kill switch — a rotated JAR_KEY voids every outstanding
+//     link at the same moment it voids every session, which is correct,
+//     because after a rotation there is no row left for one to act on
+//   · stateless — nothing is written at mint time, so there is no KV record
+//     to go stale and no window where a freshly sent link does not work yet
+//
+// It is not a login, and now the shape says so as well as the comment did.
+// All it carries is permission to stop sending, and the mail it rides in was
+// already in that mailbox.
 //
 // Each one is minted with a nonce of its own, so every message carries a
 // different link. That is what lets a link be spent: answering one closes
@@ -24,6 +41,7 @@
 import type { Env } from '../types.ts';
 
 const enc = new TextEncoder();
+const dec = new TextDecoder();
 
 const b64u = (u: Uint8Array): string => {
   let s = '';
@@ -41,28 +59,37 @@ const unb64u = (s: string): Uint8Array => {
 let cache: { raw: string; key: Promise<CryptoKey> } | null = null;
 
 /** Keyed on the secret itself, so a rotation takes effect in the same request
- *  rather than whenever a warm isolate happens to be recycled. */
-function signer(env: Env): Promise<CryptoKey> {
+ *  rather than whenever a warm isolate happens to be recycled — the same
+ *  reasoning as `kek()` in seal.ts, for the same reason: the rotation is the
+ *  kill switch and a kill switch with a lag is not one.
+ *
+ *  `info` differs from the jar's, so this key opens no session and a sealed
+ *  session is not a token. JAR_KEY is standard base64 and `unb64u` leaves
+ *  that untouched — it only rewrites the two url-safe characters. */
+function sealer(env: Env): Promise<CryptoKey> {
   if (cache?.raw !== env.JAR_KEY) {
     cache = {
       raw: env.JAR_KEY,
-      key: crypto.subtle.importKey(
-        'raw',
-        enc.encode('stop:' + env.JAR_KEY),
-        { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['sign'],
-      ),
+      key: crypto.subtle
+        .importKey('raw', unb64u(env.JAR_KEY), 'HKDF', false, ['deriveKey'])
+        .then((root) =>
+          crypto.subtle.deriveKey(
+            {
+              name: 'HKDF',
+              hash: 'SHA-256',
+              salt: enc.encode('stop'),
+              info: enc.encode('stop:link'),
+            },
+            root,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt', 'decrypt'],
+          ),
+        ),
     };
   }
   return cache.key;
 }
-
-const tag = async (env: Env, body: string): Promise<Uint8Array> =>
-  new Uint8Array(await crypto.subtle.sign('HMAC', await signer(env), enc.encode(body))).slice(
-    0,
-    16,
-  );
 
 /** Which message this link came in. Random rather than a counter: a counter
  *  would say how many have been sent, in a string that travels in a mailbox. */
@@ -74,31 +101,44 @@ export interface Stop {
   id: string;
 }
 
-/** `<uid>.<nonce>.<signature>`, url-safe. */
+/** `<iv><ciphertext><tag>`, url-safe base64 — about a hundred characters that
+ *  say nothing to anyone holding them. */
 export async function mintStop(env: Env, uid: string): Promise<string> {
-  const id = nonce();
-  return uid + '.' + id + '.' + b64u(await tag(env, uid + '.' + id));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(
+    await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv },
+      await sealer(env),
+      enc.encode(uid + '.' + nonce()),
+    ),
+  );
+  const out = new Uint8Array(12 + ct.length);
+  out.set(iv);
+  out.set(ct, 12);
+  return b64u(out);
 }
 
-/** What a token names, or null. Constant time on the comparison, because an
- *  early return on the first wrong byte is how a signature gets forged one
- *  byte at a time. */
+/** What a token names, or null. Everything that is not a token this Worker
+ *  minted under the current key lands in the same place — a bad tag, a wrong
+ *  key, a truncated string, something that is not base64 at all. */
 export async function readStop(env: Env, token: unknown): Promise<Stop | null> {
-  if (typeof token !== 'string' || token.length > 256) return null;
-  const cut = token.lastIndexOf('.');
-  if (cut <= 0) return null;
-
-  const body = token.slice(0, cut);
-  const dot = body.indexOf('.');
-  if (dot <= 0) return null;
-
-  const got = unb64u(token.slice(cut + 1));
-  const want = await tag(env, body);
-  if (got.length !== want.length) return null;
-
-  let diff = 0;
-  for (let i = 0; i < want.length; i++) diff |= got[i] ^ want[i];
-  return diff === 0 ? { uid: body.slice(0, dot), id: body.slice(dot + 1) } : null;
+  if (typeof token !== 'string' || token.length < 24 || token.length > 256) return null;
+  try {
+    const raw = unb64u(token);
+    // Twelve of iv and sixteen of tag, so anything this short carries no body.
+    if (raw.length <= 28) return null;
+    const body = dec.decode(
+      await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: raw.subarray(0, 12) },
+        await sealer(env),
+        raw.subarray(12),
+      ),
+    );
+    const dot = body.indexOf('.');
+    return dot > 0 ? { uid: body.slice(0, dot), id: body.slice(dot + 1) } : null;
+  } catch {
+    return null;
+  }
 }
 
 /**

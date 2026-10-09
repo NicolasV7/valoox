@@ -28,6 +28,15 @@ export async function rf(url: string, init: RiotInit = {}): Promise<Response> {
   if (jar) headers.Cookie = serialize(jar);
 
   const res = await fetch(url, { ...opts, headers });
+
+  // The allowlist is the read-only claim, and `fetch` defaults to following
+  // redirects — so without this the check covers the first hop and the request
+  // that actually carried the jar or the bearer token went somewhere nobody
+  // checked. Riot does not redirect these today; the point is that the claim is
+  // true whether or not that stays so. auth.ts passes redirect: 'manual' and
+  // reads the Location itself, which is why it never reaches this branch.
+  if (res.redirected) assertAllowed(method, res.url);
+
   console.log(method + ' ' + new URL(url).host + ' -> ' + res.status);
   if (jar) absorb(jar, res);
   return res;

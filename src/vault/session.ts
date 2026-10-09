@@ -1,7 +1,7 @@
 import type { Env, Jar, Session } from '../types.ts';
 import { SCAN_TTL } from './constants.ts';
 import * as repo from './repo.ts';
-import { CURRENT_KID, open, seal } from './seal.ts';
+import { CURRENT_KID, open, SealBroken, seal } from './seal.ts';
 
 // Everything that persists, behind one module. Sessions are sealed rows in D1;
 // the two caches are KV, both keyed by uid so nothing is ever shared between
@@ -17,10 +17,34 @@ export interface Held {
   seen?: number;
 }
 
+/**
+ * The row, opened — or null, which every caller already turns into "scan
+ * again".
+ *
+ * A blob that will not open is handled here rather than thrown, and that is
+ * the whole of the kill switch. `npx wrangler secret put JAR_KEY` leaves every
+ * browser holding its uid cookie and its row; without this, the next request
+ * threw SealBroken, nothing caught it, the router answered 502, and the page
+ * rendered "Riot did not answer" with a Retry that could never work — on a
+ * screen with no tabs, so the one call that would have cleared the row was
+ * unreachable. CLAUDE.md says a rotation signs everybody out. It bricked them.
+ *
+ * Deleting on a failed open is safe because AES-GCM does not fail transiently:
+ * a rotated key, a row moved between uids and a corrupted blob are the only
+ * causes and all three are permanent. The row was dead either way; this makes
+ * it say so in the same request instead of in ten days, when prune runs.
+ */
 export async function readSession(env: Env, uid: string): Promise<Held | null> {
   const row = await repo.get(env, uid);
   if (!row) return null;
-  const session = await open<Session>(env, uid, row.kid, row.blob);
+  let session: Session;
+  try {
+    session = await open<Session>(env, uid, row.kid, row.blob);
+  } catch (e) {
+    if (!(e instanceof SealBroken)) throw e;
+    await forget(env, uid);
+    return null;
+  }
   return { session, ver: row.ver, kid: row.kid, seen: row.last_used };
 }
 
@@ -42,7 +66,7 @@ export async function saveSession(
   s: Session,
   ver: number,
 ): Promise<boolean> {
-  return repo.update(env, uid, await seal(env, uid, CURRENT_KID, s), ver);
+  return repo.update(env, uid, CURRENT_KID, await seal(env, uid, CURRENT_KID, s), ver);
 }
 
 /** Forget this browser. Revokes OUR access — the jar keeps working at Riot until
@@ -83,10 +107,38 @@ export type Cache = 'store' | 'inv';
  */
 const VERSION: Record<Cache, number> = { store: 3, inv: 2 };
 
-const key = (name: Cache, uid: string) => name + VERSION[name] + ':' + uid;
+/**
+ * Which JAR_KEY these entries belong to — eight hex of its SHA-256, cached on
+ * the raw secret like every other derivation in the vault.
+ *
+ * The cache is read before D1 is touched, so without this a rotated key left
+ * every browser still holding its uid cookie receiving that account's store
+ * view, Riot name and rank for the rest of the rotation window. The kill switch
+ * has to take effect immediately — a kill switch with a lag is not one — and
+ * changing the key changes every cache key, so the old entries become
+ * unreachable in the same request and expire on their own TTL.
+ */
+let era: { raw: string; tag: Promise<string> } | null = null;
+
+function epoch(env: Env): Promise<string> {
+  if (era?.raw !== env.JAR_KEY) {
+    era = {
+      raw: env.JAR_KEY,
+      tag: crypto.subtle
+        .digest('SHA-256', new TextEncoder().encode(env.JAR_KEY))
+        .then((d) =>
+          [...new Uint8Array(d).slice(0, 4)].map((b) => b.toString(16).padStart(2, '0')).join(''),
+        ),
+    };
+  }
+  return era.tag;
+}
+
+const key = async (env: Env, name: Cache, uid: string) =>
+  name + VERSION[name] + ':' + (await epoch(env)) + ':' + uid;
 
 export async function readCache(env: Env, name: Cache, uid: string): Promise<unknown | null> {
-  const raw = await env.VAL.get(key(name, uid));
+  const raw = await env.VAL.get(await key(env, name, uid));
   return raw ? JSON.parse(raw) : null;
 }
 
@@ -100,9 +152,12 @@ export async function writeCache(
   view: unknown,
   ttl: number,
 ): Promise<void> {
-  await env.VAL.put(key(name, uid), JSON.stringify(view), { expirationTtl: Math.max(60, ttl) });
+  await env.VAL.put(await key(env, name, uid), JSON.stringify(view), {
+    expirationTtl: Math.max(60, ttl),
+  });
 }
 
 export async function clearCache(env: Env, uid: string): Promise<void> {
-  await Promise.all([env.VAL.delete(key('store', uid)), env.VAL.delete(key('inv', uid))]);
+  const [store, inv] = await Promise.all([key(env, 'store', uid), key(env, 'inv', uid)]);
+  await Promise.all([env.VAL.delete(store), env.VAL.delete(inv)]);
 }

@@ -87,7 +87,13 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
     ...(sent.id ? { send: sent.id } : {}),
     said: sent.said,
   };
-  await saveSession(env, uid, held.session, held.ver);
+  // A lost CAS here left the row on the OLD address while a code for the new
+  // one was already in a mailbox. The code is bound to its destination now, so
+  // it cannot verify the wrong address — but the screen should still not claim
+  // the change landed when it did not.
+  if (!(await saveSession(env, uid, held.session, held.ver))) {
+    return { ok: false, error: 'conflict' };
+  }
 
   return { to, ok: keep, said: sent.said, status: sent.status, until, sent: sent.ok };
 }
@@ -132,7 +138,9 @@ export async function resend({ env, uid, req }: Ctx): Promise<Body> {
     ...(sent.id ? { send: sent.id } : {}),
     said: sent.said,
   };
-  await saveSession(env, uid, held.session, held.ver);
+  if (!(await saveSession(env, uid, held.session, held.ver))) {
+    return { ok: false, error: 'conflict' };
+  }
   return { to, said: sent.said, status: sent.status, until, sent: sent.ok };
 }
 
@@ -146,9 +154,6 @@ export async function verify({ env, uid, req }: Ctx): Promise<Body> {
   const code = typeof body?.code === 'string' ? body.code.replace(/\D/g, '') : '';
   if (code.length !== 6) return { error: 'wrong', left: await left(env, uid) };
 
-  const verdict = await check(env, uid, code);
-  if (verdict !== 'ok') return { error: verdict, left: await left(env, uid) };
-
   // One mailbox, as many accounts as somebody has. Two of them is a thing
   // people actually do — a main and a smurf, a sibling's account on the same
   // phone — and refusing the second was the app deciding how many accounts a
@@ -156,7 +161,24 @@ export async function verify({ env, uid, req }: Ctx): Promise<Body> {
   // so every message now carries the Riot name it is about.
   const to = held.session.mail.to;
 
+  // The address is half of what the code proves, so it goes into the check.
+  const verdict = await check(env, uid, to, code);
+  if (verdict !== 'ok') return { error: verdict, left: await left(env, uid) };
+
   held.session.mail = { ...held.session.mail, ok: true };
-  await saveSession(env, uid, held.session, held.ver);
+  if (await saveSession(env, uid, held.session, held.ver)) return { ok: true, to };
+
+  // Losing the compare-and-swap here cannot be answered with "try again":
+  // check() deletes the code on success, so there is nothing left to type.
+  // Re-read and set the flag on whatever won — unless it moved the address,
+  // in which case this code proved a mailbox the row is no longer pointed at
+  // and marking it verified is the one thing that must not happen.
+  const again = await readSession(env, uid);
+  if (!again) return RESEED;
+  if (again.session.mail?.to !== to) return { error: 'address' };
+  again.session.mail = { ...again.session.mail, ok: true };
+  if (!(await saveSession(env, uid, again.session, again.ver))) {
+    return { ok: false, error: 'conflict' };
+  }
   return { ok: true, to };
 }

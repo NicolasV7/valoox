@@ -20,7 +20,12 @@ export function Store({ view }: { view: StoreView }) {
 
   return (
     <main class="screen screen--flush store">
-      <StoreHeader account={view.account} wallet={view.wallet} remaining={view.remaining} />
+      <StoreHeader
+        account={view.account}
+        wallet={view.wallet}
+        remaining={view.remaining}
+        since={view.fetchedAt}
+      />
 
       <section class="store__block">
         <h2 class="label">{s.daily}</h2>
@@ -35,7 +40,11 @@ export function Store({ view }: { view: StoreView }) {
         <section class="store__block">
           <div class="store__head">
             <h2 class="label">{s.night}</h2>
-            <Countdown from={view.night.remaining} className="store__clock" />
+            <Countdown
+              from={view.night.remaining}
+              since={view.fetchedAt}
+              className="store__clock"
+            />
           </div>
           <div class="store__rows">
             {view.night.items.map((o) => (
@@ -46,10 +55,10 @@ export function Store({ view }: { view: StoreView }) {
       )}
 
       {view.bundles.map((b) => (
-        <BundleCard key={b.id} bundle={b} />
+        <BundleCard key={b.id} bundle={b} since={view.fetchedAt} />
       ))}
 
-      {view.accessory && <Accessories store={view.accessory} />}
+      {view.accessory && <Accessories store={view.accessory} since={view.fetchedAt} />}
 
       <footer class="store__foot">
         <p class="legal">{s.notice}</p>

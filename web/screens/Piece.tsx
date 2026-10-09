@@ -82,7 +82,9 @@ export function Piece({ id, view }: { id: string; view: StoreView }) {
         <dl class="facts facts--boxed">
           <Fact term={s.kind} said={t().common.kind.buddy} />
           <Fact term={s.goesOn} said={s.oneAtATime} />
-          <Fact term={s.yours} said={sold.owned ? s.yes : s.no} quiet={!sold.owned} />
+          {sold.owned !== undefined && (
+            <Fact term={s.yours} said={sold.owned ? s.yes : s.no} quiet={!sold.owned} />
+          )}
         </dl>
       )}
 

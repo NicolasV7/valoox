@@ -28,7 +28,13 @@ export const CURRENT_KID = 1;
 let kekCache: { raw: string; key: Promise<CryptoKey> } | null = null;
 
 function bytes(b64: string): Uint8Array {
-  const s = atob(b64);
+  let s: string;
+  try {
+    s = atob(b64);
+  } catch {
+    // Not base64 at all, which the caller reports as a length of zero.
+    return new Uint8Array(0);
+  }
   const u = new Uint8Array(s.length);
   for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
   return u;
@@ -40,11 +46,30 @@ function b64(u: Uint8Array): string {
   return btoa(s);
 }
 
+/**
+ * 32 bytes, or nothing works.
+ *
+ * HKDF accepts input keying material of any length, so a truncated or
+ * mistyped JAR_KEY derives a perfectly valid key that is simply weaker than
+ * the one everything here claims. Nothing caught it: `wrangler secret put`
+ * takes any string, test/unit/rotation.test.ts records that the crypto layer
+ * will not, and the deploy-time guard its comment defers to did not exist.
+ *
+ * So the guard is here, where every derivation already passes. Failing the
+ * first request loudly is the right failure for this: a Worker that will not
+ * start is a problem somebody fixes in a minute, and a fleet of sessions
+ * sealed under eight bytes is one nobody finds.
+ */
 function kek(env: Env): Promise<CryptoKey> {
   if (kekCache?.raw !== env.JAR_KEY) {
+    const raw = bytes(env.JAR_KEY ?? '');
+    if (raw.length !== 32) {
+      // The length and nothing else. The value is the secret.
+      throw new Error('JAR_KEY must decode to 32 bytes, got ' + raw.length);
+    }
     kekCache = {
       raw: env.JAR_KEY,
-      key: crypto.subtle.importKey('raw', bytes(env.JAR_KEY), 'HKDF', false, ['deriveKey']),
+      key: crypto.subtle.importKey('raw', raw, 'HKDF', false, ['deriveKey']),
     };
   }
   return kekCache.key;

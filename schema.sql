@@ -14,10 +14,19 @@ CREATE TABLE IF NOT EXISTS s (
   created_at INTEGER NOT NULL,
   -- Drives the prune of abandoned rows. Deliberately NOT indexed: indexing a
   -- column written on every request doubles D1 rows-written.
-  last_used  INTEGER NOT NULL
+  last_used  INTEGER NOT NULL,
+  -- Plaintext flag so the cron can find the rows to poll. It reveals only
+  -- "this browser wants alerts" — the wishlist and the webhook live INSIDE the
+  -- sealed blob, because a webhook is a capability to message you.
+  --
+  -- In the CREATE rather than behind an ALTER. SQLite has no
+  -- `ADD COLUMN IF NOT EXISTS`, so the file vitest.config.ts calls the one
+  -- source of truth for the schema could not be applied twice: the second run
+  -- died on `duplicate column name: alerts`. The tests only survived it
+  -- because setup.ts drops the table first.
+  alerts     INTEGER NOT NULL DEFAULT 0
 );
 
--- Plaintext flag so the cron can find the rows to poll with one indexed query.
--- It reveals only "this browser wants alerts" — the wishlist and the webhook
--- live INSIDE the sealed blob, because a webhook is a capability to message you.
-ALTER TABLE s ADD COLUMN alerts INTEGER NOT NULL DEFAULT 0;
+-- The column the cron filters on, so listAlerting is an index scan rather than
+-- a table scan. schema.sql claimed "one indexed query" and no index existed.
+CREATE INDEX IF NOT EXISTS s_alerts ON s (alerts) WHERE alerts = 1;

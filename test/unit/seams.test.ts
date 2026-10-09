@@ -71,7 +71,13 @@ test('the URL is never logged either', () => {
       // The hostname alone is safe, and it is what makes a failure debuggable.
       // pathname of OUR OWN routes is fine too; a Riot path is not.
       const args = line.slice(line.indexOf('(') + 1).replace(/new URL\(url\)\.host/g, '');
-      if (/\burl\b|pathname/.test(args) && !/ERROR/.test(line)) {
+      // No `!/ERROR/` exemption. It was written to let router.ts's catch log
+      // `pathname`, which is one of ours — but it exempted the whole line, and
+      // that line also logs `err.message`, which for a BlockedUpstream carried
+      // `/store/v3/storefront/<puuid>`. The exemption is now the narrow thing
+      // it was meant to be: our own pathname, named.
+      const ours = args.replace(/'ERROR ' \+ pathname/g, '');
+      if (/\burl\b|pathname/.test(ours)) {
         offenders.push(f.path + ':' + (i + 1));
       }
     }

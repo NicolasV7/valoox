@@ -25,7 +25,7 @@ import { t } from '../i18n/index.ts';
 import { href, intercept, type Whence } from '../route.ts';
 import { Totals } from './Bundle.totals.tsx';
 
-export function Bundle({ bundle }: { bundle: BundleData }) {
+export function Bundle({ bundle, since }: { bundle: BundleData; since?: number }) {
   const s = t().bundle;
   const found = useBundle(bundle.id);
   // The ground under the whole screen is sampled from the banner, so the page
@@ -62,7 +62,7 @@ export function Bundle({ bundle }: { bundle: BundleData }) {
           </span>
           {t().common.nav.store}
         </a>
-        <Countdown from={bundle.remaining} className="chip chip--clock" />
+        <Countdown from={bundle.remaining} since={since} className="chip chip--clock" />
 
         <div class="bundle__id">
           <h1 class="bundle__name">

@@ -22,8 +22,13 @@ export default {
     ctx.waitUntil(
       runAlerts(env)
         .then((r) => console.log('alerts checked ' + r.checked + ' sent ' + r.sent))
+        // Prune runs whether or not the alerts did. They are two jobs sharing a
+        // trigger, and chaining them meant one rejection — a missing JAR_KEY,
+        // a D1 blip — silently skipped the only thing that forgets dead rows.
+        .catch((e) => console.log('alerts failed: ' + (e as Error).name))
         .then(() => prune(env))
-        .then((n) => console.log('pruned ' + n)),
+        .then((n) => console.log('pruned ' + n))
+        .catch((e) => console.log('prune failed: ' + (e as Error).name)),
     );
   },
 

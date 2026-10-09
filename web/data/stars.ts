@@ -71,7 +71,14 @@ export function useStars(): {
   const stars = prefs?.wishlist ?? null;
 
   const toggle = useCallback((item: Star) => {
-    const now = held()?.wishlist ?? [];
+    const was = held();
+    // Nothing yet is not an empty list. POST /api/prefs is a wholesale
+    // replace, so a star tapped before the prefs GET lands — or after one that
+    // failed, which channel.ts swallows into a permanent null — used to post a
+    // one-item wishlist over the real one and an empty string over the
+    // webhook. A hundred stars for one tap.
+    if (!was) return;
+    const now = was.wishlist ?? [];
     const has = now.some((w) => w.id === item.id);
     if (!has && now.length >= MAX) return;
     void write(has ? now.filter((w) => w.id !== item.id) : [...now, item]);

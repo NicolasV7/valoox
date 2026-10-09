@@ -20,7 +20,7 @@
 import { renderAt } from '../../routes/render.ts';
 import type { Hit } from '../../types.ts';
 import { shell } from './layout.ts';
-import { FONT, INK, note, solid, weave } from './paint.ts';
+import { esc, FONT, INK, note, solid, weave } from './paint.ts';
 import type { Lang } from './words.ts';
 import { words } from './words.ts';
 
@@ -161,8 +161,6 @@ const waited = (found: Hit[]): number => {
 
 /** Names come from a catalogue this project does not control and go into
  *  markup, which is the same reason the page builds DOM and never strings. */
-const esc = (said: string): string =>
-  said.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /** 1775 -> "1,775", in the reader's own separator. */
 const count = (n: number, lang: Lang): string =>

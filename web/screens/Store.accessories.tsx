@@ -17,14 +17,14 @@ import type { AccessoryStore } from '../data/types.ts';
 import { kindOf, lay, shapeOf } from '../design/shapes.ts';
 import { t } from '../i18n/index.ts';
 
-export function Accessories({ store }: { store: AccessoryStore }) {
+export function Accessories({ store, since }: { store: AccessoryStore; since?: number }) {
   const { order, span } = lay(store.items.map((it) => kindOf(it.type)));
 
   return (
     <section class="store__block">
       <div class="store__head">
         <h2 class="label">{t().store.accessories}</h2>
-        <Countdown from={store.remaining} className="store__clock" />
+        <Countdown from={store.remaining} since={since} className="store__clock" />
       </div>
       <div class="grid">
         {order.map((i) => {

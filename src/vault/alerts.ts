@@ -72,11 +72,27 @@ export async function runAlerts(env: Env): Promise<{ checked: number; sent: numb
         continue;
       }
 
+      // Before the store, not after. reauth() rolled Riot's new cookies into
+      // the jar in place; anything that throws between here and the end of the
+      // try — a 503 on the storefront, a 429, Resend being down — used to drop
+      // them, and the next night replayed a superseded jar, got redirected to
+      // the login page, and DELETED the row. One transient failure cost a
+      // wishlist, a verified address and a webhook two nights later. live.ts
+      // already saves in this order, one file away.
+      //
+      // A lost CAS just means a tab beat us, and its jar is the newer one.
+      const saved = await repo.update(
+        env,
+        row.uid,
+        CURRENT_KID,
+        await seal(env, row.uid, CURRENT_KID, session),
+        row.ver,
+      );
+      if (!saved) continue;
+
       const view = await fetchStore(env, session, t);
       const found = hits(view, session.wishlist);
       if (found.length && (await post(env, row.uid, session, found, view.remaining))) sent++;
-      // Persist the rolled-forward jar; a lost CAS just means a tab beat us.
-      await repo.update(env, row.uid, await seal(env, row.uid, CURRENT_KID, session), row.ver);
     } catch (e) {
       // A job that swallows failures silently is a job that rots unnoticed. The
       // error name is safe to log; the message never contains a jar or a token.

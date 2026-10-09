@@ -7,6 +7,9 @@ import { ownedSet } from './owned.ts';
 import { storeBase } from './shard.ts';
 import { markable, markOwned, shape } from './store.ts';
 
+/** What an item type looks like when Riot actually sent one. */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
 /** Tokens + session -> the finished store view. Everything Riot-facing for this
  *  path lives here; the caller handles caching and persistence. */
 export async function fetchStore(
@@ -48,8 +51,21 @@ export async function fetchStore(
     seen,
   });
 
-  const types = [...new Set(markable(view).flatMap((g) => g.items.map((i) => i.type)))];
-  if (types.length) markOwned(view, await ownedSet(h, base, puuid, types));
+  // Filtered to uuids, because shape() reads ItemTypeID with optional chaining
+  // on purpose — surviving a payload change is its whole job — so `undefined`
+  // is an expected value here. Concatenated into the entitlements path it
+  // became `.../entitlements/<puuid>/undefined`, which assertAllowed refuses
+  // by throwing BEFORE fetch, so owned.ts's best-effort handling never ran and
+  // the whole store 502'd on exactly the shape change shape() absorbs.
+  const types = [...new Set(markable(view).flatMap((g) => g.items.map((i) => i.type)))].filter(
+    (t): t is string => typeof t === 'string' && UUID.test(t),
+  );
+  if (types.length) {
+    const owned = await ownedSet(h, base, puuid, types);
+    // Left undefined when Riot would not say. `owned?: boolean` has always had
+    // the third state in it; it was being thrown away at the door.
+    if (owned) markOwned(view, owned);
+  }
 
   return view;
 }

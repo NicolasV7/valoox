@@ -38,7 +38,8 @@ export async function mail(
   who?: string | null,
   tz?: number,
 ) {
-  const { code, until } = await mint(env, uid);
+  // The destination is part of what the code proves — see digest() in otp.ts.
+  const { code, until } = await mint(env, uid, to);
   const home = artFrom(origin);
   const stop = stopLink(home, await mintStop(env, uid));
   const sent = await send(

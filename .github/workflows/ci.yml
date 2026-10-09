@@ -11,10 +11,14 @@ jobs:
       - uses: actions/setup-node@v5
         with: { node-version: 24, cache: npm }
       - run: npm ci
-      # Types are generated from wrangler.toml, so they are never stale here.
-      - run: npx wrangler types
-      - run: npx tsc --noEmit
-      - run: npx biome ci .
-      # Runs both projects: pure modules in Node, and the storage layer inside
-      # real workerd against real local D1.
-      - run: npx vitest run
+      # `npm run check` and nothing else, because a CI that runs a SUBSET of it
+      # is a CI that goes green on a tree the author's own command rejects.
+      # This one did: it never ran `tsc -p web/tsconfig.json`, and the root
+      # tsconfig excludes web/, so about ten thousand lines of Preact were
+      # typechecked by nobody. It never ran the build either.
+      #
+      # typecheck = wrangler types (generated from wrangler.toml, never stale
+      # here) + both tsconfigs; then biome, then vitest in both projects —
+      # pure modules in Node, the storage layer inside real workerd against
+      # real local D1 — then esbuild.
+      - run: npm run check

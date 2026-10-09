@@ -153,9 +153,24 @@ const ALLOW: Rule[] = [
   },
 ];
 
+/**
+ * The host and nothing else.
+ *
+ * This message is logged — router.ts prints it on a 502 and the daily job
+ * prints it per failed row — and `/store/v3/storefront/<puuid>` is a path, not
+ * a query string. Dropping the query kept the puuid. http.ts had it right one
+ * file away and said why: "never a URL, because the storefront path contains
+ * the puuid". A caller that needs to know which rule refused it has the stack.
+ */
 export class BlockedUpstream extends Error {
   constructor(method: string, url: string) {
-    super('upstream not allowed: ' + method + ' ' + url.split('?')[0]);
+    let host = 'an unparseable url';
+    try {
+      host = new URL(url).host;
+    } catch {
+      // Not a URL at all, which is itself the reason it was refused.
+    }
+    super('upstream not allowed: ' + method + ' ' + host);
     this.name = 'BlockedUpstream';
   }
 }

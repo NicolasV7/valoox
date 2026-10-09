@@ -101,7 +101,7 @@ export function Screen({
     // behind it. The store is the honest answer rather than an empty screen
     // about a thing that is gone.
     const it = view.bundles.find((b) => b.id === route.id);
-    if (it) return <Bundle bundle={it} />;
+    if (it) return <Bundle bundle={it} since={view.fetchedAt} />;
   }
   return <Store view={view} />;
 }

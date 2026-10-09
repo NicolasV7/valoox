@@ -36,7 +36,12 @@ export function Sprays({ inv }: { inv: Inventory }) {
   warm();
 
   const own = useMemo(() => new Set(inv.byType[SPRAY] ?? []), [inv]);
-  const wheel = inv.worn?.sprays ?? [];
+  // Memoised, because `inv.worn?.sprays ?? []` is a NEW array on every render
+  // whenever the wheel is absent — so the sort below, which lists it as a
+  // dependency, re-ran on every keystroke over nine hundred sprays. That is
+  // exactly the cost its own comment says is paid once. Buddies.tsx keys the
+  // same shape on [inv] and was always stable.
+  const wheel = useMemo(() => inv.worn?.sprays ?? [], [inv]);
 
   const sorted = useMemo(() => {
     if (!all) return null;

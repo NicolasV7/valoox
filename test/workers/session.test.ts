@@ -1,7 +1,14 @@
 import { beforeEach, expect, test } from 'vitest';
 import type { Env, Session } from '../../src/types.ts';
 import * as repo from '../../src/vault/repo.ts';
-import { createSession, forget, readSession, saveSession } from '../../src/vault/session.ts';
+import {
+  createSession,
+  forget,
+  readCache,
+  readSession,
+  saveSession,
+  writeCache,
+} from '../../src/vault/session.ts';
 import { freshDb, KEY } from './setup.ts';
 
 // The seal and the store, together. The unit tests prove the crypto in isolation;
@@ -39,7 +46,7 @@ test('what lands in the column is ciphertext, not the session', async () => {
   expect(JSON.stringify(row)).not.toContain('1aefc04b');
 });
 
-test('another browser cannot open this row', async () => {
+test('another browser cannot open this row, and the row does not survive', async () => {
   // Each row is sealed with a key derived for its own uid, and uid is bound as
   // AES-GCM additionalData — so a row mix-up fails closed instead of quietly
   // handing one person another person's Riot session.
@@ -51,7 +58,12 @@ test('another browser cannot open this row', async () => {
     .bind(OTHER, row?.kid ?? 1, row?.blob ?? '')
     .run();
 
-  await expect(readSession(env, OTHER)).rejects.toThrow();
+  // Null, not a throw. Every caller already turns null into "scan again"; a
+  // throw reached the router as a 502 and the page blamed Riot for it.
+  expect(await readSession(env, OTHER)).toBeNull();
+  expect(await repo.get(env, OTHER)).toBeNull();
+  // And the row it was copied from is untouched.
+  expect((await readSession(env, UID))?.session).toEqual(session());
 });
 
 test('saving a rolled-forward jar bumps the version', async () => {
@@ -82,13 +94,36 @@ test('forget removes the row and leaves other browsers signed in', async () => {
   expect(await readSession(env, OTHER)).not.toBeNull();
 });
 
-test('rotating the key orphans every stored session', async () => {
+test('rotating the key signs everybody out rather than bricking them', async () => {
   // This is the kill switch: one `wrangler secret put` makes every ciphertext
   // that exists undecryptable, including D1 Time Travel snapshots.
+  //
+  // Undecryptable was never the hard part. What this pins is the second half —
+  // that the browser is then told to scan again. It used to throw, nothing
+  // caught it, the router answered 502, and the page rendered "Riot did not
+  // answer" with a Retry that could never work, on a screen with no way to
+  // reach the one call that would have cleared the row.
   await createSession(env, UID, session());
-  const rotated = {
-    ...env,
-    JAR_KEY: btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))),
-  };
-  await expect(readSession(rotated, UID)).rejects.toThrow();
+  const rotated = { ...env, JAR_KEY: another() };
+
+  expect(await readSession(rotated, UID)).toBeNull();
+  expect(await repo.get(env, UID)).toBeNull();
 });
+
+test('a rotation also orphans what the cache is already holding', async () => {
+  // readCache answers before D1 is touched, so a rotation that only killed the
+  // row left every browser still holding its uid cookie receiving that
+  // account's store view and Riot name for the rest of the rotation window.
+  // The cache key carries the key's own fingerprint, so changing the key makes
+  // every entry unreachable in the same request.
+  await writeCache(env, 'store', UID, { name: 'Player#TAG' }, 3600);
+  expect(await readCache(env, 'store', UID)).toEqual({ name: 'Player#TAG' });
+
+  const rotated = { ...env, JAR_KEY: another() };
+  expect(await readCache(rotated, 'store', UID)).toBeNull();
+  // ...and the old key still reaches its own, so this is a key boundary and
+  // not a cache that quietly stopped working.
+  expect(await readCache(env, 'store', UID)).toEqual({ name: 'Player#TAG' });
+});
+
+const another = () => btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));

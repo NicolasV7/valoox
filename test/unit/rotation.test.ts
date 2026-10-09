@@ -44,10 +44,23 @@ test('a rotation takes effect immediately, not when isolates recycle', async () 
 });
 
 test('a key of the wrong length is refused rather than silently weakened', async () => {
-  const short = { JAR_KEY: Buffer.alloc(8).toString('base64') } as Env;
-  // HKDF accepts any input keying material, so this does not throw — it derives
-  // a valid but weak key. The guard belongs at deploy time, and this test exists
-  // to record that the crypto layer will NOT catch it for you.
-  const blob = await seal(short, UID, KID, session);
-  assert.deepEqual(await open(short, UID, KID, blob), session);
+  // This test used to assert the opposite of its own name: HKDF takes input
+  // keying material of any length, so eight bytes derived a valid weak key and
+  // the body checked that it round-tripped. The comment deferred the guard to
+  // deploy time; nothing at deploy time had one. It is in kek() now.
+  for (const bad of [Buffer.alloc(8), Buffer.alloc(31), Buffer.alloc(33)]) {
+    const wrong = { JAR_KEY: bad.toString('base64') } as Env;
+    await assert.rejects(() => seal(wrong, UID, KID, session), /32 bytes/);
+  }
+  // And something that is not base64 at all reads as a length of zero rather
+  // than throwing out of atob with a DOMException nobody is catching.
+  await assert.rejects(
+    () => seal({ JAR_KEY: 'not base64 !!' } as Env, UID, KID, session),
+    /32 bytes/,
+  );
+});
+
+test('a key of the right length is not refused', async () => {
+  const good = { JAR_KEY: Buffer.alloc(32, 7).toString('base64') } as Env;
+  assert.deepEqual(await open(good, UID, KID, await seal(good, UID, KID, session)), session);
 });

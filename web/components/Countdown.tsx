@@ -49,18 +49,38 @@ export function useLeft(until: number | null): number {
   return until === null ? 0 : Math.max(0, Math.ceil((until - now) / 1000));
 }
 
-export function Countdown({ from, className }: { from: number; className?: string }) {
-  const [left, setLeft] = useState(from);
+/**
+ * An instant, not a duration.
+ *
+ * `from` is what Riot reported at the moment the WORKER fetched, and that
+ * payload is cached for up to a full rotation — so a clock anchored to mount
+ * time was stale by the age of the cache, and it rewound to the top on every
+ * remount. Open the store with two hours left, open an offer, come back ten
+ * minutes later and it read two hours again.
+ *
+ * `since` is the view's own `fetchedAt`, which was on the wire all along and
+ * read by nobody. Without it this falls back to now, which is the old
+ * behaviour and right for a countdown the page started itself.
+ */
+export function Countdown({
+  from,
+  since,
+  className,
+}: {
+  from: number;
+  /** Epoch seconds: when the number in `from` was true. */
+  since?: number;
+  className?: string;
+}) {
+  const until = (since ?? Date.now() / 1000) + from;
+  const read = () => Math.max(0, Math.round(until - Date.now() / 1000));
+  const [left, setLeft] = useState(read);
 
   useEffect(() => {
-    setLeft(from);
-    // Anchored to a start time rather than decremented, so a tab that was
-    // backgrounded for ten minutes comes back correct instead of ten minutes
-    // behind.
-    const began = Date.now();
-    const id = setInterval(() => setLeft(from - Math.floor((Date.now() - began) / 1000)), 1000);
+    setLeft(read());
+    const id = setInterval(() => setLeft(read()), 1000);
     return () => clearInterval(id);
-  }, [from]);
+  }, [until]);
 
   return (
     <span class={className ? className + ' num' : 'num'} role="timer">
