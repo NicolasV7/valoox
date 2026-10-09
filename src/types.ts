@@ -124,17 +124,29 @@ export interface StoreView {
 }
 
 /**
- * The bindings, from `wrangler types` plus the one secret — secrets do not live
- * in wrangler.toml, so they are not in the generated Env.
+ * The bindings: what `wrangler types` generates from wrangler.toml, plus every
+ * secret, because a secret is not in wrangler.toml and so is not generated.
+ *
+ * All three are declared here rather than left to the generator. On this
+ * machine `wrangler types` reads `.dev.vars` and emits them anyway, which is
+ * exactly why they were once left out — and `.dev.vars` is gitignored, so CI
+ * generated an Env without them and `tsc` failed on a file nobody had touched.
+ * The secrets a Worker needs are a contract, and a contract cannot live in a
+ * file that only exists on one laptop.
+ *
+ * Redeclaring them is safe: the generated ones are `string` too, so where both
+ * exist the types are identical. The code still guards against a missing value
+ * at runtime, because a type says what should be set, not what is.
  */
 export interface Env extends Cloudflare.Env {
-  /** 32 random bytes, base64. Set with `wrangler secret put JAR_KEY`. */
+  /** 32 random bytes, base64. `wrangler secret put JAR_KEY` — rotating it is
+   *  the kill switch: every sealed row becomes undecryptable at once. */
   JAR_KEY: string;
-  // RESEND_KEY, RESEND_HOOK and MAIL_FROM are not listed here on purpose.
-  // `wrangler types` already has them — the two secrets from .dev.vars and
-  // MAIL_FROM from [vars] — and declaring them again as optional contradicts
-  // the generated required ones. The code still guards against a missing key,
-  // because a type is a promise about the local file and not about production.
+  /** Resend's API key. `wrangler secret put RESEND_KEY`. */
+  RESEND_KEY: string;
+  /** The shared secret Resend signs its delivery webhooks with.
+   *  `wrangler secret put RESEND_HOOK`. */
+  RESEND_HOOK: string;
 }
 
 /**
