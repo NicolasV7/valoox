@@ -18,7 +18,7 @@ import { Countdown } from '../components/Countdown.tsx';
 import { Chevron, Mail, Search } from '../components/icons.tsx';
 import { Watch } from '../components/Watch.tsx';
 import { waiting } from '../data/channel.ts';
-import { LEVELS } from '../data/findable.ts';
+import { LEVELS, TITLES } from '../data/findable.ts';
 import { BITS, GUNS, useStars } from '../data/stars.ts';
 import type { Prefs, StoreView } from '../data/types.ts';
 import { t } from '../i18n/index.ts';
@@ -41,6 +41,9 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
   // could star back then.
   const guns = all.filter((w) => (w.type ?? LEVELS) === LEVELS);
   const bits = all.filter((w) => (w.type ?? LEVELS) !== LEVELS);
+  // Only when the whole section is titles. One title among the sprays keeps
+  // the column, because there the alignment is what the column is for.
+  const wordy = bits.length > 0 && bits.every((w) => w.type === TITLES);
   const ok = mail?.ok === true;
   // A starred row opens the thing, and the way back out of it is this list.
   const from: Whence = { to: { name: 'alerts' }, said: t().common.nav.alerts };
@@ -96,6 +99,7 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
               key={w.id}
               item={w}
               on={on(w.id)}
+              bare={wordy}
               shut={shut(w.type)}
               from={from}
               toggle={toggle}

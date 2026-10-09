@@ -127,6 +127,7 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
               item={f}
               note={f.of}
               on={on(f.id)}
+              bare={tab === 'title'}
               shut={noRoom || !sold(given, f.id)}
               why={sold(given, f.id) ? undefined : s.notSoldWhy}
               from={from}

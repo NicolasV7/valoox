@@ -40,12 +40,22 @@ export function Watch({
   on,
   shut,
   why,
+  bare,
   note,
   from,
   toggle,
 }: {
   item: Thing;
   on: boolean;
+  /** Drop the picture column entirely.
+   *
+   *  A title has no artwork and never will — /v1/playertitles ships a string
+   *  and nothing else. The fixed 96px first column exists so names do not step
+   *  left and right as a MIXED list scrolls past, which is worth a hole beside
+   *  the occasional title. In a list where nothing has a picture there is
+   *  nothing to step against, and the column is 96px of indent with nothing in
+   *  it. The list knows which it is; a row does not. */
+  bare?: boolean;
   /** No room left, or nothing a store sells. The star still unstars; it just
    *  cannot add. */
   shut?: boolean;
@@ -67,17 +77,18 @@ export function Watch({
   const to = name ? ({ name, id: item.id } as Route) : null;
 
   return (
-    <div class="watch" style={artStyle(art)}>
+    <div class={bare ? 'watch watch--bare' : 'watch'} style={artStyle(art)}>
       {to && (
         <a class="hit" href={href(to)} onClick={intercept(to, from)}>
           <span class="sr">{item.name}</span>
         </a>
       )}
-      {icon ? (
-        <img class={gun ? 'watch__art' : 'watch__art watch__art--square'} src={icon} alt="" />
-      ) : (
-        <span class="watch__art" />
-      )}
+      {!bare &&
+        (icon ? (
+          <img class={gun ? 'watch__art' : 'watch__art watch__art--square'} src={icon} alt="" />
+        ) : (
+          <span class="watch__art" />
+        ))}
       <span class="watch__id">
         <span class="watch__name">{item.name}</span>
         {note && <span class="watch__note num">{note}</span>}

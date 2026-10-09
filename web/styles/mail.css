@@ -1,0 +1,57 @@
+/* Where the alerts go, as one tappable card.
+ *
+ * It sits at the top of the alerts screen and says three things at once: the
+ * address, whether it is verified, and that you can change it. Three facts
+ * rather than one summary, because "3 alerts set up" is a line that cannot
+ * tell you the address bounced.
+ *
+ * It keeps the watch__ prefix — it is the alerts screen's card — and it lives
+ * in its own file because watch.css reached two hundred lines and the seam
+ * was already drawn by that file's own section comments: that one is the list
+ * and the row it is made of, this is the card above it. The dot and the state
+ * word it uses are in channel.css, with the rest of the address flow.
+ */
+
+.watch__to {
+  display: block;
+  margin: 18px var(--gut) 0;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--card);
+  color: inherit;
+  text-decoration: none;
+}
+
+.watch__change {
+  margin-left: auto;
+  color: var(--ink-4);
+  font-size: 12.5px;
+}
+
+.watch__who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--ink-4);
+}
+
+.watch__addr {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.watch__who .bell__state {
+  margin-left: auto;
+}
+
+.watch__last {
+  display: block;
+  margin-top: 9px;
+  color: var(--ink-4);
+  font-size: 12.5px;
+}
