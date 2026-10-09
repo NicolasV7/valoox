@@ -151,10 +151,14 @@ export function Account({ who }: { who: Who }) {
   );
 
   /** "4 days ago", from the last time a request made the Worker reach Riot.
-   *  Not "when you last opened the app": a cached read never touches Riot. */
+   *  Not "when you last opened the app": a cached read never touches Riot.
+   *
+   *  The shard and the words "Session used" used to ride along, which put
+   *  three facts on a line under a name on a phone. The shard is in the row
+   *  below and the sentence was scaffolding around the only number anyone
+   *  reads. */
   function since(acct: Who): string {
-    const bits = [acct.shard?.toUpperCase(), acct.seen ? s.lastSeen(ago(acct.seen)) : null];
-    return bits.filter(Boolean).join(' · ');
+    return acct.seen ? ago(acct.seen) : '';
   }
 
   function ago(seconds: number): string {

@@ -66,6 +66,13 @@
   height: 8px;
   border-radius: 50%;
   background: currentColor;
+  /* Measured on the account card: the dot's centre and the line box's centre
+     were 0.36px apart, so this was already centred and still read low. A line
+     box is taller than the letters in it — it carries the descender space
+     whether or not the word has a descender — so the middle of "Connected"
+     sits about a pixel above the middle of the box it is in. The dot follows
+     the letters, not the box. */
+  margin-top: -1px;
 }
 
 .bell__label {

@@ -1,0 +1,251 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>valoox banner</title>
+<!--
+  The README banner, 1280x340.
+
+  Drawn here rather than fetched, for the same reason the site serves its own
+  art: there is no sticker on this page that somebody else owns. Every shape is
+  a few lines of SVG and every colour is one of the app's own tokens — the five
+  content tiers, which is the palette the product already speaks in.
+
+    select #5A9FE2   deluxe #009587   premium #D1548D
+    exclusive #F5955B   ultra #FAD663
+
+  Rendered at 1280x340 by opening this file in a browser and screenshotting
+  the .band element. There is no script for it: it is run once when the banner
+  changes, and a build dependency that exists for that is a dependency that
+  gets installed on every clean checkout forever.
+
+  The stickers are what the thing is made of, which is the only honest subject
+  for a repository's banner: a Worker, one allowlist, a sealed row, a QR, a
+  cron, and the check that has to pass. Each stands on a line at 300px, varied
+  a few pixels either side so the row reads as an arc rather than a shelf, and
+  each sits on a soft blob of its own colour so the dark gets warmer near the
+  yellow one and cooler near the blue one.
+-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200;12..96,300;12..96,500;12..96,700&family=Azeret+Mono:wght@400;500&display=swap">
+<style>
+  html, body { margin: 0; background: #0e0e11; }
+
+  .band {
+    position: relative;
+    width: 1280px;
+    height: 340px;
+    overflow: hidden;
+    color: #f2f4f5;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    background: radial-gradient(130% 88% at 22% -18%, #1a1e25 0%, #121419 46%, #0e0e11 100%);
+  }
+
+  /* --- the ground the stickers tint ------------------------------------- */
+  .wash { position: absolute; inset: 0; }
+  .wash i { position: absolute; display: block; border-radius: 50%; filter: blur(2px); }
+  .w-1 { left: 470px; top: -62px;  width: 380px; height: 380px;
+         background: radial-gradient(circle, rgba(90,159,226,0.34) 0%, rgba(90,159,226,0) 68%); }
+  .w-2 { left: 620px; top: 28px;   width: 400px; height: 400px;
+         background: radial-gradient(circle, rgba(0,149,135,0.28) 0%, rgba(0,149,135,0) 66%); }
+  .w-3 { left: 600px; top: 76px;   width: 360px; height: 360px;
+         background: radial-gradient(circle, rgba(250,214,99,0.28) 0%, rgba(250,214,99,0) 66%); }
+  .w-4 { left: 880px; top: 50px;   width: 380px; height: 380px;
+         background: radial-gradient(circle, rgba(209,84,141,0.30) 0%, rgba(209,84,141,0) 66%); }
+  .w-5 { left: 940px; top: -96px;  width: 360px; height: 360px;
+         background: radial-gradient(circle, rgba(245,149,91,0.28) 0%, rgba(245,149,91,0) 68%); }
+
+  /* The weave, over the washes rather than under them, so the colour is
+     combed by it the way every surface in the app is. */
+  .weave {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(107deg,
+        rgba(0,0,0,0) 0 31%, rgba(255,255,255,0.022) 31% 45%,
+        rgba(0,0,0,0) 45% 51%, rgba(255,255,255,0.012) 51% 58%,
+        rgba(0,0,0,0) 58% 72%, rgba(255,255,255,0.017) 72% 77%,
+        rgba(0,0,0,0) 77%),
+      repeating-linear-gradient(107deg, rgba(255,255,255,0.018) 0 1px, rgba(0,0,0,0) 1px 23px);
+  }
+
+  /* --- a sticker -------------------------------------------------------- *
+   * A die-cut edge, a flat colour, and a shadow it casts on the dark. The
+   * white rim is what makes a rectangle read as something peeled off a sheet
+   * rather than a div with a border.                                        */
+  .crowd { position: absolute; inset: 0; }
+  .st {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 17px;
+    border: 3px solid #fff;
+    border-radius: 14px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.45);
+    color: #0e0e11;
+    font-family: 'Azeret Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .st svg { display: block; flex: none; }
+
+  /* Two far back, blurred and dim, so the cluster has somewhere to be in
+     front of. */
+  .back .st { filter: blur(4.5px) saturate(0.65); box-shadow: none; }
+
+  .s-worker  { left: 532px; top: 92px;  background: #5A9FE2; transform: rotate(-6deg); z-index: 4; }
+  .s-sealed  { left: 712px; top: 36px;  background: #009587; color: #f2f4f5;
+               transform: rotate(5deg); z-index: 3; }
+  .s-allow   { left: 660px; top: 168px; background: #FAD663; transform: rotate(-3deg); z-index: 5; }
+  .s-cron    { left: 928px; top: 36px;  background: #F5955B; transform: rotate(4deg); z-index: 2; }
+  .s-qr      { left: 912px; top: 144px; background: #D1548D; color: #f2f4f5;
+               transform: rotate(-5deg); z-index: 4; }
+  .s-row     { left: 1046px; top: 212px; background: #f2f4f5; transform: rotate(6deg); z-index: 3; }
+  .s-check   { left: 586px; top: 240px; background: #f2f4f5; transform: rotate(-2deg); z-index: 6; }
+
+  /* Out of focus and still clearly stickers: at a whisper of opacity they read
+     as smudges on the lens rather than as more of the same, further back. */
+  .b-1 { left: 846px;  top: 232px; background: #5A9FE2; opacity: 0.34; transform: rotate(-12deg); }
+  .b-2 { left: 1058px; top: 62px;  background: #FAD663; opacity: 0.30; transform: rotate(11deg); }
+
+  /* --- the floor and the scrim ------------------------------------------ */
+  .floor {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 110px;
+    background: linear-gradient(to bottom, rgba(14,14,17,0) 0%, rgba(14,14,17,0.55) 58%, #0e0e11 100%);
+  }
+  .scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(97deg, #0e0e11 0%, rgba(14,14,17,0.97) 28%, rgba(14,14,17,0.74) 38%, rgba(14,14,17,0) 50%);
+  }
+
+  /* --- the words -------------------------------------------------------- */
+  .said { position: absolute; left: 64px; top: 66px; width: 600px; }
+  .mark { display: flex; align-items: center; gap: 13px; margin-bottom: 22px; }
+  .mark span { font-size: 26px; font-weight: 500; letter-spacing: -0.01em; }
+  h1 { margin: 0; font-size: 46px; font-weight: 200; line-height: 1.08; letter-spacing: -0.035em; }
+  h1 b { font-weight: 500; }
+  .under {
+    margin: 22px 0 0;
+    font-family: 'Azeret Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #a7aeb3;
+  }
+</style>
+
+<div class="band">
+  <div class="wash">
+    <i class="w-1"></i><i class="w-2"></i><i class="w-3"></i><i class="w-4"></i><i class="w-5"></i>
+  </div>
+  <div class="weave"></div>
+
+  <div class="crowd back">
+    <!-- a brace, far back -->
+    <span class="st b-1">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3.5C5.8 3.5 6 7 6 9s-2.5 3-2.5 3S6 13 6 15s-.2 5.5 2 5.5"/>
+        <path d="M16 3.5c2.2 0 2 3.5 2 5.5s2.5 3 2.5 3-2.5 1-2.5 3 .2 5.5-2 5.5"/>
+      </svg>
+      TypeScript
+    </span>
+    <span class="st b-2">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 18V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v11"/><path d="M2 18h20"/>
+      </svg>
+      10ms CPU
+    </span>
+  </div>
+
+  <div class="crowd">
+    <!-- the Worker: a cloud, because that is what it runs on -->
+    <span class="st s-worker">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6.5 18.5a4.5 4.5 0 0 1-.4-8.98A6 6 0 0 1 17.7 9.9a4.3 4.3 0 0 1-.2 8.6z"/>
+      </svg>
+      1 Worker
+    </span>
+
+    <!-- the allowlist: the number is quoted from src/vault/upstream.ts -->
+    <span class="st s-allow">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 7h10"/><path d="M4 12h7"/><path d="M4 17h9"/>
+        <path d="M16.5 15.5l2 2 3.5-4"/>
+      </svg>
+      19 lines out
+    </span>
+
+    <!-- the session: sealed, not hidden -->
+    <span class="st s-sealed">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="10.5" width="16" height="10" rx="2.2"/>
+        <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>
+      </svg>
+      AES-256-GCM
+    </span>
+
+    <!-- the sign-in -->
+    <span class="st s-qr">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.4"/>
+        <rect x="14" y="3.5" width="6.5" height="6.5" rx="1.4"/>
+        <rect x="3.5" y="14" width="6.5" height="6.5" rx="1.4"/>
+        <path d="M14 14h3v3"/><path d="M20.5 17v3.5H17"/>
+      </svg>
+      QR sign-in
+    </span>
+
+    <!-- the daily job -->
+    <span class="st s-cron">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/>
+      </svg>
+      00:30 UTC
+    </span>
+
+    <!-- the one row the site admits to, because the copy never says "zero" -->
+    <span class="st s-row">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="12" cy="6" rx="7.5" ry="3"/>
+        <path d="M4.5 6v11c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/>
+        <path d="M4.5 11.5c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/>
+      </svg>
+      1 sealed row
+    </span>
+
+    <!-- what has to pass -->
+    <span class="st s-check">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 12.5l5 5L20 6.5"/>
+      </svg>
+      npm run check
+    </span>
+  </div>
+
+  <div class="floor"></div>
+  <div class="scrim"></div>
+
+  <div class="said">
+    <div class="mark">
+      <svg width="31" height="31" viewBox="0 0 24 24">
+        <circle cx="6.4" cy="12" r="4.65" fill="#f2f4f5"/>
+        <circle cx="17.6" cy="12" r="4.05" fill="none" stroke="#f2f4f5" stroke-width="1.9"/>
+      </svg>
+      <span>valoox</span>
+    </div>
+    <h1>Your VALORANT store,<br><b>without opening the game.</b></h1>
+    <p class="under">One Worker · No password · Read-only</p>
+  </div>
+</div>

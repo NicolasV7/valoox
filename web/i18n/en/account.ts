@@ -11,7 +11,7 @@ export const account = {
   // --- who is signed in ----------------------------------------------------
   live: 'Connected',
   region: 'Region',
-  lastSeen: (said: string) => `Session used ${said}`,
+
   justNow: 'just now',
   daysAgo: (n: number) => (n === 1 ? 'a day ago' : `${n} days ago`),
   hoursAgo: (n: number) => (n === 1 ? 'an hour ago' : `${n} hours ago`),
@@ -66,7 +66,7 @@ export const account = {
   catalogueUnder: 'Names, renders and clips',
 
   madeBy: 'Made by',
-  madeByUnder: 'NicolasV7 · Termo#GOD in game',
+  madeByUnder: 'Termo#GOD',
 
   legal:
     'VALORANT and its art belong to Riot Games, Inc. valoox is not affiliated ' +

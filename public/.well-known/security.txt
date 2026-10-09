@@ -1,7 +1,10 @@
 # Si encuentras algo, quiero saberlo antes que cualquier otra persona.
-Contact: mailto:npava@visbl.com
+Contact: mailto:nicolas@delapava.dev
 Preferred-Languages: es, en
+Canonical: https://valoox.store/.well-known/security.txt
 Canonical: https://drop.valoox.store/.well-known/security.txt
+Policy: https://github.com/NicolasV7/valoox/blob/main/SECURITY.md
+Expires: 2027-10-09T00:00:00.000Z
 
 # Lo que más me interesa, en orden:
 #  1. Cualquier forma de leer la sesión de otro usuario.
@@ -9,3 +12,6 @@ Canonical: https://drop.valoox.store/.well-known/security.txt
 #     que no esté en src/vault/upstream.ts. El repositorio es público:
 #     https://github.com/NicolasV7/valoox
 #  3. XSS en el origen. La página puede alcanzar una sesión que saltea 2FA.
+#
+# El detalle completo, con lo que ya se sabe y no cuenta como hallazgo, está
+# en SECURITY.md.
