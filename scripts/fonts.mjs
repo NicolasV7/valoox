@@ -12,6 +12,7 @@
 //
 //   node scripts/fonts.mjs
 
+import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const OUT = 'public/fonts';
@@ -48,7 +49,24 @@ function pick(sheet, subset) {
   return url[1];
 }
 
+/**
+ * Already there, unless --force.
+ *
+ * These were "run once" commands and now they also run inside `npm run
+ * deploy`, so that a clean checkout — a fork, a CI runner, a Deploy to
+ * Cloudflare build — cannot ship a site with no typeface and no artwork.
+ * Re-downloading on every deploy would make a deploy depend on somebody
+ * else's uptime, which is the one thing a deploy should not do.
+ */
+function have(dir, one) {
+  return existsSync(dir + '/' + one) && !process.argv.includes('--force');
+}
+
 async function main() {
+  if (have(OUT, FACES[0].file)) {
+    console.log(OUT + ' is already there (--force to fetch it again)');
+    return;
+  }
   await mkdir(OUT, { recursive: true });
   for (const face of FACES) {
     const url = pick(await css(face.family), SUBSET);

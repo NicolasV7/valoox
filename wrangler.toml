@@ -1,25 +1,20 @@
-name = "val"
+# The default environment is the portable one: no domains, a workers.dev
+# address, and a different Worker name so a stray `npm run deploy` here can
+# never be mistaken for the deployed site. `npm run deploy:live` is that one.
+name = "valoox"
 main = "src/index.ts"
 compatibility_date = "2026-09-01"
 
-# The app answers on drop.valoox.store, and the apex answers only to point at
-# it — see the signpost in src/router.ts. Two hosts on purpose: the landing
-# page is read by somebody deciding whether to sign in, the app holds a Riot
-# session, and keeping them apart scopes the uid cookie to the app alone.
+# Everything above and below this line is what ANY copy of this repository
+# needs. The two custom domains are not that — they are one account's — and a
+# deploy that names a zone the account does not hold fails on the last step.
+# So they live in [env.live] at the bottom, which is what `npm run deploy`
+# targets, and the default environment is the portable one a fork gets.
 #
-# Custom Domains rather than route patterns so Cloudflare issues and renews
-# the certificates itself — the uid cookie is Secure, so over plain http the
-# browser never stores it and sign-in silently never completes.
-routes = [
-  { pattern = "drop.valoox.store", custom_domain = true },
-  { pattern = "valoox.store", custom_domain = true },
-]
-
-# Off, and said out loud rather than left to the default. Every hostname that
-# serves this Worker is a place the uid cookie can be set and an origin to
-# reason about in the CSP, so the list above is the whole list.
-workers_dev = false
-preview_urls = false
+# A fork answers on <worker>.<subdomain>.workers.dev. That is deliberate: it
+# is reachable the moment it deploys, with a certificate, which the `Secure`
+# uid cookie requires.
+workers_dev = true
 
 # Load-bearing for the privacy claim: Workers Logs defaults to ON for new Workers
 # and persists method + URL for 3 days. The storefront path carries the puuid.
@@ -67,11 +62,58 @@ run_worker_first = [
   "!/.well-known/*",
 ]
 
+# The ids here are this account's, and a Deploy to Cloudflare button replaces
+# them with the ones it provisions for whoever pressed it — Cloudflare's own
+# instruction is that a repository behind a button ships default values for
+# every binding, so they stay.
 [[d1_databases]]
 binding = "DB"
 database_name = "val-sessions"
 database_id = "564cac83-d7b7-4c0c-ab08-705a2b5f6549"
 
 [[kv_namespaces]]
+binding = "VAL"
+id = "ecad056b1aa948c1af81ffd82ab9d5e3"
+
+# --- the deployed one ------------------------------------------------------
+#
+# `npm run deploy` is `wrangler deploy --env live`. The name is pinned so the
+# environment does not append itself to it: this has to stay the Worker called
+# `val`, which is the one the two domains are attached to.
+#
+# Bindings are repeated rather than inherited because wrangler does not
+# inherit them — vars, d1_databases and kv_namespaces are per-environment by
+# design, and a named environment that omits them deploys with none.
+[env.live]
+name = "val"
+
+# The app answers on drop.valoox.store, and the apex answers only to point at
+# it — see the signpost in src/router.ts. Two hosts on purpose: the landing
+# page is read by somebody deciding whether to sign in, the app holds a Riot
+# session, and keeping them apart scopes the uid cookie to the app alone.
+#
+# Custom Domains rather than route patterns so Cloudflare issues and renews
+# the certificates itself — the uid cookie is Secure, so over plain http the
+# browser never stores it and sign-in silently never completes.
+routes = [
+  { pattern = "drop.valoox.store", custom_domain = true },
+  { pattern = "valoox.store", custom_domain = true },
+]
+
+# Off, and said out loud rather than left to the default. Every hostname that
+# serves this Worker is a place the uid cookie can be set and an origin to
+# reason about in the CSP, so the list above is the whole list.
+workers_dev = false
+preview_urls = false
+
+[env.live.vars]
+MAIL_FROM = "valoox <alerts@mail.valoox.store>"
+
+[[env.live.d1_databases]]
+binding = "DB"
+database_name = "val-sessions"
+database_id = "564cac83-d7b7-4c0c-ab08-705a2b5f6549"
+
+[[env.live.kv_namespaces]]
 binding = "VAL"
 id = "ecad056b1aa948c1af81ffd82ab9d5e3"

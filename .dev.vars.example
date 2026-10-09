@@ -1,0 +1,29 @@
+# The Worker's secrets. Copy this to `.dev.vars` and fill it in to run locally;
+# in production each one is `npx wrangler secret put <NAME>`.
+#
+# A Deploy to Cloudflare button reads this file to know what to ask for, which
+# is the only reason it is in dotenv format rather than prose.
+#
+# .dev.vars itself is gitignored and must stay that way.
+
+# 32 random bytes, base64. THE key: every stored session is sealed under a key
+# derived from this one, and it is the only thing standing between a dump of
+# the database and somebody's Riot session. Generate it with
+#   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+# Changing it is the kill switch: every existing session becomes undecryptable
+# at once and everybody is signed out.
+JAR_KEY=
+
+# resend.com API key, for the six-digit code and the morning alert. Without it
+# the app works and the alerts tab says it has nowhere to send.
+RESEND_KEY=
+
+# The signing secret of a Resend webhook (starts with whsec_), so a bounce or
+# a complaint can be believed. Without it the webhook route rejects everything,
+# which is the correct failure.
+RESEND_HOOK=
+
+# Who the mail comes from. Must be an address on a domain verified in Resend.
+# Already set as a plain var in wrangler.toml for this deployment; override it
+# here for your own.
+MAIL_FROM="valoox <alerts@example.com>"

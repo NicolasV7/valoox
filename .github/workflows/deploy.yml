@@ -77,7 +77,11 @@ jobs:
         with:
           subject-path: public/app.js
 
+      # --env live, which is the environment holding the two custom domains.
+      # The default environment is the portable one a fork gets and would put
+      # this on a workers.dev address under another name.
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --env live

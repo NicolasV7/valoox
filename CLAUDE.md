@@ -144,7 +144,8 @@ npm run fonts        # once — downloads the two faces into public/fonts/
 npm run art          # once — downloads the coins, tiers and sprays into public/art/
 npm run dev          # builds web/ then starts the Worker
 npm run check        # typecheck + lint + tests + build. What CI runs.
-npm run deploy       # builds, then wrangler deploy
+npm run deploy       # builds and deploys THIS copy, wherever it is
+npm run deploy:live  # the same, pointed at valoox.store
 ```
 
 ### On a phone

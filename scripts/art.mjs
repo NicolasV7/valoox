@@ -23,6 +23,7 @@
 //
 //   node scripts/art.mjs
 
+import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const OUT = 'public/art';
@@ -106,7 +107,24 @@ async function weapons() {
   return out;
 }
 
+/**
+ * Already there, unless --force.
+ *
+ * These were "run once" commands and now they also run inside `npm run
+ * deploy`, so that a clean checkout — a fork, a CI runner, a Deploy to
+ * Cloudflare build — cannot ship a site with no typeface and no artwork.
+ * Re-downloading on every deploy would make a deploy depend on somebody
+ * else's uptime, which is the one thing a deploy should not do.
+ */
+function have(dir, one) {
+  return existsSync(dir + '/' + one) && !process.argv.includes('--force');
+}
+
 async function main() {
+  if (have(OUT, 'NOTICE.txt')) {
+    console.log(OUT + ' is already there (--force to fetch it again)');
+    return;
+  }
   await mkdir(OUT, { recursive: true });
 
   const all = { ...Object.fromEntries(Object.entries(ART).map(([k, v]) => [k, CDN + v])) };

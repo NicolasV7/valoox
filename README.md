@@ -9,7 +9,15 @@ One Cloudflare Worker on the free plan. Sign in by scanning a QR code with Riot
 Mobile — there is no password field on any screen, because the password never
 comes here.
 
-**[valoox.store](https://valoox.store)**
+**[valoox.store](https://valoox.store)** — or run your own copy:
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/NicolasV7/valoox)
+
+That forks this repository into your GitHub, creates the D1 database and the KV
+namespace in your own Cloudflare account, asks you for the secrets below, and
+deploys. It lands on a `workers.dev` address, which is what the `Secure` cookie
+needs, and the schema is applied as part of the deploy. See
+[Running your own](#running-your-own).
 
 ## What it does
 
@@ -83,6 +91,32 @@ gh attestation verify app.js --repo NicolasV7/valoox
 That covers the browser half. Cloudflare publishes no hash of the Worker
 bundle it runs, so there is no way from outside to confirm the Worker
 answering a request is this commit. [`SECURITY.md`](SECURITY.md) says so too.
+
+## Running your own
+
+The button above does all of this for you. By hand it is:
+
+```sh
+gh repo fork NicolasV7/valoox --clone && cd valoox
+npm ci
+npx wrangler d1 create val-sessions        # put the id in wrangler.toml
+npx wrangler kv namespace create VAL       # likewise
+npx wrangler secret put JAR_KEY            # see .dev.vars.example
+npm run deploy
+```
+
+Three secrets, and only the first is required:
+
+| | |
+| --- | --- |
+| `JAR_KEY` | 32 random bytes, base64. Every session is sealed under a key derived from it; rotating it signs everybody out at once. |
+| `RESEND_KEY` | [resend.com](https://resend.com) API key, for the six-digit code and the morning alert. Without it the app runs and the alerts tab says it has nowhere to send. |
+| `RESEND_HOOK` | A Resend webhook signing secret, so a bounce can be believed. Without it the webhook route rejects everything, which is the correct failure. |
+
+Your copy is yours and it is not valoox.store — different Worker, different
+database, different key, and nothing of mine can read anything of yours. The
+licence covers the code. The name and the mark are not part of it, so call it
+something else before you point anyone at it.
 
 ## Running it
 
