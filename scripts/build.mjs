@@ -31,7 +31,17 @@ function stamp() {
     const sha = process.env.GITHUB_SHA || git('rev-parse', 'HEAD');
     // Uncommitted work means the hash below does not hold what is being
     // built, and saying so is the whole point of printing one.
-    const dirty = !process.env.GITHUB_SHA && git('status', '--porcelain') !== '';
+    //
+    // Asked only about what can end up IN the bundle. The whole tree is the
+    // obvious thing to ask and it is wrong in both directions: a stray png in
+    // the working directory would mark every build a liar, and after a few
+    // days of that nobody reads the word. Untracked files are still counted
+    // under web/, because a new module nobody has committed is exactly the
+    // case this is for.
+    const dirty =
+      !process.env.GITHUB_SHA &&
+      git('status', '--porcelain', '--', 'web', 'scripts', 'package.json', 'package-lock.json') !==
+        '';
     return { sha, dirty, at: git('log', '-1', '--format=%cI') };
   } catch {
     return { sha: 'unknown', dirty: false, at: '' };
