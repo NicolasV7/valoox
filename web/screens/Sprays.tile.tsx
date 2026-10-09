@@ -38,10 +38,11 @@ export function Tile({ spray, slot, mine }: { spray: Spray; slot: number; mine: 
         )}
       </span>
       <span class="pad__name">{spray.name}</span>
-      {/* Only the wheel has anything to say on this line, and it still takes
-          its height on every tile: without that the name sits higher on an
-          equipped one, and a wall of those is ragged. */}
-      <span class="pad__slot num">{slot > 0 ? t().sprays.slot(slot) : ''}</span>
+      {/* Only the wheel has anything to say here, and only then is there a
+          line. It used to hold its height empty so every name sat level; what
+          that cost was a strip of dead space under most of the wall, and the
+          artwork above shrank to pay for it. */}
+      {slot > 0 && <span class="pad__slot num">{t().sprays.slot(slot)}</span>}
       {/* The mark that tells the two shelves apart at the end of a scroll. It
           is a mark and not a control until the wishlist exists to put it on —
           the same as the one on a skin you do not own. */}

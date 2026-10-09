@@ -92,14 +92,18 @@
   height: 11px;
 }
 
-/* Empty on most of them, and it still takes its line: without that the name
- * sits at a different height on a tile that is on the wheel and one that is
- * not, and eighteen of those is a ragged wall. */
+/* Only drawn when there is something to say.
+ *
+ * It used to hold its line empty, so a name sat at the same height whether or
+ * not a tile was on the wheel. That bought an even row of names and spent a
+ * strip of dead space at the foot of most tiles in the wall — which is the
+ * thing people actually see, because the artwork above it shrank to pay for
+ * it. The art takes that space back now, and the names sit at two heights on
+ * a mixed row, which reads as two kinds of tile rather than as a mistake. */
 .pad__slot,
 .pad__slot--waiting {
   flex: none;
   display: block;
-  min-height: 15px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

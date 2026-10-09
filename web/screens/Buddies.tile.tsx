@@ -34,15 +34,17 @@ export function Tile({ buddy, on, mine }: { buddy: Buddy; on: string[]; mine: bo
       </span>
       <span class="pad__name">{buddy.name}</span>
       {/* A charm is attached to a weapon rather than to a slot, so the line
-          names the gun. Empty on most of them, and it still takes its height:
-          without that the name sits higher on a carried one. */}
-      {/* One gun gets named. More than one gets counted: three names on a
+          names the gun — and there is no line at all on one you are not
+          carrying, which is most of them.
+
+          One gun gets named. More than one gets counted: three names on a
           110px line is three names nobody reads, and the screen this opens
           lists them in full. */}
-      <span class="pad__slot num">
-        {said.length === 1 ? t().buddies.on(said[0] as string) : ''}
-        {said.length > 1 ? t().buddies.onMany(said.length) : ''}
-      </span>
+      {said.length > 0 && (
+        <span class="pad__slot num">
+          {said.length === 1 ? t().buddies.on(said[0] as string) : t().buddies.onMany(said.length)}
+        </span>
+      )}
       {/* A thing you do not own is a thing the store can still offer
           you, which is why this is a control and not a mark. */}
       {!mine && (
