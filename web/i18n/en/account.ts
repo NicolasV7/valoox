@@ -35,6 +35,16 @@ export const account = {
   source: 'Source',
   sourceUnder: 'The Worker, the schema and the tests',
 
+  // Which commit this page was built from. Stamped by the build — see
+  // web/built.ts — and the note below says exactly what that proves and what
+  // it does not, because overclaiming here would be worse than silence.
+  version: 'Version',
+  versionAt: (sha: string, at: string) => (at ? `${sha} · ${at.slice(0, 10)}` : sha),
+  versionDirty: (sha: string) => `${sha}, with unsaved changes`,
+  versionProves:
+    'The commit this page was built from, stamped when it was compiled. It says ' +
+    'where the code came from, not who put it up.',
+
   coffee: 'If it helped',
   coffeeSaid: 'Running on coffee',
   coffeeUnder:

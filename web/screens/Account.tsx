@@ -11,6 +11,7 @@
 // and already a column nothing had selected.
 
 import { useEffect, useState } from 'preact/hooks';
+import { built, commitUrl, short } from '../built.ts';
 import { Mark } from '../components/Mark.tsx';
 import { cardArt } from '../data/catalogue.ts';
 import { usePrefs } from '../data/channel.ts';
@@ -125,8 +126,18 @@ export function Account({ who }: { who: Who }) {
       <div class="deck__card">
         <Row out={MADE_BY} said={s.madeBy} under={s.madeByUnder} end={s.onGithub} />
         <Row out={SOURCE} said={s.source} under={s.sourceUnder} end={s.onGithub} />
+        {/* Which commit this page is. A dirty build has no commit holding what
+            you are looking at, so it names no link — a chevron to a hash that
+            is not what is running would be worse than none. */}
+        <Row
+          out={commitUrl(SOURCE) ?? undefined}
+          said={s.version}
+          under={built.dirty ? s.versionDirty(short()) : s.versionAt(short(), built.at)}
+          end={commitUrl(SOURCE) ? s.onGithub : undefined}
+        />
         <Row out={CATALOGUE} said={s.catalogue} under={s.catalogueUnder} end={s.onApi} last />
       </div>
+      <p class="legal deck__note">{s.versionProves}</p>
       <p class="legal deck__note">{s.legal}</p>
 
       <h2 class="label deck__band">{s.leaving}</h2>

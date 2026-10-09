@@ -1,0 +1,83 @@
+# Deploying from here instead of from a laptop.
+#
+# The site's argument is that its claims can be checked. One of them could not
+# be: the source is public, and nothing tied the code you can read to the code
+# that is running. `npm run deploy` runs on one machine, from whatever is in
+# its working tree, and nobody outside can see what that was.
+#
+# This closes the browser half of that gap, and only that half.
+#
+#   · the deploy runs here, from a commit, and the log is public
+#   · public/app.js is attested: a Sigstore certificate binds that exact file
+#     to this workflow and this commit
+#
+# So anyone can check the page they are being served is the code in this repo:
+#
+#   curl -sO https://valoox.store/app.js
+#   gh attestation verify app.js --repo NicolasV7/valoox
+#
+# What it does NOT cover is the Worker. Cloudflare does not publish a hash of
+# the bundle it is running, so there is no way from outside to tell that the
+# Worker serving a request is built from this commit. That is why the account
+# screen says the version is where the code came from, not who put it up.
+#
+# Until CLOUDFLARE_API_TOKEN is set in the repository's secrets this does
+# nothing and stays green, rather than printing a red cross on every push for
+# a thing that was never configured.
+
+name: Deploy
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+
+# One at a time, and never cancel one halfway: a cancelled wrangler deploy can
+# land a half-uploaded asset set.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.look.outputs.ready }}
+    steps:
+      # `secrets` is not available to a job-level `if`, so the check is a step.
+      - id: look
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: echo "ready=${{ env.TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+
+      # Both are gitignored and both are served from this origin, so a deploy
+      # without them is a site with no typeface and no coins.
+      - run: npm run fonts
+      - run: npm run art
+
+      # The same command the author runs. A deploy that ships what CI would
+      # have rejected is a CI that is decorative.
+      - run: npm run check
+
+      # The bundle is built by `npm run check` above, from GITHUB_SHA, so the
+      # file attested here is the file that goes up.
+      - uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: public/app.js
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

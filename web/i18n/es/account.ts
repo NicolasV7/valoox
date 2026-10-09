@@ -35,6 +35,16 @@ export const account = {
   source: 'Código',
   sourceUnder: 'El Worker, el esquema y los tests',
 
+  // De qué commit se armó esta página. Lo estampa el build — ver web/built.ts —
+  // y la nota de abajo dice exactamente qué prueba y qué no, porque decir de más
+  // aquí sería peor que no decir nada.
+  version: 'Versión',
+  versionAt: (sha: string, at: string) => (at ? `${sha} · ${at.slice(0, 10)}` : sha),
+  versionDirty: (sha: string) => `${sha}, con cambios sin guardar`,
+  versionProves:
+    'Es el commit del que se armó esta página, estampado al compilarla. Dice de ' +
+    'dónde salió el código, no quién lo subió.',
+
   coffee: 'Si te sirvió',
   coffeeSaid: 'Esto anda a punta de café',
   coffeeUnder:
