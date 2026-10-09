@@ -87,6 +87,11 @@ Sizes are the artboard's, in CSS pixels.
 | `AlertsFailed` | Test refused | 390×860 |
 | `MailOtp` | The code, in a mailbox | 600×900 |
 | `MailAlert` | The alert, in a mailbox | 600×990 |
+| `StopAsk` | Stop, the question | 390×844 |
+| `StopDone` | Stop, done | 390×844 |
+| `StopKept` | Stop, no | 390×844 |
+| `StopUsed` | Stop, link spent | 390×844 |
+| `StopBroken` | Stop, bad link | 390×844 |
 
 ## Account, and leaving
 

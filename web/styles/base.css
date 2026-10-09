@@ -13,6 +13,19 @@ html {
   min-height: 100%;
   background: var(--ground);
   -webkit-text-size-adjust: 100%;
+
+  /* No double-tap zoom.
+   *
+   * On a phone this app is a column of things you tap, and a browser that is
+   * still waiting to find out whether your tap was half of a double one both
+   * delays the first and sometimes answers it by zooming into a skin.
+   *
+   * `manipulation` is the whole fix and it is deliberately not the usual one:
+   * `user-scalable=no` or `maximum-scale=1` in the viewport meta would also
+   * stop it, and would take pinch zoom away from everybody at the same time.
+   * This keeps pinch, panning and scrolling, and drops only the gesture
+   * nothing here wants. */
+  touch-action: manipulation;
 }
 
 body {
