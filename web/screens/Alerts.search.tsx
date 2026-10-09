@@ -1,7 +1,7 @@
 // Adding to the list.
 //
 // What is missing is missing on purpose and the screen says so: anything you
-// own, and every knife, because the daily panel is four guns.
+// already own. Knives are not missing — the daily panel takes them too.
 //
 // What is NOT filtered out is the battle pass, and that is not an oversight —
 // see data/findable.ts. Nothing published says which skins Riot actually
@@ -24,7 +24,7 @@ import { MAX, useStars } from '../data/stars.ts';
 import type { Inventory } from '../data/types.ts';
 import { useBuddies, useCards, useRacks, useSprays, useTitles } from '../data/useIndex.ts';
 import { t } from '../i18n/index.ts';
-import { ALERTS } from '../route.ts';
+import { ALERTS, type Whence } from '../route.ts';
 import { AlertsLoading } from './Alerts.loading.tsx';
 import { AlertsStandby } from './Alerts.standby.tsx';
 
@@ -47,6 +47,9 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
   // control everywhere now — see components/StarMark.tsx. The card below
   // carries the part that is actually worth saying.
   const held = usePrefs()?.mail?.ok !== true;
+  // A result opens the thing it names, and the way back is this search — with
+  // the query still in it, because the field is kept rather than stateful.
+  const from: Whence = { to: { name: 'alerts', step: 'add' }, said: s.addSomethingTitle };
 
   // Everything owned, flattened once: the indexes are keyed by item type and
   // this only ever asks "is this id mine".
@@ -102,6 +105,7 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
               note={f.of}
               on={on(f.id)}
               shut={full}
+              from={from}
               toggle={() =>
                 toggle({
                   id: f.id,

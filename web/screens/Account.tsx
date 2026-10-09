@@ -35,6 +35,10 @@ export function Account({ who }: { who: Who }) {
   const prefs = usePrefs();
   const art = useCardArt(who.card);
 
+  // Both alerts screens are reached from two places. Saying which one this
+  // is means the back control points here rather than at the alerts tab.
+  const from = { to: { name: 'account' } as const, said: s.title };
+
   const at = who.name.lastIndexOf('#');
   const ok = prefs?.mail?.ok === true;
   const starred = prefs?.wishlist.length ?? 0;
@@ -65,18 +69,19 @@ export function Account({ who }: { who: Who }) {
           {s.live}
         </span>
       </div>
-      <p class="legal deck__note">{s.liveWhy}</p>
 
       <h2 class="label deck__band">{s.alerts}</h2>
       <div class="deck__card">
         <Row
           to={CHANNEL}
+          from={from}
           said={s.whereAlertsGo}
           under={prefs?.mail?.to || s.noAddress}
           end={prefs?.mail ? (ok ? s.verified : s.notVerified) : undefined}
         />
         <Row
           to={WATCHING}
+          from={from}
           said={s.watching}
           under={s.starredCount(starred)}
           end={s.outOf(starred, MAX)}
@@ -86,16 +91,9 @@ export function Account({ who }: { who: Who }) {
 
       <h2 class="label deck__band">{s.honest}</h2>
       <div class="deck__card">
-        <Row to={KEEP} said={s.whatWeKeep} under={s.whatWeKeepUnder} />
+        <Row to={KEEP} from={from} said={s.whatWeKeep} under={s.whatWeKeepUnder} />
         <Row said={s.whatItCalls} under={s.whatItCallsUnder(RULES)} />
-        <Row said={s.notAffiliated} under={s.notAffiliatedUnder} last />
-      </div>
-
-      <h2 class="label deck__band">{s.build}</h2>
-      <div class="deck__card">
-        <Row said={s.madeBy} under={s.madeByUnder} />
-        <Row said={s.source} under={s.sourceUnder} />
-        <Row said={s.catalogue} under={s.catalogueUnder} last />
+        <Row said={s.madeBy} under={s.madeByUnder} last />
       </div>
       <p class="legal deck__note">{s.legal}</p>
 

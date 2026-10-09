@@ -107,10 +107,9 @@ export const alerts = {
   listFull: (max: number) =>
     `La lista está llena: ${max} entre las dos. Sacá una para poder marcar otra.`,
   notInThisList:
-    'Lo que no está acá: todo lo que ya tenés, y cada cuchillo — el panel diario ' +
-    'son cuatro armas y nunca un melee. El pase de batalla sí está, y no es un ' +
-    'descuido: nada publicado dice qué skins vende Riot, así que preferimos ' +
-    'mostrarlas y decirte esto a filtrar a ojo.',
+    'Lo único que no está acá es lo que ya tenés. El pase de batalla sí está, y ' +
+    'no es un descuido: nada publicado dice qué skins vende Riot, así que ' +
+    'preferimos mostrarlas y decirte esto a filtrar a ojo.',
   searchIsLocal:
     'El buscador corre contra el catálogo que el navegador ya tiene, así que ' +
     'filtra mientras escribís sin preguntarle nada al Worker ni a Riot.',

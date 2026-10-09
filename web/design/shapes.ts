@@ -1,9 +1,9 @@
 // What shape a thing takes on a grid, and how a grid of them tiles.
 //
-// No imports and nothing async: it is two lookup tables keyed by Riot's item
-// type uuids and one piece of arithmetic. That is also why it lives here
-// rather than in data/ — nothing in this file resolves an id against
-// anything, and a test can read it without pulling the DOM in behind it.
+// No imports and nothing async: two lookup tables keyed by Riot's item type
+// uuids and one piece of arithmetic. That is also why it lives here rather
+// than in data/ — nothing in this file resolves an id against anything, and a
+// test can read it without pulling the DOM in behind it.
 
 /** Which of the four shapes a piece takes. Shape follows the kind of thing,
  *  never the slot it came from — that is what lets a ten-piece bundle and a
@@ -43,48 +43,74 @@ export const kindOf = (type: string): Kind | null => KIND[type] ?? null;
 export type Span = 'normal' | 'tall' | 'wide';
 
 /**
- * Which pieces have to grow so a two-column grid has no hole in it.
+ * The order the kinds are laid in: the tall things, then the squares, then the
+ * lines of text.
  *
- * The accessory store is four pieces and never the same four: Riot picks a
- * card, a charm, a spray, a title in whatever mix it likes, and the shapes
- * tile differently every week. So this is arithmetic rather than a layout
- * drawn for one of them.
+ * Grouping is the whole fix. The previous version kept Riot's order and tried
+ * to close the holes by growing one piece, and for two cards and two sprays it
+ * counted six cells into four rows and called it even — which is the photo:
+ * a card, two stacked sprays, a card, and a hole beside the second card. Six
+ * cells do not tile two columns unless the pieces that want two rows stand
+ * next to each other.
  *
- * Count the cells. A title is two columns by one row, a portrait is one by
- * two, a square is one by one — so titles and portraits are always even and a
- * square is the only thing that can leave the count odd. An odd count cannot
- * fill whole rows, and the leftover cell is the hole.
- *
- * Three ways out, and which one applies is decided by what the odd square has
- * to stand next to:
- *
- *   · an unpaired portrait, so the column beside it wants two cells
- *     -> the square takes both rows, and the two of them close the block
- *   · no unpaired portrait, so the square is alone on its row
- *     -> the square takes both columns instead; stretching it downwards here
- *        would open a second hole under it rather than close the first
- *   · a portrait with no square at all to stand beside it
- *     -> the portrait takes both columns
- *
- * Two columns, deliberately: the bundle's grid is three across and the
- * arithmetic there is a different problem, not this one with a bigger number.
+ * Cards before sprays before charms is also how a person reads the week: the
+ * big picture first, the small ones under it. Nothing here is Riot's order,
+ * and nothing about a weekly drop makes their order mean anything.
  */
-export function spans(shapes: Shape[]): Span[] {
-  const out: Span[] = shapes.map(() => 'normal');
-  const at = (want: Shape) => {
-    const found: number[] = [];
-    for (const [i, s] of shapes.entries()) if (s === want) found.push(i);
-    return found;
-  };
+const ORDER: Record<Kind, number> = { card: 0, skin: 1, spray: 2, buddy: 3, title: 4 };
 
-  const portraits = at('portrait');
-  const squares = at('tile');
-  const oddPortrait = portraits.length % 2 === 1;
-
-  if (squares.length % 2 === 1) {
-    out[squares[0] as number] = oddPortrait ? 'tall' : 'wide';
-  } else if (oddPortrait && squares.length === 0) {
-    out[portraits[0] as number] = 'wide';
-  }
-  return out;
+export interface Laid {
+  /** Indices into the caller's own array, in the order they should be drawn. */
+  order: number[];
+  /** What each piece grows into, by the caller's own index. */
+  span: Span[];
 }
+
+/**
+ * How a week's mix of pieces fills two columns with no hole in it.
+ *
+ * Count in cells. A portrait is one column by two rows, a line of text is two
+ * by one, a square is one by one. Text is always whole. The two that can
+ * leave a gap are a portrait with nothing to pair with and an odd square:
+ *
+ *   · portraits pair off cleanly, two side by side filling two rows
+ *   · an odd portrait leaves a one-by-two slot beside it, which two squares
+ *     fill exactly — so two of them go there and the rest carry on
+ *   · an odd portrait with only one square: that square takes both rows
+ *   · an odd portrait with no square at all: it takes both columns instead
+ *   · whatever squares are left pair off; an odd one takes both columns
+ *
+ * Two columns, deliberately. Three is a different problem, not this one with
+ * a bigger number.
+ */
+export function lay(kinds: Array<Kind | null>): Laid {
+  const span: Span[] = kinds.map(() => 'normal');
+  const order = kinds.map((_, i) => i).sort((a, b) => rank(kinds[a]) - rank(kinds[b]) || a - b);
+
+  const isa = (want: Shape) => order.filter((i) => shapeFor(kinds[i]) === want);
+
+  const portraits = isa('portrait');
+  const squares = isa('tile');
+  const spare = portraits.length % 2 === 1 ? (portraits.at(-1) as number) : null;
+
+  // The odd portrait first, because what it needs decides what the squares
+  // have left to do.
+  let free = squares.length;
+  if (spare !== null) {
+    if (free === 0) span[spare] = 'wide';
+    else if (free === 1) span[squares[0] as number] = 'tall';
+    // Two or more: the first two slot in beside it and need no help.
+    free = Math.max(0, free - 2);
+  }
+
+  // A square with nobody to stand beside takes the whole row rather than half
+  // of one — growing it downwards instead would open a hole under it.
+  if (free % 2 === 1) span[squares.at(-1) as number] = 'wide';
+
+  return { order, span };
+}
+
+const rank = (k: Kind | null): number => (k ? ORDER[k] : ORDER.spray);
+
+const shapeFor = (k: Kind | null): Shape =>
+  k === 'card' ? 'portrait' : k === 'title' ? 'text' : k === 'skin' ? 'row' : 'tile';

@@ -16,7 +16,7 @@ import { LEVELS } from '../data/findable.ts';
 import { MAX, useStars } from '../data/stars.ts';
 import type { Prefs, StoreView } from '../data/types.ts';
 import { t } from '../i18n/index.ts';
-import { href, intercept, type Route } from '../route.ts';
+import { href, intercept, type Route, type Whence } from '../route.ts';
 import { AlertsStandby } from './Alerts.standby.tsx';
 
 const CHANNEL: Route = { name: 'alerts', step: 'channel' };
@@ -36,6 +36,8 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
   const guns = all.filter((w) => (w.type ?? LEVELS) === LEVELS);
   const bits = all.filter((w) => (w.type ?? LEVELS) !== LEVELS);
   const ok = mail?.ok === true;
+  // A starred row opens the thing, and the way back out of it is this list.
+  const from: Whence = { to: { name: 'alerts' }, said: t().common.nav.alerts };
 
   return (
     <main class="screen bell">
@@ -66,7 +68,7 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
       {guns.length ? (
         <div class="watch__list">
           {guns.map((w) => (
-            <Watch key={w.id} item={w} on={on(w.id)} shut={full} toggle={toggle} />
+            <Watch key={w.id} item={w} on={on(w.id)} shut={full} from={from} toggle={toggle} />
           ))}
         </div>
       ) : (
@@ -77,7 +79,7 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
       {bits.length ? (
         <div class="watch__list">
           {bits.map((w) => (
-            <Watch key={w.id} item={w} on={on(w.id)} shut={full} toggle={toggle} />
+            <Watch key={w.id} item={w} on={on(w.id)} shut={full} from={from} toggle={toggle} />
           ))}
         </div>
       ) : (

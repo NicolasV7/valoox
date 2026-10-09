@@ -1,95 +1,149 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
-import { type Shape, spans } from '../../web/design/shapes.ts';
+import { type Kind, lay } from '../../web/design/shapes.ts';
 
-// The accessory store is four pieces and never the same four. A title is two
-// columns by one row, a portrait is one by two, a square is one by one — so a
-// square is the only thing that can leave the cell count odd, and an odd count
-// cannot fill whole rows. The leftover cell is the hole.
+// Two columns, and never a hole.
 //
-// This is here because that failure is silent: nothing throws, the grid just
-// has a gap in it on the weeks the mix comes out odd.
+// The check is arithmetic rather than a picture: lay out the pieces the way
+// `grid-auto-flow: dense` would and assert that the cells it touches form a
+// solid rectangle. That catches the case the old solver called even and the
+// screen drew with a gap — two cards and two sprays.
 
-const at = (...shapes: Shape[]) => spans(shapes);
+const CELLS: Record<Kind, [cols: number, rows: number]> = {
+  card: [1, 2],
+  title: [2, 1],
+  spray: [1, 1],
+  buddy: [1, 1],
+  skin: [1, 1],
+};
 
-/** Does this run of shapes fill every cell of a two-column grid? */
-function whole(shapes: Shape[]): boolean {
-  const cells = shapes.reduce((n, s, i) => {
-    const grown = spans(shapes)[i];
-    if (s === 'text' || grown === 'wide') return n + (s === 'portrait' ? 4 : 2);
-    return n + (s === 'portrait' || grown === 'tall' ? 2 : 1);
-  }, 0);
-  return cells % 2 === 0;
+/** Place each piece the way a two-column dense grid would, and return the set
+ *  of filled cells plus how many rows were touched. */
+function pack(kinds: Kind[]) {
+  const { order, span } = lay(kinds);
+  const filled = new Set<string>();
+  const taken = (c: number, r: number) => filled.has(c + ':' + r);
+
+  for (const i of order) {
+    const cell = CELLS[kinds[i] as Kind];
+    let w = cell[0];
+    let h = cell[1];
+    if (span[i] === 'wide') w = 2;
+    if (span[i] === 'tall') h = 2;
+
+    // Dense: first position, scanning rows then columns, where it fits.
+    let put = false;
+    for (let r = 0; r < 64 && !put; r++) {
+      for (let c = 0; c + w <= 2 && !put; c++) {
+        let ok = true;
+        for (let dc = 0; dc < w; dc++)
+          for (let dr = 0; dr < h; dr++) {
+            if (taken(c + dc, r + dr)) ok = false;
+          }
+        if (!ok) continue;
+        for (let dc = 0; dc < w; dc++)
+          for (let dr = 0; dr < h; dr++) {
+            filled.add(c + dc + ':' + (r + dr));
+          }
+        put = true;
+      }
+    }
+    assert.ok(put, 'nowhere to put ' + kinds[i]);
+  }
+
+  const rows = Math.max(...[...filled].map((k) => Number(k.split(':')[1]))) + 1;
+  return { filled, rows };
 }
 
-test('an even mix needs no help', () => {
-  // card, charm, spray, title — the common drop
-  assert.deepEqual(at('portrait', 'tile', 'tile', 'text'), [
-    'normal',
-    'normal',
-    'normal',
-    'normal',
-  ]);
+/** Every cell of every row the grid touches is filled. */
+function solid(kinds: Kind[]) {
+  const { filled, rows } = pack(kinds);
+  const holes: string[] = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < 2; c++) if (!filled.has(c + ':' + r)) holes.push(c + ':' + r);
+  }
+  assert.deepEqual(holes, [], kinds.join('+') + ' leaves ' + holes.join(', '));
+}
+
+test('the week in the photo: two cards and two sprays', () => {
+  // The one the old solver got wrong. It counted six cells, called them even,
+  // and drew a card, two stacked sprays, a card, and a hole.
+  solid(['card', 'spray', 'spray', 'card']);
 });
 
-test('a lone square beside an unpaired portrait takes both rows', () => {
-  // title, card, charm, title — measured live on 2026-10-08, and the mix that
-  // left a hole under the charm
-  assert.deepEqual(at('text', 'portrait', 'tile', 'text'), ['normal', 'normal', 'tall', 'normal']);
-  assert.deepEqual(at('portrait', 'tile'), ['normal', 'tall']);
-  assert.deepEqual(at('portrait', 'tile', 'tile', 'tile'), ['normal', 'tall', 'normal', 'normal']);
+test('every mix of four Riot can actually send', () => {
+  const kinds: Kind[] = ['card', 'spray', 'buddy', 'title'];
+  for (const a of kinds)
+    for (const b of kinds) for (const c of kinds) for (const d of kinds) solid([a, b, c, d]);
 });
 
-test('a lone square with no portrait to pair with takes both columns', () => {
-  // Growing it downwards here would open a second hole under it.
-  assert.deepEqual(at('tile', 'text'), ['wide', 'normal']);
-  assert.deepEqual(at('tile', 'tile', 'tile'), ['wide', 'normal', 'normal']);
-  // Two portraits pair with each other, so the square is still on its own row.
-  assert.deepEqual(at('portrait', 'portrait', 'tile'), ['normal', 'normal', 'wide']);
-});
-
-test('a portrait with nothing to stand beside it takes both columns', () => {
-  assert.deepEqual(at('portrait', 'text'), ['wide', 'normal']);
-  assert.deepEqual(at('portrait', 'portrait', 'portrait'), ['wide', 'normal', 'normal']);
-});
-
-test('nothing to solve', () => {
-  assert.deepEqual(at('text', 'text'), ['normal', 'normal']);
-  assert.deepEqual(at(), []);
-});
-
-test('every mix of four pieces comes out whole', () => {
-  // The real constraint: whatever Riot sends, the grid fills its rows.
-  const kinds: Shape[] = ['portrait', 'tile', 'text'];
+test('and every mix of one, two and three', () => {
+  const kinds: Kind[] = ['card', 'spray', 'buddy', 'title'];
   for (const a of kinds) {
+    solid([a]);
     for (const b of kinds) {
-      for (const c of kinds) {
-        for (const d of kinds) {
-          const mix = [a, b, c, d];
-          assert.ok(whole(mix), 'leaves a hole: ' + mix.join(', '));
-        }
-      }
+      solid([a, b]);
+      for (const c of kinds) solid([a, b, c]);
     }
   }
 });
 
-test('and every mix a bundle can hold', () => {
-  // The same grid carries a bundle's contents now, and a bundle is between
-  // four and ten pieces. Walk every length and every mix at that length —
-  // 88,572 of them — rather than trusting that four generalises.
-  const kinds: Shape[] = ['portrait', 'tile', 'text'];
-  let checked = 0;
-  for (let n = 1; n <= 10; n++) {
-    for (let code = 0; code < 3 ** n; code++) {
-      const mix: Shape[] = [];
-      let left = code;
-      for (let i = 0; i < n; i++) {
-        mix.push(kinds[left % 3] as Shape);
-        left = Math.floor(left / 3);
-      }
-      assert.ok(whole(mix), 'leaves a hole: ' + mix.join(', '));
-      checked += 1;
-    }
+test('a bundle is the same grid with more in it', () => {
+  // Fourteen pieces, every shape, in the order Riot happened to send them.
+  solid([
+    'spray',
+    'card',
+    'buddy',
+    'title',
+    'spray',
+    'card',
+    'buddy',
+    'spray',
+    'title',
+    'card',
+    'buddy',
+    'spray',
+    'card',
+    'title',
+  ]);
+  for (let n = 5; n <= 12; n++) {
+    const mix: Kind[] = [];
+    for (let i = 0; i < n; i++) mix.push((['card', 'spray', 'buddy', 'title'] as Kind[])[i % 4]);
+    solid(mix);
   }
-  assert.ok(checked > 88_000, 'walked only ' + checked + ' mixes');
+});
+
+test('cards lead, then sprays, then charms, then titles', () => {
+  const kinds: Kind[] = ['title', 'buddy', 'spray', 'card'];
+  assert.deepEqual(lay(kinds).order, [3, 2, 1, 0]);
+});
+
+test('two of a kind keep the order they came in', () => {
+  // Nothing about a weekly drop makes Riot's order mean anything, but two
+  // pieces of one kind have no reason to swap.
+  const kinds: Kind[] = ['spray', 'spray', 'card', 'card'];
+  assert.deepEqual(lay(kinds).order, [2, 3, 0, 1]);
+});
+
+test('an odd card with nothing square beside it takes the row', () => {
+  const { order, span } = lay(['card', 'title']);
+  assert.equal(span[0], 'wide');
+  assert.deepEqual(order, [0, 1]);
+});
+
+test('an odd card with one square: the square takes both rows', () => {
+  const { span } = lay(['card', 'spray']);
+  assert.equal(span[0], 'normal');
+  assert.equal(span[1], 'tall');
+});
+
+test('an odd card with two squares needs nobody to grow', () => {
+  const { span } = lay(['card', 'spray', 'buddy']);
+  assert.deepEqual(span, ['normal', 'normal', 'normal']);
+});
+
+test('a square with nobody beside it takes the row, not the column', () => {
+  // Growing it downwards would open a hole under it rather than close one.
+  const { span } = lay(['spray']);
+  assert.equal(span[0], 'wide');
 });

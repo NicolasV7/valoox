@@ -10,10 +10,6 @@ export const account = {
 
   // --- who is signed in ----------------------------------------------------
   live: 'Connected',
-  liveWhy:
-    'The green dot says the link to Riot was working when this screen loaded. ' +
-    'It does not say you are online or in a match: this app has no way to know ' +
-    'that, and there is no presence endpoint anywhere on its list.',
   region: 'Region',
   lastSeen: (said: string) => `Session used ${said}`,
   justNow: 'just now',
@@ -36,21 +32,13 @@ export const account = {
   whatWeKeepUnder: 'One sealed row, your list, your address',
   whatItCalls: 'What it is allowed to call',
   whatItCallsUnder: (n: number) => `${n} lines, and nearly all of them read`,
-  notAffiliated: 'Not affiliated with Riot Games',
-  notAffiliatedUnder: 'And what that means here',
-
-  build: 'This build',
   madeBy: 'Made by',
   madeByUnder: 'NicolasV7 · Termo#GOD in game',
-  source: 'Source',
-  sourceUnder: 'The Worker, the schema and the tests',
-  catalogue: 'Catalogue',
-  catalogueUnder: 'Names, renders and clips',
 
   legal:
-    'VALORANT, its artwork and its marks belong to Riot Games, Inc. valoox is ' +
-    'not affiliated with, endorsed by, or sponsored by Riot Games. Prices and ' +
-    'offers are read from your own account and shown as Riot returns them.',
+    'VALORANT and its art belong to Riot Games, Inc. valoox is not affiliated ' +
+    'with Riot. Names and renders come from valorant-api.com; prices come from ' +
+    'your own account, as Riot returns them.',
 
   leaving: 'Leaving',
   disconnect: 'Disconnect',

@@ -105,10 +105,9 @@ export const alerts = {
   listFull: (max: number) =>
     `The list is full at ${max} across both. Take one off to star another.`,
   notInThisList:
-    'What is not here: anything you already own, and every knife — the daily ' +
-    'panel is four guns and never a melee. The battle pass is here, and that ' +
-    'is not an oversight: nothing published says which skins Riot sells, so ' +
-    'showing them and telling you this beats filtering by guesswork.',
+    'The only thing not here is what you already own. The battle pass is here, ' +
+    'and that is not an oversight: nothing published says which skins Riot ' +
+    'sells, so showing them and telling you this beats filtering by guesswork.',
   searchIsLocal:
     'The search runs against the catalogue the browser already holds, so it ' +
     'narrows as you type without asking the Worker or Riot anything.',

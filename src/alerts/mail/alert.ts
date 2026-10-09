@@ -127,7 +127,7 @@ function band(h: Hit, origin: string, w: (typeof words)['es'], lang: Lang): stri
     `<td valign="bottom">` +
     `<div style="font-size:27px;font-weight:500;letter-spacing:-0.02em;color:${INK.text};` +
     `line-height:1.15">${esc(h.name)}</div>` +
-    `<div style="font-size:13px;color:${INK.faint};padding-top:6px">${says(h, w, lang)}</div>` +
+    `<div style="font-size:13px;color:${INK.faint};padding-top:6px">${says(h, w)}</div>` +
     `</td>` +
     (h.cost
       ? `<td align="right" valign="bottom" style="padding-left:14px;white-space:nowrap">` +
@@ -143,7 +143,7 @@ function band(h: Hit, origin: string, w: (typeof words)['es'], lang: Lang): stri
 /** "Premium · 4 levels · 4 chromas" — only the parts that are known, and only
  *  the ones worth saying. One level and one colourway is every default skin
  *  in the game, so a line reading "1 level · 1 chroma" says nothing. */
-function says(h: Hit, w: (typeof words)['es'], lang: Lang): string {
+function says(h: Hit, w: (typeof words)['es']): string {
   const parts = [
     h.tier ? w.tier[h.tier as keyof typeof w.tier] : null,
     h.levels && h.levels > 1 ? w.levels(h.levels) : null,

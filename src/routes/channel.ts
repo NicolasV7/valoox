@@ -15,13 +15,11 @@
 // and no field here says otherwise.
 
 import { tzOf } from '../alerts/mail/clock.ts';
-import { type Lang, langOf } from '../alerts/mail/words.ts';
+import { langOf } from '../alerts/mail/words.ts';
 import { check, left, waitFor } from '../alerts/otp.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
-import type { Env } from '../types.ts';
 import { gotThere, looksLikeAddress, refused } from '../vault/mail.ts';
-import * as repo from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
 import { mail } from './send.ts';
 

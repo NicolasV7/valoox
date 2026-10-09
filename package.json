@@ -20,7 +20,8 @@
     "lint": "biome check .",
     "format": "biome check --write .",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
-    "mail": "node scripts/mailpreview.mjs"
+    "mail": "node scripts/mailpreview.mjs",
+    "grid": "node scripts/grid.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

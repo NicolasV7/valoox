@@ -15,7 +15,6 @@ import { Search } from '../components/icons.tsx';
 import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import type { Skin } from '../data/skins.ts';
-import { tierOf } from '../data/tiers.ts';
 import type { Inventory } from '../data/types.ts';
 import { useWeapon } from '../data/useIndex.ts';
 import { t } from '../i18n/index.ts';

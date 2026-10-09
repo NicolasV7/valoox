@@ -7,10 +7,11 @@
 // chevron that goes nowhere is worse than no chevron.
 
 import { Chevron } from '../components/icons.tsx';
-import { href, intercept, type Route } from '../route.ts';
+import { href, intercept, type Route, type Whence } from '../route.ts';
 
 export function Row({
   to,
+  from,
   said,
   under,
   end,
@@ -18,6 +19,9 @@ export function Row({
 }: {
   /** Where it goes, when it goes anywhere. */
   to?: Route;
+  /** And where back goes from there. Without it the alerts screens fall back
+   *  to their own section, so opening one from here cost you the way home. */
+  from?: Whence;
   said: string;
   under: string;
   /** The word on the right — a state, or a count. */
@@ -40,7 +44,7 @@ export function Row({
   const cls = 'deck__row' + (last ? '' : ' deck__row--rule');
 
   return to ? (
-    <a class={cls} href={href(to)} onClick={intercept(to)}>
+    <a class={cls} href={href(to)} onClick={intercept(to, from)}>
       {inside}
     </a>
   ) : (

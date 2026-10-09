@@ -1,18 +1,19 @@
 // Everything a star is allowed to go on.
 //
-// Two filters, and each one removes a row that could only ever disappoint:
+// One filter, and it removes a row that could only ever disappoint: anything
+// already owned, because the daily store never offers you something you have.
 //
-//   - already owned. The daily store never offers you something you have.
-//   - melee. The daily panel is four guns and never a knife, so a starred
-//     dagger is a row that cannot fire whatever else is true of it.
-//
-// There was a third and it is gone, which is worth writing down because it
+// There were two more and both are gone, which is worth writing down because it
 // looks like an omission. Whether Riot sells a given skin at all is not in
 // the public catalogue — a battle-pass skin carries a content tier and a
 // theme exactly like a sold one — and Riot's own answer, /store/v1/offers/,
 // now 404s on every shard and every spelling of the path. So the list holds
 // things that will never match, and the screen says so rather than pretending
 // to a filter it cannot run.
+//
+// The other was melee, kept out on the belief that the daily panel is four
+// guns. It is not — a knife turns up in that panel like anything else, and
+// the Night Market is the rotation that excludes them. So melee is in.
 
 import { type Buddy, bare as bareBuddy } from './buddies.ts';
 import { bare as bareCard, type Card } from './cards.ts';
@@ -60,12 +61,11 @@ const row = (
   hay: fold(name + ' ' + of),
 });
 
-/** Guns only, and only the base level: the store sells a skin, and level 2 is
- *  not a thing that turns up on its own. */
+/** Every weapon, melee included, and only the base level: the store sells a
+ *  skin, and level 2 is not a thing that turns up on its own. */
 export function guns(racks: Rack[], owned: Set<string>): Findable[] {
   const out: Findable[] = [];
   for (const rack of racks) {
-    if (rack.of === 'melee') continue;
     for (const w of rack.weapons) {
       for (const skin of w.skins) {
         const id = skin.levels[0]?.id;

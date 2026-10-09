@@ -28,12 +28,10 @@ export function CollectionLoading() {
       <CollectionTabs on="weapons" />
 
       {RACKS.map(([slots, label], rack) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: the rack IS its position
         <section class="coll__rack" key={rack}>
           <span class="skel label--waiting" style={{ width: label }} />
           <div class="slots">
             {Array.from({ length: slots }, (_, slot) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: likewise
               <div class="slot slot--waiting" key={slot} />
             ))}
           </div>

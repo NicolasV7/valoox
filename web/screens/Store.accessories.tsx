@@ -7,18 +7,18 @@
 // ten-piece bundle be the same grid.
 //
 // It is never the same four pieces twice, so the grid is not laid out — it is
-// solved. spans() reads the week's shapes and says which piece has to grow so
-// the two columns come out whole. See design/shapes.ts.
+// solved. lay() groups the week by kind, puts the cards first and the charms
+// last, and says which piece has to grow so the two columns come out whole.
+// See design/shapes.ts.
 
 import { Countdown } from '../components/Countdown.tsx';
 import { Tile } from '../components/Tile.tsx';
 import type { AccessoryStore } from '../data/types.ts';
-import { shapeOf, spans } from '../design/shapes.ts';
+import { kindOf, lay, shapeOf } from '../design/shapes.ts';
 import { t } from '../i18n/index.ts';
 
 export function Accessories({ store }: { store: AccessoryStore }) {
-  const shapes = store.items.map((it) => shapeOf(it.type));
-  const grown = spans(shapes);
+  const { order, span } = lay(store.items.map((it) => kindOf(it.type)));
 
   return (
     <section class="store__block">
@@ -27,21 +27,25 @@ export function Accessories({ store }: { store: AccessoryStore }) {
         <Countdown from={store.remaining} className="store__clock" />
       </div>
       <div class="grid">
-        {store.items.map((it, i) => (
-          <Tile
-            key={it.id}
-            type={it.type}
-            id={it.id}
-            cost={it.cost}
-            qty={it.qty}
-            span={grown[i]}
-            // A square here is 110px and its name already says what it is
-            // ("Glitchpop Spray"). A card and a title have the room, and a
-            // title's name — "Fortune" — says nothing at all on its own. One
-            // that has grown has the room too.
-            captioned={shapes[i] !== 'tile' || grown[i] !== 'normal'}
-          />
-        ))}
+        {order.map((i) => {
+          const it = store.items[i];
+          if (!it) return null;
+          return (
+            <Tile
+              key={it.id}
+              type={it.type}
+              id={it.id}
+              cost={it.cost}
+              qty={it.qty}
+              span={span[i]}
+              // A square here is 110px and its name already says what it is
+              // ("Glitchpop Spray"). A card and a title have the room, and a
+              // title's name — "Fortune" — says nothing at all on its own. One
+              // that has grown has the room too.
+              captioned={shapeOf(it.type) !== 'tile' || span[i] !== 'normal'}
+            />
+          );
+        })}
       </div>
     </section>
   );

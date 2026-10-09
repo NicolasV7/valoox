@@ -16,6 +16,10 @@
 }
 
 .watch {
+  /* The stretched link inside measures itself against this, and the star has
+   * to sit above the link or tapping it opens the thing instead of starring
+   * it — which is the one tap on this row that is not navigation. */
+  position: relative;
   display: grid;
   grid-template-columns: 96px 1fr auto;
   align-items: center;
@@ -36,6 +40,11 @@
     repeating-linear-gradient(107deg, rgba(var(--art), 0.043) 0 1px, rgba(0, 0, 0, 0) 1px 23px),
     radial-gradient(84% 128% at 30% 50%, rgba(var(--art), 0.255) 0%, rgba(var(--art), 0) 70%),
     var(--stage-row);
+}
+
+.watch > .star {
+  position: relative;
+  z-index: 2;
 }
 
 .watch__art {
