@@ -4,9 +4,7 @@
 
 export const gate = {
   title: 'Your VALORANT store, without opening the game.',
-  lede:
-    'You get in by scanning a code with Riot Mobile. Before you do, here is ' +
-    'exactly what happens to your account.',
+  lede: 'You get in by scanning a code with Riot Mobile. Here is what happens to your account.',
 
   // One line each wherever the sentence allows it. This screen has to be read
   // in one piece on a phone, and a fact below the fold is a fact nobody read —
@@ -14,17 +12,18 @@ export const gate = {
   // it goes looking.
   facts: {
     password: 'Your password never comes here.',
-    passwordWhy:
-      'Riot signs you in inside their own app. There is nowhere on this page to type it.',
+    passwordWhy: 'Riot signs you in inside their own app. There is nowhere here to type it.',
     keep: 'We keep one thing.',
     keepWhy: 'The session Riot hands back, encrypted, with the key held outside the database.',
     read: 'It only knows how to read.',
     readWhy:
-      'The endpoints that change something — loadout, queue, purchases — are not ' +
-      'in the code, and a test proves it.',
+      'The endpoints that change something — equipping, queueing, buying — are ' +
+      'not in the code, and a test proves it.',
     leave: 'You can leave.',
+    // `forget()` deletes our row and nothing else, so the subject of the first
+    // sentence is what we keep — never the session, which is Riot's to end.
     leaveWhy:
-      'Disconnect and your session is deleted at once. On Riot’s side it expires ' + 'on its own.',
+      'Disconnect and what we keep is deleted at once. On Riot’s side the session expires on its own.',
   },
 
   show: 'Show me the code',
@@ -59,10 +58,10 @@ export const gate = {
 
   expired: {
     title: 'This code expired.',
-    lede:
-      'They last about two minutes, on purpose. One left lying around is a way ' +
-      'into your account.',
+    // Riot's timer, not ours. Two minutes is the figure web/sign-in.ts is
+    // written against, which is why the line hedges it rather than states it.
+    lede: 'They last about two minutes, on purpose. One left lying around is a way into your account.',
     again: 'Make a new code',
-    nothingHappened: 'Nothing happened to your account. An expired code is simply ignored by Riot.',
+    nothingHappened: 'Nothing happened to your account. Riot ignores an expired code.',
   },
 };

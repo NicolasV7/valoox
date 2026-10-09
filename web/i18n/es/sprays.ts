@@ -5,7 +5,7 @@ export const sprays = {
   of: (have: number, all: number) => `${have} de ${all} grafitis`,
 
   /** Qué ranura de la rueda ocupa. Las cuatro se dicen igual: estar en la
-   *  rueda ya es estar equipado, y «equipado» al lado de «ranura 3» son dos
+   *  rueda ya es estar equipado, y "equipado" al lado de "ranura 3" son dos
    *  palabras para lo mismo. */
   slot: (n: number) => `ranura ${n}`,
 
@@ -15,41 +15,36 @@ export const sprays = {
   yours: 'Tuyos',
   notYours: 'No son tuyos',
 
+  // El lavado de cada celda es el color medido de su propio dibujo, que es lo
+  // único que mantiene legible una pared de cuadrados. Se ve en pantalla, así
+  // que no hace falta decirlo aquí: colourWhy lo explica una sola vez, abajo.
   grid:
-    'Un grafiti es cuadrado, así que acá hay una grilla y no el tablero de ' +
-    'ranuras que tienen las armas. Cada celda va lavada en el color de su ' +
-    'propio dibujo — medido del dibujo, no elegido — que es lo único que ' +
-    'mantiene legible una pared de cuadrados. Están los del juego entero, no ' +
-    'solo los tuyos: los huecos son la mitad de lo que cuenta una colección.',
+    'Un grafiti es cuadrado, así que aquí hay una grilla y no el tablero de ' +
+    'ranuras de las armas. Están todos los del juego, no solo los tuyos.',
   /** La rueda tiene cuatro ranuras y una puede estar vacía: Riot tiene un
-   *  grafiti llamado «None» y eso es lo que manda cuando no hay nada puesto. */
+   *  grafiti llamado "None" y eso es lo que envía cuando no hay nada puesto. */
   wheel: (on: number, rest: number) =>
     `${on} están en la rueda ahora mismo, uno por ranura y hasta cuatro. Los ` +
-    `otros ${rest} de acá son solo tuyos.`,
+    `otros ${rest} son tuyos, fuera de la rueda.`,
 
   // --- mientras no llegó el catálogo ---------------------------------------
   waitingWhy:
-    'Las pestañas están dibujadas de verdad porque no necesitan datos. Todo lo ' +
-    'de abajo espera el catálogo de grafitis: un solo fetch a valorant-api que ' +
-    'el navegador se queda, así que esta pantalla es de la primera visita. Las ' +
-    'celdas ya son cuadradas, que es todo el trabajo de un esqueleto.',
+    'Esperando el catálogo de grafitis: un solo fetch que el navegador guarda, ' +
+    'así que esta pantalla es solo de la primera visita.',
 
   // --- uno abierto ---------------------------------------------------------
   colourFrom: 'De dónde sale el color',
+  // El tono es una media pesada por croma sobre los píxeles con más de 12% de
+  // alfa y la saturación sale del percentil 88 — ALPHA_FLOOR y VIVID en
+  // design/hsv.ts. El estimador es nuestro, no del que mira un grafiti.
   colourWhy: (rgb: string) =>
-    `rgb(${rgb}). No es un promedio: un promedio plano sobre un dibujo sale ` +
-    `siempre embarrado, porque el contorno, el brillo y el margen transparente ` +
-    `tiran todos hacia el gris. El tono es una media pesada por croma sobre los ` +
-    `píxeles con más de 12% de alfa, y la saturación sale del percentil 88 — su ` +
-    `extremo vivo — en lugar de la media. El navegador lo mide dibujando la ` +
-    `imagen en un canvas de 96px y leyendo los píxeles de vuelta, que ` +
-    `valorant-api permite porque manda la cabecera CORS.`,
+    `rgb(${rgb}), medido del dibujo y no elegido: el navegador lee los píxeles ` +
+    `de la imagen en un canvas de 96px.`,
 
   canSay: 'Qué podemos decir de él',
   canSayWhy:
     'Que es tuyo, y en cuál de las cuatro ranuras de la rueda está. No cuántas ' +
-    'veces lo usaste: Riot no lo publica, y un número que nadie puede verificar ' +
-    'es peor que ningún número.',
+    'veces lo usaste: Riot no lo publica.',
 
   moves: 'Este se anima en el juego y lo que ves son los cuadros que publica Riot.',
 };

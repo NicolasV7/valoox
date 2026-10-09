@@ -32,8 +32,8 @@ export function setLocale(next: Locale): void {
   document.documentElement.lang = next;
 }
 
-/** What the browser asked for, if we speak it. Nothing is stored; the choice is
- *  the browser's until a person makes one on the Account screen. */
+/** What the browser asked for, if we speak it. Nothing is stored and nothing
+ *  asks: the browser decides, every load. There is no language control yet. */
 export function preferred(): Locale {
   for (const tag of navigator.languages ?? []) {
     const base = tag.slice(0, 2).toLowerCase();

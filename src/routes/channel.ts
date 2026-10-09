@@ -28,9 +28,13 @@ import { mail } from './send.ts';
  *
  * The address is validated, stored unverified, and then mailed — in that
  * order, so what reaches fetch() is a value this Worker put in its own row
- * rather than a string off a request. Changing it later starts the new one
- * unverified and leaves the old one receiving until the new code comes back,
- * so nothing stops silently.
+ * rather than a string off a request.
+ *
+ * Changing it stops the alerts until the new code comes back: there is one
+ * address and `ok` goes false with it, and both the job and post() gate on
+ * `ok === true`. A doc comment here used to claim the old address kept
+ * receiving in the meantime, and the alerts copy was written from that
+ * sentence rather than from the code.
  */
 export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
   const held = await readSession(env, uid);

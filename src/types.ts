@@ -61,9 +61,6 @@ export interface Session {
     send?: string;
     said?: string;
   };
-  /** The last address this browser actually proved, which is not always the
-   *  one in `mail`: changing it leaves the old one receiving until the new
-   *  code comes back. It is what tells the claim which key to release. */
 }
 
 /** Headers every authenticated Riot data call must carry. Extends Record so it

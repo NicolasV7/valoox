@@ -34,9 +34,11 @@ export const common = {
     ultra: 'Ultra',
   },
 
-  owned: 'Ya es tuya',
-  notOwned: 'No es tuya',
-  equipped: 'Equipada',
+  // One pair for every kind of thing, so it carries no gender: this chip sits
+  // on a grafiti and a título as often as on a tarjeta.
+  owned: 'Ya lo tienes',
+  notOwned: 'No lo tienes',
+  equipped: 'En uso',
 
   // What a failure is allowed to say. The server throws messages meant for a
   // log — `storefront 403`, `sealed blob did not open` — and none of them reach
@@ -44,17 +46,15 @@ export const common = {
   error: {
     expired: 'Tu sesión venció en Riot',
     expiredWhy:
-      'No pasó nada acá. Riot termina una sesión cada tanto, y después de un ' +
-      'cambio de contraseña o un cierre en todos los dispositivos la termina al ' +
-      'instante. Escaneá de nuevo y vuelve todo.',
+      'Aquí no pasó nada malo. Riot termina una sesión pasado un tiempo, y al ' +
+      'instante tras un cambio de contraseña o un cierre en todos lados. Escanea ' +
+      'otra vez y vuelve todo.',
     riot: 'Riot no contestó',
-    riotWhy:
-      'Puede ser un mantenimiento o un rato de lentitud. Lo que guardamos sigue ' +
-      'intacto; no hay nada que rehacer.',
+    riotWhy: 'Puede ser mantenimiento, o unos minutos lentos. Lo que guardamos sigue intacto.',
     us: 'Algo se rompió de este lado',
-    usWhy: 'No es tu cuenta ni tu sesión. Probá de nuevo en un minuto.',
+    usWhy: 'No es tu cuenta ni tu sesión. Prueba otra vez en un minuto.',
     status: (code: number) => `Código ${code}`,
-    scanAgain: 'Escanear de nuevo',
+    scanAgain: 'Escanear otra vez',
   },
 
   loading: 'Cargando…',

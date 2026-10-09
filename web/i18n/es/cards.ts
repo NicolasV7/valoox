@@ -9,28 +9,29 @@ export const cards = {
   yours: 'Tuyas',
   notYours: 'No son tuyas',
 
+  // La celda recorta el arte alto en vez de reducirlo, y el lavado de atrás es
+  // el color medido de esa misma pintura. Las dos cosas están a la vista: lo
+  // que no se ve es por qué hay dos columnas, y eso es lo único que se agrega.
   grid:
     'Dos columnas, no tres: una tarjeta es un retrato 2:5 y a un tercio del ' +
-    'ancho deja de ser una imagen. La celda recorta el arte alto en vez de ' +
-    'achicarlo — una tarjeta que no se puede mirar no es una tarjeta — y el ' +
-    'lavado de atrás sigue siendo el color medido de esa misma pintura, que es ' +
-    'lo que se ve en los bordes del recorte. Están las del juego entero.',
+    'ancho deja de ser una imagen. Están todas las del juego, no solo las tuyas.',
 
   waitingWhy:
-    'Las pestañas están dibujadas de verdad porque no necesitan datos. Todo lo ' +
-    'de abajo espera el catálogo de tarjetas: un solo fetch a valorant-api que ' +
-    'el navegador se queda, así que esta pantalla es de la primera visita.',
+    'Esperando el catálogo de tarjetas: un solo fetch que el navegador guarda, ' +
+    'así que esta pantalla es solo de la primera visita.',
 
   crops: 'Tres recortes, una tarjeta',
+  // Dónde se encuentra cada uno lo dice la etiqueta debajo del recorte, en
+  // piece.wideWhere y piece.smallWhere. Decirlo otra vez aquí era decirlo dos
+  // veces con palabras distintas.
   cropsWhy:
-    'Riot manda cada tarjeta tres veces y son recortes, no escalas: el alto tiene detalle que el cuadrado no muestra nunca. La celda de la grilla recorta el alto, y acá están los otros dos — cada uno dibujado donde te lo encontrás, porque «recorte ancho» no quiere decir nada y «detrás de tu nombre en el lobby» es el mismo dato en una forma que podés verificar.',
+    'Riot envía cada tarjeta tres veces y son recortes, no escalas: el alto ' +
+    'tiene detalle que el cuadrado no muestra nunca.',
 
   colourFrom: 'De dónde sale el color',
+  // Media pesada por croma sobre los píxeles con más de 12% de alfa, y la
+  // saturación del percentil 88 — design/hsv.ts. El estimador es nuestro.
   colourWhy: (rgb: string) =>
     `rgb(${rgb}), medido del recorte cuadrado — el mismo que mide la grilla, ` +
-    `así que el lavado es el mismo color en las dos pantallas. El tono es una ` +
-    `media pesada por croma sobre los píxeles con más de 12% de alfa y la ` +
-    `saturación sale del percentil 88, no de la media. Una tarjeta suele salir ` +
-    `de un color que no es el que uno adivinaría, y ese es el argumento para ` +
-    `medirlo en lugar de elegirlo.`,
+    `así que el lavado es el mismo color en las dos pantallas.`,
 };

@@ -9,28 +9,29 @@ export const cards = {
   yours: 'Yours',
   notYours: 'Not yours',
 
+  // The tile crops the tall art rather than shrinking it, and the wash behind
+  // it is that painting's own measured colour. Both are on screen already;
+  // what is not visible is why there are two columns, so that is all it adds.
   grid:
-    'Two columns, not three: a card is a 2:5 portrait and at a third of the ' +
-    'width it stops being a picture. The tile crops the tall art rather than ' +
-    'shrinking it — a card you cannot read is not a card — and the wash behind ' +
-    'each one is still that painting’s own measured colour, which is what you ' +
-    'see at the edges. Every card in the game is here.',
+    'Two columns, not three: a card is a 2:5 portrait, and at a third of the ' +
+    'width it stops being a picture. Every card in the game is here, not only yours.',
 
   waitingWhy:
-    'The tab bar is drawn for real because it needs no data. Everything under ' +
-    'it is waiting on the cards catalogue — one fetch from valorant-api that ' +
-    'the browser keeps, so this state belongs to a first visit.',
+    'Waiting on the cards catalogue: one fetch the browser keeps, so this ' +
+    'screen belongs to a first visit.',
 
   crops: 'Three crops, one card',
+  // Where each one turns up is the label under the crop itself, in
+  // piece.wideWhere and piece.smallWhere. Saying it here too was saying it
+  // twice in two different sets of words.
   cropsWhy:
-    'Riot ships every card three times and they are crops, not scales: the tall one has detail the square never shows. The grid crops the tall one, and here are the other two — each drawn where you actually meet it, because “wide crop” means nothing and “behind your name in the lobby” is the same fact in a form you can check.',
+    'Riot ships every card three times and they are crops, not scales: the ' +
+    'tall one has detail the square never shows.',
 
   colourFrom: 'Where the colour comes from',
+  // Chroma-weighted mean over the pixels above 12% alpha, saturation from the
+  // 88th percentile — design/hsv.ts. The estimator is ours, not the reader's.
   colourWhy: (rgb: string) =>
     `rgb(${rgb}), measured off the square crop — the same one the grid ` +
-    `measures, so the wash is the same colour on both screens. The hue is a ` +
-    `chroma-weighted mean over the pixels above 12% alpha and the saturation ` +
-    `comes from the 88th percentile rather than the mean. A card often reads a ` +
-    `colour you would not have guessed, which is the argument for measuring it ` +
-    `instead of picking it.`,
+    `measures, so the wash is the same colour on both screens.`,
 };

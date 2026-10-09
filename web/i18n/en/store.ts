@@ -19,9 +19,7 @@ export const store = {
   allOwned: 'You already own all of it',
 
   empty: 'Riot returned nothing for this account.',
-  emptyWhy:
-    'That is unusual and probably not true. If you own skins in game, this is ' +
-    'our bug rather than an empty collection.',
+  emptyWhy: 'If you own skins in game, this is our bug — not an empty collection.',
 
   disconnect: 'Disconnect',
   notice:
@@ -36,8 +34,8 @@ export const offer = {
   levelsOf: (have: number, all: number) => `${have} of ${all}`,
   variants: 'Variants',
   starred: 'Starred',
-  star: 'Star it',
-  unstar: 'Stop watching',
+  star: 'Star',
+  unstar: 'Unstar',
 
   original: 'Original',
 
@@ -54,12 +52,12 @@ export const offer = {
   },
 
   /** Riot hosts one clip per level and they are large. We link theirs instead
-   *  of keeping copies, which is also the honest thing to say about it. */
+   *  of keeping copies, which is also the honest thing to say about it. Both
+   *  blocks vanish for a skin that has neither: 857 of the catalogue have one
+   *  level and 880 have no variants. */
   clips:
-    'Both blocks disappear for a skin that has neither: 857 of the catalogue ' +
-    'have one level and 880 have no variants. The clip is Riot’s and streams ' +
-    'from their server; they are 13 MB each, so we point at theirs rather than ' +
-    'keep copies.',
+    'The clip is Riot’s and streams from their server: it is 13 MB, so we point ' +
+    'at theirs rather than keep copies.',
 };
 
 // The bundle, opened. Riot sends between four and ten pieces and each carries
@@ -74,14 +72,13 @@ export const bundle = {
   total: 'Bundle price',
 
   perItem:
-    'Every piece carries its own price: Riot gives each item in a bundle a ' +
-    'BasePrice and a DiscountedPrice, accessories included, so the discount is ' +
-    'applied per item rather than as one number on the whole.',
+    'Riot gives each item in a bundle a BasePrice and a DiscountedPrice, ' +
+    'accessories included, so the discount is applied per item rather than on the whole.',
+  /** The daily store is the one place a price is derived rather than read —
+   *  from the tier, because that offer carries only a cost. */
   read:
-    'Read, not guessed: each row above is a BasePrice and a DiscountedPrice ' +
-    'straight out of the storefront payload, and the totals are its ' +
-    'TotalBaseCost and TotalDiscountedCost. The daily store is the one place a ' +
-    'price is derived here, from the tier, because that offer carries only a cost.',
+    'Read, not guessed: each row is a BasePrice and a DiscountedPrice out of the ' +
+    'storefront, and the totals are its TotalBaseCost and TotalDiscountedCost.',
 
   gone: 'This bundle is no longer in your store.',
 };

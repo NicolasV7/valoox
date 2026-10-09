@@ -9,27 +9,24 @@ export const titles = {
   yours: 'Tuyos',
   notYours: 'No son tuyos',
 
+  // El banderín y el único degradado gris de la app están a la vista en el
+  // título abierto, así que no se nombran. Esta nota dice la forma —por qué es
+  // una lista y no una grilla— y el cierre que llevan las cuatro pestañas.
   noArt:
-    'La única pestaña sin una sola imagen. Un título es un texto, así que lleva ' +
-    'tipografía, el banderín con el que el juego lo dibuja, y el único degradado ' +
-    'gris de la app: inventarle un color acá sería inventar un dato. Es una ' +
-    'lista y no una grilla porque lo que se compara son palabras.',
+    'Un título es un texto, así que es una lista y no una grilla: lo que se ' +
+    'compara son palabras. Están todos los del juego, no solo los tuyos.',
 
   waitingWhy:
-    'Las pestañas están dibujadas de verdad porque no necesitan datos. Todo lo ' +
-    'de abajo espera el catálogo de títulos, que es el más chico de los cuatro ' +
-    'y sigue siendo un fetch que el navegador se queda.',
+    'Esperando el catálogo de títulos: un solo fetch que el navegador guarda, ' +
+    'así que esta pantalla es solo de la primera visita.',
 
   none: 'Un título no tiene arte',
   noneWhy: (n: number) =>
-    `${n} de ellos y ni una imagen entre todos: un título es un texto que el ` +
-    `juego imprime al lado de tu nombre. Por eso esta pantalla lleva el ` +
-    `banderín con el que lo dibuja, la tipografía al tamaño que usa, y el único ` +
-    `degradado gris de la app. Darle un color sería inventárselo.`,
+    `${n} títulos y ni una imagen entre todos: un título es un texto que el ` +
+    `juego imprime al lado de tu nombre. Darle un color sería inventárselo.`,
 
   inMatch: 'Cómo se ve en una partida',
   inMatchWhy:
-    'Riot lo dibuja dentro de un corchete después de tu nombre en el marcador. ' +
-    'Acá mostramos el texto y el marco y nos detenemos: dibujar un marcador ' +
-    'falso alrededor sería disfrazar un dato de captura de pantalla.',
+    'Riot lo dibuja entre corchetes después de tu nombre en el marcador. Aquí ' +
+    'mostramos el texto y el marco, nada más.',
 };

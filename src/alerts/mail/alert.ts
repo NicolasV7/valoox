@@ -140,9 +140,9 @@ function band(h: Hit, origin: string, w: (typeof words)['es'], lang: Lang): stri
   );
 }
 
-/** "Premium · 4 levels · 4 chromas" — only the parts that are known, and only
- *  the ones worth saying. One level and one colourway is every default skin
- *  in the game, so a line reading "1 level · 1 chroma" says nothing. */
+/** "Premium · 4 levels · 4 variants" — only the parts that are known, and
+ *  only the ones worth saying. One level and one variant is every default
+ *  skin in the game, so "1 level · 1 variant" says nothing. */
 function says(h: Hit, w: (typeof words)['es']): string {
   const parts = [
     h.tier ? w.tier[h.tier as keyof typeof w.tier] : null,

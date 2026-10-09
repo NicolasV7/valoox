@@ -15,7 +15,7 @@ import { rf } from '../vault/http.ts';
 import { send } from '../vault/mail.ts';
 import { mintStop } from '../vault/stop.ts';
 import { html, subject, text } from './mail/alert.ts';
-import { langOf } from './mail/words.ts';
+import { type Lang, langOf, words } from './mail/words.ts';
 
 /** Where the pictures in a message come from and where its links point. The
  *  job has no request to read an origin off, so this is the one place in the
@@ -49,13 +49,11 @@ async function fire(url: string, init: RequestInit): Promise<Response> {
   return last ?? new Response(null, { status: 504 });
 }
 
-/** The one line a channel with no layout gets. */
-export function message(found: Hit[]): string {
-  const names = found.map((h) => h.name);
-  return names.length === 1
-    ? names[0] + ' está en tu tienda hoy.'
-    : names.join(', ') + ' están en tu tienda hoy.';
-}
+/** The one line a channel with no layout gets, in the language the row asked
+ *  for. It used to be written here, in Spanish only, so this channel answered
+ *  in a language the reader may never have picked. */
+export const message = (found: Hit[], lang: Lang): string =>
+  words[lang].pushLine(found.map((h) => h.name));
 
 type Notify = NonNullable<Session['notify']>;
 
@@ -89,9 +87,11 @@ export async function post(
   left: number,
 ): Promise<boolean> {
   const out: Array<Promise<boolean>> = [];
+  // Both channels speak it, so it is read once rather than inside the half
+  // that happens to have the address on it.
+  const lang = langOf(session.mail?.lang);
 
   if (session.mail?.ok === true) {
-    const lang = langOf(session.mail.lang);
     const stop = stopLink(HOME, await mintStop(env, uid));
     out.push(
       send(
@@ -108,7 +108,7 @@ export async function post(
 
   if (session.notify?.discord) {
     out.push(
-      deliver(session.notify, message(found))
+      deliver(session.notify, message(found, lang))
         .then(() => true)
         .catch(() => false),
     );

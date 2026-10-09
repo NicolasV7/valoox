@@ -46,22 +46,31 @@ test('an empty store is not a crash', () => {
   assert.deepEqual(hits({ offers: [], night: null } as unknown as StoreView, want('a')), []);
 });
 
-test('the message reads like a sentence in both shapes', () => {
+test('the message reads like a sentence in both shapes, in both languages', () => {
   assert.equal(
-    message([{ id: 'x', name: 'Reaver Vandal' }]),
+    message([{ id: 'x', name: 'Reaver Vandal' }], 'es'),
     'Reaver Vandal está en tu tienda hoy.',
   );
   assert.equal(
-    message([
-      { id: 'x', name: 'Reaver Vandal' },
-      { id: 'y', name: 'Prime Phantom' },
-    ]),
+    message(
+      [
+        { id: 'x', name: 'Reaver Vandal' },
+        { id: 'y', name: 'Prime Phantom' },
+      ],
+      'es',
+    ),
     'Reaver Vandal, Prime Phantom están en tu tienda hoy.',
+  );
+  // The half that was wrong until the line moved into words.ts: this channel
+  // answered in Spanish whatever the row asked for.
+  assert.equal(
+    message([{ id: 'x', name: 'Reaver Vandal' }], 'en'),
+    'Reaver Vandal is in your store today.',
   );
 });
 
 test('the message carries no identifier, only names the user chose', () => {
-  const m = message([{ id: 'e7c63390-eda7-46e0-bb7a-a6abdacd2433', name: 'Sakura Sheriff' }]);
+  const m = message([{ id: 'e7c63390-eda7-46e0-bb7a-a6abdacd2433', name: 'Sakura Sheriff' }], 'es');
   assert.ok(!m.includes('e7c63390'), 'a uuid in a push would leak through ntfy');
 });
 

@@ -15,41 +15,36 @@ export const sprays = {
   yours: 'Yours',
   notYours: 'Not yours',
 
+  // Each tile is washed in the measured colour of its own art, which is the
+  // only way a wall of squares stays readable. That is visible on screen, so
+  // it is not said here: colourWhy explains it once, below.
   grid:
     'A spray is square, so this is a grid rather than the slot board the ' +
-    'weapons get. Each tile is washed in the colour of its own art — measured ' +
-    'off the art, not picked — which is the only way a wall of squares stays ' +
-    'readable. Every spray in the game is here, not only yours: the gaps are ' +
-    'half of what a collection tells you.',
+    'weapons get. Every spray in the game is here, not only yours.',
   /** The wheel has four slots and one can be empty: Riot has a spray called
    *  "None" and that is what comes back when nothing is in it. */
   wheel: (on: number, rest: number) =>
     `${on} are on the wheel right now, one per slot and up to four. The other ` +
-    `${rest} here are just owned.`,
+    `${rest} are yours, off the wheel.`,
 
   // --- before the catalogue lands ------------------------------------------
   waitingWhy:
-    'The tab bar is drawn for real because it needs no data. Everything under ' +
-    'it is waiting on the sprays catalogue — one fetch from valorant-api that ' +
-    'the browser keeps, so this state belongs to a first visit. The cells are ' +
-    'already square, which is the whole job of a skeleton.',
+    'Waiting on the sprays catalogue: one fetch the browser keeps, so this ' +
+    'screen belongs to a first visit.',
 
   // --- one opened ----------------------------------------------------------
   colourFrom: 'Where the colour comes from',
+  // The hue is a chroma-weighted mean over the pixels above 12% alpha and the
+  // saturation comes from the 88th percentile — ALPHA_FLOOR and VIVID in
+  // design/hsv.ts. The estimator is ours, not the reader's.
   colourWhy: (rgb: string) =>
-    `rgb(${rgb}). Not an average: a flat mean over a drawing always comes out ` +
-    `muddy, because the outline, the glow and the transparent margin all pull ` +
-    `toward grey. The hue is a chroma-weighted mean over the pixels above 12% ` +
-    `alpha, and the saturation is taken from the 88th percentile — its vivid ` +
-    `end — rather than the mean. The browser measures it by drawing the image ` +
-    `into a 96px canvas and reading the pixels back, which valorant-api allows ` +
-    `because it sends the CORS header.`,
+    `rgb(${rgb}), measured off the art rather than picked: the browser reads ` +
+    `the pixels back from a 96px canvas.`,
 
   canSay: 'What we can say about it',
   canSayWhy:
     'That you own it, and which of the four wheel slots it is in. Not how often ' +
-    'you have used it: Riot does not publish that, and a number nobody can ' +
-    'check is worse than no number.',
+    'you have used it: Riot does not publish that.',
 
   moves: 'This one animates in game, and what you are seeing are the frames Riot publishes.',
 };

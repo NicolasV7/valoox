@@ -16,37 +16,31 @@ export const buddies = {
   yours: 'Tuyos',
   notYours: 'No son tuyos',
 
+  // La grilla de los grafitis, reusada en lugar de ganarse una segunda. Lo
+  // único que un amuleto no comparte es la línea de abajo, así que esta nota
+  // dice eso y el cierre que llevan las cuatro pestañas, nada más.
   grid:
-    'Un amuleto también es cuadrado, así que usa la grilla de los grafitis en ' +
-    'lugar de ganarse una segunda. Lo que cambia es la línea de abajo: un ' +
-    'amuleto va colgado de un arma y no de una ranura, así que dice qué arma lo ' +
-    'está llevando. Están los del juego entero, no solo los tuyos.',
+    'Un amuleto también es cuadrado, así que usa la grilla de los grafitis. La ' +
+    'línea de abajo dice de qué arma cuelga. Están todos los del juego, no solo los tuyos.',
   instances: (have: number, kinds: number) =>
-    `El número de arriba son ${have} instancias y acá abajo hay ${kinds} ` +
-    `amuletos distintos. Riot los cobra por instancia: podés tener cuatro del ` +
-    `mismo y colgarlos de cuatro armas.`,
+    `El número de arriba son ${have} instancias y aquí abajo hay ${kinds} ` +
+    `amuletos distintos. Riot los cobra por instancia.`,
 
   // --- mientras no llegó el catálogo ---------------------------------------
   waitingWhy:
-    'Las pestañas están dibujadas de verdad porque no necesitan datos. Todo lo ' +
-    'de abajo espera el catálogo de amuletos: un solo fetch a valorant-api que ' +
-    'el navegador se queda, así que esta pantalla es de la primera visita. Las ' +
-    'celdas ya son cuadradas, que es todo el trabajo de un esqueleto.',
+    'Esperando el catálogo de amuletos: un solo fetch que el navegador guarda, ' +
+    'así que esta pantalla es solo de la primera visita.',
 
   // --- uno abierto ---------------------------------------------------------
   colourFrom: 'De dónde sale el color',
+  // Misma lectura que la del grafiti (design/hsv.ts). Sin pesar los píxeles
+  // vivos, todos los amuletos del juego promedian al mismo gris.
   colourWhy: (rgb: string) =>
-    `rgb(${rgb}), medido de este amuleto igual que el del grafiti. Un amuleto ` +
-    `es chico y casi todo contorno, así que la lectura pesa los píxeles vivos ` +
-    `por encima de los planos — el tono es una media pesada por croma sobre los ` +
-    `que pasan el 12% de alfa, y la saturación sale del percentil 88. Sin eso ` +
-    `todos los amuletos del juego promedian al mismo gris y la página deja de ` +
-    `distinguirlos.`,
+    `rgb(${rgb}), medido de este amuleto. Un amuleto es chico y casi todo ` +
+    `contorno, así que la lectura pesa los píxeles vivos por encima de los planos.`,
 
   many: 'Uno solo, muchas instancias',
   manyWhy: (n: number) =>
-    `Riot entrega los amuletos por instancia: tenés ${n} de este, y cada una es ` +
-    `un id distinto que puede colgar de un arma distinta. La colección los ` +
-    `agrupa por amuleto y nombra las armas, porque una lista con la misma foto ` +
-    `cuatro veces no es una lista.`,
+    `Riot entrega los amuletos por instancia: tienes ${n} de este, y cada uno ` +
+    `es un id distinto que puede colgar de un arma distinta.`,
 };

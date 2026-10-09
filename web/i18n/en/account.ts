@@ -38,7 +38,7 @@ export const account = {
   legal:
     'VALORANT and its art belong to Riot Games, Inc. valoox is not affiliated ' +
     'with Riot. Names and renders come from valorant-api.com; prices come from ' +
-    'your own account, as Riot returns them.',
+    'your own account.',
 
   leaving: 'Leaving',
   disconnect: 'Disconnect',
@@ -48,8 +48,7 @@ export const account = {
   keepTitle: 'What we keep',
   keepLede:
     'Worth saying first: the session this app holds reads your account without ' +
-    'a password and without a second factor. That is what scanning hands over, ' +
-    'and it is why this page is short enough to read.',
+    'a password and without a second factor. That is what scanning hands over.',
   kept: 'Kept',
   notKept: 'Not kept',
 
@@ -59,17 +58,15 @@ export const account = {
     'Worker’s secrets, not in the database, so a copy of the database alone ' +
     'opens nothing.',
   keepWho: 'Your account id and region',
-  keepWhoWhy:
-    'Riot answers to the id, not to a name. The region is where your store ' + 'comes from.',
+  keepWhoWhy: 'Riot answers to the id, not to a name. The region is where your store comes from.',
   keepList: 'Your list',
   keepListWhy:
-    'Ids and the names you saw when you starred them, plus the tier, the level ' +
-    'counts and the colour that was measured — all of it sent by the browser, ' +
-    'because the Worker has no catalogue. It lives inside the same sealed row.',
+    'Ids and the names you saw when you starred them, plus the tier, the levels ' +
+    'and the measured colour. It lives inside the same sealed row.',
   keepMail: 'Your email, once proved',
   keepMailWhy:
     'The address, a flag saying a code came back from it, and the language and ' +
-    'clock of the tab that set it. This goes with the jar when you disconnect.',
+    'time zone of the tab that set it. It goes with the jar when you disconnect.',
 
   noPassword: 'Your password',
   noPasswordWhy: 'Never typed here. There is no field for it anywhere in the app.',
@@ -80,17 +77,15 @@ export const account = {
   noReach: 'A way to reach you after you disconnect',
   noReachWhy:
     'The jar and the address go together, and the whole row with them. Nothing ' +
-    'is left that can act on your account and nothing is left to write to you.',
+    'is left that can reach your account or write to you.',
 
   twoLocks:
     'Two locks, not one: the database holds ciphertext and the key is held ' +
-    'elsewhere. Rotating that key retires every stored jar at once, which is a ' +
-    'drill we run rather than a property we assume.',
+    'elsewhere. Rotating that key retires every stored jar at once.',
   alsoKv:
-    'Outside that row are things that expire on their own and are worth naming: ' +
-    'your store and inventory cached, the hash of a six-digit code for ten ' +
-    'minutes, and a message id pointing at this browser for a week so the mail ' +
-    'webhook can find the row. Every one is written with its own expiry on it.',
+    'Outside that row, what expires on its own: your store and inventory cached; ' +
+    'the hash of a six-digit code, ten minutes; a message id for this browser, ' +
+    'a week.',
 
   // --- leaving -------------------------------------------------------------
   leaveTitle: 'Disconnect this browser',
@@ -98,7 +93,7 @@ export const account = {
     'One row is deleted and this app can no longer reach your account. Scanning ' +
     'a new code starts over.',
   goes: 'What goes',
-  goesJar: 'The sealed cookie jar — the only thing here that can read your account',
+  goesJar: 'The sealed jar — the only thing here that can read your account',
   goesMail: 'Your email address and its verified flag',
   goesList: 'Your starred list, which lives inside the same row',
   staysTitle: 'What keeps existing',
@@ -106,36 +101,24 @@ export const account = {
     'The session you approved on your phone. It keeps existing on Riot’s side ' +
     'until it expires on its own: deleting the jar ends our access, not the ' +
     'credential.',
-  staysWhy:
-    'We say it the long way because the short word would be a claim about a ' +
-    'system we do not control, and people decide things on that word. If you ' +
-    'want it gone at the source, Riot’s account page signs out every device.',
+  staysWhy: 'To end that session at the source, Riot’s account page signs out every device.',
   listGoesWhy:
     'The list goes with the row because it lives inside it. There is no second ' +
-    'table keyed to your Riot id, and there is not one on purpose: that is ' +
-    'exactly the thing the schema is written not to hold.',
+    'table keyed to your Riot id.',
   cancel: 'Cancel',
-  noDialog:
-    'No confirmation dialog on top of this screen: the screen is the ' +
-    'confirmation. A second one trains people to click through both.',
+  noDialog: 'No confirmation dialog on top of this: this screen is the confirmation.',
 
   // --- riot said no --------------------------------------------------------
   gone: 'Your session expired at Riot',
   goneLede:
-    'Nothing went wrong here. Riot ends a session after a while, and after a ' +
-    'password change or a sign-out-everywhere it ends immediately. Scan again ' +
-    'and everything is back.',
+    'Nothing went wrong here. Riot ends a session after a while — at once after ' +
+    'a password change or a sign-out-everywhere. Scan again and everything is back.',
   scanAgain: 'Scan again',
   notNow: 'Not now',
   whichTwo: 'Which of the two happened',
   itEnded: 'The session ended',
   itEndedWhy: 'This one. Riot refused the stored cookies, which is ordinary and expected.',
   riotChanged: 'Riot changed something',
-  riotChangedWhy:
-    'A different message, and scanning again would not help. The app says so ' +
-    'rather than sending you round the loop.',
-  jobSkips:
-    'The daily job skips a session it cannot open rather than retrying it. An ' +
-    'unattended loop replaying dead credentials is what credential stuffing ' +
-    'looks like from Riot’s side, so it stops instead.',
+  riotChangedWhy: 'A different message, and scanning again would not help.',
+  jobSkips: 'The daily job skips a session it cannot open rather than retrying it.',
 };

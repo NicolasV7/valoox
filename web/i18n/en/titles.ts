@@ -9,27 +9,24 @@ export const titles = {
   yours: 'Yours',
   notYours: 'Not yours',
 
+  // The pennant and the one grey ramp are on screen on the opened title, so
+  // they are not named. This note says the shape — why it is a list rather than
+  // a grid — and the closing line every tab carries.
   noArt:
-    'The one tab with no art in it. A title is a string, so it gets type, the ' +
-    'pennant the game draws it in, and the only grey gradient in the app — ' +
-    'inventing a colour here would be inventing data. A list rather than a ' +
-    'grid, because what is being compared is words.',
+    'A title is a string, so it is a list rather than a grid: what is being ' +
+    'compared is words. Every title in the game is here, not only yours.',
 
   waitingWhy:
-    'The tab bar is drawn for real because it needs no data. Everything under ' +
-    'it is waiting on the titles catalogue, which is the smallest of the four ' +
-    'and still one fetch the browser keeps.',
+    'Waiting on the titles catalogue: one fetch the browser keeps, so this ' +
+    'screen belongs to a first visit.',
 
   none: 'A title has no art',
   noneWhy: (n: number) =>
     `${n} of them and not one picture between them: a title is a string the ` +
-    `game prints next to your name. So this screen gets the pennant the game ` +
-    `draws it in, type at the size the game uses, and the one grey ramp in the ` +
-    `app. Giving it a colour would mean inventing one.`,
+    `game prints next to your name. Giving it a colour would mean inventing one.`,
 
   inMatch: 'What it looks like in a match',
   inMatchWhy:
     'Riot draws it in a bracket after your name on the scoreboard. We show the ' +
-    'string and the frame and stop there — drawing a fake scoreboard around it ' +
-    'would be dressing a fact up as a screenshot.',
+    'string and the frame and stop there.',
 };

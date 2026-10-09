@@ -16,12 +16,10 @@ export const store = {
   days: (n: number) => `${n}d`,
 
   discount: (percent: number) => `−${percent}%`,
-  allOwned: 'Ya lo tenés completo',
+  allOwned: 'Ya lo tienes completo',
 
   empty: 'Riot no devolvió nada para esta cuenta.',
-  emptyWhy:
-    'Es raro y seguramente no sea cierto. Si tenés skins en el juego, el error ' +
-    'es nuestro, no una colección vacía.',
+  emptyWhy: 'Si tienes skins en el juego, el error es nuestro, no una colección vacía.',
 
   disconnect: 'Desconectar',
   notice:
@@ -54,11 +52,11 @@ export const offer = {
   },
 
   /** Riot hosts one clip per level and they are large. We link theirs instead
-   *  of keeping copies, which is also the honest thing to say about it. */
+   *  of keeping copies, which is also the honest thing to say about it. Both
+   *  blocks vanish for a skin that has neither: 857 of the catalogue have one
+   *  level and 880 have no variants. */
   clips:
-    'Los dos bloques desaparecen en una skin que no tiene ninguno: 857 del ' +
-    'catálogo tienen un solo nivel y 880 no tienen variantes. El clip es de ' +
-    'Riot y sale de su servidor; pesan 13 MB cada uno, así que apuntamos al ' +
+    'El clip es de Riot y sale de su servidor: pesa 13 MB, así que apuntamos al ' +
     'suyo en vez de guardar copias.',
 };
 
@@ -74,14 +72,13 @@ export const bundle = {
   total: 'Precio del bundle',
 
   perItem:
-    'Cada pieza trae su propio precio: Riot le pone a cada ítem del bundle un ' +
-    'BasePrice y un DiscountedPrice, accesorios incluidos, así que el descuento ' +
-    'se aplica por ítem y no como un número sobre el total.',
+    'Riot le pone a cada ítem del bundle un BasePrice y un DiscountedPrice, ' +
+    'accesorios incluidos, así que el descuento se aplica por ítem y no sobre el total.',
+  /** The daily store is the one place a price is derived rather than read —
+   *  from the tier, because that offer carries only a cost. */
   read:
-    'Leído, no estimado: cada fila de arriba es un BasePrice y un ' +
-    'DiscountedPrice tal como vienen en el storefront, y los totales son su ' +
-    'TotalBaseCost y su TotalDiscountedCost. La tienda diaria es el único lugar ' +
-    'donde un precio se deduce acá, del tier, porque esa oferta trae solo un costo.',
+    'Leído, no estimado: cada fila es un BasePrice y un DiscountedPrice del ' +
+    'storefront, y los totales son su TotalBaseCost y su TotalDiscountedCost.',
 
   gone: 'Este bundle ya no está en tu tienda.',
 };

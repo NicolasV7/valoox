@@ -1,10 +1,10 @@
 // Los avisos. La única pestaña cuyo tema entero es nuestro: qué marcaste y a
-// dónde iría viven en nuestra propia fila, así que nada acá espera a Riot.
+// dónde iría viven en nuestra propia fila, así que nada aquí espera a Riot.
 
 export const alerts = {
   what:
-    'Marcá las skins que estás esperando. Cuando una aparece en tu tienda te la ' +
-    'mandamos — una vez, apenas tu tienda rota.',
+    'Marca las skins que estás esperando. Cuando una aparece en tu tienda te la ' +
+    'enviamos — una vez, apenas tu tienda rota.',
 
   // --- primera vez ---------------------------------------------------------
   noneYet: 'Todavía no marcaste nada',
@@ -16,66 +16,70 @@ export const alerts = {
 
   yourEmail: 'Tu correo',
   oneAddress: 'Una dirección, verificada una vez.',
+  // El nombre de Riot va en el encabezado del correo, debajo de la marca:
+  // `who` en `src/alerts/mail/layout.ts`.
   sameInbox:
     'La misma casilla sirve para varias cuentas. Cada correo lleva arriba el ' +
-    'nombre de Riot al que corresponde, así que dos cuentas en una bandeja se ' +
-    'distinguen de una mirada.',
+    'nombre de Riot al que corresponde.',
 
   searchASkin: 'Buscar una skin…',
-  opensOnce:
-    'Se abre cuando haya un canal guardado. Mandar a ningún lado es la única ' +
-    'falla que un avisador no puede esconder.',
+  // La condición es `mail.ok`, no que haya una dirección escrita: AlertsFirst
+  // abre el buscador con `mail?.ok === true` y con nada más.
+  opensOnce: 'Se abre cuando haya una dirección verificada.',
 
+  // La fila es la que arma `cleanWishlist` en `src/routes/wishlist.ts`, y la
+  // misma lista que enumera `account.keepListWhy`. Nada que no estuviera ya
+  // en la pantalla donde apretaste la estrella.
   whatAStarIs:
-    'Una marca acá es una fila en nuestra base con el id de la skin y el nombre ' +
-    'que viste — nada más. El trabajo diario cruza esa lista con tu tienda y ' +
-    'manda los nombres que coinciden.',
+    'Una marca aquí es una fila en nuestra base con lo que ya tenías en ' +
+    'pantalla: el id de la skin, el nombre, el tier, los niveles y el color medido.',
 
   // --- esperando -----------------------------------------------------------
   whereItGoes: 'A dónde va',
   watching: 'Vigilando',
+  // La espera es corta porque esta pantalla no toca Riot ni el catálogo: una
+  // sola llamada a este origen. Los nombres y los renders llegan después.
   waitingWhy:
-    'Qué estás vigilando y a dónde va son nuestros, en nuestra propia fila: una ' +
-    'sola llamada a este origen, nada a Riot y nada al catálogo, que es por qué ' +
-    'esta espera es corta. Los nombres y los renders llegan después, del ' +
-    'catálogo de la comunidad, y por eso las caras son lo único gris.',
+    'Lo que vigilas y a dónde va son nuestros: una sola llamada a este origen, ' +
+    'nada a Riot. Los nombres y los renders llegan después, del catálogo de la ' +
+    'comunidad.',
 
   // --- dónde va ------------------------------------------------------------
   email: 'Correo',
   verified: 'Verificado',
   notVerified: 'Sin verificar',
   notVerifiedYet: 'Guardado, sin verificar todavía.',
-  pickSomething: 'Elegí qué vigilar.',
+  pickSomething: 'Elige qué vigilar.',
   comingNext: 'El buscador de skins es lo que sigue.',
   anAddress: 'Una dirección que puedas abrir ahora mismo.',
-  sendATest: 'Mandar el código',
-  badAddress: 'Eso no tiene forma de dirección. Revisá el arroba y el punto.',
-  waitSeconds: (n: number) => `Esperá ${n} segundos antes de pedir otro código.`,
-  oneIsOut: 'Ya te mandamos un código. Está en esa casilla.',
+  sendATest: 'Enviar el código',
+  badAddress: 'Eso no tiene forma de dirección. Revisa el arroba y el punto.',
+  waitSeconds: (n: number) => `Espera ${n} segundos antes de pedir otro código.`,
+  // Un servidor no ve una casilla: lo único que sabemos es que salió.
+  oneIsOut: 'Ya hay un código en camino a esa casilla.',
   testIsProof:
-    'Ese código es la verificación: lo escribís de vuelta y recién ahí la ' +
-    'dirección queda probada. Hasta que eso pase, acá no se manda nada más.',
-  oneChannel:
-    'Un solo canal, no un menú. Un segundo duplica las formas en que un mensaje ' +
-    'de la mañana se pierde y parte al medio la atención que se le presta a ' +
-    'cualquiera de los dos — y una casilla es el único lugar que todo el mundo ' +
-    'ya mira.',
+    'Ese código es la verificación: lo escribes de vuelta y la dirección queda ' +
+    'probada. Hasta que eso pase, aquí no se envía nada más.',
+  // Un segundo canal duplica las formas de perder el correo de la mañana y
+  // parte al medio la atención que se le presta a cualquiera de los dos.
+  oneChannel: 'Un solo canal, no un menú: una casilla es el único lugar que todo el mundo ya mira.',
   whyACode:
-    'Por qué un código y no un enlace: a un enlace dentro de un correo lo abren ' +
-    'los escáneres antes que una persona, y eso verificaría una dirección que ' +
-    'nadie leyó. Un código hay que traerlo a mano.',
+    'Por qué un código y no un enlace: a un enlace lo abren los escáneres antes ' +
+    'que una persona, y eso verificaría una dirección que nadie leyó.',
+  // La vieja no sigue recibiendo: `setChannel` pisa `mail.to` y deja `ok` en
+  // false, y `post()` solo envía con `mail.ok === true`. No quedó dónde
+  // guardar la dirección anterior.
   changeItLater:
-    'Si la cambiás después, la nueva arranca sin verificar: el código va a la ' +
-    'nueva y la vieja sigue recibiendo hasta que el código nuevo vuelva. Nada se ' +
-    'corta en silencio.',
+    'Si la cambias después, la nueva arranca sin verificar: el código va ahí y ' +
+    'no sale ningún correo hasta que lo escribas de vuelta.',
 
   watch: (name: string) => `Vigilar ${name}`,
 
   standby: 'Tu lista está en espera',
   standbyKept: (n: number) =>
     n === 1
-      ? 'La cosa que marcaste sigue acá. No sale nada hasta que haya una dirección verificada.'
-      : `Las ${n} cosas que marcaste siguen acá. No sale nada hasta que haya una dirección verificada.`,
+      ? 'Lo que marcaste sigue aquí. No sale nada hasta que haya una dirección verificada.'
+      : `Las ${n} cosas que marcaste siguen aquí. No sale nada hasta que haya una dirección verificada.`,
   standbyNone: 'Para marcar algo hace falta primero una dirección verificada.',
   addAnAddress: 'Poner una dirección',
 
@@ -89,100 +93,90 @@ export const alerts = {
   addSomething: 'Agregar algo…',
   addSomethingTitle: 'Agregar algo',
   outOf: (n: number, max: number) => `${n} / ${max}`,
+  // No hay de dónde saber qué vende Riot: el catálogo público no lo dice y el
+  // endpoint que lo decía ya no existe.
   onlyWhatTurnsUp:
-    'El trabajo diario cruza esta lista con tu tienda y manda los nombres que ' +
-    'coinciden. Si marcaste algo que Riot no vende —casi todo el pase de batalla, ' +
-    'cada premio de evento— la fila existe y no va a coincidir nunca. No hay de ' +
-    'dónde saber cuáles son: el catálogo público no lo dice y el endpoint de Riot ' +
-    'que lo decía ya no existe.',
+    'El trabajo diario cruza esta lista con tu tienda y envía lo que coincide. ' +
+    'Lo que Riot no vende —casi todo el pase de batalla, los premios de evento— ' +
+    'no coincide nunca.',
+  // El techo es por mantener pequeña la fila, no por cómputo: el trabajo diario
+  // es una intersección de conjuntos y casi no gasta.
   hundredWhy:
-    'Cien es el techo para las dos listas juntas. El trabajo diario es una ' +
-    'intersección de conjuntos y la lista entera viaja en una sola fila, así que ' +
-    'el límite es por mantener esa fila chica — no por cómputo, que este trabajo ' +
-    'casi no usa.',
+    'Cien es el techo para las dos listas juntas: la lista entera viaja en una sola fila.',
 
   // --- agregar -------------------------------------------------------------
-  kinds: { spray: 'Spray', buddy: 'Colgante', card: 'Tarjeta', title: 'Título' },
-  sellsCount: (n: number) => (n === 1 ? '1 que no tenés.' : `${n} que no tenés.`),
+  kinds: { spray: 'Grafiti', buddy: 'Amuleto', card: 'Tarjeta', title: 'Título' },
+  sellsCount: (n: number) => (n === 1 ? '1 que no tienes.' : `${n} que no tienes.`),
   listFull: (max: number) =>
-    `La lista está llena: ${max} entre las dos. Sacá una para poder marcar otra.`,
+    `La lista está llena: ${max} entre las dos. Saca una para poder marcar otra.`,
   notInThisList:
-    'Lo único que no está acá es lo que ya tenés. El pase de batalla sí está, y ' +
-    'no es un descuido: nada publicado dice qué skins vende Riot, así que ' +
-    'preferimos mostrarlas y decirte esto a filtrar a ojo.',
+    'Lo único que no está aquí es lo que ya tienes. El pase de batalla sí está: ' +
+    'nada publicado dice qué skins vende Riot, así que preferimos mostrarlo y ' +
+    'decírtelo.',
   searchIsLocal:
     'El buscador corre contra el catálogo que el navegador ya tiene, así que ' +
-    'filtra mientras escribís sin preguntarle nada al Worker ni a Riot.',
+    'filtra mientras escribes sin preguntar nada al Worker ni a Riot.',
 
   // --- el código -----------------------------------------------------------
   sentOut: 'Enviado',
-  typeTheCode: 'Escribí el código que te mandamos',
-  sixDigitsTo: (to: string) => `Seis dígitos, a ${to}. Vale diez minutos y cinco intentos.`,
+  typeTheCode: 'Escribe el código que te enviamos',
+  sixDigitsTo: (to: string) => `Seis dígitos, a ${to}. Dura diez minutos y admite cinco intentos.`,
   verify: 'Verificar',
-  sendItAgain: 'Mandar otro',
+  sendItAgain: 'Enviar otro',
   codeWrong: (left: number) => (left > 0 ? `No es ese. Te quedan ${left} intentos.` : 'No es ese.'),
-  codeGone: 'Ese código venció. Pedí otro.',
-  codeSpent: 'Se acabaron los intentos. Pedí un código nuevo.',
+  codeGone: 'Ese código venció. Pide otro.',
+  codeSpent: 'Se acabaron los intentos. Pide un código nuevo.',
   tenAndFive:
-    'Diez minutos y cinco intentos, y después el código muere y pedís otro. Los ' +
-    'dos números existen por lo mismo: seis dígitos son un millón de intentos, y ' +
-    'sin techo un script paciente llega.',
+    'Diez minutos y cinco intentos, y después el código muere y pides otro: seis ' +
+    'dígitos son un millón de combinaciones y sin techo un script paciente llega.',
   whatHappensAfter: 'Qué pasa después',
+  // Lo que impide que esto sea un botón para mandarle correo a desconocidos.
   afterWhy:
-    'La dirección queda verificada y el mensaje de la mañana empieza a ir ahí. A ' +
-    'una dirección que no trajo un código de vuelta no se le manda nada — ni una ' +
-    'sola vez — que es lo que impide que esto sea un botón para mandarle correo ' +
-    'a desconocidos.',
+    'La dirección queda verificada y el correo de la mañana empieza a ir ahí. A ' +
+    'una dirección que no trajo un código de vuelta no se le envía nada, ni una ' +
+    'sola vez.',
 
   // --- rechazado -----------------------------------------------------------
-  refusedLede:
-    'Salió una prueba y el proveedor la rechazó. Acá no se perdió nada: tus ' +
-    'marcas quedaron intactas.',
+  refusedLede: 'Salió una prueba y el proveedor la rechazó. Tus marcas quedaron intactas.',
   bouncedLede:
-    'La prueba salió y el servidor del otro lado la devolvió. Acá no se perdió ' +
-    'nada: tus marcas quedaron intactas.',
+    'La prueba salió y el servidor del otro lado la devolvió. Tus marcas quedaron intactas.',
   refusedWhy:
-    'La dirección fue rechazada antes de mandar nada: esa casilla no sirve. No ' +
-    'que esté llena, y no que haya rebotado después. Revisá cómo está escrita y ' +
-    'mandá otro código.',
+    'La dirección fue rechazada antes de enviar nada: esa casilla no sirve. ' +
+    'Revisa cómo está escrita y envía otro código.',
   wasRefused: 'Rechazada',
   wasBounced: 'Rebotó',
   wasBlocked: 'Bloqueada',
   blockedLede:
-    'Ni siquiera salió: esa dirección ya estaba marcada como que no recibe. Acá ' +
-    'no se perdió nada, tus marcas quedaron intactas.',
+    'Ni siquiera salió: esa dirección ya estaba marcada como que no recibe. Tus ' +
+    'marcas quedaron intactas.',
   blockedWhy:
-    'El canal se negó a intentarlo. Esa dirección quedó en su lista de bloqueo ' +
-    'por un rebote o una queja de antes, así que ningún mensaje nuestro va a ' +
-    'salir hacia ahí. Insistir no la saca de esa lista: hace falta otra.',
+    'Esa dirección está en la lista de bloqueo del canal por un rebote o una ' +
+    'queja de antes. Insistir no la saca de esa lista: hace falta otra.',
   bouncedWhy:
-    'El mensaje salió y el servidor del otro lado lo devolvió. Eso es la casilla ' +
-    'misma diciendo que no, así que mandar lo mismo otra vez es el único consejo ' +
-    'que no puede ayudar: hace falta otra dirección.',
-  taken:
-    'Esa dirección ya está verificada en otra cuenta. Una casilla recibe los ' +
-    'avisos de una sola, así que hace falta otra — o desconectá la otra cuenta ' +
-    'primero.',
+    'El correo salió y el servidor del otro lado lo devolvió. Enviar lo mismo ' +
+    'otra vez no puede funcionar: hace falta otra dirección.',
   // Sin uso desde que una casilla sirve para varias cuentas. Se deja porque
   // el Worker todavía puede devolver 'taken' si alguna vez vuelve la regla.
-  changeIt:
-    'Esa dirección rebotó: el servidor del otro lado la devolvió. Mandarle lo ' +
-    'mismo otra vez es lo único que no puede funcionar, así que hace falta ' +
-    'cambiarla.',
+  taken:
+    'Esa dirección ya está verificada en otra cuenta. Hace falta otra, o ' +
+    'desconecta la otra cuenta primero.',
+  changeIt: 'Esa dirección rebotó: el servidor del otro lado la devolvió. Hace falta cambiarla.',
+  // Esta pantalla aparece con `gotThere(said)`, o sea `email.delivered` o
+  // `email.opened`. Eso es lo que dijo el proveedor, no que la casilla lo
+  // tenga: "ya llegó" sería una afirmación que nadie puede ver.
   alreadyThere:
-    'Ese mensaje ya llegó a la casilla y el código que lleva sigue vivo. ' +
-    'Buscalo ahí. Cuando se venza, el botón vuelve.',
-  sendAnother: 'Mandar otro código',
+    'El proveedor dice que el servidor del otro lado lo aceptó, y el código ' +
+    'sigue vivo. Cuando venza, el botón vuelve.',
+  sendAnother: 'Enviar otro código',
   editAddress: 'Cambiar la dirección',
   oneChannelMeans:
     'Un solo canal quiere decir que un rechazo es la historia completa: no fue a ' +
-    'ningún lado. Tus marcas están intactas y el trabajo diario sigue corriendo ' +
-    '— solo que no tiene dónde poner el resultado hasta que esto se arregle.',
+    'ningún lado. El trabajo diario sigue corriendo, pero no tiene dónde dejar ' +
+    'el resultado.',
   codeIsTheirs:
-    'Las dos son cosas distintas. Un rechazo es la dirección estando mal antes ' +
-    'de que saliera nada, y va a seguir mal; un rebote es el otro lado ' +
-    'devolviéndola después de mirarla.',
+    'Un rechazo es la dirección estando mal antes de que saliera nada; un rebote ' +
+    'es el otro lado devolviéndola después de mirarla.',
   canAndCannot: 'Qué puede y qué no puede decirte un envío',
   canTell: 'Que el canal lo aceptó, y después lo que ese canal nos cuente',
-  cannotTell: 'Que llegó a una bandeja, que sobrevivió un filtro, o que se leyó',
+  cannotTell: 'Que llegó a una casilla, que sobrevivió un filtro, o que se leyó',
 };

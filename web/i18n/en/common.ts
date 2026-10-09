@@ -20,10 +20,10 @@ export const common = {
   // a card, a spray or a title and the name gives you nothing.
   kind: {
     skin: 'Skin',
-    buddy: 'Gun buddy',
+    buddy: 'Buddy',
     spray: 'Spray',
-    card: 'Player card',
-    title: 'Player title',
+    card: 'Card',
+    title: 'Title',
   },
 
   tier: {
@@ -44,13 +44,11 @@ export const common = {
   error: {
     expired: 'Your session expired at Riot',
     expiredWhy:
-      'Nothing went wrong here. Riot ends a session after a while, and after a ' +
-      'password change or a sign-out-everywhere it ends immediately. Scan again ' +
-      'and everything is back.',
+      'Nothing went wrong here. Riot ends a session after a while — at once ' +
+      'after a password change or a sign-out-everywhere. Scan again and ' +
+      'everything is back.',
     riot: 'Riot did not answer',
-    riotWhy:
-      'Maintenance, or a slow few minutes. What we hold is untouched and there ' +
-      'is nothing to redo.',
+    riotWhy: 'Maintenance, or a slow few minutes. What we hold is untouched.',
     us: 'Something broke on our side',
     usWhy: 'Not your account and not your session. Try again in a minute.',
     status: (code: number) => `Status ${code}`,

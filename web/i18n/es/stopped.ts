@@ -2,7 +2,7 @@
 
 export const stopped = {
   sure: '¿Parar los avisos?',
-  sureWhy: 'Dejás de recibir el correo de la mañana. Lo que marcaste no se toca.',
+  sureWhy: 'Dejas de recibir el correo de la mañana. Lo que marcaste no se toca.',
   yesStop: 'Sí, parar',
   no: 'No',
 
@@ -14,12 +14,12 @@ export const stopped = {
   keptNone: 'No tenías nada marcado.',
 
   nothingChanged: 'No tocamos nada',
-  stillOn: 'Los avisos siguen andando. Podés cerrar esta pestaña.',
+  stillOn: 'Los avisos siguen andando. Puedes cerrar esta pestaña.',
 
   alreadyUsed: 'Este enlace ya se usó',
   alreadyUsedWhy:
-    'Ya respondiste desde acá, y cada correo trae el suyo. Si querés cambiar la ' +
-    'decisión, hacelo desde la app, o usá el enlace del correo siguiente.',
+    'Ya respondiste desde aquí, y cada correo trae el suyo. Si quieres cambiar ' +
+    'la decisión, hazlo desde la app o usa el enlace del correo siguiente.',
   couldNot: 'Ese enlace no sirve',
   couldNotWhy: 'No abrió ninguna fila. Puede que ya no valga, o que no sea el enlace entero.',
 };

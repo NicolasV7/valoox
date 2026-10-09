@@ -1,4 +1,4 @@
-// A card, a spray, a charm or a title, opened. One screen, four bodies — so
+// A card, a spray, a buddy or a title, opened. One screen, four bodies — so
 // four sets of facts, because what Riot publishes for each kind is different
 // and the screen says which.
 
@@ -19,21 +19,20 @@ export const piece = {
   size: '128×128',
 
   buddyNote:
-    'Riot publishes one 128×128 image for a buddy and nothing else. The light ' +
-    'behind it is taken from that image: an accessory has no rarity, so there ' +
-    'is no tier colour to borrow.',
+    'Riot publishes one 128×128 image for a buddy. The light behind it comes ' +
+    'from that image: an accessory has no rarity to borrow a colour from.',
+  // The light comes off the art because an accessory has no rarity: buddyNote
+  // already says that, and the four notes never appear together.
   cardNote:
-    'Riot ships all three and they are cropped differently, not scaled — the ' +
-    'tall one has detail the small one never shows. The light on this screen is ' +
-    'taken from the art itself; an accessory has no rarity to borrow a colour from.',
+    'Riot ships all three and they are crops, not scales: the tall one has ' +
+    'detail the small one never shows.',
   titleNote:
-    'Riot’s catalogue gives a title a titleText and no image field at all. The ' +
-    'mark above is the game’s own, used wherever a title appears — it says ' +
-    '“this is a title”. It is not artwork for this one, because none exists.',
+    'The Riot catalogue gives a title a titleText and no image field at all. ' +
+    'The mark above is the one the game uses, not artwork for this one.',
   sprayNote:
-    'Some sprays animate in game. Riot publishes the frames for those as ' +
-    'animationGif; this one has none, so what you see is what it is.',
+    'Some sprays animate in game. Riot publishes those frames as animationGif; ' +
+    'this one has none.',
   sprayMoves:
-    'This one animates in game, and what you are watching are the frames Riot ' +
-    'publishes rather than a still of them: most sprays have none.',
+    'This one animates in game: what you are watching are the frames Riot ' +
+    'publishes. Most sprays have none.',
 };
