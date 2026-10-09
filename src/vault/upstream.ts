@@ -147,7 +147,14 @@ const ALLOW: Rule[] = [
   {
     method: 'GET',
     pattern: new RegExp(
-      '^https://media.valorant-api.com/weaponskinlevels/' + UUID + '/displayicon.png$',
+      // Escaped, and it matters here in a way it does not in a /literal/: this
+      // one is built from a string, where a bare dot is a wildcard. Unescaped,
+      // the rule also matched `mediaXvalorant-apiYcom` — unreachable, because
+      // render.ts builds the url from a constant prefix and a uuid that cannot
+      // contain a slash, but this file's claim is that the PATTERN pins the
+      // host, and a pattern that pins it only while every caller behaves is
+      // not the claim. Checked: every other rule built this way escapes.
+      '^https://media\\.valorant-api\\.com/weaponskinlevels/' + UUID + '/displayicon\\.png$',
     ),
     why: "one skin's picture, so a message can carry it from our own origin instead of pointing every reader's mail client at somebody else's CDN. The uuid is built into the url here and never taken from a request; the page fetches these directly, which is what img-src in the CSP is for",
   },

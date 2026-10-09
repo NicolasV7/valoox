@@ -27,15 +27,23 @@ export async function rf(url: string, init: RiotInit = {}): Promise<Response> {
   };
   if (jar) headers.Cookie = serialize(jar);
 
-  const res = await fetch(url, { ...opts, headers });
-
-  // The allowlist is the read-only claim, and `fetch` defaults to following
-  // redirects — so without this the check covers the first hop and the request
-  // that actually carried the jar or the bearer token went somewhere nobody
-  // checked. Riot does not redirect these today; the point is that the claim is
-  // true whether or not that stays so. auth.ts passes redirect: 'manual' and
-  // reads the Location itself, which is why it never reaches this branch.
-  if (res.redirected) assertAllowed(method, res.url);
+  // Never followed, and this is the line that makes the check above mean what
+  // it says. `fetch` follows redirects by default, and a followed redirect is
+  // a second request to a URL nobody checked — carrying the jar, or the
+  // bearer token, to wherever the first hop pointed.
+  //
+  // It used to re-check after the fact: `if (res.redirected) assertAllowed(...)`.
+  // That reads like a guard and is not one. By the time `redirected` is true
+  // the credential has already been sent; throwing then is a report, not a
+  // refusal. The claim on this file is that assertAllowed runs BEFORE fetch,
+  // and with a followed redirect that was not true of the second hop.
+  //
+  // Nothing needs the follow. Every caller was checked: only auth.ts expects a
+  // 30x at all, it already asked for 'manual', and it reads the Location
+  // itself. A caller that gets an unexpected 30x now fails loudly instead of
+  // quietly succeeding somewhere else, which is the right direction for this
+  // failure. A caller may still opt in by passing its own `redirect`.
+  const res = await fetch(url, { redirect: 'manual', ...opts, headers });
 
   console.log(method + ' ' + new URL(url).host + ' -> ' + res.status);
   if (jar) absorb(jar, res);
