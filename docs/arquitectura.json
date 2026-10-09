@@ -46,7 +46,7 @@
       "url": "https://github.com/NicolasV7/valoox",
       "provider": "github",
       "link_mode": "web",
-      "revision": "965210f439e42db90963bab8ceb3633481901567"
+      "revision": "main"
     }
   },
   "components": [
@@ -65,7 +65,7 @@
       ],
       "sources": [
         {
-          "path": "public/app.js",
+          "path": "web/main.tsx",
           "label": "vistas"
         }
       ]
@@ -85,7 +85,7 @@
       ],
       "sources": [
         {
-          "path": "public/catalogs.js",
+          "path": "web/data/catalogue.ts",
           "label": "índices"
         }
       ]
@@ -133,8 +133,8 @@
     {
       "id": "notify",
       "type": "external",
-      "label": "Discord",
-      "sublabel": "webhook por usuario",
+      "label": "Tu correo",
+      "sublabel": "Resend · una vez al día",
       "pos": [
         980,
         90
@@ -145,7 +145,7 @@
       ],
       "sources": [
         {
-          "path": "src/vault/alerts.ts"
+          "path": "src/alerts/post.ts"
         }
       ]
     },
@@ -153,7 +153,7 @@
       "id": "worker",
       "type": "backend",
       "label": "Worker  val",
-      "sublabel": "6 rutas /api/*",
+      "sublabel": "11 rutas /api/*",
       "pos": [
         320,
         270
@@ -172,7 +172,7 @@
       "id": "allow",
       "type": "security",
       "label": "Allowlist de egreso",
-      "sublabel": "17 reglas · único fetch()",
+      "sublabel": "19 reglas · único fetch()",
       "pos": [
         700,
         270
@@ -271,7 +271,7 @@
     },
     {
       "kind": "security-group",
-      "label": "el jar existe en claro solo acá, durante el pedido",
+      "label": "el jar existe en claro solo aquí, durante el pedido",
       "wraps": [
         "worker",
         "seal"
@@ -291,7 +291,7 @@
       "id": "ui-catalog",
       "from": "browser",
       "to": "catalog",
-      "label": "el join pasa acá, no en el Worker",
+      "label": "el join pasa aquí, no en el Worker",
       "fromSide": "bottom",
       "toSide": "top",
       "labelDy": 24
@@ -371,7 +371,7 @@
       "title": "Qué entra y qué sale",
       "items": [
         "El navegador solo manda una cookie uid de 16 bytes al azar",
-        "Riot autentica por QR en su app: la contraseña no pasa por acá",
+        "Riot autentica por QR en su app: la contraseña no pasa por aquí",
         "Toda salida cruza la allowlist; el webhook se guarda como id/token, nunca como URL"
       ]
     },

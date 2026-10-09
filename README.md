@@ -40,6 +40,28 @@ disagree.
 - **Nothing loads from a third party.** No CDN, no font host, no analytics. The
   only hosts anywhere in the CSP are Riot's own, one per directive.
 
+```mermaid
+flowchart LR
+  B["Browser<br/>uid cookie"]
+  W["Worker val<br/>11 routes /api/*"]
+  A["Egress allowlist<br/>upstream.ts"]
+  R["Riot"]
+  K["KV<br/>caches"]
+  S["Sealed<br/>AES-256-GCM"]
+  D["D1<br/>one row per browser"]
+  C["valorant-api.com<br/>3.5 MB"]
+  M["Your inbox"]
+  T["Cron 00:30"]
+
+  B -->|GET /api/*| W
+  B -.->|the catalogue is joined here| C
+  W --> K
+  W --> S --> D
+  W --> A --> R
+  A -.-> M
+  T -.-> W
+```
+
 [Interactive diagram](docs/arquitectura.html), generated from
 `docs/arquitectura.json`.
 
