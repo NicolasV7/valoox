@@ -22,7 +22,8 @@
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "mail": "node scripts/mailpreview.mjs",
     "grid": "node scripts/grid.mjs",
-    "copy": "node scripts/copy.mjs"
+    "copy": "node scripts/copy.mjs",
+    "who": "node scripts/who.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
