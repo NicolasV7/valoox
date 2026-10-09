@@ -94,6 +94,9 @@ export const alerts = {
   // --- la lista andando ----------------------------------------------------
   change: 'Cambiar',
   weapons: 'Armas',
+  // Dentro de Armas, para distinguirlas del cuerpo a cuerpo. No "Armas" otra
+  // vez: una pestaña con el nombre de la que está encima no dice nada.
+  firearms: 'De fuego',
   accessories: 'Accesorios',
   rotatesIn: 'rota en',
   noGuns: 'Ninguna skin de arma marcada todavía.',

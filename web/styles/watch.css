@@ -181,3 +181,16 @@
 .watch__picks {
   margin: 14px var(--gut) 0;
 }
+
+/* Which one, once you have said which kind. It is a refinement of the row
+   above it, so it sits closer to that row than to anything else and is drawn
+   a size down — same two shapes, because inventing a third state for a
+   subordinate row is how one control becomes two. */
+.watch__picks--under {
+  margin-top: 8px;
+}
+
+.watch__picks--under .pill {
+  padding: 7px 0;
+  font-size: 12px;
+}

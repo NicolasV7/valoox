@@ -11,21 +11,18 @@
 // The narrowing happens entirely against indexes the browser already holds,
 // so the field answers without asking anything of anybody.
 //
-// One tab per kind of thing, six of them, because this is the screen where you
-// are looking for ONE thing and every tab you are not on is noise you have to
-// read past. Guns and knives are split for the same reason they are split in
-// the collection: nobody opening this to find a knife wants nine hundred rifle
-// skins ranked above it. The wishlist itself has no tabs — that list is short
-// and it is yours.
+// Two rows of tabs — which kind, then which one of those. They live in
+// Alerts.picks.tsx; everything here is about what a tab contains.
+//
+// The wishlist itself has no tabs at all — that list is short and it is yours.
 
 import { useMemo } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
 import { Search } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
-import { Pick } from '../components/Pick.tsx';
 import { Watch } from '../components/Watch.tsx';
 import { usePrefs } from '../data/channel.ts';
-import { BUDDIES, bits, CARDS, guns, LEVELS, narrow, SPRAYS, TITLES } from '../data/findable.ts';
+import { bits, guns, LEVELS, narrow, SPRAYS } from '../data/findable.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
 import { sold } from '../data/sellable.ts';
@@ -42,36 +39,15 @@ import {
 import { t } from '../i18n/index.ts';
 import { ALERTS, type Whence } from '../route.ts';
 import { AlertsLoading } from './Alerts.loading.tsx';
+import { isGun, TYPE, usePicks } from './Alerts.picks.tsx';
 import { AlertsStandby } from './Alerts.standby.tsx';
 
 const STEP = 20;
 
-/** Which index a tab reads, for the four that are accessories. */
-const TYPE: Record<string, string> = {
-  spray: SPRAYS,
-  buddy: BUDDIES,
-  card: CARDS,
-  title: TITLES,
-};
-
-const isGun = (tab: string) => tab === 'gun' || tab === 'melee';
-
 export function AlertsSearch({ inv }: { inv: Inventory }) {
   const s = t().alerts;
   const [q, setQ] = useKept('alerts-add');
-  const [kind, setKind] = useKept('alerts-kind');
-  // Guns are the default and the fallback: a key kept from before this screen
-  // had six tabs resolves to one of them rather than to an empty list.
-  const tab = kind === 'melee' || TYPE[kind] ? kind : 'gun';
-  const c = t().collection;
-  const tabs: Array<[string, string]> = [
-    ['gun', c.tab.weapons],
-    ['melee', c.rack.melee ?? c.tab.weapons],
-    ['spray', c.tab.sprays],
-    ['buddy', c.tab.buddies],
-    ['card', c.tab.cards],
-    ['title', c.tab.titles],
-  ];
+  const { tab, picks } = usePicks();
 
   const racks = useRacks();
   const sprays = useSprays();
@@ -137,14 +113,7 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
         />
       </div>
 
-      {/* The same two shapes a skin's levels wear — see styles/pick.css. Six
-          of them wrap to a second line at phone width, which is the right
-          shape: they are six peers, not two with four hidden under one. */}
-      <div class="pills watch__picks">
-        {tabs.map(([key, said]) => (
-          <Pick key={key} said={said} on={tab === key} choose={() => setKind(key)} />
-        ))}
-      </div>
+      {picks}
 
       {held && <AlertsStandby starred={stars?.length ?? 0} />}
 

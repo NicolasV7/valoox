@@ -94,6 +94,9 @@ export const alerts = {
   // --- the working list ----------------------------------------------------
   change: 'Change',
   weapons: 'Weapons',
+  // Inside Weapons, to tell them from melee. Not "Weapons" again: a tab named
+  // after the one above it says nothing.
+  firearms: 'Guns',
   accessories: 'Accessories',
   rotatesIn: 'rotates in',
   noGuns: 'No weapon skin starred yet.',
