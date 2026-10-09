@@ -35,9 +35,25 @@ export const account = {
   source: 'Source',
   sourceUnder: 'The Worker, the schema and the tests',
 
-  coffee: 'The coffee',
-  coffeeSaid: 'Buy me a coffee',
-  coffeeUnder: 'This runs on Cloudflare’s free plan.',
+  coffee: 'If it helped',
+  coffeeSaid: 'Running on coffee',
+  coffeeUnder:
+    'Free to use, nothing sold, nothing measured. If it saved you opening the game this week.',
+  coffeeButton: 'Buy me a coffee',
+  coffeeNote:
+    'The button goes to Buy Me a Coffee and nothing about your account goes ' +
+    'with it: it is a plain link off this page.',
+
+  notAffiliated: 'Not affiliated with Riot Games',
+  notAffiliatedUnder: 'And what that means here',
+
+  /** Where a row goes, in the right-hand column. */
+  onGithub: 'github',
+  onApi: 'valorant-api.com',
+
+  build: 'This build',
+  catalogue: 'Catalogue',
+  catalogueUnder: 'Names, renders and clips',
 
   madeBy: 'Made by',
   madeByUnder: 'NicolasV7 · Termo#GOD in game',

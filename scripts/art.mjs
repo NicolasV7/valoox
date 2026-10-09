@@ -51,7 +51,8 @@ const ART = {
   'tier-exclusive': 'contenttiers/e046854e-406c-37f4-6607-19a9ba8426fc/displayicon.png',
   'tier-ultra': 'contenttiers/411e4a55-4e59-7757-41f0-86a53f101bb5/displayicon.png',
 
-  // The eighteen sprays, each picked for what it is OF. See web/design/sprays.ts.
+  // The nineteen sprays, each picked for what it is OF. See web/design/sprays.ts.
+  'spray-wingman': 'sprays/89319db4-4304-669e-533b-5bba442e7263/fulltransparenticon.png',
   'spray-holdup': 'sprays/271896c9-496b-8c89-962f-59a9ed3f4ffa/fulltransparenticon.png',
   'spray-goagain': 'sprays/0d5ac29c-482f-1a31-eba2-bba3acb2c2c4/fulltransparenticon.png',
   'spray-peace': 'sprays/13a7b621-44cf-73a3-04bb-0fad33b93179/fulltransparenticon.png',

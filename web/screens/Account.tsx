@@ -18,6 +18,7 @@ import { MAX } from '../data/stars.ts';
 import type { Account as Who } from '../data/types.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept, type Route } from '../route.ts';
+import { Coffee } from './Account.coffee.tsx';
 import { Row } from './Account.row.tsx';
 
 const CHANNEL: Route = { name: 'alerts', step: 'channel' };
@@ -31,7 +32,13 @@ const LEAVE: Route = { name: 'account', step: 'leave' };
  *  together rather than apart because they are the same decision: the only
  *  outbound links on any screen. */
 const SOURCE = 'https://github.com/NicolasV7/valoox';
-const COFFEE = 'https://buymeacoffee.com/nicolasv7';
+const COFFEE = 'https://buymeacoffee.com/termoo';
+const MADE_BY = 'https://github.com/NicolasV7';
+/** The allowlist itself, which is what the row above it is about. The board
+ *  points this at a page on the site; the file is the better answer, and it is
+ *  the thing a person would actually want to see. */
+const ALLOWLIST = SOURCE + '/blob/main/src/vault/upstream.ts';
+const CATALOGUE = 'https://valorant-api.com';
 
 /** How many rules the egress allowlist holds. Written down here and checked
  *  by a test, so the number on screen cannot drift from the list — the whole
@@ -100,16 +107,27 @@ export function Account({ who }: { who: Who }) {
       <h2 class="label deck__band">{s.honest}</h2>
       <div class="deck__card">
         <Row to={KEEP} from={from} said={s.whatWeKeep} under={s.whatWeKeepUnder} />
-        <Row said={s.whatItCalls} under={s.whatItCallsUnder(RULES)} />
-        <Row said={s.madeBy} under={s.madeByUnder} />
-        <Row out={SOURCE} said={s.source} under={s.sourceUnder} last />
+        <Row
+          out={ALLOWLIST}
+          said={s.whatItCalls}
+          under={s.whatItCallsUnder(RULES)}
+          end={s.onGithub}
+        />
+        {/* The board sends this to a page on the site that does not exist yet,
+            so it stays a line of text. A chevron that goes nowhere is worse
+            than no chevron. */}
+        <Row said={s.notAffiliated} under={s.notAffiliatedUnder} last />
+      </div>
+
+      <Coffee to={COFFEE} />
+
+      <h2 class="label deck__band">{s.build}</h2>
+      <div class="deck__card">
+        <Row out={MADE_BY} said={s.madeBy} under={s.madeByUnder} end={s.onGithub} />
+        <Row out={SOURCE} said={s.source} under={s.sourceUnder} end={s.onGithub} />
+        <Row out={CATALOGUE} said={s.catalogue} under={s.catalogueUnder} end={s.onApi} last />
       </div>
       <p class="legal deck__note">{s.legal}</p>
-
-      <h2 class="label deck__band">{s.coffee}</h2>
-      <div class="deck__card">
-        <Row out={COFFEE} said={s.coffeeSaid} under={s.coffeeUnder} last />
-      </div>
 
       <h2 class="label deck__band">{s.leaving}</h2>
       <a class="deck__leave" href={href(LEAVE)} onClick={intercept(LEAVE)}>

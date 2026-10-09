@@ -3,7 +3,7 @@
 // feeling to carry, and they are the only ones where a picture is not in the
 // way of the thing you came to look at. The store and the collection stay bare.
 //
-// They are served from this origin. Eighteen files that never change, fetched at
+// They are served from this origin. Nineteen files that never change, fetched at
 // build time by scripts/art.mjs — which is where Riot's uuid for each one is
 // written down — so the screen a stranger reads before scanning does not open
 // a second connection to draw a sticker on it.
@@ -60,4 +60,7 @@ export const SPRAY = {
   sorry: art('sorry'),
   /** Yoru asleep, with the Zzz. A session that is over at Riot. */
   asleep: art('asleep'),
+  /** Wingman For The Win: the little bot celebrating. The one card on any
+   *  screen that asks for something rather than explaining something. */
+  wingman: art('wingman'),
 } as const;

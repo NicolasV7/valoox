@@ -35,9 +35,25 @@ export const account = {
   source: 'Código',
   sourceUnder: 'El Worker, el esquema y los tests',
 
-  coffee: 'El café',
-  coffeeSaid: 'Invítame un café',
-  coffeeUnder: 'Esto corre en el plan gratis de Cloudflare.',
+  coffee: 'Si te sirvió',
+  coffeeSaid: 'Esto anda a punta de café',
+  coffeeUnder:
+    'Gratis, no se vende nada y no se mide nada. Si esta semana te ahorró abrir el juego.',
+  coffeeButton: 'Invítame un café',
+  coffeeNote:
+    'El botón va a Buy Me a Coffee y no lleva nada de tu cuenta: es un enlace ' +
+    'normal que sale de esta página.',
+
+  notAffiliated: 'Sin relación con Riot Games',
+  notAffiliatedUnder: 'Y qué quiere decir eso aquí',
+
+  /** El sitio al que sale una fila, en la columna de la derecha. */
+  onGithub: 'github',
+  onApi: 'valorant-api.com',
+
+  build: 'Esta versión',
+  catalogue: 'Catálogo',
+  catalogueUnder: 'Nombres, renders y clips',
 
   madeBy: 'Hecho por',
   madeByUnder: 'NicolasV7 · Termo#GOD en el juego',
