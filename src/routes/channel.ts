@@ -14,58 +14,16 @@
 // A 2xx means Resend accepted the message. It does not mean an inbox has it,
 // and no field here says otherwise.
 
-import { html, subject, text } from '../alerts/mail/code.ts';
+import { tzOf } from '../alerts/mail/clock.ts';
 import { type Lang, langOf } from '../alerts/mail/words.ts';
-import { check, clear, LIFE, left, mint, waitFor } from '../alerts/otp.ts';
+import { check, left, waitFor } from '../alerts/otp.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
 import type { Env } from '../types.ts';
-import { gotThere, looksLikeAddress, refused, send } from '../vault/mail.ts';
+import { gotThere, looksLikeAddress, refused } from '../vault/mail.ts';
 import * as repo from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
-import { mintStop } from '../vault/stop.ts';
-import { stopLink } from './stop.ts';
-
-/** Ties the provider's id for a message back to the browser it was sent for,
- *  so its webhook can find the row. Kept out of D1 on purpose: it is a short-
- *  lived join key, not state, and KV expires it without a cron. */
-const TRAIL = 60 * 60 * 24 * 7;
-export const trail = (id: string) => 'sent:' + id;
-
-/** Where the one picture in a message is served from.
- *
- *  The live origin, except in dev: a mail client has no way to reach
- *  127.0.0.1, so a test message would arrive with a broken sticker and no way
- *  to tell that from a real one. Anything that is not https falls back to the
- *  address the app actually answers on. */
-const artFrom = (origin: string) =>
-  origin.startsWith('https://') ? origin : 'https://drop.valoox.store';
-
-async function mail(
-  env: Env,
-  uid: string,
-  to: string,
-  lang: Lang,
-  origin: string,
-  who?: string | null,
-) {
-  const { code, until } = await mint(env, uid);
-  const home = artFrom(origin);
-  const stop = stopLink(home, await mintStop(env, uid));
-  const sent = await send(
-    env,
-    to,
-    subject(code, lang),
-    html(code, LIFE.minutes, lang, home, stop, who),
-    text(code, LIFE.minutes, lang),
-  );
-  // Nothing carried it, so nothing should be outstanding: the code is thrown
-  // away and the cooldown with it, or a provider hiccup locks the button for a
-  // minute over a message that never left.
-  if (!sent.ok) await clear(env, uid);
-  else if (sent.id) await env.VAL.put(trail(sent.id), uid, { expirationTtl: TRAIL });
-  return { sent, until };
-}
+import { mail } from './send.ts';
 
 /**
  * Set the address and send it a code.
@@ -80,11 +38,16 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
   const held = await readSession(env, uid);
   if (!held) return RESEED;
 
-  const body = (await req.json().catch(() => null)) as { to?: unknown; lang?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as {
+    to?: unknown;
+    lang?: unknown;
+    tz?: unknown;
+  } | null;
   const to = typeof body?.to === 'string' ? body.to.trim() : '';
   // The language of the tab that asked, so the mail arrives in the language of
   // the screen that sent it. Kept on the row so the morning message matches.
   const lang = langOf(body?.lang);
+  const tz = tzOf(body?.tz);
   if (!looksLikeAddress(to)) return { error: 'address' };
 
   const was = held.session.mail;
@@ -117,6 +80,7 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
   held.session.mail = {
     to,
     lang,
+    ...(tz === undefined ? {} : { tz }),
     ok: keep,
     ...(sent.id ? { send: sent.id } : {}),
     said: sent.said,
@@ -146,8 +110,9 @@ export async function resend({ env, uid, req }: Ctx): Promise<Body> {
   const wait = await waitFor(env, uid);
   if (wait > 0) return { error: 'wait', wait };
 
-  const body = (await req.json().catch(() => null)) as { lang?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { lang?: unknown; tz?: unknown } | null;
   const lang = langOf(body?.lang ?? held.session.mail?.lang);
+  const tz = tzOf(body?.tz) ?? held.session.mail?.tz;
   const { sent, until } = await mail(
     env,
     uid,
@@ -160,6 +125,7 @@ export async function resend({ env, uid, req }: Ctx): Promise<Body> {
     ...held.session.mail,
     to,
     lang,
+    ...(tz === undefined ? {} : { tz }),
     ok: held.session.mail?.ok === true,
     ...(sent.id ? { send: sent.id } : {}),
     said: sent.said,

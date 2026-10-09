@@ -42,7 +42,11 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
   const cards = useCards();
   const titles = useTitles();
   const { stars, on, full, toggle } = useStars();
-  const verified = usePrefs()?.mail?.ok === true;
+  // Shut once, on the reasoning that finding things with nowhere to send
+  // them is a dead end. It is the same action the star is, and the star is a
+  // control everywhere now — see components/StarMark.tsx. The card below
+  // carries the part that is actually worth saying.
+  const held = usePrefs()?.mail?.ok !== true;
 
   // Everything owned, flattened once: the indexes are keyed by item type and
   // this only ever asks "is this id mine".
@@ -60,17 +64,6 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
   const [shown, more] = useMore('alerts-add-' + kind + q, STEP);
 
   if (!all) return <AlertsLoading />;
-
-  // Nothing to find until there is somewhere to send what is found.
-  if (!verified) {
-    return (
-      <main class="screen bell">
-        <Back to={ALERTS} said={t().common.nav.alerts} />
-        <h1 class="bell__title">{s.addSomethingTitle}</h1>
-        <AlertsStandby starred={stars?.length ?? 0} />
-      </main>
-    );
-  }
 
   return (
     <main class="screen bell">
@@ -96,6 +89,8 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
         <Pick said={s.accessories} on={bitsTab} choose={() => setKind('bits')} />
       </div>
 
+      {held && <AlertsStandby starred={stars?.length ?? 0} />}
+
       <p class="legal bell__note">{s.sellsCount(found.length)}</p>
 
       {found.length > 0 && (
@@ -107,7 +102,16 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
               note={f.of}
               on={on(f.id)}
               shut={full}
-              toggle={() => toggle({ id: f.id, name: f.name, type: f.type })}
+              toggle={() =>
+                toggle({
+                  id: f.id,
+                  name: f.name,
+                  type: f.type,
+                  tier: f.tier,
+                  levels: f.levels,
+                  chromas: f.chromas,
+                })
+              }
             />
           ))}
         </div>

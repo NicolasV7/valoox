@@ -38,7 +38,12 @@ export function Tile({ card, on, mine }: { card: Card; on: boolean; mine: boolea
       {!mine && (
         <StarMark
           size={15}
-          item={{ id: card.id, name: card.name, type: '3f296c07-64c3-494c-923b-fe692a4fa1bd' }}
+          item={{
+            id: card.id,
+            name: card.name,
+            art: lit ?? undefined,
+            type: '3f296c07-64c3-494c-923b-fe692a4fa1bd',
+          }}
         />
       )}
     </div>

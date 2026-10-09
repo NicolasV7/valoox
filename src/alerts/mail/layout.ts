@@ -73,7 +73,7 @@ const HEAD =
   // it — which needs no breakpoint and cannot come apart.
   '@media (max-width:600px){' +
   '.pad{padding-left:18px!important;padding-right:18px!important}' +
-  '.big{font-size:38px!important;letter-spacing:0.12em!important}' +
+  '.big{font-size:46px!important;letter-spacing:0.18em!important}' +
   '}' +
   '</style>';
 

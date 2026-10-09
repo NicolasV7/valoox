@@ -53,6 +53,7 @@ export function Tile({ buddy, on, mine }: { buddy: Buddy; on: string[]; mine: bo
           item={{
             id: buddy.levels[0] ?? buddy.id,
             name: buddy.name,
+            art: lit ?? undefined,
             type: 'dd3bf334-87f3-40bd-b043-682a57a8dc3a',
           }}
         />

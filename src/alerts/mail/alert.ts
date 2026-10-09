@@ -2,21 +2,20 @@
 //
 // It opens on the thing, not on a sentence about the thing. A mail about a
 // gun whose first line is "You have 1 new alert" is a mail nobody opens
-// twice — so the render is the top of it, on the colour of the skin.
+// twice — so the render is the top of it, on the skin's own colour, and the
+// one number that decides whether you act sits beside the button rather than
+// in a footnote. That number is Riot's own, carried from the storefront
+// payload: a countdown we invented would be a countdown that drifts.
 //
-// The picture comes from this origin, built from the skin level's uuid: see
-// routes/render.ts. The Worker still has no catalogue and needs none, because
-// a uuid is the whole address.
+// Everything the message knows about a skin beyond its uuid was put there by
+// the browser when somebody pressed the star — name, tier, how many levels
+// and colourways, the colour measured off the render. The Worker has no
+// catalogue and needs none; see types.ts Starred. The picture comes from this
+// origin, built from the uuid: see routes/render.ts.
 //
-// The one number that decides whether you act is how long is left, and it
-// sits beside the button rather than in a footnote. That number is Riot's
-// own, carried from the storefront payload, which is why it can be stated at
-// all: a countdown we invented would be a countdown that drifts.
-//
-// Names come from the browser that starred them. What the mail can say about
-// an item is exactly what was on screen when somebody pressed the star, which
-// is also why an accessory gets a line and a gun gets a picture: only a gun's
-// render has an address that can be derived.
+// One band per match, all the same size. A message about four things that
+// shows one of them and lists the rest under a heading has decided which
+// three you cared about less, and it has no way to know that.
 
 import { renderAt } from '../../routes/render.ts';
 import type { Hit } from '../../types.ts';
@@ -25,15 +24,24 @@ import { FONT, INK, note, solid, weave } from './paint.ts';
 import type { Lang } from './words.ts';
 import { words } from './words.ts';
 
-/** The gold the store uses for a clock that is running out. */
+/** The gold the store uses for a clock that is running out. It is the colour
+ *  of the urgency, not of the skin — the skin brings its own. */
 const HUE = '217, 193, 78';
 const CLOCK = '#F0CB74';
+
+/** What a band falls back to when the star was pressed before the colour was
+ *  being kept: the app's own neutral, which is what an unmeasured weave uses
+ *  everywhere else. */
+const NEUTRAL = '157, 164, 172';
 
 /** Somebody delighted with the gun they are holding. */
 const STICKER = '/art/spray-thisgun.png';
 
-/** Riot's item type for a skin level. Only these have a render this can
- *  build an address for; everything else is named and not drawn. */
+/** VP, the coin every skin is priced in. From this origin, like the mark. */
+const COIN = '/art/coin-vp.png';
+
+/** Riot's item type for a skin level — the only kind of thing whose picture
+ *  has an address this can build. */
 const LEVELS = 'e7c63390-eda7-46e0-bb7a-a6abdacd2433';
 
 export const subject = (found: Hit[], lang: Lang, who?: string | null): string =>
@@ -53,28 +61,32 @@ export function html(
   origin: string,
   stop: string,
   who?: string | null,
+  /** Minutes the reader's clock is behind UTC, so the header can say a time
+   *  that means something where it is read. */
+  tz?: number,
 ): string {
   const w = words[lang];
 
   const body =
-    // Every match, each on its own band, each the same size. There is no
-    // appendix: a message about four things that shows one of them and lists
-    // the rest under a heading is a message that decided which three you
-    // cared about less, and it has no way to know that.
-    found.map((h) => band(h, origin, w.inYourStore)).join('') +
+    found.map((h) => band(h, origin, w, lang)).join('') +
     // the one number that decides whether you act, next to the thing you do
+    `<tr><td class="pad" style="padding:20px 28px 0">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
+    ` style="border-top:1px solid ${INK.rule}"><tr>` +
+    `<td style="padding-top:20px" valign="middle">` +
+    `<a href="${origin}/" style="display:inline-block;padding:14px 26px;border-radius:10px;` +
+    `${solid(INK.text)}color:#0e0e11;text-decoration:none;font-size:14.5px;` +
+    `font-weight:600">${w.openYourStore}</a></td>` +
+    `<td align="right" style="padding-top:20px" valign="middle">` +
+    `<div style="font-family:${FONT.mono};font-size:11.5px;letter-spacing:0.14em;` +
+    `text-transform:uppercase;color:${INK.faint}">${w.goneIn}</div>` +
+    `<div style="font-family:${FONT.mono};font-size:19px;font-weight:700;color:${CLOCK};` +
+    `padding-top:4px">${hours(left)}</div></td>` +
+    `</tr></table></td></tr>` +
+    // the line that says why this arrived, with the one sticker in the message
     `<tr><td class="pad" style="padding:22px 28px 0">` +
-    `<a href="${origin}/" style="display:block;padding:15px 20px;border-radius:10px;` +
-    `${solid(INK.text)}color:#0e0e11;text-decoration:none;font-size:15px;` +
-    `font-weight:600;text-align:center">${w.openYourStore}</a>` +
-    `<div style="padding-top:14px;text-align:center">` +
-    `<span style="font-family:${FONT.mono};font-size:11.5px;letter-spacing:0.14em;` +
-    `text-transform:uppercase;color:${INK.faint}">${w.goneIn} </span>` +
-    `<span style="font-family:${FONT.mono};font-size:17px;font-weight:700;color:${CLOCK}">` +
-    `${hours(left)}</span></div></td></tr>` +
-    `<tr><td class="pad" style="padding:22px 28px 0">` +
-    `${note(origin + STICKER, 104, w.youStarred, HUE)}</td></tr>` +
-    `<tr><td class="pad" style="padding:22px 28px 24px">` +
+    `${note(origin + STICKER, 104, w.youStarred(waited(found)), HUE)}</td></tr>` +
+    `<tr><td class="pad" style="padding:22px 28px 26px">` +
     `<p style="margin:0;font-size:12.5px;line-height:1.6;color:${INK.quiet}">` +
     `${w.oneADay}</p></td></tr>`;
 
@@ -83,36 +95,78 @@ export function html(
     `<p style="margin:10px 0 0;font-size:12px;line-height:1.6">` +
     `<a href="${stop}" style="color:${INK.faint}">${w.stopThese}</a></p>`;
 
-  return shell({ aside: w.goneInAside(hours(left)), body, foot, lang, origin, who });
+  return shell({ aside: w.sentAt(Date.now(), tz, lang), body, foot, lang, origin, who });
 }
 
-/** Whether a row has a picture this can address. A spray, a charm, a card
- *  and a title all have renders somewhere; none of them has one whose url is
- *  derivable from the id alone, which is the whole constraint here. */
-const drawable = (h: Hit | undefined): h is Hit => !!h && (h.type ?? LEVELS) === LEVELS;
+/**
+ * One match: the picture on the skin's own colour, then its name, what it is,
+ * and what it costs today.
+ *
+ * An accessory is named and not drawn. Only a skin level's render has an
+ * address derivable from the id, and inventing a layout for the ones that do
+ * not would be two designs for one message.
+ */
+function band(h: Hit, origin: string, w: (typeof words)['es'], lang: Lang): string {
+  const gun = (h.type ?? LEVELS) === LEVELS;
+  const hue = h.art ?? NEUTRAL;
 
-/** One match: the thing, on the colour of a clock running out, with its name
- *  under it. A gun is drawn because a skin level's uuid is the whole address
- *  of its render; an accessory is named, because none of theirs is. */
-function band(h: Hit, origin: string, said: string): string {
-  const art = drawable(h)
-    ? `<img src="${renderAt(origin, h.id)}" width="460" alt="${esc(h.name)}"` +
-      ' style="display:block;border:0;width:100%;max-width:460px;height:auto;margin:0 auto">'
+  const art = gun
+    ? `<tr><td align="center" style="padding:0;${weave(hue, INK.page)}">` +
+      `<img src="${renderAt(origin, h.id)}" width="490" alt="${esc(h.name)}"` +
+      ' style="display:block;border:0;width:100%;max-width:490px;height:auto;' +
+      'margin:0 auto;padding:31px 0">' +
+      `</td></tr>`
     : '';
+
+  // Name on the left, price on the right, baselines aligned — the board's own
+  // arrangement, as a table because a message has no flexbox.
   return (
-    `<tr><td align="center" class="pad" style="padding:30px 28px 26px;${weave(HUE, INK.page)}">` +
     art +
-    `<div style="font-size:26px;font-weight:500;letter-spacing:-0.02em;color:${INK.text};` +
-    `line-height:1.2;padding-top:${art ? 14 : 0}px">${esc(h.name)}</div>` +
-    `<div style="font-size:13px;color:${INK.faint};padding-top:7px">${said}</div>` +
-    `</td></tr>`
+    `<tr><td class="pad" style="padding:20px 28px 0">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>` +
+    `<td valign="bottom">` +
+    `<div style="font-size:27px;font-weight:500;letter-spacing:-0.02em;color:${INK.text};` +
+    `line-height:1.15">${esc(h.name)}</div>` +
+    `<div style="font-size:13px;color:${INK.faint};padding-top:6px">${says(h, w, lang)}</div>` +
+    `</td>` +
+    (h.cost
+      ? `<td align="right" valign="bottom" style="padding-left:14px;white-space:nowrap">` +
+        `<img src="${origin}${COIN}" width="20" height="20" alt="VP"` +
+        ' style="display:inline-block;width:20px;height:20px;vertical-align:-3px;opacity:0.85">' +
+        `<span style="font-family:${FONT.mono};font-size:25px;color:${INK.text};` +
+        `padding-left:8px">${count(h.cost, lang)}</span></td>`
+      : '') +
+    `</tr></table></td></tr>`
   );
 }
+
+/** "Premium · 4 levels · 4 chromas" — only the parts that are known, and only
+ *  the ones worth saying. One level and one colourway is every default skin
+ *  in the game, so a line reading "1 level · 1 chroma" says nothing. */
+function says(h: Hit, w: (typeof words)['es'], lang: Lang): string {
+  const parts = [
+    h.tier ? w.tier[h.tier as keyof typeof w.tier] : null,
+    h.levels && h.levels > 1 ? w.levels(h.levels) : null,
+    h.chromas && h.chromas > 1 ? w.chromas(h.chromas) : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(' · ') : w.inYourStore;
+}
+
+/** How long the oldest of these has been waiting, in whole days. */
+const waited = (found: Hit[]): number => {
+  const at = found.map((h) => h.at).filter((n): n is number => typeof n === 'number');
+  if (!at.length) return 0;
+  return Math.max(0, Math.floor((Date.now() - Math.min(...at)) / 86_400_000));
+};
 
 /** Names come from a catalogue this project does not control and go into
  *  markup, which is the same reason the page builds DOM and never strings. */
 const esc = (said: string): string =>
   said.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/** 1775 -> "1,775", in the reader's own separator. */
+const count = (n: number, lang: Lang): string =>
+  n.toLocaleString(lang === 'es' ? 'es-CO' : 'en-GB');
 
 /** `13:52:06`, or `2d 04:11:09` past a day — the same spelling the app uses,
  *  because the two are read within a minute of each other. */

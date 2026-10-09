@@ -1,11 +1,18 @@
 import { pending } from '../alerts/otp.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
-import type { Env } from '../types.ts';
+import type { Env, Starred } from '../types.ts';
 import { setAlerts } from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+/** The five words /v1/contenttiers uses, and no others. */
+const TIER = /^(select|deluxe|premium|exclusive|ultra)$/;
+
+/** `r, g, b` and nothing else. This string is written into a style attribute
+ *  in an email, so it is pinned to the shape rather than merely trimmed. */
+const ART = /^\d{1,3}, \d{1,3}, \d{1,3}$/;
 /** Both lists together. The ceiling is about the row, not the compute: the
  *  whole wishlist rides in one sealed blob, and the daily job's work is a set
  *  intersection either way. */
@@ -32,18 +39,29 @@ function cleanHook(body: unknown): string | undefined {
 /**
  * Validated at the edge, before anything is sealed.
  *
- * Three fields and all three are the browser's: the Worker has no catalogue to
- * check a uuid against and never will. `type` is Riot's own item type, kept so
- * the list can draw itself without downloading a 3.5 MB index to find out what
- * each row is of; `name` is what was on screen when it was starred, which is
- * what the morning mail carries, because the daily job has nowhere to look one
- * up either.
+ * Every field past the id is the browser's, because the Worker has no
+ * catalogue to check a uuid against and never will: what a skin is called,
+ * what tier it is, how many levels and colourways it has, and what colour it
+ * measured — all of it is on screen at the moment somebody presses the star,
+ * and none of it is derivable here.
+ *
+ * `at` is the exception and is stamped on this side. A row that already had
+ * one keeps it, so saving the list does not reset how long you have been
+ * waiting; a new row is stamped now. Taking it from the browser would let a
+ * client make a message say "you starred this 400 days ago" about a star it
+ * pressed a second earlier, which is the only field here with that shape.
  */
-function cleanWishlist(body: unknown): Array<{ id: string; name: string; type?: string }> {
+function cleanWishlist(body: unknown, was: Starred[]): Starred[] {
   const raw = ((body ?? {}) as { wishlist?: unknown }).wishlist;
-  return (Array.isArray(raw) ? raw : [])
+  const when = new Map(was.map((w) => [w.id, w.at]));
+  const now = Date.now();
+
+  const num = (v: unknown, cap: number): number | undefined =>
+    typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.min(Math.round(v), cap) : undefined;
+
+  return (raw && Array.isArray(raw) ? raw : [])
     .filter(
-      (w): w is { id: string; name: string; type?: string } =>
+      (w): w is Starred =>
         !!w &&
         typeof w === 'object' &&
         typeof (w as { id?: unknown }).id === 'string' &&
@@ -51,11 +69,20 @@ function cleanWishlist(body: unknown): Array<{ id: string; name: string; type?: 
         typeof (w as { name?: unknown }).name === 'string',
     )
     .slice(0, MAX)
-    .map((w) => ({
-      id: w.id,
-      name: w.name.slice(0, 80),
-      ...(typeof w.type === 'string' && UUID.test(w.type) ? { type: w.type } : {}),
-    }));
+    .map((w) => {
+      const keep: Starred = { id: w.id, name: w.name.slice(0, 80), at: when.get(w.id) ?? now };
+      if (typeof w.type === 'string' && UUID.test(w.type)) keep.type = w.type;
+      if (typeof w.tier === 'string' && TIER.test(w.tier)) keep.tier = w.tier;
+      // Three numbers and nothing else: it goes straight into a style
+      // attribute in a message, which is the one place in this app that
+      // builds markup from a string.
+      if (typeof w.art === 'string' && ART.test(w.art)) keep.art = w.art;
+      const levels = num(w.levels, 9);
+      const chromas = num(w.chromas, 99);
+      if (levels) keep.levels = levels;
+      if (chromas) keep.chromas = chromas;
+      return keep;
+    });
 }
 
 export const readWishlist = ({ env, uid }: Ctx): Promise<Body> => wishlist(env, uid, null);
@@ -75,7 +102,7 @@ async function wishlist(env: Env, uid: string, body: unknown | null, retry = tru
 
   if (body !== null) {
     const discord = cleanHook(body);
-    session.wishlist = cleanWishlist(body);
+    session.wishlist = cleanWishlist(body, session.wishlist ?? []);
     session.notify = discord ? { discord } : {};
 
     if (!(await saveSession(env, uid, session, ver))) {

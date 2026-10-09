@@ -122,19 +122,25 @@ const THERE = ['email.delivered', 'email.opened'];
 
 export const landed = (said: string | undefined): boolean => !!said && THERE.includes(said);
 
+/** What a message needs to be written for this reader: the language on
+ *  screen, and the clock on this device as minutes behind UTC. Both are
+ *  settled once, when the address is set, and ride on the row from then on —
+ *  the morning mail is sent by a cron with no browser anywhere near it. */
+const forMe = () => ({ lang: locale(), tz: new Date().getTimezoneOffset() });
+
 /** Set it and send a code to it. */
 export const open = (to: string) =>
   api.post<{ said?: string; error?: string; wait?: number; sent?: boolean }>('/api/channel', {
     to,
-    // Which language the mail should be in: the one on screen right now.
-    lang: locale(),
+    ...forMe(),
   });
 
 /** Another code to the address already stored. */
 export const again = () =>
-  api.post<{ said?: string; error?: string; wait?: number; sent?: boolean }>('/api/channel/again', {
-    lang: locale(),
-  });
+  api.post<{ said?: string; error?: string; wait?: number; sent?: boolean }>(
+    '/api/channel/again',
+    forMe(),
+  );
 
 /** The code, typed back. */
 export const prove = (code: string) =>

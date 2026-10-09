@@ -20,7 +20,7 @@ import type { Inventory } from '../data/types.ts';
 import { useSkinOf } from '../data/useIndex.ts';
 import { useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
-import { chipFor } from './Offer.levels.tsx';
+import { chipFor, clock } from './Offer.levels.tsx';
 import { SkinLoading } from './Skin.loading.tsx';
 import { Colours, Levels } from './Skin.picks.tsx';
 import { Worn } from './Skin.worn.tsx';
@@ -134,7 +134,15 @@ export function Skin({ id, inv }: { id: string; inv: Inventory }) {
           {!mine && (
             <StarMark
               size={19}
-              item={{ id: skin.levels[0]?.id ?? id, name: skin.name, type: LEVELS }}
+              item={{
+                id: skin.levels[0]?.id ?? id,
+                name: skin.name,
+                type: LEVELS,
+                tier: tier?.name,
+                levels: skin.levels.length,
+                chromas: skin.chromas.length,
+                ...(art ? { art } : {}),
+              }}
             />
           )}
         </div>
@@ -182,11 +190,4 @@ export function Skin({ id, inv }: { id: string; inv: Inventory }) {
     video.currentTime = 0;
     void video.play();
   }
-}
-
-/** mm:ss, from the clip's own metadata. Nothing claims a length until the
- *  browser has read one. */
-function clock(secs: number): string {
-  const whole = Math.round(secs);
-  return Math.floor(whole / 60) + ':' + String(whole % 60).padStart(2, '0');
 }

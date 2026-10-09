@@ -80,17 +80,23 @@ export const weave = (rgb: string, under: string): string =>
   `linear-gradient(${under},${under})`;
 
 /**
- * A picture over a sentence, on the weave.
+ * A picture beside a sentence, on the weave.
  *
- * One column on purpose: see the note by the media query. The picture is
- * `alt=""` and the sentence carries the whole meaning, because every client
- * worth the name blocks images until asked.
+ * Two columns and they never become one. The stacking version of this — a
+ * `<td>` told to `display: block` at a breakpoint — is what broke it the
+ * first time: the `<tr>` stays a table row, the client invents a cell around
+ * it, and the paragraph comes out centred and over the edge. Two columns
+ * that simply get narrower cannot come apart, and the narrowest phone still
+ * leaves the sentence a readable measure.
+ *
+ * The picture is `alt=""` and the sentence carries the whole meaning,
+ * because every client worth the name blocks images until asked.
  */
 export const note = (art: string, size: number, said: string, rgb: string): string =>
   `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"` +
-  ` style="border-radius:14px;${weave(rgb, INK.stage)}">` +
-  `<tr><td align="center" style="padding:20px 22px 0">` +
+  ` style="border-radius:14px;${weave(rgb, INK.stage)}"><tr>` +
+  `<td width="${size}" valign="middle" style="padding:18px 0 18px 22px;width:${size}px">` +
   `<img src="${art}" width="${size}" height="${size}" alt=""` +
-  ` style="display:block;border:0;width:${size}px;height:${size}px"></td></tr>` +
-  `<tr><td style="padding:14px 22px 20px;font-size:14px;line-height:1.6;color:${INK.text}">` +
-  `${said}</td></tr></table>`;
+  ` style="display:block;border:0;width:${size}px;height:${size}px"></td>` +
+  `<td valign="middle" style="padding:18px 22px;font-size:14px;line-height:1.6;` +
+  `color:${INK.text}">${said}</td></tr></table>`;

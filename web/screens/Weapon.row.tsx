@@ -92,7 +92,15 @@ export function SkinRow({
         <span class="skin__end">
           <StarMark
             size={17}
-            item={{ id: skin.levels[0]?.id ?? skin.id, name: shortName(skin, gun), type: LEVELS }}
+            item={{
+              id: skin.levels[0]?.id ?? skin.id,
+              name: shortName(skin, gun),
+              type: LEVELS,
+              tier: tierOf(skin.tier)?.name,
+              levels: skin.levels.length,
+              chromas: skin.chromas.length,
+              ...(lit ? { art: lit } : {}),
+            }}
           />
         </span>
       )}

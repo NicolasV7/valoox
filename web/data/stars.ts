@@ -19,11 +19,27 @@ import type { Prefs } from './types.ts';
  *  shows. Guns and accessories are not separate rooms with separate ceilings. */
 export const MAX = 100;
 
+/**
+ * One starred thing, as this screen sees it.
+ *
+ * Everything past the id is here because the Worker has no catalogue: a uuid
+ * alone cannot say what a thing is called, what tier it is, how many levels
+ * it has or what colour it is, and the morning mail is drawn from exactly
+ * these fields. Each screen sends what it happens to know — a tile knows the
+ * colour it measured, a skin list knows the counts — and the mail leaves out
+ * what it was not told.
+ */
 export interface Star {
   id: string;
   name: string;
   /** Riot's item type uuid, so the list can draw a row without an index. */
   type?: string;
+  /** The content tier's own word, where the screen knows it. */
+  tier?: string;
+  levels?: number;
+  chromas?: number;
+  /** `r, g, b`, measured off the art. */
+  art?: string;
 }
 
 const write = async (next: Star[]): Promise<void> => {

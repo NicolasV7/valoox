@@ -1,5 +1,5 @@
 import { post } from '../alerts/post.ts';
-import type { Env, Hit, Session, StoreView } from '../types.ts';
+import type { Env, Hit, Session, Starred, StoreView } from '../types.ts';
 import { reauth } from './auth.ts';
 import * as repo from './repo.ts';
 import { CURRENT_KID, open, seal } from './seal.ts';
@@ -25,11 +25,20 @@ import { fetchStore } from './storefront.ts';
 const FAIL_STOP = 0.5;
 const MIN_BEFORE_STOP = 4;
 
-/** Pure: which wishlist entries are in today's store. Unit-testable, no network. */
-export function hits(view: StoreView, wishlist: Array<{ id: string; name: string }>): Hit[] {
-  const offered = new Set(view.offers.map((o) => o.id));
-  for (const n of view.night?.items ?? []) if (n.id) offered.add(n.id);
-  return wishlist.filter((w) => offered.has(w.id));
+/**
+ * Pure: which wishlist entries are in today's store, with what Riot is
+ * charging for each. Unit-testable, no network.
+ *
+ * The price is the one thing the morning mail shows that is not on the
+ * starred row — it belongs to today's panel rather than to the star — so it
+ * is picked up here, where the two meet. A night market price wins over the
+ * daily one, because that is the number you would actually pay.
+ */
+export function hits(view: StoreView, wishlist: Starred[]): Hit[] {
+  const offered = new Map<string, number | null>();
+  for (const o of view.offers) offered.set(o.id, o.cost);
+  for (const n of view.night?.items ?? []) if (n.id) offered.set(n.id, n.price ?? n.cost);
+  return wishlist.filter((w) => offered.has(w.id)).map((w) => ({ ...w, cost: offered.get(w.id) }));
 }
 
 export async function runAlerts(env: Env): Promise<{ checked: number; sent: number }> {

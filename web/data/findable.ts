@@ -19,6 +19,7 @@ import { bare as bareCard, type Card } from './cards.ts';
 import { fold, hits } from './find.ts';
 import type { Rack } from './skins.ts';
 import { bare as bareSpray, type Spray } from './sprays.ts';
+import { tierOf } from './tiers.ts';
 import type { Title } from './titles.ts';
 
 export const LEVELS = 'e7c63390-eda7-46e0-bb7a-a6abdacd2433';
@@ -31,6 +32,12 @@ export interface Findable {
   id: string;
   name: string;
   type: string;
+  /** What the morning mail says under a name. Known here because this list is
+   *  built from the index that has it; absent for an accessory, which has
+   *  neither tier nor levels. */
+  tier?: string;
+  levels?: number;
+  chromas?: number;
   /** The weapon it is for, or the kind of accessory. Shown under the name. */
   of: string;
   cost: number | null;
@@ -64,7 +71,12 @@ export function guns(racks: Rack[], owned: Set<string>): Findable[] {
         const id = skin.levels[0]?.id;
         // No tier is a default skin: the gun you already have, in grey.
         if (!id || !skin.tier || owned.has(id)) continue;
-        out.push(row(id, skin.name, LEVELS, w.name, null));
+        out.push({
+          ...row(id, skin.name, LEVELS, w.name, null),
+          tier: tierOf(skin.tier)?.name,
+          levels: skin.levels.length,
+          chromas: skin.chromas.length,
+        });
       }
     }
   }

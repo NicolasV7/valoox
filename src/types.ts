@@ -23,7 +23,7 @@ export interface Session {
   name?: string;
   /** Skin LEVEL uuids with their display name, so the alert job never needs the
    *  3.5 MB catalogue — the browser resolves names once, at save time. */
-  wishlist?: Array<{ id: string; name: string; type?: string }>;
+  wishlist?: Starred[];
   /**
    * Where to send a hit: a Discord webhook's `id/token`, never a URL. The host is
    * pinned in the egress allowlist, so this field cannot turn the notifier into
@@ -54,6 +54,9 @@ export interface Session {
     /** The language of the tab that set it, so every later message — the code
      *  again, the morning alert — arrives in the one it was asked for in. */
     lang?: 'es' | 'en';
+    /** And its clock, as minutes behind UTC. The Worker runs in UTC and the
+     *  reader does not, so without this no message can print a time. */
+    tz?: number;
     ok: boolean;
     send?: string;
     said?: string;
@@ -127,13 +130,36 @@ export interface Env extends Cloudflare.Env {
   // because a type is a promise about the local file and not about production.
 }
 
-/** One wishlist entry that is in today's store. The name is the browser's,
- *  saved when it was starred: the Worker has no catalogue to look one up in. */
-export interface Hit {
+/**
+ * One starred thing, as the browser saw it.
+ *
+ * Everything past `id` is here because the Worker has no catalogue and will
+ * not get one: a uuid alone cannot say what a skin is called, what tier it
+ * is, how many levels it has or what colour it is. The browser has all of
+ * that on screen at the moment somebody presses the star, so it sends it and
+ * the morning mail reads it back.
+ */
+export interface Starred {
   id: string;
   name: string;
   /** Riot's item type. Only a skin level has a picture whose address can be
-   *  derived from the id, so this is what decides whether a row in a message
-   *  is drawn or only named. Absent on anything starred before it was kept. */
+   *  derived from the id. */
   type?: string;
+  /** The content tier's own word — select, deluxe, premium, exclusive, ultra. */
+  tier?: string;
+  /** How many of each there are, for the line under the name. */
+  levels?: number;
+  chromas?: number;
+  /** The colour measured off the render, as `r, g, b`. The band in the mail
+   *  is the skin's own colour for the same reason the row in the app is. */
+  art?: string;
+  /** When it was starred, in ms. Stamped here and never taken from the
+   *  browser: it is the one field a client could use to make a message claim
+   *  something about a past it did not have. */
+  at?: number;
+}
+
+export interface Hit extends Starred {
+  /** What Riot is charging for it today, from the storefront that matched. */
+  cost?: number | null;
 }

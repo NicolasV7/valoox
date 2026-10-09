@@ -21,7 +21,7 @@ import { verify } from '../alerts/svix.ts';
 import type { Env } from '../types.ts';
 import { outranks, refused } from '../vault/mail.ts';
 import { readSession, saveSession } from '../vault/session.ts';
-import { trail } from './channel.ts';
+import { trail } from './send.ts';
 
 interface Event {
   type?: string;

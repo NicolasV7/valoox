@@ -44,6 +44,10 @@ export function html(
   origin: string,
   stop: string,
   who?: string | null,
+  /** Minutes the reader's clock is behind UTC. Without it the header says a
+   *  duration, because a clock time in the sender's zone is a lie about the
+   *  reader's. */
+  tz?: number,
 ): string {
   const w = words[lang];
   const body =
@@ -52,8 +56,11 @@ export function html(
     // Letter-spacing and not spaces between the digits: the spaces doubled
     // the width of the one line in the message that must never wrap, and at
     // 320px they pushed it off the edge.
-    `<div class="big" style="font-family:${FONT.mono};font-size:46px;font-weight:700;` +
-    `letter-spacing:0.18em;color:${INK.text};line-height:1">${code}</div>` +
+    // 58px with 0.22em of tracking, and the indent puts the trailing gap
+    // back on the left so six digits sit centred rather than pushed a letter
+    // to the left of where they look centred.
+    `<div class="big" style="font-family:${FONT.mono};font-size:58px;font-weight:500;` +
+    `letter-spacing:0.22em;text-indent:0.22em;color:${INK.text};line-height:1">${code}</div>` +
     `<div style="font-family:${FONT.mono};font-size:11.5px;letter-spacing:0.16em;` +
     `text-transform:uppercase;color:${INK.body};padding-top:22px">` +
     `${w.bounds(mins)}</div></td></tr>` +
@@ -82,5 +89,12 @@ export function html(
 
   // A duration, not a clock time. The board shows "Expires 10:14", which is a
   // time in the sender's timezone printed for a reader in another one.
-  return shell({ aside: w.expiresIn(mins), body, foot, lang, origin, who });
+  return shell({
+    aside: w.expiresAt(Date.now() + mins * 60_000, tz, mins),
+    body,
+    foot,
+    lang,
+    origin,
+    who,
+  });
 }

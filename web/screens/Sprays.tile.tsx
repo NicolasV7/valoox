@@ -51,7 +51,12 @@ export function Tile({ spray, slot, mine }: { spray: Spray; slot: number; mine: 
       {!mine && (
         <StarMark
           size={15}
-          item={{ id: spray.id, name: spray.name, type: 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475' }}
+          item={{
+            id: spray.id,
+            name: spray.name,
+            art: lit ?? undefined,
+            type: 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475',
+          }}
         />
       )}
     </div>

@@ -98,7 +98,7 @@ export async function post(
         env,
         session.mail.to,
         subject(found, lang, session.name),
-        html(found, left, lang, HOME, stop, session.name),
+        html(found, left, lang, HOME, stop, session.name, session.mail.tz),
         text(found, lang, stop),
       )
         .then((r) => r.ok)

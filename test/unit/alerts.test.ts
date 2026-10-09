@@ -19,12 +19,17 @@ const view = (offers: string[], night: string[] = []) =>
 
 const want = (...ids: string[]) => ids.map((id) => ({ id, name: 'Skin ' + id }));
 
-test('a wanted skin in the daily store is a hit', () => {
-  assert.deepEqual(hits(view(['a', 'b', 'c', 'd']), want('c')), [{ id: 'c', name: 'Skin c' }]);
+test('a wanted skin in the daily store is a hit, with what it costs today', () => {
+  // The price belongs to the panel rather than to the star, so it is picked
+  // up here, where the two meet. The morning mail prints it.
+  assert.deepEqual(hits(view(['a', 'b', 'c', 'd']), want('c')), [
+    { id: 'c', name: 'Skin c', cost: 1775 },
+  ]);
 });
 
 test('the night market counts too — that is where the discount is', () => {
-  assert.deepEqual(hits(view(['a'], ['z']), want('z')), [{ id: 'z', name: 'Skin z' }]);
+  // And its price wins, because that is the number you would actually pay.
+  assert.deepEqual(hits(view(['a'], ['z']), want('z')), [{ id: 'z', name: 'Skin z', cost: 1 }]);
 });
 
 test('nothing wanted, nothing sent', () => {

@@ -157,8 +157,15 @@
   text-align: center;
 }
 
-/* Not hidden, and not greyed into nothing: these are the reason to be here. */
-.wall--theirs .pad {
+/* Not hidden, and not greyed into nothing: these are the reason to be here.
+ *
+ * Every shelf, not only the square ones. The selector named `.pad` and the
+ * cards grid is made of `.leaf` and the titles list of `.said__row`, so two
+ * of the five tabs drew a thousand things you do not own at the same weight
+ * as the thirty you do. */
+.wall--theirs .pad,
+.wall--theirs .leaf,
+.wall--theirs .said__row {
   opacity: 0.55;
 }
 

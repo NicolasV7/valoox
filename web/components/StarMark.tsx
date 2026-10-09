@@ -1,28 +1,27 @@
-// The star, as a control — and as a mark when there is nothing behind it.
+// The star, as a control.
 //
-// Starring with no verified address builds a list the daily job steps over,
-// so an unlit star is a mark until there is somewhere to send. That is not a
-// disabled button: a disabled button is a control you are being kept from,
-// and this is a thing that is not a control yet. It says the same thing it
-// always said — this one is not yours — and the alerts tab is where the
-// reason lives, because that is the screen that can do something about it.
+// Always one, wherever it appears: on a tile, on a row, and on the screen
+// that tile opens. It was a mark without a verified address for a while, on
+// the reasoning that starring with nowhere to send builds a list the daily
+// job steps over — which is true, and which the alerts tab already says in
+// the one place that can do something about it.
 //
-// A LIT one stays a control whatever the state of the address. Taking
-// something off your own list is not an action that needs a reason, and a
-// list you can only add to is a trap: lose the address after starring forty
-// things and every one of them is stuck there.
+// What that reasoning missed is that the list is the work and the address is
+// the plumbing. Somebody goes through nine hundred sprays first and sets up
+// the mail after, and a star that will not take a tap in the meantime turns
+// the one into a precondition for the other. The standby card on the alerts
+// screen is where that gets explained, in words, at the moment it matters.
 //
-// Where it is a control, it sits on top of a link rather than inside one:
-// every place it appears is a tile or a row that opens something, and a
-// button nested in an anchor is markup no browser agrees about. So it is a
-// sibling, positioned over the corner, and it stops the click before the
-// link sees it.
+// It sits on top of a link rather than inside one, because every place it
+// appears is a tile or a row that opens something, and a button nested in an
+// anchor is markup no browser agrees about. So it is a sibling, positioned
+// over the corner, and it stops the click before the link sees it.
 //
-// What it writes is the id, the name you were looking at and Riot's item
-// type — the daily job has no catalogue to look any of those up in, so the
-// name on the row is the name the mail will carry.
+// What it writes is the id, the name you were looking at, Riot's item type,
+// and what the screen knows about the thing — its tier, how many levels and
+// colourways it has, the colour measured off its art. The daily job has no
+// catalogue to look any of that up in, and the morning mail is drawn from it.
 
-import { usePrefs } from '../data/channel.ts';
 import { type Star, useStars } from '../data/stars.ts';
 import { t } from '../i18n/index.ts';
 import { Star as Glyph } from './icons.tsx';
@@ -30,16 +29,6 @@ import { Star as Glyph } from './icons.tsx';
 export function StarMark({ item, size = 15 }: { item: Star; size?: number }) {
   const { on, full, toggle } = useStars();
   const lit = on(item.id);
-  const live = usePrefs()?.mail?.ok === true;
-
-  if (!live && !lit) {
-    return (
-      <span class="star star--mark">
-        <Glyph size={size} on={false} />
-      </span>
-    );
-  }
-
   return (
     <button
       type="button"

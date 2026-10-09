@@ -99,3 +99,14 @@ export function chipFor(family: Family, on: string): string {
   const no = s.levelNo(i + 1);
   return adds === s.level.base ? no : no + ' · ' + adds;
 }
+
+/** mm:ss, from a clip's own metadata. Nothing claims a length until the
+ *  browser has read one.
+ *
+ *  Here rather than beside the one screen that calls it, because it belongs
+ *  to the same subject this file already owns: what the box over a skin is
+ *  showing and how long it runs. */
+export function clock(secs: number): string {
+  const whole = Math.round(secs);
+  return Math.floor(whole / 60) + ':' + String(whole % 60).padStart(2, '0');
+}
