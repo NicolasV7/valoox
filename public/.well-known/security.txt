@@ -1,4 +1,4 @@
-# Si encontrás algo, quiero saberlo antes que cualquier otra persona.
+# Si encuentras algo, quiero saberlo antes que cualquier otra persona.
 Contact: mailto:npava@visbl.com
 Preferred-Languages: es, en
 Canonical: https://drop.valoox.store/.well-known/security.txt
@@ -6,5 +6,6 @@ Canonical: https://drop.valoox.store/.well-known/security.txt
 # Lo que más me interesa, en orden:
 #  1. Cualquier forma de leer la sesión de otro usuario.
 #  2. Cualquier forma de hacer que el servidor llame a un endpoint de Riot
-#     que no esté en src/vault/upstream.ts.
+#     que no esté en src/vault/upstream.ts. El repositorio es público:
+#     https://github.com/NicolasV7/valoox
 #  3. XSS en el origen. La página puede alcanzar una sesión que saltea 2FA.
