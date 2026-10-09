@@ -1,0 +1,152 @@
+/* The account tab, and the three screens under it.
+ *
+ * One file because they are one subject and share every shape: the card of
+ * rows, the band above it, the fact with a sentence under its name. Nothing
+ * here is a control unless it goes somewhere — three of the rows describe
+ * pages that live on the site rather than in the app, and a chevron that
+ * goes nowhere is worse than no chevron.
+ */
+
+.deck__head {
+  padding: 26px var(--gut) 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.deck__head h1 {
+  margin: 0;
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.deck__title {
+  margin: 12px 0 0;
+  font-size: var(--t-section);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+.deck__crown {
+  margin: 0 var(--gut);
+}
+
+.deck__lede {
+  margin: 12px var(--gut) 0;
+}
+
+/* --- who is signed in ----------------------------------------------------- */
+
+.deck__who {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin: 18px var(--gut) 0;
+  padding: 16px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.deck__face {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+/* No card equipped, or none Riot would hand over. The mark rather than a
+ * broken-image box: it is the one picture this app owns. */
+.deck__face--none {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--raised);
+  color: var(--ink-4);
+}
+
+.deck__id {
+  display: block;
+  min-width: 0;
+}
+
+.deck__name {
+  display: block;
+  overflow: hidden;
+  font-size: 16px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.deck__since {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-4);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.deck__live {
+  margin-left: auto;
+  flex: none;
+}
+
+/* --- a card of rows ------------------------------------------------------- */
+
+.deck__band {
+  margin: 22px var(--gut) 10px;
+}
+
+.deck__card {
+  margin: 0 var(--gut);
+  padding: 2px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.deck__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 2px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.deck__row--rule {
+  border-bottom: 1px solid var(--hair);
+}
+
+.deck__said {
+  display: block;
+  font-size: 14.5px;
+}
+
+.deck__under {
+  display: block;
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--ink-4);
+  font-size: 12.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The chevron points the way it goes. The glyph is drawn pointing down —
+ * it is the same one the back control rotates the other way — so a row that
+ * opens something turns it a quarter. */
+.deck__end svg {
+  transform: rotate(-90deg);
+}
+
+.deck__end {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: auto;
+  flex: none;
+  color: var(--ink-4);
+  font-size: 12.5px;
+}

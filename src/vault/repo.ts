@@ -11,12 +11,19 @@ export interface Row {
   kid: number;
   blob: string;
   ver: number;
+  /** Seconds. When this row was last written, which is the last time a
+   *  request made the Worker touch Riot — reads come off a KV cache. Written
+   *  since the schema existed and selected by nothing until the Account
+   *  screen needed a date on it. */
+  last_used?: number;
 }
 
 const now = () => Math.floor(Date.now() / 1000);
 
 export async function get(env: Env, uid: string): Promise<Row | null> {
-  return env.DB.prepare('SELECT uid, kid, blob, ver FROM s WHERE uid = ?').bind(uid).first<Row>();
+  return env.DB.prepare('SELECT uid, kid, blob, ver, last_used FROM s WHERE uid = ?')
+    .bind(uid)
+    .first<Row>();
 }
 
 /**

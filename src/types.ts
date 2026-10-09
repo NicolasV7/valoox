@@ -112,7 +112,17 @@ export interface StoreView {
   /** Who you are and where you rank. Not store data, but it shares the header
    *  with the wallet and the same cache lifetime. `card` is the uuid of the
    *  equipped player card; the browser turns it into artwork. */
-  account: { name: string; rank: { tier: number; rr: number } | null; card?: string | null };
+  account: {
+    name: string;
+    rank: { tier: number; rr: number } | null;
+    card?: string | null;
+    /** Riot's own word for the region this account plays in — 'na', 'eu',
+     *  'latam'. The affinity rather than the host it routes to, because that
+     *  is the one a player would recognise. */
+    shard?: string;
+    /** Seconds: when this browser last made the Worker reach Riot. */
+    seen?: number;
+  };
   fetchedAt: number;
 }
 

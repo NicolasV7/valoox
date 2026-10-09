@@ -22,6 +22,9 @@ export type Route =
   | { name: 'title'; id: string }
   | { name: 'skin'; id: string }
   | { name: 'alerts'; step?: Step }
+  /** The fourth tab, and the two screens under it that are their own place:
+   *  what is stored, and the way out. */
+  | { name: 'account'; step?: Leaf }
   /** Arrived from the footer of a message. The token is what names the row:
    *  the phone reading that mail may never have had this app's cookie. */
   | { name: 'stopped'; token: string };
@@ -33,6 +36,11 @@ export type Tab = 'weapons' | 'sprays' | 'buddies' | 'cards' | 'titles';
 export type Step = 'channel' | 'code' | 'add';
 
 const STEPS: Step[] = ['channel', 'code', 'add'];
+
+/** The two screens inside the account tab. */
+export type Leaf = 'keep' | 'leave';
+
+const LEAVES: Leaf[] = ['keep', 'leave'];
 
 const TABS: Tab[] = ['weapons', 'sprays', 'buddies', 'cards', 'titles'];
 
@@ -58,6 +66,10 @@ export function parse(path: string, query = location.search): Route {
     const step = STEPS.find((x) => x === id);
     return step ? { name: 'alerts', step } : { name: 'alerts' };
   }
+  if (head === 'account') {
+    const step = LEAVES.find((x) => x === id);
+    return step ? { name: 'account', step } : { name: 'account' };
+  }
   if (head === 'collection') {
     const tab = TABS.find((t) => t === id) ?? 'weapons';
     return { name: 'collection', tab };
@@ -69,6 +81,7 @@ export const href = (route: Route): string => {
   if (route.name === 'store') return '/';
   if (route.name === 'stopped') return '/stop?t=' + encodeURIComponent(route.token);
   if (route.name === 'alerts') return route.step ? '/alerts/' + route.step : '/alerts';
+  if (route.name === 'account') return route.step ? '/account/' + route.step : '/account';
   if (route.name === 'collection') {
     return route.tab === 'weapons' ? '/collection' : '/collection/' + route.tab;
   }

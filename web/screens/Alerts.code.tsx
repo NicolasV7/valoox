@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
 import { useLeft } from '../components/Countdown.tsx';
 import { again, landed, prove, refused, reload, usePrefs, useWatch } from '../data/channel.ts';
+import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS, go } from '../route.ts';
 
@@ -55,7 +56,11 @@ export function AlertsCode() {
         <span class="bell__dot" />
         {s.sentOut}
       </p>
-      <h1 class="bell__ask">{s.typeTheCode}</h1>
+      <div class="bell__crown">
+        <h1 class="bell__ask">{s.typeTheCode}</h1>
+        {/* A clock already running: ten minutes and five attempts. */}
+        <img src={SPRAY.countdown} alt="" width="84" height="84" />
+      </div>
       <p class="lede bell__to">{s.sixDigitsTo(to)}</p>
 
       {/* The boxes are the picture; the input under them is the field. */}

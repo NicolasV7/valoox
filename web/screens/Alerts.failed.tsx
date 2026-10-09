@@ -16,6 +16,7 @@
 import { useState } from 'preact/hooks';
 import { Check, Mail } from '../components/icons.tsx';
 import { again, reload, usePrefs } from '../data/channel.ts';
+import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
 import { go } from '../route.ts';
 
@@ -41,8 +42,11 @@ export function AlertsFailed() {
 
   return (
     <main class="screen bell">
-      <header class="bell__head">
+      <header class="bell__head bell__head--said">
         <h1>{t().common.nav.alerts}</h1>
+        {/* Sova, grinning and sweating. The send did not work, and that is
+            ours to say rather than a fault to report. */}
+        <img class="bell__sticker" src={SPRAY.sorry} alt="" width="84" height="84" />
         <p class="small">{fate.lede}</p>
       </header>
 

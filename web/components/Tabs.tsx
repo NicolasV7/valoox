@@ -1,10 +1,10 @@
 // The bar at the bottom. Fixed, because the store is a long scroll and the way
 // out of it should not require reaching the end.
 //
-// The two that do not exist yet are drawn disabled rather than hidden or
-// silently inert. A control that looks live and does nothing is the worst of
-// the three; a missing tab would hide the shape of the app from somebody
-// deciding whether it is worth signing into.
+// All four exist now. The last of them was drawn disabled for a while rather
+// than hidden, on the reasoning that a missing tab hides the shape of the app
+// from somebody deciding whether it is worth signing into — which is the same
+// reason it was drawn at all.
 
 import { section } from '../belong.ts';
 import { t } from '../i18n/index.ts';
@@ -35,12 +35,7 @@ export function Tabs() {
       {open({ name: 'store' }, nav.store, 'store')}
       {open({ name: 'collection', tab: 'weapons' }, nav.collection, 'collection')}
       {open({ name: 'alerts' }, nav.alerts, 'alerts')}
-      {/* The one that does not exist yet stays drawn and shut: a tab that
-          looks live and does nothing is worse than either, and a missing one
-          hides the shape of the app from somebody deciding whether to scan. */}
-      <button type="button" class="tab" disabled aria-disabled="true">
-        {nav.account}
-      </button>
+      {open({ name: 'account' }, nav.account, 'account')}
     </nav>
   );
 }

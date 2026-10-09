@@ -39,9 +39,12 @@
 @import './reel.css';
 @import './steps.css';
 @import './bell.css';
+@import './crown.css';
 @import './watch.css';
 @import './star.css';
 @import './standby.css';
+@import './deck.css';
+@import './told.css';
 @import './channel.css';
 @import './pin.css';
 @import './stop.css';

@@ -12,13 +12,16 @@ export interface Held {
   session: Session;
   ver: number;
   kid: number;
+  /** What the row said before this request wrote to it, in seconds. The
+   *  Account screen dates the session with it; everything else ignores it. */
+  seen?: number;
 }
 
 export async function readSession(env: Env, uid: string): Promise<Held | null> {
   const row = await repo.get(env, uid);
   if (!row) return null;
   const session = await open<Session>(env, uid, row.kid, row.blob);
-  return { session, ver: row.ver, kid: row.kid };
+  return { session, ver: row.ver, kid: row.kid, seen: row.last_used };
 }
 
 export async function createSession(env: Env, uid: string, s: Session): Promise<void> {
@@ -78,7 +81,7 @@ export type Cache = 'store' | 'inv';
  * which is exactly what happened when the inventory grew from `owned` to
  * `byType`. Old versions simply expire; nothing needs migrating.
  */
-const VERSION: Record<Cache, number> = { store: 2, inv: 2 };
+const VERSION: Record<Cache, number> = { store: 3, inv: 2 };
 
 const key = (name: Cache, uid: string) => name + VERSION[name] + ':' + uid;
 

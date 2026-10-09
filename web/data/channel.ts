@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { locale } from '../i18n/index.ts';
 import * as api from './api.ts';
-import { NEEDS_RESEED } from './api.ts';
+import { reseeded } from './api.ts';
 import type { Prefs } from './types.ts';
 
 let kept: Prefs | null = null;
@@ -29,7 +29,7 @@ export function tell(next: Prefs | null) {
 export async function reload(): Promise<void> {
   const got = await api.prefs().catch(() => null);
   last = Date.now();
-  if (got && got !== NEEDS_RESEED) tell(got);
+  if (got && !reseeded(got)) tell(got);
 }
 
 let flight: Promise<void> | null = null;

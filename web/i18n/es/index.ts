@@ -2,6 +2,7 @@
 // no file grows past a screenful and so a translator opens the screen they are
 // translating rather than a thousand-line map.
 
+import { account } from './account.ts';
 import { alerts } from './alerts.ts';
 import { buddies } from './buddies.ts';
 import { cards } from './cards.ts';
@@ -31,5 +32,6 @@ export const es = {
   titles,
   skin,
   stopped,
+  account,
   alerts,
 };

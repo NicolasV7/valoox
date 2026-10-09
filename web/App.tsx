@@ -11,46 +11,21 @@ import { needsOwned } from './belong.ts';
 import { Tabs } from './components/Tabs.tsx';
 import type { ApiError } from './data/api.ts';
 import * as api from './data/api.ts';
-import { NEEDS_RESEED } from './data/api.ts';
+import { EXPIRED, reseeded } from './data/api.ts';
 import type { Fault, Inventory, StoreView } from './data/types.ts';
 import { useRoute, wasAt } from './route.ts';
-import { AlertsChannel } from './screens/Alerts.channel.tsx';
-import { AlertsCode } from './screens/Alerts.code.tsx';
-import { AlertsLoading } from './screens/Alerts.loading.tsx';
-import { AlertsSearch } from './screens/Alerts.search.tsx';
-import { Alerts } from './screens/Alerts.tsx';
-import { BuddiesLoading } from './screens/Buddies.loading.tsx';
-import { Buddies } from './screens/Buddies.tsx';
-import { Buddy } from './screens/Buddy.tsx';
-import { Bundle } from './screens/Bundle.tsx';
-import { Card } from './screens/Card.tsx';
-import { CardsLoading } from './screens/Cards.loading.tsx';
-import { Cards } from './screens/Cards.tsx';
-import { CollectionLoading } from './screens/Collection.loading.tsx';
-import { Collection } from './screens/Collection.tsx';
+import { Screen } from './screen.tsx';
+import { AccountGone } from './screens/Account.gone.tsx';
 import { Fail } from './screens/Fail.tsx';
 import { Gate } from './screens/Gate.tsx';
-import { Offer } from './screens/Offer.tsx';
-import { Piece } from './screens/Piece.tsx';
 import { Scan } from './screens/Scan.tsx';
-import { SkinLoading } from './screens/Skin.loading.tsx';
-import { Skin } from './screens/Skin.tsx';
-import { Spray } from './screens/Spray.tsx';
-import { SpraysLoading } from './screens/Sprays.loading.tsx';
-import { Sprays } from './screens/Sprays.tsx';
 import { Stopped } from './screens/Stopped.tsx';
 import { StoreLoading } from './screens/Store.loading.tsx';
-import { Store } from './screens/Store.tsx';
-import { Title } from './screens/Title.tsx';
-import { TitlesLoading } from './screens/Titles.loading.tsx';
-import { Titles } from './screens/Titles.tsx';
-import { WeaponLoading } from './screens/Weapon.loading.tsx';
-import { Weapon } from './screens/Weapon.tsx';
 import { useScan } from './sign-in.ts';
 
 type State =
   | { at: 'loading' }
-  | { at: 'out' }
+  | { at: 'out'; gone?: boolean }
   | { at: 'in'; view: StoreView }
   | { at: 'fail'; fault: Fault; status: number };
 
@@ -74,7 +49,10 @@ export function App() {
     setState({ at: 'loading' });
     try {
       const view = await api.store();
-      setState(view === NEEDS_RESEED ? { at: 'out' } : { at: 'in', view });
+      // Two kinds of nothing: never scanned, and a session Riot has just
+      // retired. The second is a screen of its own — see Account.gone.tsx.
+      if (reseeded(view)) return setState({ at: 'out', gone: view === EXPIRED });
+      setState({ at: 'in', view });
     } catch (e) {
       const err = e as ApiError;
       setState({ at: 'fail', fault: err.fault ?? 'us', status: err.status ?? 0 });
@@ -93,7 +71,7 @@ export function App() {
     void api
       .inventory()
       .then((got) => {
-        if (got !== NEEDS_RESEED) setInv(got);
+        if (!reseeded(got)) setInv(got);
       })
       .catch(() => undefined);
   }, [wants, inv]);
@@ -131,6 +109,12 @@ export function App() {
       return <Scan key={scan.state.phase} state={scan.state} name={who} onRetry={scan.start} />;
     }
 
+    // A session Riot has just retired is not the same screen as never having
+    // scanned: one is a stranger's wall, the other is an explanation and a
+    // button. The Worker is the only place that distinction exists.
+    if (state.at === 'out' && state.gone) {
+      return <AccountGone onScan={scan.start} onWait={() => setState({ at: 'out' })} />;
+    }
     if (state.at === 'out') return <Gate onScan={scan.start} onIntent={scan.prefetch} />;
 
     // Still loading, and the scan screen that was covering it has just gone.
@@ -138,53 +122,9 @@ export function App() {
 
     return (
       <>
-        {open(state.view)}
+        <Screen route={route} view={state.view} inv={inv} onGone={() => setState({ at: 'out' })} />
         <Tabs />
       </>
     );
-  }
-
-  function open(view: StoreView) {
-    if (route.name === 'collection') {
-      if (route.tab === 'sprays') return inv ? <Sprays inv={inv} /> : <SpraysLoading />;
-      if (route.tab === 'buddies') return inv ? <Buddies inv={inv} /> : <BuddiesLoading />;
-      if (route.tab === 'cards') return inv ? <Cards inv={inv} /> : <CardsLoading />;
-      if (route.tab === 'titles') return inv ? <Titles inv={inv} /> : <TitlesLoading />;
-      return inv ? <Collection inv={inv} /> : <CollectionLoading />;
-    }
-    if (route.name === 'spray') {
-      return inv ? <Spray id={route.id} inv={inv} /> : <SpraysLoading />;
-    }
-    if (route.name === 'buddy') {
-      return inv ? <Buddy id={route.id} inv={inv} /> : <BuddiesLoading />;
-    }
-    if (route.name === 'alerts') {
-      if (route.step === 'channel') return <AlertsChannel />;
-      if (route.step === 'code') return <AlertsCode />;
-      if (route.step === 'add') return inv ? <AlertsSearch inv={inv} /> : <AlertsLoading />;
-      return <Alerts view={view} />;
-    }
-    if (route.name === 'skin') {
-      return inv ? <Skin id={route.id} inv={inv} /> : <SkinLoading />;
-    }
-    if (route.name === 'card') {
-      return inv ? <Card id={route.id} inv={inv} who={view.account.name} /> : <CardsLoading />;
-    }
-    if (route.name === 'title') {
-      return inv ? <Title id={route.id} inv={inv} /> : <TitlesLoading />;
-    }
-    if (route.name === 'weapon') {
-      return inv ? <Weapon id={route.id} inv={inv} /> : <WeaponLoading />;
-    }
-    if (route.name === 'offer') return <Offer id={route.id} view={view} />;
-    if (route.name === 'piece') return <Piece id={route.id} view={view} />;
-    if (route.name === 'bundle') {
-      // A bundle rotates out, so a link to last week's lands here with nothing
-      // behind it. The store is the honest answer rather than an empty screen
-      // about a thing that is gone.
-      const it = view.bundles.find((b) => b.id === route.id);
-      if (it) return <Bundle bundle={it} />;
-    }
-    return <Store view={view} />;
   }
 }

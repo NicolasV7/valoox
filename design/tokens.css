@@ -68,6 +68,11 @@
   --ok: light-dark(#2e7d4f, #7fb98f); /* accepted, verified, owned */
   --kept: light-dark(#8a6200, #e0b740); /* starred */
   --bad: light-dark(#b3261e, #d96d6d); /* refused, with its status */
+  /* The one destructive control in the app wears these and nothing else
+   * does: a border and a ground tinted towards --bad, so Disconnect is
+   * recognisable before the word is read. */
+  --rule-bad: light-dark(#e8cfcd, #3a2a2c);
+  --sunk-bad: light-dark(#fdf5f4, #1a1416);
   --clock: light-dark(#8a6200, #f0cb74); /* a countdown, and only that */
 
   /* --- Riot's tier colours ------------------------------------------------ */

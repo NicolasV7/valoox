@@ -26,7 +26,15 @@ export class ApiError extends Error {
 const faultFor = (status: number): Fault => (status === 502 ? 'riot' : 'us');
 
 export const NEEDS_RESEED = Symbol('needsReseed');
-export type Reseed = typeof NEEDS_RESEED;
+/** The same answer about a session that existed until a moment ago: Riot
+ *  refused the stored cookies. A different screen from never having scanned,
+ *  which is the whole reason it is a second symbol. */
+export const EXPIRED = Symbol('expired');
+export type Reseed = typeof NEEDS_RESEED | typeof EXPIRED;
+
+/** Either kind of "no session". Most callers only need to know that much;
+ *  the one screen that tells them apart compares the symbol itself. */
+export const reseeded = (v: unknown): v is Reseed => v === NEEDS_RESEED || v === EXPIRED;
 
 async function call<T>(path: string, init?: RequestInit): Promise<T | Reseed> {
   let res: Response;
@@ -38,8 +46,8 @@ async function call<T>(path: string, init?: RequestInit): Promise<T | Reseed> {
   }
   if (!res.ok) throw new ApiError(faultFor(res.status), res.status);
 
-  const body = (await res.json()) as T & { needsReseed?: boolean };
-  if (body?.needsReseed) return NEEDS_RESEED;
+  const body = (await res.json()) as T & { needsReseed?: boolean; expired?: boolean };
+  if (body?.needsReseed) return body.expired ? EXPIRED : NEEDS_RESEED;
   return body;
 }
 

@@ -1,0 +1,45 @@
+/* A heading with its sticker beside it.
+ *
+ * Its own file because it is not one screen's: every screen with something to
+ * say and room to say it wears one, and they should all wear it the same way.
+ *
+ * The drawing is never the subject. It sits to the right of the words, at the
+ * size the boards give it, and it shrinks with the viewport rather than
+ * pushing a heading into two lines on a narrow phone. Every one is alt="",
+ * because a screen whose meaning needs the picture is a screen that breaks
+ * for anybody who cannot see it.
+ */
+
+/* A heading with its sticker beside it. The drawing is never the subject —
+ * it sits to the right of the words, at the size the boards give it, and a
+ * client with images off loses a joke and keeps the screen. */
+.bell__crown {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bell__crown h1 {
+  min-width: 0;
+}
+
+.bell__crown img {
+  flex: none;
+  width: min(84px, 24vw);
+  height: auto;
+  margin-left: auto;
+  object-fit: contain;
+}
+
+.bell__head--said {
+  position: relative;
+}
+
+.bell__sticker {
+  position: absolute;
+  top: 0;
+  right: var(--gut);
+  width: min(84px, 24vw);
+  height: auto;
+  object-fit: contain;
+}

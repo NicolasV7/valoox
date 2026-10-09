@@ -3,7 +3,7 @@
 // feeling to carry, and they are the only ones where a picture is not in the
 // way of the thing you came to look at. The store and the collection stay bare.
 //
-// They are served from this origin. Thirteen files that never change, fetched at
+// They are served from this origin. Eighteen files that never change, fetched at
 // build time by scripts/art.mjs — which is where Riot's uuid for each one is
 // written down — so the screen a stranger reads before scanning does not open
 // a second connection to draw a sticker on it.
@@ -31,7 +31,7 @@ export const SPRAY = {
   crab: art('crab'),
   /** A seal on support, sweating. Riot said no. */
   whoops: art('whoops'),
-  /** Being teleported out, waving. Disconnecting. */
+  /** Being teleported out, waving. The screen that asks before it deletes. */
   seeYou: art('seeyou'),
   /** Cypher, one finger up. The block that says never hand this code over. */
   shh: art('shh'),
@@ -49,4 +49,15 @@ export const SPRAY = {
   lostConn: art('lostconn'),
   /** Brimstone in a hammock, cucumber on his eyes. Kept, and running nothing. */
   chill: art('chill'),
+  /** Cypher at a laptop with a hand over Killjoy's eyes. What is kept, and
+   *  who can read it. */
+  secrets: art('secrets'),
+  /** Posting something, carefully. Where an alert goes. */
+  sending: art('sending'),
+  /** A countdown already running. Ten minutes and five attempts. */
+  countdown: art('countdown'),
+  /** Sova, grinning and sweating. The send did not work and it is on us. */
+  sorry: art('sorry'),
+  /** Yoru asleep, with the Zzz. A session that is over at Riot. */
+  asleep: art('asleep'),
 } as const;

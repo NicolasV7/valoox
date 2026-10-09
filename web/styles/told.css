@@ -1,0 +1,162 @@
+/* The two screens under the account tab that are nothing but statements.
+ *
+ * What is kept and what leaving does are the same shape: a name with a
+ * sentence under it, in a list of hairline-separated rows. The things that
+ * are NOT kept wear the same rows a step back, because an absence should
+ * look like the thing it is an absence of rather than like a different
+ * component.
+ */
+
+/* --- a fact with its sentence --------------------------------------------- */
+
+.deck__list {
+  display: grid;
+  gap: 1px;
+  margin: 0 var(--gut);
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.deck__fact {
+  padding: 13px 15px;
+  background: var(--stage-row);
+}
+
+/* The things that are NOT kept read as absences: the same rows, a step back. */
+.deck__list--not .deck__fact {
+  background: var(--card);
+}
+
+.deck__list--not .deck__said {
+  color: var(--ink-3);
+}
+
+.deck__list--not .deck__why {
+  color: var(--ink-5);
+}
+
+.deck__why {
+  display: block;
+  margin-top: 5px;
+  color: var(--ink-4);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.deck__fact--gone {
+  display: flex;
+  gap: 11px;
+  align-items: baseline;
+}
+
+.deck__fact--gone .deck__why {
+  margin-top: 0;
+  color: var(--ink-3);
+  font-size: 13.5px;
+}
+
+.deck__cross {
+  flex: none;
+  color: var(--bad);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.deck__stays {
+  display: flex;
+  gap: 11px;
+  align-items: baseline;
+  margin: 0 var(--gut);
+  padding: 15px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.deck__tick {
+  display: flex;
+  flex: none;
+  color: var(--ok);
+}
+
+.deck__stays .deck__why {
+  margin-top: 0;
+  color: var(--ink-3);
+  font-size: 13.5px;
+}
+
+.deck__note {
+  margin: 12px var(--gut) 0;
+}
+
+/* --- leaving -------------------------------------------------------------- */
+
+.deck__leave {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 var(--gut);
+  padding: 15px 16px;
+  border: 1px solid var(--rule-bad);
+  border-radius: 12px;
+  background: var(--sunk-bad);
+  color: inherit;
+  text-decoration: none;
+}
+
+.deck__danger {
+  display: block;
+  color: var(--bad);
+  font-size: 14.5px;
+}
+
+.deck__pair {
+  display: flex;
+  gap: 9px;
+  margin: 22px var(--gut) 0;
+}
+
+.deck__pair .btn {
+  flex: 1;
+  padding: 14px;
+  font-size: 14px;
+}
+
+.btn--gone {
+  background: var(--bad);
+  color: #16090b;
+  font-weight: 600;
+}
+
+/* --- riot said no --------------------------------------------------------- */
+
+.deck--gone {
+  padding-top: 26px;
+}
+
+.deck__chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 var(--gut);
+  color: var(--clock);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.deck__chip .bell__dot {
+  background: var(--clock);
+}
+
+.deck__sign {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin: calc(var(--v) * 1.6) 0 0;
+  color: var(--ink-5);
+  font-size: 13px;
+}

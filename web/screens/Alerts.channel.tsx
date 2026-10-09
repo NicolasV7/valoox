@@ -14,6 +14,7 @@ import { useLeft } from '../components/Countdown.tsx';
 import { Mail } from '../components/icons.tsx';
 import { again, open, refused, reload, usePrefs, waiting } from '../data/channel.ts';
 import { sameMailbox } from '../data/mailbox.ts';
+import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS, go } from '../route.ts';
 
@@ -63,7 +64,12 @@ export function AlertsChannel() {
   return (
     <main class="screen bell">
       <Back to={ALERTS} said={t().common.nav.alerts} />
-      <h1 class="bell__title">{s.whereItGoes}</h1>
+      <div class="bell__crown">
+        <h1 class="bell__title">{s.whereItGoes}</h1>
+        {/* One channel, posted carefully. Picked for what it is of, like the
+            rest — see design/sprays.ts. */}
+        <img src={SPRAY.sending} alt="" width="84" height="84" />
+      </div>
 
       <div class={bad ? 'bell__card bell__card--bad' : 'bell__card'}>
         <p class="bell__kind">

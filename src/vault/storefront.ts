@@ -9,7 +9,14 @@ import { markable, markOwned, shape } from './store.ts';
 
 /** Tokens + session -> the finished store view. Everything Riot-facing for this
  *  path lives here; the caller handles caching and persistence. */
-export async function fetchStore(env: Env, s: Session, t: Tokens): Promise<StoreView> {
+export async function fetchStore(
+  env: Env,
+  s: Session,
+  t: Tokens,
+  /** When this row was last written, for the Account screen. Passed in rather
+   *  than read here: this file's subject is Riot, and that number is ours. */
+  seen?: number,
+): Promise<StoreView> {
   const puuid = s.puuid as string;
   const h = await dataHeaders(env, t);
   const base = storeBase(s.shard as string);
@@ -37,6 +44,8 @@ export async function fetchStore(env: Env, s: Session, t: Tokens): Promise<Store
     name: s.name ?? '',
     rank,
     card: worn?.card ?? null,
+    shard: s.shard as string | undefined,
+    seen,
   });
 
   const types = [...new Set(markable(view).flatMap((g) => g.items.map((i) => i.type)))];

@@ -20,6 +20,7 @@ const UNDER: Array<[section: string, screens: Array<Route['name']>]> = [
   ['store', ['store', 'offer', 'bundle', 'piece']],
   ['collection', ['collection', 'weapon', 'skin', 'spray', 'buddy', 'card', 'title']],
   ['alerts', ['alerts', 'stopped']],
+  ['account', ['account']],
 ];
 
 export const section = (name: Route['name']): string | undefined =>

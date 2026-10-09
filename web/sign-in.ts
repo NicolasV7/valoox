@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import * as api from './data/api.ts';
-import { NEEDS_RESEED } from './data/api.ts';
+import { reseeded } from './data/api.ts';
 import { POLL_EVERY, type ScanState } from './screens/Scan.tsx';
 
 /**
@@ -54,7 +54,7 @@ export function useScan(onApproved: () => Promise<void>) {
   const prefetch = useCallback(() => {
     warm.current ??= api
       .startScan()
-      .then((open) => (open !== NEEDS_RESEED && open.url ? open.url : null))
+      .then((open) => (!reseeded(open) && open.url ? open.url : null))
       .catch(() => null);
   }, []);
 
@@ -75,7 +75,7 @@ export function useScan(onApproved: () => Promise<void>) {
 
     const ask = async () => {
       const seen = await api.pollScan().catch(() => null);
-      if (!seen || seen === NEEDS_RESEED) return;
+      if (!seen || reseeded(seen)) return;
       if (seen.status === 'expired') {
         stop();
         setState({ phase: 'expired', url: shown.current });

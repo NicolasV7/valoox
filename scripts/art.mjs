@@ -1,7 +1,7 @@
 // Fetches the app's fixed artwork into public/art/.
 //
 // The images that never change and appear on nearly every screen: the three
-// coins, the five content tiers, the thirteen sprays the empty, waiting and mailed
+// coins, the five content tiers, the eighteen sprays the empty, waiting and mailed
 // states are drawn with, and one stock render per weapon. They are chrome rather than
 // content — a Kingdom Credits coin is a symbol this interface is built out of,
 // the way a chevron is, and a stock Vandal is what an empty slot means. None
@@ -45,7 +45,7 @@ const ART = {
   'tier-exclusive': 'contenttiers/e046854e-406c-37f4-6607-19a9ba8426fc/displayicon.png',
   'tier-ultra': 'contenttiers/411e4a55-4e59-7757-41f0-86a53f101bb5/displayicon.png',
 
-  // The thirteen sprays, each picked for what it is OF. See web/design/sprays.ts.
+  // The eighteen sprays, each picked for what it is OF. See web/design/sprays.ts.
   'spray-holdup': 'sprays/271896c9-496b-8c89-962f-59a9ed3f4ffa/fulltransparenticon.png',
   'spray-goagain': 'sprays/0d5ac29c-482f-1a31-eba2-bba3acb2c2c4/fulltransparenticon.png',
   'spray-peace': 'sprays/13a7b621-44cf-73a3-04bb-0fad33b93179/fulltransparenticon.png',
@@ -61,6 +61,11 @@ const ART = {
   'spray-nothing': 'sprays/256a2aea-4508-de29-b87e-1c8a40b0647e/fulltransparenticon.png',
   'spray-lostconn': 'sprays/1f6bab1f-4459-fbd0-ac15-27a993144f21/fulltransparenticon.png',
   'spray-chill': 'sprays/101bfb95-40b3-de3d-fc83-65870bbc2933/fulltransparenticon.png',
+  'spray-secrets': 'sprays/ba0a3fdd-4f01-6766-a4c7-348bea8764bb/fulltransparenticon.png',
+  'spray-sending': 'sprays/608726e8-440d-0276-6380-45b50e209f38/fulltransparenticon.png',
+  'spray-countdown': 'sprays/8ad54d24-47e1-1f1b-f089-81880bf0b1ac/fulltransparenticon.png',
+  'spray-sorry': 'sprays/0f20c96b-4865-2440-efea-d38eb1d2bf01/fulltransparenticon.png',
+  'spray-asleep': 'sprays/38b459ee-46f6-5f3b-147c-6a9492f667b2/fulltransparenticon.png',
 };
 
 /**

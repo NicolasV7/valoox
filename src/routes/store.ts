@@ -1,5 +1,5 @@
 import type { Body, Ctx } from '../lib/json.ts';
-import { RESEED } from '../lib/json.ts';
+import { EXPIRED, RESEED } from '../lib/json.ts';
 import type { StoreView } from '../types.ts';
 import { live } from '../vault/live.ts';
 import { readCache, writeCache } from '../vault/session.ts';
@@ -18,8 +18,11 @@ export async function store({ env, uid }: Ctx): Promise<Body> {
 
   const s = await live(env, uid);
   if (!s) return RESEED;
+  // A row Riot has just refused is a different screen from never having
+  // scanned, and the only place that distinction exists is here.
+  if (s === 'gone') return EXPIRED;
 
-  const view = await fetchStore(env, s.session, s.t);
+  const view = await fetchStore(env, s.session, s.t, s.seen);
   await writeCache(env, 'store', uid, view, view.remaining);
   return view as unknown as Body;
 }

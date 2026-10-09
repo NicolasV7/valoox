@@ -9,17 +9,22 @@ import { forget, readSession, saveSession } from './session.ts';
  * in the vault rather than in routes/ because all three things it does are jar
  * work: open the sealed row, roll the cookies forward, and put them back.
  */
-export async function live(env: Env, uid: string): Promise<{ session: Session; t: Tokens } | null> {
+/** A session, or which kind of nothing. `gone` is a row Riot has just
+ *  refused — a different sentence from never having scanned, and the only
+ *  reason this is a union rather than a null. */
+export type Live = { session: Session; t: Tokens; seen?: number };
+
+export async function live(env: Env, uid: string): Promise<Live | 'gone' | null> {
   const held = await readSession(env, uid);
   if (!held) return null;
 
-  const { session, ver } = held;
+  const { session, ver, seen } = held;
   const t = await reauth(session.jar);
   if (!t) {
     // Dead at Riot. Keeping the row until the 10-day prune would leave a useless
     // credential sitting in anything that reads the table.
     await forget(env, uid);
-    return null;
+    return 'gone';
   }
 
   // A sign-in that stored the jar but died before identify heals itself here —
@@ -33,5 +38,5 @@ export async function live(env: Env, uid: string): Promise<{ session: Session; t
   // The jar was rolled forward by absorb(). Losing the CAS means another tab
   // already persisted a newer jar — theirs wins and ours is dropped on purpose.
   await saveSession(env, uid, session, ver);
-  return { session, t };
+  return { session, t, seen };
 }

@@ -53,6 +53,12 @@ export interface Account {
   name: string;
   rank: { tier: number; rr: number } | null;
   card?: string | null;
+  /** Riot's own word for the region: 'na', 'eu', 'latam'. */
+  shard?: string;
+  /** Seconds: when this browser last made the Worker reach Riot. Not "when
+   *  you last opened the app" — a cached read never touches Riot, so this is
+   *  the age of the session rather than of the visit. */
+  seen?: number;
 }
 
 export interface StoreView {
