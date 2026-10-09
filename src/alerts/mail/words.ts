@@ -7,51 +7,10 @@
 // language of the screen that sent it.
 
 import { at, on } from './clock.ts';
+import type { Words } from './said.ts';
 
-export type Lang = 'es' | 'en';
-
-export const langOf = (raw: unknown): Lang => (raw === 'en' ? 'en' : 'es');
-
-export interface Words {
-  subject: (code: string) => string;
-  /** Under the code itself: the two numbers that bound it. */
-  bounds: (mins: number) => string;
-  asked: string;
-  askedWhy: string;
-  neverAsk: string;
-  neverPassword: string;
-  foot: string;
-  text: (code: string, mins: number) => string;
-
-  // --- the morning message -------------------------------------------------
-  hitSubject: (first: string, n: number) => string;
-  inYourStore: string;
-  openYourStore: string;
-  goneIn: string;
-  /** The line under a name: the tier, then only the counts worth saying. */
-  tier: Record<'select' | 'deluxe' | 'premium' | 'exclusive' | 'ultra', string>;
-  levels: (n: number) => string;
-  chromas: (n: number) => string;
-  youStarred: (days: number) => string;
-  oneADay: string;
-  hitFoot: string;
-  stopThese: string;
-  hitText: (names: string[], link: string) => string;
-  /** The header's right-hand line. A clock where the reader's offset is
-   *  known, and how long is left where it is not. */
-  sentAt: (ms: number, tz: number | undefined, lang: Lang) => string;
-  expiresAt: (ms: number, tz: number | undefined, mins: number) => string;
-
-  // --- a channel with no layout --------------------------------------------
-  // One line of text, which is all a webhook takes. Here rather than beside
-  // the sender because a message is a message: these were the last two spoken
-  // strings in src/ written in one language, and they ignored the one the
-  // reader asked for.
-  /** The same news the morning mail carries, in a sentence. */
-  pushLine: (names: string[]) => string;
-  /** Sent by the test button. Carries no skin, no account id and no session. */
-  pushTest: string;
-}
+export type { Lang, Words } from './said.ts';
+export { langOf } from './said.ts';
 
 const es: Words = {
   subject: (code) => code + ' es tu código de valoox',
@@ -105,6 +64,7 @@ const es: Words = {
       ? names[0] + ' está en tu tienda hoy.'
       : names.join(', ') + ' están en tu tienda hoy.',
   pushTest: 'Prueba de valoox. Los avisos llegan bien por aquí.',
+  riotNotice: 'Sin relación con Riot Games. VALORANT y su arte son de Riot Games, Inc.',
   oneADay: 'Un correo por día como máximo, y solo cuando algo de tu lista está en tu tienda.',
   // No "ningún id interno": the stop link in the footer is `<uid>.<nonce>.<sig>`,
   // so this email does carry the row's id. What it does not carry is the jar.
@@ -176,6 +136,7 @@ const en: Words = {
       ? names[0] + ' is in your store today.'
       : names.join(', ') + ' are in your store today.',
   pushTest: 'valoox test. Alerts arrive fine on this channel.',
+  riotNotice: 'Not affiliated with Riot Games. VALORANT and its art belong to Riot Games, Inc.',
   oneADay: 'One email a day at most, and only when something on your list is in your store.',
   // Not "no internal id": the stop link in the footer is `<uid>.<nonce>.<sig>`,
   // so this email does carry the row's id. What it does not carry is the jar.

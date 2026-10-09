@@ -137,9 +137,27 @@ function epoch(env: Env): Promise<string> {
 const key = async (env: Env, name: Cache, uid: string) =>
   name + VERSION[name] + ':' + (await epoch(env)) + ':' + uid;
 
+/**
+ * Sealed, like the row.
+ *
+ * What is in here is a store view: the Riot game name, the tag, the rank, the
+ * shard and today's offers. schema.sql says a raw dump reveals no Riot
+ * identity, and that was true of D1 and not of KV, which has no per-row
+ * encryption boundary and held all of it as JSON. The key is the same per-uid
+ * subkey the row uses, so a KV dump is now the same kind of nothing.
+ *
+ * A failed open is a cache MISS, not an error: a bumped CURRENT_KID, a bent
+ * value, anything. The caller refetches, which is what it does for an expired
+ * entry anyway.
+ */
 export async function readCache(env: Env, name: Cache, uid: string): Promise<unknown | null> {
   const raw = await env.VAL.get(await key(env, name, uid));
-  return raw ? JSON.parse(raw) : null;
+  if (!raw) return null;
+  try {
+    return await open<unknown>(env, uid, CURRENT_KID, raw);
+  } catch {
+    return null;
+  }
 }
 
 /** For the store, the TTL is the rotation timer Riot itself returns, so the cache
@@ -152,7 +170,7 @@ export async function writeCache(
   view: unknown,
   ttl: number,
 ): Promise<void> {
-  await env.VAL.put(await key(env, name, uid), JSON.stringify(view), {
+  await env.VAL.put(await key(env, name, uid), await seal(env, uid, CURRENT_KID, view), {
     expirationTtl: Math.max(60, ttl),
   });
 }

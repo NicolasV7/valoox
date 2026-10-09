@@ -118,6 +118,12 @@ test('a rotation also orphans what the cache is already holding', async () => {
   // every entry unreachable in the same request.
   await writeCache(env, 'store', UID, { name: 'Player#TAG' }, 3600);
   expect(await readCache(env, 'store', UID)).toEqual({ name: 'Player#TAG' });
+  // And what KV actually holds is ciphertext. The store view carries the Riot
+  // game name, the tag, the rank and the shard, and KV has no per-row
+  // encryption boundary — so a dump of it used to be a list of who uses this.
+  const keys = await env.VAL.list({ prefix: 'store' });
+  const stored = await env.VAL.get((keys.keys[0] as { name: string }).name);
+  expect(stored).not.toContain('Player#TAG');
 
   const rotated = { ...env, JAR_KEY: another() };
   expect(await readCache(rotated, 'store', UID)).toBeNull();

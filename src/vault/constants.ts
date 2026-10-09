@@ -24,7 +24,20 @@ export const REAUTH_URL =
   '&client_id=play-valorant-web-prod&response_type=token%20id_token&nonce=1&scope=account%20openid';
 
 /** Affinities riot-geo may return. Not the same set as the shard hosts. */
-export const AFFINITIES = ['ap', 'br', 'esports', 'eu', 'kr', 'latam', 'na', 'pbe'];
+/**
+ * The affinities riot-geo returns that this app can actually serve.
+ *
+ * `pbe` and `esports` are gone, and their absence is the fix: they passed this
+ * gate, so sign-in SUCCEEDED, and then every data call threw UnknownAffinity
+ * because shard.ts maps neither to a pd host that resolves. A 502 on every
+ * screen forever, after a QR scan that said it worked. Failing here instead is
+ * one honest error at the only moment the person can do anything about it.
+ *
+ * br and latam stay: they have no pd host of their own either, but shard.ts
+ * maps both to na, which is where those accounts' stores actually live —
+ * measured, not assumed.
+ */
+export const AFFINITIES = ['ap', 'br', 'eu', 'kr', 'latam', 'na'];
 
 /** How long a cached client version stays fresh, in seconds. */
 export const VERSION_TTL = 3600;

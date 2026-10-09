@@ -13,13 +13,12 @@
 // hash cannot be looked up against another browser's code.
 
 import type { Env } from '../types.ts';
+import { COOLDOWN, hold, release } from './wait.ts';
+
+export { waitFor } from './wait.ts';
 
 const MINUTES = 10;
 const TRIES = 5;
-/** One code a minute. The provider rate-limits too, but a cooldown here is
- *  what stops the button being a mail cannon pointed at one address. */
-const COOLDOWN = 60;
-
 export const LIFE = { minutes: MINUTES, tries: TRIES, cooldown: COOLDOWN };
 
 interface Held {
@@ -33,7 +32,6 @@ interface Held {
 }
 
 const key = (uid: string) => 'otp:' + uid;
-const gate = (uid: string) => 'otp-wait:' + uid;
 const tried = (id: string) => 'otp-try:' + id + ':';
 
 /**
@@ -79,14 +77,6 @@ function six(): string {
   return String(n % 1_000_000).padStart(6, '0');
 }
 
-/** Seconds left on the cooldown, or 0 when a code may be sent. */
-export async function waitFor(env: Env, uid: string): Promise<number> {
-  const at = await env.VAL.get(gate(uid));
-  if (!at) return 0;
-  const left = Math.ceil((Number(at) - Date.now()) / 1000);
-  return left > 0 ? left : 0;
-}
-
 /** A new code, replacing whatever was outstanding. Returns the code itself —
  *  the only moment it exists in the clear — and when it dies. */
 export async function mint(
@@ -100,9 +90,7 @@ export async function mint(
   const held: Held = { hash: await digest(uid, to, code), id, until };
 
   await env.VAL.put(key(uid), JSON.stringify(held), { expirationTtl: MINUTES * 60 });
-  await env.VAL.put(gate(uid), String(Date.now() + COOLDOWN * 1000), {
-    expirationTtl: COOLDOWN,
-  });
+  await hold(env, uid, to);
   return { code, until };
 }
 
@@ -111,8 +99,8 @@ export async function mint(
  *  For a send that did not go: the code has to be minted before the message
  *  can carry it, so a provider that then refuses leaves a live code nobody
  *  received and a cooldown blocking the retry. Both are undone here. */
-export async function clear(env: Env, uid: string): Promise<void> {
-  await Promise.all([env.VAL.delete(key(uid)), env.VAL.delete(gate(uid))]);
+export async function clear(env: Env, uid: string, to?: string): Promise<void> {
+  await Promise.all([env.VAL.delete(key(uid)), release(env, uid, to)]);
 }
 
 export type Verdict = 'ok' | 'wrong' | 'gone' | 'spent';

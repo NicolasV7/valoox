@@ -1,5 +1,4 @@
-import type { Env, Session, Tokens } from '../types.ts';
-import { dataHeaders } from './auth.ts';
+import type { RiotHeaders, Session } from '../types.ts';
 import { rf } from './http.ts';
 import { shardBase } from './shard.ts';
 
@@ -18,10 +17,15 @@ export interface Rank {
  *
  * Returns null rather than throwing when the account has never played a ranked
  * game, which is a normal state and not an error.
+ *
+ * Takes headers rather than tokens. Minting them costs a request to Riot for
+ * the entitlements JWT, and three callers each minting their own put the
+ * nightly job at three where one would do — against a 50-subrequest ceiling
+ * that decides how many people get an email at all.
  */
-export async function fetchRank(env: Env, s: Session, t: Tokens): Promise<Rank | null> {
+export async function fetchRank(s: Session, h: RiotHeaders): Promise<Rank | null> {
   const url = shardBase(s.shard as string) + 'mmr/v1/players/' + s.puuid;
-  const res = await rf(url, { headers: await dataHeaders(env, t) });
+  const res = await rf(url, { headers: h });
   if (!res.ok) return null;
 
   const d = (await res.json()) as {

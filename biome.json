@@ -7,6 +7,7 @@
       "web/**/*.tsx",
       "test/**/*.ts",
       "scripts/**/*.mjs",
+      "scripts/**/*.ts",
       "design/**/*.css",
       "public/**/*.js",
       "vitest.config.ts",

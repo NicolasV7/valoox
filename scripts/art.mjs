@@ -28,6 +28,12 @@ import { mkdir, writeFile } from 'node:fs/promises';
 const OUT = 'public/art';
 const CDN = 'https://media.valorant-api.com/';
 
+/** A uuid from the catalogue, and a filename this script is willing to write.
+ *  Both halves of every entry come from somebody else's JSON and both are used
+ *  literally — one as a path, one as a fetch target. */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const NAME = /^[a-z0-9-]+$/;
+
 /** name -> the path under media.valorant-api.com. The uuids are Riot's and are
  *  the same ones pinned in web/components/Money.tsx, web/data/tiers.ts and
  *  web/design/sprays.ts — each of those names this file in a comment, so a
@@ -89,7 +95,12 @@ async function weapons() {
   for (const w of data ?? []) {
     const stock = (w.skins ?? []).find((s) => s.uuid === w.defaultSkinUuid);
     const url = stock?.chromas?.[0]?.fullRender ?? w.displayIcon;
-    if (url) out['weapon-' + w.uuid] = url;
+    // Both halves come from a catalogue this project does not control, and
+    // both are used literally: the uuid becomes a FILENAME and the url becomes
+    // a fetch. A uuid with a slash or a `..` in it wrote outside public/art/,
+    // and whatever that deploy picked up is then served from this origin —
+    // the one place `img-src 'self'` cannot tell it from our own bytes.
+    if (url && UUID.test(w.uuid)) out['weapon-' + w.uuid] = url;
   }
   return out;
 }
@@ -102,8 +113,14 @@ async function main() {
 
   let total = 0;
   for (const [name, url] of Object.entries(all)) {
+    if (!NAME.test(name)) throw new Error('refusing to write ' + JSON.stringify(name));
+    if (!url.startsWith(CDN)) throw new Error(name + ': off-catalogue url ' + url);
     const res = await fetch(url);
     if (!res.ok) throw new Error(name + ': ' + res.status + ' for ' + url);
+    // A 200 is not a picture. An error page saved as a .png is deployed as a
+    // .png, and nothing downstream looks again.
+    const type = res.headers.get('content-type') ?? '';
+    if (!type.startsWith('image/')) throw new Error(name + ': ' + type + ' is not an image');
     const bytes = Buffer.from(await res.arrayBuffer());
     await writeFile(OUT + '/' + name + '.png', bytes);
     total += bytes.length;

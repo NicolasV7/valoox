@@ -1,4 +1,5 @@
 import { esc, FONT, INK, solid } from './paint.ts';
+import { langOf, words } from './words.ts';
 
 // The shell every message is built in.
 //
@@ -149,9 +150,7 @@ export function shell({
     body +
     `<tr><td class="pad" style="padding:20px 28px 26px;border-top:1px solid ${INK.rule}">${foot}` +
     `<p style="margin:12px 0 0;font-size:12px;line-height:1.6;color:${INK.legal}">` +
-    (lang === 'en'
-      ? 'Not affiliated with Riot Games. VALORANT and its art belong to Riot Games, Inc.'
-      : 'Sin relación con Riot Games. VALORANT y su arte son de Riot Games, Inc.') +
+    words[langOf(lang)].riotNotice +
     '</p>' +
     `</td></tr></table></td></tr></table></body></html>`
   );

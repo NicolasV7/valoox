@@ -5,8 +5,6 @@ export const store = {
   night: 'Night market',
 
   /** The one line that is the whole reason somebody opened this. */
-  hit: (name: string) => `${name} is here today.`,
-  hits: (n: number) => `${n} of the ones you starred are here today.`,
 
   rank: (tier: string, rr: number) => `${tier} · ${rr} RR`,
   unranked: 'Unranked',
@@ -17,9 +15,6 @@ export const store = {
 
   discount: (percent: number) => `−${percent}%`,
   allOwned: 'You already own all of it',
-
-  empty: 'Riot returned nothing for this account.',
-  emptyWhy: 'If you own skins in game, this is our bug — not an empty collection.',
 
   disconnect: 'Disconnect',
   notice:
@@ -33,9 +28,6 @@ export const offer = {
   levels: 'Levels',
   levelsOf: (have: number, all: number) => `${have} of ${all}`,
   variants: 'Variants',
-  starred: 'Starred',
-  star: 'Star',
-  unstar: 'Unstar',
 
   original: 'Original',
 

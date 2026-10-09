@@ -26,7 +26,7 @@ export async function fetchInventory(env: Env, s: Session, t: Tokens): Promise<I
   const h = await dataHeaders(env, t);
   const [byType, worn] = await Promise.all([
     ownedAll(h, storeBase(s.shard as string), s.puuid as string),
-    fetchLoadout(env, s, t).catch(() => null),
+    fetchLoadout(s, h).catch(() => null),
   ]);
   return { byType, worn, fetchedAt: Math.floor(Date.now() / 1000) };
 }

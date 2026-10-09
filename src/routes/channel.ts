@@ -65,11 +65,17 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
     return { error: 'opened', said: was.said };
   }
 
-  const wait = await waitFor(env, uid);
+  // The address too, so one session cannot mail a different stranger every
+  // minute — see toGate() in alerts/otp.ts.
+  const wait = await waitFor(env, uid, to);
   if (wait > 0) return { error: 'wait', wait };
   // Re-sending to an address already proved must not un-prove it: the code is
   // how you change an address, not how you keep one.
   const keep = was?.ok === true && was.to === to;
+  // tz included. mail() has taken it since the header grew a clock, and
+  // neither caller passed it — so `expiresAt` fell to its no-offset branch in
+  // every message production has ever sent, and `npm run mail` previewed a
+  // header nobody could receive.
   const { sent, until } = await mail(
     env,
     uid,
@@ -77,6 +83,7 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
     lang,
     new URL(req.url).origin,
     held.session.name,
+    tz,
   );
 
   held.session.mail = {
@@ -115,7 +122,7 @@ export async function resend({ env, uid, req }: Ctx): Promise<Body> {
     return { error: 'opened', said: held.session.mail?.said };
   }
 
-  const wait = await waitFor(env, uid);
+  const wait = await waitFor(env, uid, to);
   if (wait > 0) return { error: 'wait', wait };
 
   const body = (await req.json().catch(() => null)) as { lang?: unknown; tz?: unknown } | null;
@@ -128,6 +135,7 @@ export async function resend({ env, uid, req }: Ctx): Promise<Body> {
     lang,
     new URL(req.url).origin,
     held.session.name,
+    tz,
   );
   held.session.mail = {
     ...held.session.mail,

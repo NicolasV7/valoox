@@ -110,9 +110,6 @@ export const account = {
 
   // --- riot said no --------------------------------------------------------
   gone: 'Your session expired at Riot',
-  goneLede:
-    'Nothing went wrong here. Riot ends a session after a while — at once after ' +
-    'a password change or a sign-out-everywhere. Scan again and everything is back.',
   scanAgain: 'Scan again',
   notNow: 'Not now',
   whichTwo: 'Which of the two happened',

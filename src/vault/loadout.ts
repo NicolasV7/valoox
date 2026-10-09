@@ -1,5 +1,4 @@
-import type { Env, Session, Tokens } from '../types.ts';
-import { dataHeaders } from './auth.ts';
+import type { RiotHeaders, Session } from '../types.ts';
 import { rf } from './http.ts';
 import { shardBase } from './shard.ts';
 
@@ -48,10 +47,11 @@ interface Raw {
   Identity?: { PlayerCardID?: string; PlayerTitleID?: string };
 }
 
-export async function fetchLoadout(env: Env, s: Session, t: Tokens): Promise<Loadout | null> {
+/** Headers in, not tokens — see fetchRank for why. */
+export async function fetchLoadout(s: Session, h: RiotHeaders): Promise<Loadout | null> {
   const url =
     shardBase(s.shard as string) + 'personalization/v3/players/' + s.puuid + '/playerloadout';
-  const res = await rf(url, { headers: await dataHeaders(env, t) });
+  const res = await rf(url, { headers: h });
   if (!res.ok) return null;
 
   const d = (await res.json()) as Raw;

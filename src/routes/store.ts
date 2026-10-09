@@ -22,7 +22,7 @@ export async function store({ env, uid }: Ctx): Promise<Body> {
   // scanned, and the only place that distinction exists is here.
   if (s === 'gone') return EXPIRED;
 
-  const view = await fetchStore(env, s.session, s.t, s.seen);
+  const view = await fetchStore(env, s.session, s.t, { seen: s.seen });
   await writeCache(env, 'store', uid, view, view.remaining);
   return view as unknown as Body;
 }

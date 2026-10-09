@@ -26,6 +26,22 @@ const FAIL_STOP = 0.5;
 const MIN_BEFORE_STOP = 4;
 
 /**
+ * How many rows one invocation can finish.
+ *
+ * A Worker gets 50 subrequests, and a lean row spends about four: reauth, the
+ * entitlements JWT, the storefront, and the message. Past the ceiling every
+ * fetch rejects with "Too many subrequests" — which lands in the per-row catch,
+ * counts as a failure, and is logged to a sink that is deliberately switched
+ * off. So the run reported `alerts checked 20 sent 2` and looked fine while
+ * fourteen people were never checked at all.
+ *
+ * Nine rows against forty-five, with five held back for the shared ones. Rows
+ * come least-recently-served first (repo.listAlerting), so a day's overflow is
+ * at the front of tomorrow's queue rather than permanently at the back.
+ */
+const MAX_ROWS = 9;
+
+/**
  * Pure: which wishlist entries are in today's store, with what Riot is
  * charging for each. Unit-testable, no network.
  *
@@ -41,15 +57,18 @@ export function hits(view: StoreView, wishlist: Starred[]): Hit[] {
   return wishlist.filter((w) => offered.has(w.id)).map((w) => ({ ...w, cost: offered.get(w.id) }));
 }
 
-export async function runAlerts(env: Env): Promise<{ checked: number; sent: number }> {
+export async function runAlerts(
+  env: Env,
+): Promise<{ checked: number; sent: number; skipped: number }> {
   if (!env.JAR_KEY) throw new Error('JAR_KEY missing: cannot open any session');
   const rows = await repo.listAlerting(env);
-  console.log('alerts: ' + rows.length + ' row(s) opted in');
+  const skipped = Math.max(0, rows.length - MAX_ROWS);
+  console.log('alerts: ' + rows.length + ' row(s) opted in, ' + skipped + ' over the ceiling');
   let checked = 0;
   let failed = 0;
   let sent = 0;
 
-  for (const row of rows) {
+  for (const row of rows.slice(0, MAX_ROWS)) {
     if (checked >= MIN_BEFORE_STOP && failed / checked > FAIL_STOP) {
       console.log('alerts: stopping early, failure rate too high');
       break;
@@ -90,7 +109,10 @@ export async function runAlerts(env: Env): Promise<{ checked: number; sent: numb
       );
       if (!saved) continue;
 
-      const view = await fetchStore(env, session, t);
+      // Lean: this job reads offers, night and remaining. Rank, the equipped
+      // card, the wallet and the ownership marks are four more requests for
+      // four values no message has ever carried.
+      const view = await fetchStore(env, session, t, { lean: true });
       const found = hits(view, session.wishlist);
       if (found.length && (await post(env, row.uid, session, found, view.remaining))) sent++;
     } catch (e) {
@@ -100,5 +122,5 @@ export async function runAlerts(env: Env): Promise<{ checked: number; sent: numb
       console.log('alerts: row failed: ' + (e as Error).name + ' ' + (e as Error).message);
     }
   }
-  return { checked, sent };
+  return { checked, sent, skipped };
 }

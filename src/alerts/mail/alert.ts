@@ -164,7 +164,11 @@ const waited = (found: Hit[]): number => {
 
 /** 1775 -> "1,775", in the reader's own separator. */
 const count = (n: number, lang: Lang): string =>
-  n.toLocaleString(lang === 'es' ? 'es-CO' : 'en-GB');
+  // The locale the APP uses, not a regional cousin of it. components/Money.tsx
+  // formats with locale(), which is 'es' or 'en', and 'es-CO' groups four-digit
+  // numbers where 'es' does not — so the same offer read 1.775 in the inbox and
+  // 1775 on the screen it links to.
+  n.toLocaleString(lang);
 
 /** `13:52:06`, or `2d 04:11:09` past a day — the same spelling the app uses,
  *  because the two are read within a minute of each other. */

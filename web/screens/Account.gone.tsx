@@ -34,7 +34,10 @@ export function AccountGone({ onScan, onWait }: { onScan: () => void; onWait: ()
             what this screen is for saying. */}
         <img src={SPRAY.asleep} alt="" width="84" height="84" />
       </div>
-      <p class="lede deck__lede">{s.goneLede}</p>
+      {/* The same sentence the generic failure screen shows, from the same
+          key. It was written twice, in two files, and both had to be edited
+          by hand when the wording changed — which is the drift this removes. */}
+      <p class="lede deck__lede">{t().common.error.expiredWhy}</p>
 
       <div class="deck__pair">
         <button type="button" class="btn" onClick={onScan}>

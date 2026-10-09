@@ -12,11 +12,35 @@ import { html as codeHtml } from '../../src/alerts/mail/code.ts';
 
 const ORIGIN = 'https://drop.valoox.store';
 const STOP = ORIGIN + '/stop?t=t';
+// The Riot name and the reader's offset. Production passes both and these
+// fixtures passed neither, so the header's name div and its clock — the two
+// pieces every real message carries — were absent from everything under test.
+// That is why the unescaped name in layout.ts went three reviews unnoticed.
+const WHO = 'Termo#GOD';
+const TZ = 300;
 
 const BOTH = [
-  ['code', codeHtml('418302', 10, 'en', ORIGIN, STOP)],
-  ['alert', alertHtml([{ id: '1', name: 'Reaver Vandal' }], 4000, 'en', ORIGIN, STOP)],
+  ['code', codeHtml('418302', 10, 'en', ORIGIN, STOP, WHO, TZ)],
+  ['alert', alertHtml([{ id: '1', name: 'Reaver Vandal' }], 4000, 'en', ORIGIN, STOP, WHO, TZ)],
 ] as const;
+
+test('the header carries the Riot name it is about, escaped', () => {
+  for (const [what, body] of BOTH) {
+    assert.ok(body.includes('Termo#GOD'), what + ' has no name');
+  }
+  // A name is Riot's data, not ours, and these builders make markup out of a
+  // string — the one place in this app that does.
+  const bent = codeHtml('418302', 10, 'en', ORIGIN, STOP, '<script>x</script>', TZ);
+  assert.ok(!bent.includes('<script>'), 'a name went in unescaped');
+  assert.ok(bent.includes('&lt;script&gt;'), 'and it should still be readable');
+});
+
+test('a reader with a known offset gets a clock, not a duration', () => {
+  // `tz` reached neither builder until this fixture passed it: both callers in
+  // routes/channel.ts dropped it, so every message fell to the no-offset
+  // branch and `npm run mail` previewed a header production could not send.
+  assert.ok(/\d{2}:\d{2}/.test(codeHtml('418302', 10, 'en', ORIGIN, STOP, WHO, TZ)));
+});
 
 test('each message tells the client not to adapt it', () => {
   for (const [what, body] of BOTH) {

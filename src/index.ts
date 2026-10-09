@@ -21,7 +21,11 @@ export default {
   ): Promise<void> {
     ctx.waitUntil(
       runAlerts(env)
-        .then((r) => console.log('alerts checked ' + r.checked + ' sent ' + r.sent))
+        .then((r) =>
+          console.log(
+            'alerts checked ' + r.checked + ' sent ' + r.sent + ' over the ceiling ' + r.skipped,
+          ),
+        )
         // Prune runs whether or not the alerts did. They are two jobs sharing a
         // trigger, and chaining them meant one rejection — a missing JAR_KEY,
         // a D1 blip — silently skipped the only thing that forgets dead rows.

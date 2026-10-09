@@ -73,7 +73,14 @@ export async function update(
 /** The rows the alert job polls. `alerts` is the only plaintext preference in the
  *  table, and it says nothing beyond "this browser asked to be told". */
 export async function listAlerting(env: Env): Promise<Row[]> {
-  const r = await env.DB.prepare('SELECT uid, kid, blob, ver FROM s WHERE alerts = 1').all<Row>();
+  const r = await env.DB.prepare(
+    // Least recently served first. The job writes `last_used` on every row it
+    // gets through, so this is round-robin with no extra state — and without
+    // it rowid order meant the same people were served every night and the
+    // same people never were, silently, because the ceiling that cut them off
+    // is a subrequest limit and not an error anybody sees.
+    'SELECT uid, kid, blob, ver FROM s WHERE alerts = 1 ORDER BY last_used ASC',
+  ).all<Row>();
   return r.results ?? [];
 }
 

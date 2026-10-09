@@ -5,8 +5,9 @@
 // that no test could have caught, and the loop of send, open on a phone,
 // squint was slow enough that one of them shipped twice.
 //
-import { html as codeHtml } from '../src/alerts/mail/code.ts';
+
 import { html as alertHtml } from '../src/alerts/mail/alert.ts';
+import { html as codeHtml } from '../src/alerts/mail/code.ts';
 
 const ORIGIN = 'https://drop.valoox.store';
 const STOP = ORIGIN + '/stop?t=preview';

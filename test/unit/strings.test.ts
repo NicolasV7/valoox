@@ -96,3 +96,33 @@ test('es and en carry the same keys', () => {
     assert.deepEqual(keys('es', file), keys('en', file), 'keys differ in ' + file);
   }
 });
+
+// --- and the half the rule forgot ------------------------------------------
+//
+// The scan above is scoped to web/, because src/ throws messages for a log and
+// not for a person. The two emails are the exception and nothing covered them:
+// every sentence a message says lives in src/alerts/mail/words.ts, which is the
+// right place, but nothing said so and nothing would have noticed a sentence
+// written straight into a builder.
+//
+// A narrower grep than the one above, because these files ARE markup: a style
+// value and a tag are full of lowercase words with spaces in them. What a
+// sentence has and `padding:22px 28px` does not is a word ending in a full
+// stop, a question mark or an exclamation mark.
+const SENTENCE = /['"`][^'"`\n]*[a-záéíóúñü]{3,}[.?!]['"`]/i;
+
+test('every sentence a message says lives in words.ts', () => {
+  const home = 'src/alerts/mail/words.ts';
+  const found: string[] = [];
+  for (const f of sources('src')) {
+    if (f.path === home) continue;
+    for (const [i, line] of strip(f.text).split('\n').entries()) {
+      if (/\bimport\b|\bfrom\b/.test(line)) continue;
+      // `why:` is the allowlist's own prose and is addressed to a reviewer.
+      if (/^\s*why:/.test(line)) continue;
+      const m = SENTENCE.exec(line);
+      if (m) found.push(f.path + ':' + (i + 1) + '  ' + m[0].slice(0, 60));
+    }
+  }
+  assert.deepEqual(found, [], 'a sentence outside ' + home + ':\n  ' + found.join('\n  '));
+});

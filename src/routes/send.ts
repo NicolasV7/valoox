@@ -52,7 +52,7 @@ export async function mail(
   // Nothing carried it, so nothing should be outstanding: the code is thrown
   // away and the cooldown with it, or a provider hiccup locks the button for a
   // minute over a message that never left.
-  if (!sent.ok) await clear(env, uid);
+  if (!sent.ok) await clear(env, uid, to);
   else if (sent.id) await env.VAL.put(trail(sent.id), uid, { expirationTtl: TRAIL });
   return { sent, until };
 }

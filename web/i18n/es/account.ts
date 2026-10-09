@@ -111,10 +111,6 @@ export const account = {
 
   // --- riot dijo que no ----------------------------------------------------
   gone: 'Tu sesión venció en Riot',
-  goneLede:
-    'Aquí no pasó nada malo. Riot termina una sesión pasado un tiempo, y al ' +
-    'instante tras un cambio de contraseña o un cierre en todos lados. Escanea ' +
-    'otra vez y vuelve todo.',
   scanAgain: 'Escanear otra vez',
   notNow: 'Ahora no',
   whichTwo: 'Cuál de las dos pasó',

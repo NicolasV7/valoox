@@ -10,31 +10,49 @@ import { markable, markOwned, shape } from './store.ts';
 /** What an item type looks like when Riot actually sent one. */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-/** Tokens + session -> the finished store view. Everything Riot-facing for this
- *  path lives here; the caller handles caching and persistence. */
+/**
+ * Tokens + session -> the finished store view. Everything Riot-facing for this
+ * path lives here; the caller handles caching and persistence.
+ *
+ * `lean` is for the nightly job, which reads `offers`, `night` and `remaining`
+ * and nothing else. A Worker gets 50 subrequests per invocation and the full
+ * version spends seven to thirteen of them per row, so the job served the first
+ * handful of people and every fetch after that rejected — inside the per-row
+ * catch, counted as a failure, logged to a sink that is switched off. Lean is
+ * four: reauth, the entitlements JWT, the storefront, and the message.
+ */
 export async function fetchStore(
   env: Env,
   s: Session,
   t: Tokens,
-  /** When this row was last written, for the Account screen. Passed in rather
-   *  than read here: this file's subject is Riot, and that number is ours. */
-  seen?: number,
+  opts: {
+    /** When this row was last written, for the Account screen. Passed in rather
+     *  than read here: this file's subject is Riot, and that number is ours. */
+    seen?: number;
+    /** Skip everything no alert has ever needed: rank, the equipped card, the
+     *  wallet, and the ownership marks. */
+    lean?: boolean;
+  } = {},
 ): Promise<StoreView> {
+  const { seen, lean } = opts;
   const puuid = s.puuid as string;
+  // Once, and handed to everything below it. Each call mints an entitlements
+  // JWT at Riot, and three callers each minting their own was three requests
+  // for one header.
   const h = await dataHeaders(env, t);
   const base = storeBase(s.shard as string);
 
-  // Four reads in parallel. Rank and card are not store data, but they share the
-  // header and the cache lifetime, so fetching them here costs no extra latency.
+  // Rank and card are not store data, but they share the header and the cache
+  // lifetime, so on the screen path they cost no extra latency.
   const [sfRes, wRes, rank, worn] = await Promise.all([
     rf(base + 'v3/storefront/' + puuid, {
       method: 'POST',
       headers: { ...h, 'Content-Type': 'application/json' },
       body: '{}',
     }),
-    rf(base + 'v1/wallet/' + puuid, { headers: h }),
-    fetchRank(env, s, t),
-    fetchLoadout(env, s, t).catch(() => null),
+    lean ? null : rf(base + 'v1/wallet/' + puuid, { headers: h }),
+    lean ? null : fetchRank(s, h),
+    lean ? null : fetchLoadout(s, h).catch(() => null),
   ]);
 
   if (!sfRes.ok) {
@@ -43,7 +61,7 @@ export async function fetchStore(
     throw new Error('storefront ' + sfRes.status);
   }
 
-  const view = shape(await sfRes.json(), wRes.ok ? await wRes.json() : null, undefined, {
+  const view = shape(await sfRes.json(), wRes?.ok ? await wRes.json() : null, undefined, {
     name: s.name ?? '',
     rank,
     card: worn?.card ?? null,
@@ -60,7 +78,7 @@ export async function fetchStore(
   const types = [...new Set(markable(view).flatMap((g) => g.items.map((i) => i.type)))].filter(
     (t): t is string => typeof t === 'string' && UUID.test(t),
   );
-  if (types.length) {
+  if (types.length && !lean) {
     const owned = await ownedSet(h, base, puuid, types);
     // Left undefined when Riot would not say. `owned?: boolean` has always had
     // the third state in it; it was being thrown away at the door.
