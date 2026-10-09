@@ -12,7 +12,6 @@
 
 import type { Inventory, StoreView } from './data/types.ts';
 import type { Route } from './route.ts';
-import { AccountGone } from './screens/Account.gone.tsx';
 import { AccountKeep } from './screens/Account.keep.tsx';
 import { AccountLeave } from './screens/Account.leave.tsx';
 import { Account } from './screens/Account.tsx';

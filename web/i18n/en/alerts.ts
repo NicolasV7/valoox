@@ -76,6 +76,13 @@ export const alerts = {
 
   watch: (name: string) => `Watch ${name}`,
 
+  // Why the star refuses the tap. Not "not in the store today" — this one is
+  // handed out by a contract, so no store ever carries it and the alert could
+  // never fire. See data/sellable.ts.
+  notSoldOne: (name: string) => `${name} is not sold in the store`,
+  notSoldWhy:
+    'This comes from a pass or a contract, not the store, so an alert would ' + 'never fire.',
+
   standby: 'Your list is on hold',
   standbyKept: (n: number) =>
     n === 1
@@ -98,21 +105,25 @@ export const alerts = {
   // say, and the endpoint that did is gone.
   onlyWhatTurnsUp:
     'The daily job checks this list against your store and sends what matches. ' +
-    'What Riot does not sell — most of the battle pass, event rewards — never ' +
-    'matches.',
+    'What a pass or a contract hands out cannot be starred; of the rest, nobody ' +
+    'can tell you when it rotates.',
   // The ceiling is about keeping the row small, not about compute: the daily
   // job is a set intersection and barely uses any.
-  hundredWhy: 'A hundred is the ceiling for both lists together: the whole list rides in one row.',
+  hundredWhy:
+    'Fifty weapons and a hundred accessories: two different rotations, and ' +
+    'filling one should not stop you on the other.',
+  outOfBoth: (g: number, gm: number, b: number, bm: number) => `${g}/${gm} · ${b}/${bm}`,
+  /** A tab, with how much sits behind it. */
+  withCount: (said: string, n: number) => `${said} ${n}`,
 
   // --- adding --------------------------------------------------------------
   kinds: { spray: 'Spray', buddy: 'Buddy', card: 'Card', title: 'Title' },
   sellsCount: (n: number) => (n === 1 ? '1 you do not own.' : `${n} you do not own.`),
-  listFull: (max: number) =>
-    `The list is full at ${max} across both. Take one off to star another.`,
+  listFull: (max: number) => `This list is full at ${max}. Take one off to star another.`,
   notInThisList:
-    'The only thing not here is what you already own. The battle pass is here: ' +
-    'nothing published says which skins Riot sells, so we show them and tell ' +
-    'you this.',
+    'What you already own is not here, and anything a pass or a contract hands ' +
+    'out cannot be starred: no store carries those. The rest is shown, though ' +
+    'being here does not mean it turns up this week.',
   searchIsLocal:
     'The search runs against the catalogue the browser already holds, so it ' +
     'narrows as you type without asking the Worker or Riot anything.',

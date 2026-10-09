@@ -13,10 +13,21 @@ const TIER = /^(select|deluxe|premium|exclusive|ultra)$/;
 /** `r, g, b` and nothing else. This string is written into a style attribute
  *  in an email, so it is pinned to the shape rather than merely trimmed. */
 const ART = /^\d{1,3}, \d{1,3}, \d{1,3}$/;
-/** Both lists together. The ceiling is about the row, not the compute: the
- *  whole wishlist rides in one sealed blob, and the daily job's work is a set
- *  intersection either way. */
-const MAX = 100;
+/** Riot's item type for a skin level, which is how a gun is told from an
+ *  accessory without a catalogue. A row with no type, or one whose type is not
+ *  a uuid, counts as a gun — that is how the browser reads it too, and the two
+ *  sides disagreeing is how a cap gets walked around. */
+const LEVELS = 'e7c63390-eda7-46e0-bb7a-a6abdacd2433';
+
+/** Two ceilings, one per rotation. Guns rotate daily and four at a time;
+ *  accessories rotate weekly. The limit is about the row either way — the
+ *  whole wishlist rides in one sealed blob and the daily job is a set
+ *  intersection — so these are product numbers, not budget ones. */
+const GUNS = 50;
+const BITS = 100;
+
+const isGun = (w: { type?: unknown }): boolean =>
+  typeof w.type !== 'string' || !UUID.test(w.type) || w.type === LEVELS;
 
 /**
  * A Discord webhook, from whatever was pasted.
@@ -51,13 +62,19 @@ function cleanHook(body: unknown): string | undefined {
  * client make a message say "you starred this 400 days ago" about a star it
  * pressed a second earlier, which is the only field here with that shape.
  */
-function cleanWishlist(body: unknown, was: Starred[]): Starred[] {
+export function cleanWishlist(body: unknown, was: Starred[] = []): Starred[] {
   const raw = ((body ?? {}) as { wishlist?: unknown }).wishlist;
   const when = new Map(was.map((w) => [w.id, w.at]));
   const now = Date.now();
 
   const num = (v: unknown, cap: number): number | undefined =>
     typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.min(Math.round(v), cap) : undefined;
+
+  // Counted as they pass, so the first fifty guns and the first hundred
+  // accessories survive — rather than one slice a hundred accessories could
+  // use up before a gun got a look in.
+  let guns = 0;
+  let bits = 0;
 
   return (raw && Array.isArray(raw) ? raw : [])
     .filter(
@@ -68,7 +85,7 @@ function cleanWishlist(body: unknown, was: Starred[]): Starred[] {
         UUID.test((w as { id: string }).id) &&
         typeof (w as { name?: unknown }).name === 'string',
     )
-    .slice(0, MAX)
+    .filter((w) => (isGun(w) ? ++guns <= GUNS : ++bits <= BITS))
     .map((w) => {
       // Control characters out before the length cap. This string is the one
       // piece of free text the browser stores, and it is read back into an

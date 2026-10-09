@@ -75,6 +75,14 @@ export const alerts = {
 
   watch: (name: string) => `Vigilar ${name}`,
 
+  // Por qué la estrella no toma el toque. No es "no está en la tienda hoy":
+  // es que ese objeto se entrega por un contrato y una tienda no lo vende
+  // nunca, así que el aviso no podría sonar jamás. Ver data/sellable.ts.
+  notSoldOne: (name: string) => `${name} no sale en la tienda`,
+  notSoldWhy:
+    'Esto se consigue en un pase o un contrato, no en la tienda, así que un ' +
+    'aviso nunca sonaría.',
+
   standby: 'Tu lista está en espera',
   standbyKept: (n: number) =>
     n === 1
@@ -97,22 +105,25 @@ export const alerts = {
   // endpoint que lo decía ya no existe.
   onlyWhatTurnsUp:
     'El trabajo diario cruza esta lista con tu tienda y envía lo que coincide. ' +
-    'Lo que Riot no vende —casi todo el pase de batalla, los premios de evento— ' +
-    'no coincide nunca.',
+    'Lo que entregan los pases y los contratos no se puede marcar; de lo demás, ' +
+    'nadie puede decirte cuándo rota.',
   // El techo es por mantener pequeña la fila, no por cómputo: el trabajo diario
   // es una intersección de conjuntos y casi no gasta.
   hundredWhy:
-    'Cien es el techo para las dos listas juntas: la lista entera viaja en una sola fila.',
+    'Cincuenta armas y cien accesorios: son dos rotaciones distintas y llenar ' +
+    'una no debería frenarte en la otra.',
+  outOfBoth: (g: number, gm: number, b: number, bm: number) => `${g}/${gm} · ${b}/${bm}`,
+  /** Una pestaña con cuántas cosas hay detrás. */
+  withCount: (said: string, n: number) => `${said} ${n}`,
 
   // --- agregar -------------------------------------------------------------
   kinds: { spray: 'Grafiti', buddy: 'Amuleto', card: 'Tarjeta', title: 'Título' },
   sellsCount: (n: number) => (n === 1 ? '1 que no tienes.' : `${n} que no tienes.`),
-  listFull: (max: number) =>
-    `La lista está llena: ${max} entre las dos. Saca una para poder marcar otra.`,
+  listFull: (max: number) => `Esta lista está llena: ${max}. Saca una para marcar otra.`,
   notInThisList:
-    'Lo único que no está aquí es lo que ya tienes. El pase de batalla sí está: ' +
-    'nada publicado dice qué skins vende Riot, así que preferimos mostrarlo y ' +
-    'decírtelo.',
+    'No está lo que ya tienes, y no se puede marcar lo que entrega un pase o un ' +
+    'contrato: eso no lo vende ninguna tienda. Lo demás sí se muestra, aunque ' +
+    'que esté aquí no quiere decir que vaya a salir esta semana.',
   searchIsLocal:
     'El buscador corre contra el catálogo que el navegador ya tiene, así que ' +
     'filtra mientras escribes sin preguntar nada al Worker ni a Riot.',

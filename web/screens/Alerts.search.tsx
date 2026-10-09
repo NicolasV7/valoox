@@ -3,10 +3,10 @@
 // What is missing is missing on purpose and the screen says so: anything you
 // already own. Knives are not missing — the daily panel takes them too.
 //
-// What is NOT filtered out is the battle pass, and that is not an oversight —
-// see data/findable.ts. Nothing published says which skins Riot actually
-// sells, so the honest screen is one that holds them and says plainly that
-// some of them will never match.
+// What a contract hands out is still listed, and still cannot be starred —
+// see data/sellable.ts. Removing those rows would be the screen pretending
+// they do not exist; a star that says why it will not take the tap is the
+// thing you can check.
 //
 // The narrowing happens entirely against indexes the browser already holds,
 // so the field answers without asking anything of anybody.
@@ -15,14 +15,23 @@ import { useMemo } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
 import { Search } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
+import { Pick } from '../components/Pick.tsx';
 import { Watch } from '../components/Watch.tsx';
 import { usePrefs } from '../data/channel.ts';
-import { bits, guns, narrow } from '../data/findable.ts';
+import { bits, guns, LEVELS, narrow, SPRAYS } from '../data/findable.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
-import { MAX, useStars } from '../data/stars.ts';
+import { sold } from '../data/sellable.ts';
+import { BITS, GUNS, useStars } from '../data/stars.ts';
 import type { Inventory } from '../data/types.ts';
-import { useBuddies, useCards, useRacks, useSprays, useTitles } from '../data/useIndex.ts';
+import {
+  useBuddies,
+  useCards,
+  useGiven,
+  useRacks,
+  useSprays,
+  useTitles,
+} from '../data/useIndex.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS, type Whence } from '../route.ts';
 import { AlertsLoading } from './Alerts.loading.tsx';
@@ -41,7 +50,12 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
   const buddies = useBuddies();
   const cards = useCards();
   const titles = useTitles();
-  const { stars, on, full, toggle } = useStars();
+  const { stars, on, shut, toggle } = useStars();
+  // Everything a contract hands out, which is everything no store sells.
+  const given = useGiven();
+  // The ceiling that applies to the tab you are on.
+  const cap = bitsTab ? BITS : GUNS;
+  const noRoom = shut(bitsTab ? SPRAYS : LEVELS);
   // Shut once, on the reasoning that finding things with nowhere to send
   // them is a dead end. It is the same action the star is, and the star is a
   // control everywhere now — see components/StarMark.tsx. The card below
@@ -104,7 +118,8 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
               item={f}
               note={f.of}
               on={on(f.id)}
-              shut={full}
+              shut={noRoom || !sold(given, f.id)}
+              why={sold(given, f.id) ? undefined : s.notSoldWhy}
               from={from}
               toggle={() =>
                 toggle({
@@ -122,17 +137,9 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
       )}
       {found.length > shown && <More when={more} at={shown} />}
 
-      {full && <p class="legal bell__note">{s.listFull(MAX)}</p>}
+      {noRoom && <p class="legal bell__note">{s.listFull(cap)}</p>}
       <p class="legal bell__note">{s.notInThisList}</p>
       <p class="legal bell__note">{s.searchIsLocal}</p>
     </main>
-  );
-}
-
-function Pick({ said, on, choose }: { said: string; on: boolean; choose: () => void }) {
-  return (
-    <button type="button" class={on ? 'pill pill--on' : 'pill'} aria-pressed={on} onClick={choose}>
-      {said}
-    </button>
   );
 }

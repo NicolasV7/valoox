@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { type Buddy, buddies } from './buddies.ts';
 import { type Card, cards } from './cards.ts';
+import { given } from './sellable.ts';
 import { type Found, type Rack, racks, skinOf, type Weapon, weaponOf } from './skins.ts';
 import { type Spray, sprays } from './sprays.ts';
 import { type Title, titles } from './titles.ts';
@@ -57,3 +58,8 @@ export const useCards = (): Card[] | null => held(cards, 'cards');
 
 /** Every player title. */
 export const useTitles = (): Title[] | null => held(titles, 'titles');
+
+/** Every uuid handed out by a battle pass, an event pass or an agent
+ *  contract — which is the set a store never sells. Null while it loads, and
+ *  the caller reads null as "no reason to refuse". See data/sellable.ts. */
+export const useGiven = (): Set<string> | null => held(given, 'given');

@@ -39,14 +39,18 @@ export function Watch({
   item,
   on,
   shut,
+  why,
   note,
   from,
   toggle,
 }: {
   item: Thing;
   on: boolean;
-  /** No room left. The star still unstars; it just cannot add. */
+  /** No room left, or nothing a store sells. The star still unstars; it just
+   *  cannot add. */
   shut?: boolean;
+  /** Why it cannot, where there is a reason worth saying. */
+  why?: string;
   /** What it is and what it costs, when the screen knows. */
   note?: string;
   /** Where back goes from the screen this opens. */
@@ -83,7 +87,8 @@ export function Watch({
         class={on ? 'star star--inline star--on' : 'star star--inline'}
         disabled={!on && shut}
         aria-pressed={on}
-        aria-label={item.name}
+        title={!on && why ? why : undefined}
+        aria-label={!on && why ? why : item.name}
         onClick={() => toggle(item)}
       >
         <Star size={19} on={on} />

@@ -14,7 +14,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { Mark } from '../components/Mark.tsx';
 import { cardArt } from '../data/catalogue.ts';
 import { usePrefs } from '../data/channel.ts';
-import { MAX } from '../data/stars.ts';
+import { BOTH } from '../data/stars.ts';
 import type { Account as Who } from '../data/types.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept, type Route } from '../route.ts';
@@ -99,7 +99,7 @@ export function Account({ who }: { who: Who }) {
           from={from}
           said={s.watching}
           under={s.starredCount(starred)}
-          end={s.outOf(starred, MAX)}
+          end={s.outOf(starred, BOTH)}
           last
         />
       </div>

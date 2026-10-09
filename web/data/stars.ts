@@ -15,9 +15,29 @@ import * as api from './api.ts';
 import { held, tell, usePrefs } from './channel.ts';
 import type { Prefs } from './types.ts';
 
-/** Both lists together, which is what the Worker counts and what the screen
- *  shows. Guns and accessories are not separate rooms with separate ceilings. */
-export const MAX = 100;
+/** Riot's own item type for a skin level. A row saved before the app kept the
+ *  type is a gun, because a gun is all it could star then. */
+const LEVELS = 'e7c63390-eda7-46e0-bb7a-a6abdacd2433';
+
+/** Two ceilings, because they are two lists with two rotations behind them.
+ *
+ *  One number for both was the wrong shape: the daily panel shows four guns
+ *  and the weekly accessory shop shows a handful, so a hundred accessories is
+ *  a plausible list and a hundred guns is most of the ones worth having. They
+ *  are also separately reachable — filling one should never be what stops you
+ *  starring the other.
+ *
+ *  The ceiling itself is still about the row. The whole wishlist rides in one
+ *  sealed blob and the daily job's work is a set intersection either way, so
+ *  150 ids is about three kilobytes and nothing here is a compute budget. */
+export const GUNS = 50;
+export const BITS = 100;
+
+/** The most that can be starred at all, for the one screen that counts both. */
+export const BOTH = GUNS + BITS;
+
+/** Which ceiling a thing falls under. */
+export const capOf = (type?: string): number => ((type ?? LEVELS) === LEVELS ? GUNS : BITS);
 
 /**
  * One starred thing, as this screen sees it.
@@ -64,7 +84,11 @@ const write = async (next: Star[]): Promise<void> => {
 export function useStars(): {
   stars: Star[] | null;
   on: (id: string) => boolean;
-  full: boolean;
+  /** No room left for a thing of this kind. A function rather than a flag
+   *  because the answer depends on what is being starred. */
+  shut: (type?: string) => boolean;
+  /** How many of that kind are starred, for the counters. */
+  count: (type?: string) => number;
   toggle: (item: Star) => void;
 } {
   const prefs = usePrefs();
@@ -80,14 +104,21 @@ export function useStars(): {
     if (!was) return;
     const now = was.wishlist ?? [];
     const has = now.some((w) => w.id === item.id);
-    if (!has && now.length >= MAX) return;
+    const cap = capOf(item.type);
+    if (!has && now.filter((w) => capOf(w.type) === cap).length >= cap) return;
     void write(has ? now.filter((w) => w.id !== item.id) : [...now, item]);
   }, []);
+
+  const count = (type?: string) => {
+    const cap = capOf(type);
+    return stars?.filter((w) => capOf(w.type) === cap).length ?? 0;
+  };
 
   return {
     stars,
     on: (id: string) => !!stars?.some((w) => w.id === id),
-    full: (stars?.length ?? 0) >= MAX,
+    shut: (type?: string) => count(type) >= capOf(type),
+    count,
     toggle,
   };
 }
