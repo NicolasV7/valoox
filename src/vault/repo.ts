@@ -34,13 +34,20 @@ export async function get(env: Env, uid: string): Promise<Row | null> {
  *
  * ver resets to 0 because the caller's follow-up save is pinned to 0.
  */
-export async function upsert(env: Env, uid: string, kid: number, blob: string): Promise<void> {
+export async function upsert(
+  env: Env,
+  uid: string,
+  kid: number,
+  blob: string,
+  acct: string | null,
+): Promise<void> {
   const t = now();
   await env.DB.prepare(
-    'INSERT INTO s (uid, kid, blob, ver, created_at, last_used) VALUES (?, ?, ?, 0, ?, ?) ' +
-      'ON CONFLICT(uid) DO UPDATE SET kid = excluded.kid, blob = excluded.blob, ver = 0, last_used = excluded.last_used',
+    'INSERT INTO s (uid, kid, blob, ver, created_at, last_used, acct) VALUES (?, ?, ?, 0, ?, ?, ?) ' +
+      'ON CONFLICT(uid) DO UPDATE SET kid = excluded.kid, blob = excluded.blob, ver = 0, ' +
+      'last_used = excluded.last_used, acct = excluded.acct',
   )
-    .bind(uid, kid, blob, t, t)
+    .bind(uid, kid, blob, t, t, acct)
     .run();
 }
 
@@ -55,6 +62,9 @@ export async function update(
   kid: number,
   blob: string,
   ver: number,
+  /** Null leaves whatever the row already had: a session that has not resolved
+   *  its puuid yet must not erase the mark a previous request wrote. */
+  acct: string | null = null,
 ): Promise<boolean> {
   const r = await env.DB.prepare(
     // `kid` is written with the blob, not left behind it. Every save re-seals
@@ -63,9 +73,10 @@ export async function update(
     // request per user would store a kid:2 blob under a row saying kid:1, and
     // every later read would derive the wrong subkey and fail closed. The
     // migration path the comment on saveSession promises is this column.
-    'UPDATE s SET kid = ?, blob = ?, ver = ver + 1, last_used = ? WHERE uid = ? AND ver = ?',
+    'UPDATE s SET kid = ?, blob = ?, ver = ver + 1, last_used = ?, ' +
+      'acct = COALESCE(?, acct) WHERE uid = ? AND ver = ?',
   )
-    .bind(kid, blob, now(), uid, ver)
+    .bind(kid, blob, now(), acct, uid, ver)
     .run();
   return r.meta.changes > 0;
 }

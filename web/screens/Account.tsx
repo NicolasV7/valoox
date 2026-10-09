@@ -25,6 +25,14 @@ const WATCHING: Route = { name: 'alerts' };
 const KEEP: Route = { name: 'account', step: 'keep' };
 const LEAVE: Route = { name: 'account', step: 'leave' };
 
+/** The two places this app points at that are not this app.
+ *
+ *  Written here rather than in i18n because a URL is not translated, and
+ *  together rather than apart because they are the same decision: the only
+ *  outbound links on any screen. */
+const SOURCE = 'https://github.com/NicolasV7/valoox';
+const COFFEE = 'https://buymeacoffee.com/nicolasv7';
+
 /** How many rules the egress allowlist holds. Written down here and checked
  *  by a test, so the number on screen cannot drift from the list — the whole
  *  argument of that sentence is that it is countable. */
@@ -93,9 +101,15 @@ export function Account({ who }: { who: Who }) {
       <div class="deck__card">
         <Row to={KEEP} from={from} said={s.whatWeKeep} under={s.whatWeKeepUnder} />
         <Row said={s.whatItCalls} under={s.whatItCallsUnder(RULES)} />
-        <Row said={s.madeBy} under={s.madeByUnder} last />
+        <Row said={s.madeBy} under={s.madeByUnder} />
+        <Row out={SOURCE} said={s.source} under={s.sourceUnder} last />
       </div>
       <p class="legal deck__note">{s.legal}</p>
+
+      <h2 class="label deck__band">{s.coffee}</h2>
+      <div class="deck__card">
+        <Row out={COFFEE} said={s.coffeeSaid} under={s.coffeeUnder} last />
+      </div>
 
       <h2 class="label deck__band">{s.leaving}</h2>
       <a class="deck__leave" href={href(LEAVE)} onClick={intercept(LEAVE)}>

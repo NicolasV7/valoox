@@ -2,7 +2,17 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- `interactive-widget=resizes-content` is the half that is not obvious.
+         Without it the on-screen keyboard leaves the LAYOUT viewport the size
+         of the whole screen and only shrinks the visual one — so `100dvh` and
+         a `position: fixed; bottom: 0` bar are both measured against a screen
+         the keyboard is covering, and the bar sits underneath it, repainting
+         in the wrong place on every scroll. With it, the layout viewport is
+         what is actually visible and both are simply correct. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
     <title>valoox</title>
     <meta
       name="description"

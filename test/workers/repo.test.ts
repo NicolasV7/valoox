@@ -20,8 +20,8 @@ test('a second sign-in from the same browser overwrites instead of failing', asy
   // With a plain INSERT this throws `UNIQUE constraint failed: s.uid`, breaking
   // re-entry at exactly the moment the user has no working session to fall back
   // on. That shipped once, and only live probing caught it.
-  await repo.upsert(env, UID, 1, 'first');
-  await repo.upsert(env, UID, 1, 'second');
+  await repo.upsert(env, UID, 1, 'first', null);
+  await repo.upsert(env, UID, 1, 'second', null);
 
   const row = await repo.get(env, UID);
   expect(row?.blob).toBe('second');
@@ -29,7 +29,7 @@ test('a second sign-in from the same browser overwrites instead of failing', asy
 });
 
 test('compare-and-swap lets the first writer win and tells the second it lost', async () => {
-  await repo.upsert(env, UID, 1, 'v0');
+  await repo.upsert(env, UID, 1, 'v0', null);
 
   expect(await repo.update(env, UID, 1, 'from tab A', 0)).toBe(true);
   // Tab B still holds ver 0 and must not clobber a jar Riot has already rotated.
@@ -41,7 +41,7 @@ test('compare-and-swap lets the first writer win and tells the second it lost', 
 });
 
 test('an update moves the kid with the blob it describes', async () => {
-  await repo.upsert(env, UID, 1, 'sealed under one');
+  await repo.upsert(env, UID, 1, 'sealed under one', null);
   // What a CURRENT_KID bump does: the save re-seals under the new key, and the
   // row has to say so or every later read derives the old subkey and fails
   // closed. The column was simply not in the UPDATE.
@@ -58,8 +58,8 @@ test('an update to a row that does not exist reports failure, not success', asyn
 });
 
 test('only rows that asked for alerts are listed', async () => {
-  await repo.upsert(env, UID, 1, 'wants');
-  await repo.upsert(env, OTHER, 1, 'does not');
+  await repo.upsert(env, UID, 1, 'wants', null);
+  await repo.upsert(env, OTHER, 1, 'does not', null);
   await repo.setAlerts(env, UID, true);
 
   const rows = await repo.listAlerting(env);
@@ -70,8 +70,8 @@ test('only rows that asked for alerts are listed', async () => {
 });
 
 test('prune deletes what was abandoned and keeps what is in use', async () => {
-  await repo.upsert(env, UID, 1, 'active');
-  await repo.upsert(env, OTHER, 1, 'abandoned');
+  await repo.upsert(env, UID, 1, 'active', null);
+  await repo.upsert(env, OTHER, 1, 'abandoned', null);
   const old = Math.floor(Date.now() / 1000) - 20 * 86400;
   await env.DB.prepare('UPDATE s SET last_used = ? WHERE uid = ?').bind(old, OTHER).run();
 
@@ -81,7 +81,7 @@ test('prune deletes what was abandoned and keeps what is in use', async () => {
 });
 
 test('prune keeps a row that is exactly at the boundary', async () => {
-  await repo.upsert(env, UID, 1, 'borderline');
+  await repo.upsert(env, UID, 1, 'borderline', null);
   const justInside = Math.floor(Date.now() / 1000) - 10 * 86400 + 60;
   await env.DB.prepare('UPDATE s SET last_used = ? WHERE uid = ?').bind(justInside, UID).run();
 
@@ -90,8 +90,8 @@ test('prune keeps a row that is exactly at the boundary', async () => {
 });
 
 test('remove deletes one row and leaves the rest alone', async () => {
-  await repo.upsert(env, UID, 1, 'mine');
-  await repo.upsert(env, OTHER, 1, 'theirs');
+  await repo.upsert(env, UID, 1, 'mine', null);
+  await repo.upsert(env, OTHER, 1, 'theirs', null);
 
   await repo.remove(env, UID);
   expect(await repo.get(env, UID)).toBeNull();

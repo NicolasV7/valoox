@@ -39,6 +39,18 @@
 /* Fixed, because the store is a long scroll and the way out of it should not
  * require reaching the end. */
 
+/* ...except while somebody is typing.
+ *
+ * A fixed bottom bar and an on-screen keyboard want the same forty points of
+ * screen. The viewport meta in index.html handles the browsers that shrink the
+ * layout viewport for a keyboard; Safari does not, and there the bar stays
+ * pinned to a screen edge the keyboard is covering and smears on every scroll.
+ *
+ * So it leaves. That is what a native app does — the keyboard replaces the
+ * nav, because nobody searching a list of nine hundred sprays needs the way
+ * out of the tab while they type. `.screen` keeps its bottom padding, so
+ * nothing below jumps when it goes.
+ */
 .tabs {
   position: fixed;
   left: 0;
@@ -52,6 +64,11 @@
   padding: 12px var(--gut) calc(20px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--rule);
   background: var(--page);
+  transition: transform 160ms ease-out;
+}
+
+body:has(input:focus) .tabs {
+  transform: translateY(100%);
 }
 
 .tab {

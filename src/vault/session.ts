@@ -2,6 +2,7 @@ import type { Env, Jar, Session } from '../types.ts';
 import { SCAN_TTL } from './constants.ts';
 import * as repo from './repo.ts';
 import { CURRENT_KID, open, SealBroken, seal } from './seal.ts';
+import { markOf } from './who.ts';
 
 // Everything that persists, behind one module. Sessions are sealed rows in D1;
 // the two caches are KV, both keyed by uid so nothing is ever shared between
@@ -49,7 +50,8 @@ export async function readSession(env: Env, uid: string): Promise<Held | null> {
 }
 
 export async function createSession(env: Env, uid: string, s: Session): Promise<void> {
-  await repo.upsert(env, uid, CURRENT_KID, await seal(env, uid, CURRENT_KID, s));
+  const [blob, acct] = await Promise.all([seal(env, uid, CURRENT_KID, s), markOf(env, s.puuid)]);
+  await repo.upsert(env, uid, CURRENT_KID, blob, acct);
 }
 
 /**
@@ -66,7 +68,10 @@ export async function saveSession(
   s: Session,
   ver: number,
 ): Promise<boolean> {
-  return repo.update(env, uid, CURRENT_KID, await seal(env, uid, CURRENT_KID, s), ver);
+  // The mark goes with the blob, so a session that resolves its puuid on a
+  // later request starts being counted then rather than never.
+  const [blob, acct] = await Promise.all([seal(env, uid, CURRENT_KID, s), markOf(env, s.puuid)]);
+  return repo.update(env, uid, CURRENT_KID, blob, ver, acct);
 }
 
 /** Forget this browser. Revokes OUR access — the jar keeps working at Riot until

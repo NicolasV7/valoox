@@ -32,6 +32,13 @@ export const account = {
   whatWeKeepUnder: 'One sealed row, your list, your address',
   whatItCalls: 'What it is allowed to call',
   whatItCallsUnder: (n: number) => `${n} lines, and nearly all of them read`,
+  source: 'Source',
+  sourceUnder: 'The Worker, the schema and the tests',
+
+  coffee: 'The coffee',
+  coffeeSaid: 'Buy me a coffee',
+  coffeeUnder: 'This runs on Cloudflare’s free plan.',
+
   madeBy: 'Made by',
   madeByUnder: 'NicolasV7 · Termo#GOD in game',
 

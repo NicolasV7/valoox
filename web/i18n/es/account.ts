@@ -32,6 +32,13 @@ export const account = {
   whatWeKeepUnder: 'Una fila sellada, tu lista, tu dirección',
   whatItCalls: 'Qué tiene permitido llamar',
   whatItCallsUnder: (n: number) => `${n} líneas, y casi todas son lecturas`,
+  source: 'Código',
+  sourceUnder: 'El Worker, el esquema y los tests',
+
+  coffee: 'El café',
+  coffeeSaid: 'Invítame un café',
+  coffeeUnder: 'Esto corre en el plan gratis de Cloudflare.',
+
   madeBy: 'Hecho por',
   madeByUnder: 'NicolasV7 · Termo#GOD en el juego',
 

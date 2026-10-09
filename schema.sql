@@ -24,7 +24,16 @@ CREATE TABLE IF NOT EXISTS s (
   -- source of truth for the schema could not be applied twice: the second run
   -- died on `duplicate column name: alerts`. The tests only survived it
   -- because setup.ts drops the table first.
-  alerts     INTEGER NOT NULL DEFAULT 0
+  alerts     INTEGER NOT NULL DEFAULT 0,
+  -- Which ACCOUNT this browser is, without saying which account that is:
+  -- HMAC-SHA256 of the puuid under a key derived from JAR_KEY, truncated.
+  -- It exists so COUNT(DISTINCT acct) is a real number — a row is a browser,
+  -- and a phone, a laptop and every private window are separate rows.
+  --
+  -- The claim above still holds: the mark is not the puuid, does not contain
+  -- it, and cannot be walked back without a key that is not in this database.
+  -- What a dump DOES now show is that two rows are one account. Not which.
+  acct       TEXT
 );
 
 -- The column the cron filters on, so listAlerting is an index scan rather than

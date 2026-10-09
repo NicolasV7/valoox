@@ -30,7 +30,8 @@
 import { execSync } from 'node:child_process';
 
 const SQL = `
-  SELECT COUNT(*)                                                AS signed_in,
+  SELECT COUNT(DISTINCT acct)                                    AS accounts,
+         COUNT(*)                                                AS browsers,
          SUM(alerts)                                             AS with_alerts,
          SUM(last_used > strftime('%s','now') -  86400)          AS seen_24h,
          SUM(last_used > strftime('%s','now') - 604800)          AS seen_7d,
@@ -62,7 +63,9 @@ const [now] = ask(SQL);
 const days = ask(BY_DAY);
 
 const pad = (s, n) => String(s).padEnd(n);
-console.log('\n  ' + pad('signed in now', 16) + now.signed_in);
+console.log('');
+console.log('  ' + pad('accounts', 16) + now.accounts);
+console.log('  ' + pad('browsers', 16) + now.browsers);
 console.log('  ' + pad('with alerts set', 16) + now.with_alerts);
 console.log('  ' + pad('seen in 24h', 16) + now.seen_24h);
 console.log('  ' + pad('seen in 7 days', 16) + now.seen_7d);
@@ -75,10 +78,16 @@ for (const d of days) {
 }
 
 console.log(`
-  A row is a browser, not a person: a phone and a laptop are two, and every
-  private window is another. Rows unused for ten days are deleted, so this is
-  "signed in now" and never "has ever used it". Anyone who opened the page and
-  left without scanning is not here — nothing recorded them.
+  "accounts" is COUNT(DISTINCT acct), and acct is an HMAC of the Riot puuid
+  under a key that is not in this database — so two browsers of one account
+  collapse into one here without the table ever naming the account. "browsers"
+  is the raw row count: a phone and a laptop are two, every private window is
+  another. The gap between them is how much row-counting over-counted.
+
+  Rows unused for ten days are deleted, so both are "signed in now" and never
+  "has ever used it". Anyone who opened the page and left without scanning is
+  not here — nothing recorded them. A row that signed in before this column
+  existed carries no mark until its next request, and does not count yet.
 
   For visits rather than sign-ins: the Cloudflare dashboard, Workers & Pages ->
   val -> Metrics. Aggregate, no URL, no identity, and not the logs setting that
