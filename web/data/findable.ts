@@ -3,13 +3,11 @@
 // One filter, and it removes a row that could only ever disappoint: anything
 // already owned, because the daily store never offers you something you have.
 //
-// There were two more and both are gone, which is worth writing down because it
-// looks like an omission. Whether Riot sells a given skin at all is not in
-// the public catalogue — a battle-pass skin carries a content tier and a
-// theme exactly like a sold one — and Riot's own answer, /store/v1/offers/,
-// now 404s on every shard and every spelling of the path. So the list holds
-// things that will never match, and the screen says so rather than pretending
-// to a filter it cannot run.
+// Not two: whether Riot SELLS a thing is answered elsewhere and answered the
+// other way round — see data/sellable.ts — and it is not a filter. A contract
+// reward stays in this list and stays browsable; what it loses is the star.
+// Taking the row out would make the screen quietly disagree with the game's
+// own collection, which is where people come from when they search here.
 //
 // The other was melee, kept out on the belief that the daily panel is four
 // guns. It is not — a knife turns up in that panel like anything else, and
@@ -17,7 +15,7 @@
 
 import { type Buddy, bare as bareBuddy } from './buddies.ts';
 import { bare as bareCard, type Card } from './cards.ts';
-import { fold, hits } from './find.ts';
+import { fold, MISS, score } from './find.ts';
 import type { Rack } from './skins.ts';
 import { bare as bareSpray, type Spray } from './sprays.ts';
 import { tierOf } from './tiers.ts';
@@ -108,5 +106,16 @@ export function bits(
  *  change between keystrokes and the query does. */
 export const narrow = (all: Findable[], q: string): Findable[] => {
   const needle = fold(q);
-  return needle ? all.filter((f) => hits(f.hay, needle)) : all;
+  if (!needle) return all;
+  // Ranked, not just filtered. The typo allowance earns its place by sorting
+  // below the names that needed none — otherwise "Yoru" leads with "Stay
+  // Safe, Wash Your Hands", which is what it did. Sort is stable, so inside a
+  // tier the catalogue's order survives.
+  const kept: Array<{ f: Findable; s: number }> = [];
+  for (const f of all) {
+    const s = score(f.hay, needle);
+    if (s > MISS) kept.push({ f, s });
+  }
+  kept.sort((a, b) => b.s - a.s);
+  return kept.map((k) => k.f);
 };

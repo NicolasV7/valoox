@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
-import { fold, hits, sift } from '../../web/data/find.ts';
+import { fold, hits, score, sift } from '../../web/data/find.ts';
 
 // Six screens had `name.toLowerCase().includes(query)` and it said no to two
 // things people type constantly: the words the other way round, and one
@@ -45,9 +45,37 @@ test('and not in a short one, where one letter is a third of the word', () => {
   no('Ion Vandal', 'oni');
 });
 
-test('two wrong letters is a different word', () => {
-  no('Prime Classic', 'clessec');
-  no('Reaver Vandal', 'vendel');
+test('two wrong letters, once the word is long enough to carry them', () => {
+  // The allowance is a share of the word, not a number: one edit on three
+  // letters is a third, and so is two on six. This moved because of a real
+  // complaint — "buddie" is what people type for "buddy", which is a deletion
+  // AND a substitution, and at one edit the search came back empty.
+  yes('Buddy', 'buddie');
+  yes('Reaver Vandal', 'vendel');
+  yes('Prime Classic', 'clessec');
+});
+
+test('but not on a word too short to carry them', () => {
+  no('Ion Vandal', 'oni');
+  no('Sage Spray', 'saeg'.replace('saeg', 'sgea')); // two edits on four letters
+  no('Fade Spray', 'feda'.replace('feda', 'fdea')); // ditto
+});
+
+test('an exact match outranks one that needed the allowance', () => {
+  // Measured on the alerts search: "Yoru" returned forty-five rows and the
+  // first row containing the word was FOURTH, behind "Stay Safe, Wash Your
+  // Hands", "You Wanna Play?" and "Killjoy! I Choose You!" — because "Your"
+  // and "You" are each one edit from "Yoru".
+  const all = ['Stay Safe, Wash Your Hands', 'You Wanna Play?', 'Sad Yoru', 'Yoru Figure'];
+  const got = sift(all, 'yoru', (x) => x);
+  assert.deepEqual(got.slice(0, 2), ['Sad Yoru', 'Yoru Figure']);
+  assert.ok(score(fold('Sad Yoru'), 'yoru') > score(fold('You Wanna Play?'), 'yoru'));
+});
+
+test('every word present beats a word that had to be corrected', () => {
+  assert.ok(
+    score(fold('Reaver Vandal'), 'reaver vandal') > score(fold('Reaver Vandal'), 'reaver vandel'),
+  );
 });
 
 test('where the spaces fall is not something anybody has to remember', () => {

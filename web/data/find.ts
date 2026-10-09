@@ -13,14 +13,34 @@
 // adds its own. One wrong letter should not empty the screen.
 //
 // So: every word of the query has to appear somewhere in the name, in any
-// order, and a word of four letters or more may be off by one edit. Four,
-// because at three the distance covers a third of the word and "ion" starts
-// matching "icon", "iron" and "lion" — at that length the typo tolerance is
-// wider than the word.
+// order, and a long enough word may be off by an edit or two.
 //
-// Nothing here is a fuzzy ranking. The result stays in the catalogue's own
-// order, because a list that reorders itself as you type is a list where the
-// thing you were reaching for moves.
+// HOW FAR OFF, by length, because a fixed allowance is wrong at both ends:
+//
+//   under 4   exact. At three letters one edit covers a third of the word and
+//             "ion" starts matching "icon", "iron" and "lion" — the tolerance
+//             would be wider than the word.
+//   4 to 5    one edit.
+//   6 and up  two. Measured on the complaint that produced this: "buddie" is
+//             what people type for "buddy", and that is a deletion AND a
+//             substitution. At one edit the search came back empty, which is
+//             the worst answer a search can give to a word that is nearly
+//             right. Two edits on six letters is the same third as one on
+//             three, so the rule is the same rule.
+//
+// AND IT RANKS NOW, which it deliberately did not. The old note here said a
+// list that reorders itself as you type is a list where the thing you were
+// reaching for moves. That is true of a list whose ORDER changes under a
+// stable set, and it is not what was happening: measured on this screen,
+// "Yoru" returned 45 rows of which the first exact match was fourth, behind
+// "Stay Safe, Wash Your Hands", "You Wanna Play?" and "Killjoy! I Choose
+// You!" — because "Your" and "You" are each one edit from "Yoru". Eighteen of
+// the twenty rows on screen did not contain the word typed. The set already
+// changes completely on every keystroke; leaving it in catalogue order inside
+// that churn was not stability, it was burying the answer.
+//
+// So the tolerance earns its place by sorting below the things that need no
+// tolerance at all, and ties keep the catalogue's order.
 
 /** Lower case, accents off, punctuation to spaces. Riot ships "Glitchpop",
  *  "Run It Back", "RGX 11z" and "Oni 2.0" — an apostrophe or a dot between
@@ -33,68 +53,117 @@ export const fold = (said: string): string =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 
-/** Whether two words are one typo apart.
+/** How many edits a word of this length is allowed to be wrong by. */
+const slack = (n: number): number => (n < 4 ? 0 : n < 6 ? 1 : 2);
+
+/**
+ * Whether two words are within `max` edits.
  *
- *  Four edits count and the fourth is the one that matters: insert, delete,
- *  substitute, and SWAP TWO NEIGHBOURS. A swap is two substitutions to a
- *  plain edit distance, so without it "raever" is as far from "reaver" as a
- *  different word — and transposing two letters is the most common thing a
- *  pair of thumbs does. Damerau's addition, and the reason he made it.
+ * Four edits count and the fourth is the one that matters: insert, delete,
+ * substitute, and SWAP TWO NEIGHBOURS. A swap is two substitutions to a plain
+ * edit distance, so without it "raever" is as far from "reaver" as a different
+ * word — and transposing two letters is the most common thing a pair of thumbs
+ * does. Damerau's addition, and the reason he made it.
  *
- *  Not a matrix: the answer is only ever yes or no at a distance of one,
- *  which a single walk settles. The lengths differ by at most one or the
- *  answer is already no, and after the first mismatch the tails have to
- *  agree exactly. */
-function oneOff(a: string, b: string): boolean {
+ * Bounded rather than exact: the question is only ever "within max", so the
+ * row is clipped to a band of 2*max+1 cells and the walk stops as soon as the
+ * whole band is already over budget. At max 2 that is five cells per letter,
+ * which is cheaper than it looks and runs over nine hundred names per
+ * keystroke without being felt — see the measurement in Alerts.search.
+ */
+function within(a: string, b: string, max: number): boolean {
   if (a === b) return true;
-  const [s, t] = a.length <= b.length ? [a, b] : [b, a];
-  if (t.length - s.length > 1) return false;
+  if (Math.abs(a.length - b.length) > max) return false;
+  if (max === 0) return false;
 
-  let i = 0;
-  while (i < s.length && s[i] === t[i]) i++;
-  if (i === s.length) return true; // one extra letter on the end of t
-
-  if (s.length !== t.length) {
-    // One insertion in t: skip it and the tails must agree.
-    return s.slice(i) === t.slice(i + 1);
+  let prev2: number[] = [];
+  let prev: number[] = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const row: number[] = new Array(b.length + 1);
+    row[0] = i;
+    let best = i;
+    const from = Math.max(1, i - max);
+    const to = Math.min(b.length, i + max);
+    for (let j = 1; j <= b.length; j++) {
+      if (j < from || j > to) {
+        row[j] = max + 1;
+        continue;
+      }
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      let v = Math.min(
+        (prev[j] ?? max + 1) + 1,
+        (row[j - 1] ?? max + 1) + 1,
+        (prev[j - 1] ?? max + 1) + cost,
+      );
+      // the transposition
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        v = Math.min(v, (prev2[j - 2] ?? max + 1) + 1);
+      }
+      row[j] = v;
+      if (v < best) best = v;
+    }
+    if (best > max) return false;
+    prev2 = prev;
+    prev = row;
   }
-  // One substitution, or the two at the mismatch are each other's.
-  if (s.slice(i + 1) === t.slice(i + 1)) return true;
-  return s[i] === t[i + 1] && s[i + 1] === t[i] && s.slice(i + 2) === t.slice(i + 2);
+  return (prev[b.length] ?? max + 1) <= max;
 }
 
 /** The words of a folded string, for the near-match pass. */
 const parts = (said: string): string[] => (said ? said.split(' ') : []);
 
+/** Nothing matched. Anything above it is ordered by how little help it needed. */
+export const MISS = 0;
+
 /**
- * Whether this haystack answers this query.
+ * How well this haystack answers this query: 0 for no, higher for better.
  *
  * The haystack is folded by the caller once per item, because it does not
  * change between keystrokes and the query does.
+ *
+ *   3  the query is in there as typed, spaces or not
+ *   2  every word of it is in there, in some order
+ *   1  it got there on the typo allowance
  */
-export function hits(hay: string, query: string): boolean {
+export function score(hay: string, query: string): number {
   const words = parts(query);
-  if (!words.length) return true;
+  if (!words.length) return 3;
 
   // Both squeezed flat first. Riot writes "Glitch Pop" and "Oni 2.0"; people
   // write glitchpop and oni20, and where the spaces fall is not something
   // anybody is being asked to remember.
-  if (hay.replace(/ /g, '').includes(query.replace(/ /g, ''))) return true;
+  if (hay.includes(query) || hay.replace(/ /g, '').includes(query.replace(/ /g, ''))) return 3;
 
   let own: string[] | null = null;
+  let clean = true;
   for (const word of words) {
     if (hay.includes(word)) continue;
-    // Only now is it worth splitting the haystack.
-    if (word.length < 4) return false;
+    clean = false;
+    const max = slack(word.length);
+    if (!max) return MISS;
     own ??= parts(hay);
-    if (!own.some((w) => oneOff(w, word))) return false;
+    if (!own.some((w) => within(w, word, max))) return MISS;
   }
-  return true;
+  return clean ? 2 : 1;
 }
 
-/** The whole thing, for a caller holding plain names: fold both and ask. */
+/** The boolean, for callers that only need yes or no. */
+export const hits = (hay: string, query: string): boolean => score(hay, query) > MISS;
+
+/**
+ * The whole thing, for a caller holding plain names: fold both, ask, and put
+ * the ones that needed no help first.
+ *
+ * The sort is stable, so inside a tier the catalogue's own order survives.
+ */
 export const sift = <T>(list: T[], query: string, of: (x: T) => string): T[] => {
   const needle = fold(query);
   if (!needle) return list;
-  return list.filter((x) => hits(fold(of(x)), needle));
+  const kept: Array<{ x: T; s: number }> = [];
+  for (const x of list) {
+    const s = score(fold(of(x)), needle);
+    if (s > MISS) kept.push({ x, s });
+  }
+  kept.sort((a, b) => b.s - a.s);
+  return kept.map((k) => k.x);
 };
