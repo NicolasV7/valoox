@@ -16,7 +16,7 @@ test('the actual App clears inventory before loading a different approved accoun
   const actor = {
     store: view('A'),
     inventory: { byType: { owned: ['only-A'] }, worn: null, fetchedAt: 1 },
-    prefs: { wishlist: [], discord: '', mail: null, code: null },
+    prefs: { wishlist: [], mail: null, code: null },
   };
   const f = await fixture(
     "export {App} from './web/App.tsx'; export * as api from './web/data/api.ts';",

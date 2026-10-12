@@ -69,9 +69,7 @@ const write = async (next: Star[]): Promise<void> => {
   // Show it, then say it. A failure puts the old list back rather than leaving
   // a star that looks saved and is not.
   if (was) tell({ ...was, wishlist: next });
-  const got = await api
-    .post<Prefs>('/api/prefs', { wishlist: next, notify: { discord: was?.discord ?? '' } })
-    .catch(() => null);
+  const got = await api.post<Prefs>('/api/prefs', { wishlist: next }).catch(() => null);
   if (!current(generation)) return;
   if (got && typeof got === 'object' && 'wishlist' in got) tell(got as Prefs);
   else if (was) tell(was);
@@ -102,8 +100,7 @@ export function useStars(): {
     // Nothing yet is not an empty list. POST /api/prefs is a wholesale
     // replace, so a star tapped before the prefs GET lands — or after one that
     // failed, which channel.ts swallows into a permanent null — used to post a
-    // one-item wishlist over the real one and an empty string over the
-    // webhook. A hundred stars for one tap.
+    // one-item wishlist over the real one. A hundred stars for one tap.
     if (!was) return;
     const now = was.wishlist ?? [];
     const has = now.some((w) => w.id === item.id);

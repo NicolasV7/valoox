@@ -27,7 +27,6 @@ export async function adopt(env: Env, uid: string, puuid: string, legacy?: strin
   return {
     preferences: {
       wishlist: old.wishlist,
-      notify: old.notify,
       mail: old.mail?.ok ? { ...old.mail, gen: crypto.randomUUID(), send: undefined } : undefined,
     },
     legacy: adopted,

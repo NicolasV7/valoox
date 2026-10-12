@@ -59,11 +59,6 @@ const es: Words = {
   sentAt: (ms, tz, lang) => (tz === undefined ? '' : on(ms, tz, lang)),
   expiresAt: (ms, tz, mins) =>
     tz === undefined ? 'Vence en ' + mins + ' minutos' : 'Vence ' + at(ms, tz),
-  pushLine: (names) =>
-    names.length === 1
-      ? names[0] + ' está en tu tienda hoy.'
-      : names.join(', ') + ' están en tu tienda hoy.',
-  pushTest: 'Prueba de valoox. Los avisos llegan bien por aquí.',
   riotNotice: 'Sin relación con Riot Games. VALORANT y su arte son de Riot Games, Inc.',
   oneADay: 'Un correo por día como máximo, y solo cuando algo de tu lista está en tu tienda.',
   // No "internal identifiers absent": the stop link carries a signed row reference,
@@ -131,11 +126,6 @@ const en: Words = {
   sentAt: (ms, tz, lang) => (tz === undefined ? '' : on(ms, tz, lang)),
   expiresAt: (ms, tz, mins) =>
     tz === undefined ? 'Expires in ' + mins + ' minutes' : 'Expires ' + at(ms, tz),
-  pushLine: (names) =>
-    names.length === 1
-      ? names[0] + ' is in your store today.'
-      : names.join(', ') + ' are in your store today.',
-  pushTest: 'valoox test. Alerts arrive fine on this channel.',
   riotNotice: 'Not affiliated with Riot Games. VALORANT and its art belong to Riot Games, Inc.',
   oneADay: 'One email a day at most, and only when something on your list is in your store.',
   // Not "no internal id": the stop link in the footer is `<uid>.<nonce>.<sig>`,

@@ -80,7 +80,6 @@ export interface Prefs {
   /** `type` is Riot's item type uuid, so a row can draw itself without an
    *  index. Absent on anything starred before it was kept. */
   wishlist: Array<{ id: string; name: string; type?: string }>;
-  discord: string;
   /** The address an alert would go to, whether it has carried a code back,
    *  and the last thing the provider said about the last message sent to it.
    *  `said` is theirs — `resend 422`, `email.bounced` — and is never printed:

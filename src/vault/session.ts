@@ -12,14 +12,20 @@ export interface Held {
   kid: number;
   seen?: number;
 }
-export const alerting = (s: Session) =>
-  !!s.wishlist?.length && (!!s.notify?.discord || s.mail?.ok === true);
+export const alerting = (s: Session) => !!s.wishlist?.length && s.mail?.ok === true;
+
+/** Drop obsolete notification preferences before returning or resealing a row. */
+function preferences(s: Session): Session {
+  const current = { ...s } as Session & { notify?: unknown };
+  delete current.notify;
+  return current;
+}
 
 export async function readSession(env: Env, uid: string): Promise<Held | null> {
   const row = await repo.get(env, uid);
   if (!row) return null;
   try {
-    const session = await open<Session>(env, uid, row.kid, row.blob);
+    const session = preferences(await open<Session>(env, uid, row.kid, row.blob));
     if (!sessionShape(session)) throw new SealBroken();
     return { session, ver: row.ver, kid: row.kid, seen: row.last_used };
   } catch (e) {
@@ -31,7 +37,10 @@ export async function readSession(env: Env, uid: string): Promise<Held | null> {
 
 /** Preferences and the cron flag are one atomic write. */
 export async function encoded(env: Env, uid: string, s: Session) {
-  const [blob, acct] = await Promise.all([seal(env, uid, CURRENT_KID, s), markOf(env, s.puuid)]);
+  const [blob, acct] = await Promise.all([
+    seal(env, uid, CURRENT_KID, preferences(s)),
+    markOf(env, s.puuid),
+  ]);
   return { kid: CURRENT_KID, blob, acct, alerts: alerting(s) };
 }
 
@@ -47,8 +56,8 @@ export async function prepared(
 }
 
 export async function createSession(env: Env, uid: string, s: Session): Promise<void> {
-  const [blob, acct] = await Promise.all([seal(env, uid, CURRENT_KID, s), markOf(env, s.puuid)]);
-  await repo.upsert(env, uid, CURRENT_KID, blob, acct, alerting(s));
+  const value = await encoded(env, uid, s);
+  await repo.upsert(env, uid, value.kid, value.blob, value.acct, value.alerts);
 }
 
 export async function saveSession(

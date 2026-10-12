@@ -2,7 +2,6 @@ import * as cookie from './app/cookie.ts';
 import { HttpError } from './lib/body.ts';
 import type { Body, Ctx } from './lib/json.ts';
 import { json } from './lib/json.ts';
-import { testAlert } from './routes/alerts.ts';
 import { logout, pollScan, startScan } from './routes/auth.ts';
 import { resend, setChannel, verify } from './routes/channel.ts';
 import { collection } from './routes/collection.ts';
@@ -25,7 +24,6 @@ const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
   '/api/channel/again': { POST: resend },
   '/api/channel/verify': { POST: verify },
   '/api/stop': { POST: stopMail },
-  '/api/test-alert': { POST: testAlert },
   '/api/logout': { POST: logout },
 };
 const shell = (req: Request) => new Request(new URL('/', req.url), req);

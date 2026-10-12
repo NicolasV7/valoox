@@ -1,6 +1,5 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
-import { deliver, message } from '../../src/alerts/post.ts';
 import type { StoreView } from '../../src/types.ts';
 import { hits } from '../../src/vault/alerts.ts';
 
@@ -58,87 +57,4 @@ test('several hits in one day come back together, not as several alerts', () => 
 test('an empty store is not a crash', () => {
   assert.deepEqual(hits(view([]), want('a')), []);
   assert.deepEqual(hits({ offers: [], night: null } as unknown as StoreView, want('a')), []);
-});
-
-test('the message reads like a sentence in both shapes, in both languages', () => {
-  assert.equal(
-    message([{ id: 'x', name: 'Reaver Vandal' }], 'es'),
-    'Reaver Vandal está en tu tienda hoy.',
-  );
-  assert.equal(
-    message(
-      [
-        { id: 'x', name: 'Reaver Vandal' },
-        { id: 'y', name: 'Prime Phantom' },
-      ],
-      'es',
-    ),
-    'Reaver Vandal, Prime Phantom están en tu tienda hoy.',
-  );
-  // The half that was wrong until the line moved into words.ts: this channel
-  // answered in Spanish whatever the row asked for.
-  assert.equal(
-    message([{ id: 'x', name: 'Reaver Vandal' }], 'en'),
-    'Reaver Vandal is in your store today.',
-  );
-});
-
-test('the message carries no identifier, only names the user chose', () => {
-  const m = message([{ id: 'e7c63390-eda7-46e0-bb7a-a6abdacd2433', name: 'Sakura Sheriff' }], 'es');
-  assert.ok(!m.includes('e7c63390'), 'a uuid in a push would leak through ntfy');
-});
-
-// --- the channel ------------------------------------------------------------
-
-const HOOK = '123456789012345678/' + 'a'.repeat(68);
-
-/** Swap the global fetch for a scripted one, and always put it back. */
-async function withFetch(reply: (n: number) => Response, body: () => Promise<void>) {
-  const real = globalThis.fetch;
-  let calls = 0;
-  globalThis.fetch = (async () => reply(++calls)) as typeof fetch;
-  try {
-    await body();
-  } finally {
-    globalThis.fetch = real;
-  }
-  return calls;
-}
-
-test('a message with nowhere to go is a failure, not a quiet success', async () => {
-  await assert.rejects(deliver({}, 'hello'), /notification channel/);
-});
-
-test('a channel that times out is retried, and a late success still counts', async () => {
-  // The failure this exists for: a push that returns 5xx or never connects at
-  // all. Without the retry one alert is simply lost and nothing says so.
-  const calls = await withFetch(
-    (n) => new Response(null, { status: n < 3 ? 522 : 204 }),
-    async () => {
-      assert.deepEqual(await deliver({ discord: HOOK }, 'hello'), ['discord 204']);
-    },
-  );
-  assert.equal(calls, 3, 'the first two attempts should have been retried');
-});
-
-test('a channel that never answers fails loudly, and says which one', async () => {
-  const calls = await withFetch(
-    () => new Response(null, { status: 522 }),
-    async () => {
-      await assert.rejects(deliver({ discord: HOOK }, 'hello'), /discord 522/);
-    },
-  );
-  assert.equal(calls, 3, 'it should stop at three, not keep going');
-});
-
-test('a refusal is not retried — a 4xx will stay a 4xx', async () => {
-  // Hammering a webhook Discord has already deleted is how an egress reputation
-  // gets spent. One attempt, one honest answer.
-  const calls = await withFetch(
-    () => new Response(null, { status: 404 }),
-    async () => {
-      await assert.rejects(deliver({ discord: HOOK }, 'hello'), /discord 404/);
-    },
-  );
-  assert.equal(calls, 1, 'a 404 is final');
 });

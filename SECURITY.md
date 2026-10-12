@@ -11,7 +11,7 @@ Please report privately first; there is no bounty.
 
 One Cloudflare Worker serves [drop.valoox.store](https://drop.valoox.store).
 The apex redirects there. Game access passes the
-[egress allowlist](src/vault/upstream.ts): nineteen rules and no purchases,
+[egress allowlist](src/vault/upstream.ts): eighteen rules and no purchases,
 equipping, queueing or chat. Authentication writes are intentional. Redirects
 cannot bypass the allowlist. Riot's undocumented storefront POST has not been
 independently proven idempotent; do not infer that property from its method.
@@ -89,12 +89,11 @@ flags are repaired, and checked timestamps advance independently of session
 activity. Browser watchlists are combined for the same account/destination.
 Typed accessory ids participate in matching.
 
-Each invocation counts every external attempt, including timeouts and Discord
+Each invocation counts every external attempt, including timeouts and mail
 retries, against a 48-request budget. One daily delivery is reserved atomically
 per account/destination. An encrypted immutable outbox retries independently of
 Riot polling and stops at the payload's expiry, within the storefront rotation.
-Resend idempotency keys accompany identical retry bodies. Discord offers no
-idempotency API, so an ambiguous timeout can still duplicate a push. An API
+Resend idempotency keys accompany identical retry bodies. An API
 acceptance or a provider event is not evidence someone received or read a mail.
 
 ## Review regression evidence

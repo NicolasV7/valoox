@@ -44,14 +44,4 @@ export interface Words {
    *  known, and how long is left where it is not. */
   sentAt: (ms: number, tz: number | undefined, lang: Lang) => string;
   expiresAt: (ms: number, tz: number | undefined, mins: number) => string;
-
-  // --- a channel with no layout --------------------------------------------
-  // One line of text, which is all a webhook takes. Here rather than beside
-  // the sender because a message is a message: these were the last two spoken
-  // strings in src/ written in one language, and they ignored the one the
-  // reader asked for.
-  /** The same news the morning mail carries, in a sentence. */
-  pushLine: (names: string[]) => string;
-  /** Sent by the test button. Carries no skin, no account id and no session. */
-  pushTest: string;
 }

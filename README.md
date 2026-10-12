@@ -12,14 +12,14 @@ game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
 
 - Daily offers, night market, bundles and accessories, with owned items marked.
 - Weapon skins, variants, sprays, buddies, cards and titles in your collection.
-- Wishlist alerts by verified email or Discord webhook. Batches run every fifteen
+- Wishlist alerts by verified email. Batches run every fifteen
   minutes outside the first half hour of each UTC day. Lists are grouped by
   account and destination; email retries use Resend idempotency.
 
 One Cloudflare Worker serves a Preact app, with D1 for sessions and atomic state
 and KV for encrypted views. Riot sessions use purpose-bound AES-256-GCM keys;
 D1 checks authentication and revocation before private cache reads. Every
-outbound request passes the [19-rule allowlist](src/vault/upstream.ts), which
+outbound request passes the [18-rule allowlist](src/vault/upstream.ts), which
 excludes purchases, equipping and chat. The browser joins the community
 catalogue; code, fonts and fixed artwork are served from the app's own origin.
 Catalogue data, item artwork and clips use narrowly allowed external hosts.
@@ -34,13 +34,13 @@ flowchart LR
   B["Browser<br/>Preact + host-only cookie"]
   C["Community catalogue<br/>valorant-api.com"]
   R["Riot<br/>QR sign-in + account reads"]
-  N["Resend + Discord<br/>Email + webhook alerts"]
+  N["Resend<br/>Verified email alerts"]
 
   subgraph CF["Cloudflare"]
     W["Worker<br/>API + scheduled jobs"]
     D[("D1<br/>Encrypted sessions + atomic state")]
     K[("KV<br/>Encrypted views")]
-    A["Egress allowlist<br/>19 rules"]
+    A["Egress allowlist<br/>18 rules"]
     T["Cron<br/>Every 15 minutes"]
   end
 
@@ -54,6 +54,7 @@ flowchart LR
   A -->|Notifications| N
 ```
 
+The diagram follows the email notification flow exposed by the app.
 D1 authorizes private cache reads. Sessions and views are encrypted by the Worker
 with purpose-bound keys derived from `JAR_KEY`, which stays outside the databases.
 [Open the interactive architecture](docs/architecture.html) for source links

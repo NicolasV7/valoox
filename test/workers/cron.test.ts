@@ -14,7 +14,6 @@ let calls: string[];
 let mails: string[];
 let mailFails: boolean;
 const AT = Date.parse('2026-10-12T01:00:00Z');
-const HOOK = '123456789012345678/' + 'a'.repeat(68);
 beforeEach(async () => {
   env = {
     ...(await freshDb()),
@@ -49,28 +48,29 @@ beforeEach(async () => {
         ? new Response(null, { status: 503 })
         : Response.json({ id: crypto.randomUUID() });
     }
-    if (url.host === 'discord.com') return new Response(null, { status: 503 });
     throw new Error('unexpected fixture request');
   });
 });
 afterEach(() => vi.unstubAllGlobals());
-async function watching(uid: string, account = uid, discord = false) {
+async function watching(uid: string, account = uid) {
   await createSession(env, uid, {
     ...session(),
     puuid: account === UID || account === OTHER ? session().puuid : account,
     wishlist: [{ id: 'level', name: 'Wanted' }],
     mail: { to: 'person@example.invalid', ok: true, gen: crypto.randomUUID() },
-    notify: discord ? { discord: HOOK } : undefined,
   });
 }
-test('retries for both channels remain within the external request ceiling', async () => {
-  for (let i = 0; i < 9; i++)
-    await watching(String(i).padStart(64, '0'), crypto.randomUUID(), true);
+test('failed email deliveries remain within the external request ceiling', async () => {
+  mailFails = true;
+  for (let i = 0; i < 9; i++) await watching(String(i).padStart(64, '0'), crypto.randomUUID());
   const result = await runAlerts(env, AT);
   expect(result.checked).toBe(6);
   expect(calls.length).toBeLessThanOrEqual(48);
-  expect(calls.filter((v) => v === 'discord.com')).toHaveLength(18);
   expect(mails).toHaveLength(6);
+  expect(result.sent).toBe(0);
+  expect(
+    await env.DB.prepare('SELECT COUNT(*) AS n FROM deliveries WHERE state=0').first(),
+  ).toEqual({ n: 6 });
 });
 test('invalid opt-in flags cannot starve valid rows in later batches', async () => {
   for (let i = 0; i < 9; i++) {

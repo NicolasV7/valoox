@@ -30,24 +30,6 @@ const isGun = (w: { type?: unknown }): boolean =>
   typeof w.type !== 'string' || !UUID.test(w.type) || w.type === LEVELS;
 
 /**
- * A Discord webhook, from whatever was pasted.
- *
- * Accepts the whole URL, because that is what the Copy button in Discord gives
- * you, and keeps only the id and the token. A URL is never stored and never
- * reaches fetch(): the host is pinned in the allowlist, and these two halves
- * are the only user-supplied text that gets anywhere near it. Neither half can
- * contain a slash, a dot or an @, so neither can walk out of the path.
- */
-const HOOK =
-  /^(?:https:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/api\/webhooks\/)?([0-9]{15,25}\/[A-Za-z0-9_-]{50,120})$/;
-
-function cleanHook(body: unknown): string | undefined {
-  const n = ((body ?? {}) as { notify?: { discord?: unknown } }).notify;
-  const raw = typeof n?.discord === 'string' ? n.discord.trim() : '';
-  return HOOK.exec(raw)?.[1];
-}
-
-/**
  * Validated at the edge, before anything is sealed.
  *
  * Every field past the id is the browser's, because the Worker has no
@@ -120,9 +102,7 @@ async function wishlist(env: Env, uid: string, body: unknown | null, retry = tru
   const { session, ver } = held;
 
   if (body !== null) {
-    const discord = cleanHook(body);
     session.wishlist = cleanWishlist(body, session.wishlist ?? []);
-    session.notify = discord ? { discord } : {};
 
     if (!(await saveSession(env, uid, session, ver))) {
       // Another tab wrote first; theirs is the stored session. Re-read once
@@ -133,7 +113,6 @@ async function wishlist(env: Env, uid: string, body: unknown | null, retry = tru
   }
   return {
     wishlist: session.wishlist ?? [],
-    discord: session.notify?.discord ?? '',
     // The address itself, never a code and never a secret: the browser needs
     // it to show you what it is about to write to. `said` is the provider's
     // own last word, passed through unchanged so no screen can soften it.

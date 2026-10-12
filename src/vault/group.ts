@@ -19,29 +19,19 @@ export async function recipients(env: Env, row: repo.Row): Promise<Recipient[]> 
     const held = await readSession(env, member.uid);
     if (!held || held.session.puuid !== owner.session.puuid || !alerting(held.session)) continue;
     const s = held.session;
-    const channels = [
-      s.mail?.ok ? (['mail:' + s.mail.to.toLowerCase(), { mail: s.mail }] as const) : null,
-      s.notify?.discord ? (['discord:' + s.notify.discord, { notify: s.notify }] as const) : null,
-    ];
-    for (const channel of channels) {
-      if (!channel) continue;
-      const [key, prefs] = channel;
-      let group = groups.get(key);
-      if (!group) {
-        group = {
-          value: {
-            uid: member.uid,
-            session: { ...s, mail: undefined, notify: undefined, ...prefs },
-            rows: [],
-          },
-          wishlist: new Map(),
-        };
-        groups.set(key, group);
-      }
-      group.value.rows.push(member.uid);
-      for (const item of s.wishlist ?? [])
-        group.wishlist.set((item.type ?? '') + ':' + item.id, item);
+    if (!s.mail?.ok) continue;
+    const key = 'mail:' + s.mail.to.toLowerCase();
+    let group = groups.get(key);
+    if (!group) {
+      group = {
+        value: { uid: member.uid, session: s, rows: [] },
+        wishlist: new Map(),
+      };
+      groups.set(key, group);
     }
+    group.value.rows.push(member.uid);
+    for (const item of s.wishlist ?? [])
+      group.wishlist.set((item.type ?? '') + ':' + item.id, item);
   }
   return [...groups.values()].map(({ value, wishlist }) => ({
     ...value,

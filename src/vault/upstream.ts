@@ -20,11 +20,6 @@
 
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
-/** A Discord webhook: numeric id, then an opaque token. This is the only
- *  user-influenced text in any URL this file builds, and neither half can
- *  contain a slash, a dot or an @, so neither can walk out of the path. */
-export const HOOK = '[0-9]{15,25}/[A-Za-z0-9_-]{50,120}';
-
 /** The shard hosts that resolve. latam and br have no DNS record at all. */
 export const SHARD_HOSTS = ['na', 'eu', 'ap', 'kr'] as const;
 
@@ -119,15 +114,6 @@ const ALLOW: Rule[] = [
   },
 
   // --- notifications ------------------------------------------------------
-  // The user supplies an id and a token, never a URL. Pinning the host here is
-  // what keeps the rule that nothing user-supplied reaches fetch() — otherwise
-  // this route would be an open SSRF with our egress reputation attached.
-  {
-    method: 'POST',
-    pattern: new RegExp('^https://discord\\.com/api/webhooks/' + HOOK + '$'),
-    why: 'delivers a wishlist hit; carries no credential and no puuid. Throttled per webhook, which is the only kind of limit a Worker can own',
-  },
-
   // Mail. The address is ours to pick from a stored session, never off a
   // request: the route validates and stores it first, and this sends to
   // whatever is stored. The body carries a number we generated and skin names

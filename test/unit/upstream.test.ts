@@ -57,12 +57,9 @@ test('no path traversal or host confusion sneaks past', () => {
   no('GET', 'https://pd.na.a.pvp.net/store/v1/wallet/not-a-uuid');
 });
 
-test('a Discord webhook cannot escape its path either', () => {
-  // The id and the token are the ONLY user-supplied text in any URL this service
-  // builds. If either could carry a slash, a dot or an @, this rule would be an
-  // open SSRF with our egress reputation attached to it.
+test('Discord and other push destinations are blocked, including valid webhooks', () => {
   const HOOK = '123456789012345678/' + 'a'.repeat(68);
-  ok('POST', 'https://discord.com/api/webhooks/' + HOOK);
+  no('POST', 'https://discord.com/api/webhooks/' + HOOK);
   no('POST', 'https://discord.com/api/webhooks/' + HOOK + '/extra');
   no('POST', 'https://discord.com/api/webhooks/abc/' + 'a'.repeat(68));
   no('POST', 'https://discord.com/api/webhooks/123456789012345678/short');
@@ -100,23 +97,9 @@ test('the loadout is readable but not writable', () => {
 test('the list stays short enough to read in one sitting', () => {
   // If this fails, someone added an endpoint. That is allowed — but it should be
   // a deliberate edit to this number, with a look at what was added.
-  // 17 -> 18 on 2026-10-08: POST https://api.resend.com/emails, which sends
-  // the six digits that prove an address and the morning alert to it once
-  // proved. It is the second non-Riot rule here, after the Discord webhook,
-  // and like that one it carries no puuid, no jar and no Riot credential.
-  // 19 -> 18 the same day: GET /store/v1/offers/ went back out. Riot removed
-  // the endpoint — it answers 404 on every shard and every spelling, which a
-  // live session proved — and there is no other source for "what the store
-  // can draw from". The public catalogue does not carry it: a battle-pass
-  // skin has a content tier and a theme exactly like a sold one, and the
-  // contentEdition field is set on 159 skins out of 1,415 and separates
-  // nothing. So the filter went, and so did the sentence that promised it.
-  // 18 -> 19 on 2026-10-08: GET media.valorant-api.com/weaponskinlevels/<uuid>
-  // /displayicon.png. A message cannot carry a third party, so the one
-  // picture in the morning mail is proxied through this origin. No session,
-  // no credential, and the uuid is built into the url rather than read off a
-  // request — the same rule the Discord webhook follows.
-  assert.equal(allowCount, 19);
+  // Email is the only notification transport. Removing the push endpoint
+  // reduces nineteen rules to eighteen; Resend and the image proxy remain.
+  assert.equal(allowCount, 18);
 });
 
 // The two the file's own comment names as the clearest cases, and neither was
@@ -143,7 +126,6 @@ test('a host pattern pins its host', () => {
   no('GET', 'https://media-valorant-api-com' + tail);
   // And the extension, which was the same bug one character later.
   no('GET', 'https://media.valorant-api.com/weaponskinlevels/' + TYPE + '/displayiconXpng');
-  // The other two built this way were already escaped. Pinned so they stay.
-  no('POST', 'https://discordXcom/api/webhooks/123456789012345/' + 'a'.repeat(60));
+  // Riot's host pattern is independently pinned as well.
   no('POST', 'https://pdXnaXaXpvp.net/store/v3/storefront/' + PUUID);
 });

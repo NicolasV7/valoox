@@ -125,7 +125,7 @@ export async function send(
   if (!env.RESEND_KEY || !env.MAIL_FROM) {
     // Not configured is not the address's fault, and saying "refused" would
     // send somebody to check their spelling for our missing secret.
-    return { ok: false, status: 0, said: 'mail no configurado' };
+    return { ok: false, status: 0, said: 'mail not configured' };
   }
 
   let res: Response;

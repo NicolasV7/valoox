@@ -7,7 +7,6 @@ vi.mock('../../web/i18n/index.ts', () => ({ locale: () => 'es' }));
 
 const prefs = {
   wishlist: [{ id: 'a', name: 'A' }],
-  discord: '',
   mail: { to: 'a@example.invalid', ok: true, said: '' },
   code: null,
 };

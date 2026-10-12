@@ -6,7 +6,7 @@
 // routes/render.ts, which knows nothing about where the bytes come from.
 //
 // The url is built here from a uuid and never taken from a request, which is
-// the same rule the Discord webhook follows: nothing user-supplied reaches
+// the allowlist pins both the origin and path: nothing user-supplied reaches
 // fetch(). The pattern in upstream.ts pins the host and the path, and a uuid
 // cannot walk out of either.
 

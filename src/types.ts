@@ -13,7 +13,6 @@ export interface Session {
   shard?: string;
   name?: string;
   wishlist?: Starred[];
-  notify?: { discord?: string };
   mail?: {
     to: string;
     lang?: 'es' | 'en';

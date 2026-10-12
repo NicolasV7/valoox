@@ -44,7 +44,7 @@ const CATALOGUE = 'https://valorant-api.com';
 /** How many rules the egress allowlist holds. Written down here and checked
  *  by a test, so the number on screen cannot drift from the list — the whole
  *  argument of that sentence is that it is countable. */
-export const RULES = 19;
+export const RULES = 18;
 
 export function Account({ who }: { who: Who }) {
   const s = t().account;

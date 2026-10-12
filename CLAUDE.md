@@ -63,7 +63,6 @@ requests, including retries and aborted calls. Process fair batches after
 00:30 UTC and continue every fifteen minutes. Combine browser lists per account
 and destination; reserve one delivery per daily rotation. Retries use an
 encrypted immutable outbox and Resend idempotency, without re-polling Riot.
-Discord has no idempotency API; do not promise exactly-once delivery.
 
 **The page builds DOM, never HTML from strings.** Community item names are
 untrusted. CSP is `default-src 'none'`, `script-src 'self'`, without
