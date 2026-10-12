@@ -47,7 +47,7 @@
       "url": "https://github.com/NicolasV7/valoox",
       "provider": "github",
       "link_mode": "web",
-      "revision": "82ff015259da2e7aeccbacbcfd768f7ec6a8281c"
+      "revision": "04254ee8b1ca61284f38a83d4bf9255534ba3bbf"
     }
   },
   "components": [
@@ -138,8 +138,8 @@
     {
       "id": "notify",
       "type": "external",
-      "label": "Your inbox",
-      "sublabel": "Account + destination queue",
+      "label": "Resend",
+      "sublabel": "Verified email alerts",
       "pos": [
         980,
         90
@@ -151,6 +151,10 @@
       "sources": [
         {
           "path": "src/alerts/post.ts"
+        },
+        {
+          "path": "src/vault/mail.ts",
+          "label": "Email transport"
         }
       ]
     },
@@ -158,7 +162,7 @@
       "id": "worker",
       "type": "backend",
       "label": "Worker  val",
-      "sublabel": "11 routes /api/*",
+      "sublabel": "10 routes /api/*",
       "pos": [
         320,
         270
@@ -177,7 +181,7 @@
       "id": "allow",
       "type": "security",
       "label": "Egress allowlist",
-      "sublabel": "19 rules · one fetch()",
+      "sublabel": "18 rules · one fetch()",
       "pos": [
         700,
         270
