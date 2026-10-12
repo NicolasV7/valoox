@@ -1,116 +1,14 @@
 import type { Env } from '../types.ts';
+import { b64, bytes, dec, derive, enc } from './keys.ts';
 
-// What this buys, precisely — and it is worth writing down because the usual
-// claim is wrong. Cloudflare already encrypts D1 at rest with its own AES-256
-// keys, so "encrypted at rest" describes the platform, not this file.
-//
-// The ONLY thing sealing here buys is that the key lives OUTSIDE the database.
-// Anything that reads rows — a leaked D1-scoped API token, a query bug, a log
-// line, a Time Travel export, a .sql on a stolen laptop — gets ciphertext.
-// That is the common, low-effort leak, and this turns it inert.
-//
-// What it does NOT buy: protection from anyone who can deploy a Worker. They
-// read the key from env in two lines. That boundary is the Cloudflare account,
-// not the crypto.
-
-const enc = new TextEncoder();
-const dec = new TextDecoder();
-
-/** Current key version. Bump when JAR_KEY is replaced; old rows keep their own
- *  kid and still open, so nobody is logged out by a rotation. */
-export const CURRENT_KID = 1;
-
-/** Derived once per isolate, not once per request. The promise is cached (not
- *  the resolved key) so concurrent requests in one isolate don't race — and it is
- *  keyed on the secret itself, so a rotated JAR_KEY takes effect immediately
- *  instead of waiting for every warm isolate to be recycled. That matters: the
- *  rotation IS the kill switch, and a kill switch with a lag is not one. */
-let kekCache: { raw: string; key: Promise<CryptoKey> } | null = null;
-
-function bytes(b64: string): Uint8Array {
-  let s: string;
-  try {
-    s = atob(b64);
-  } catch {
-    // Not base64 at all, which the caller reports as a length of zero.
-    return new Uint8Array(0);
-  }
-  const u = new Uint8Array(s.length);
-  for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
-  return u;
-}
-
-function b64(u: Uint8Array): string {
-  let s = '';
-  for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
-  return btoa(s);
-}
-
-/**
- * 32 bytes, or nothing works.
- *
- * HKDF accepts input keying material of any length, so a truncated or
- * mistyped JAR_KEY derives a perfectly valid key that is simply weaker than
- * the one everything here claims. Nothing caught it: `wrangler secret put`
- * takes any string, test/unit/rotation.test.ts records that the crypto layer
- * will not, and the deploy-time guard its comment defers to did not exist.
- *
- * So the guard is here, where every derivation already passes. Failing the
- * first request loudly is the right failure for this: a Worker that will not
- * start is a problem somebody fixes in a minute, and a fleet of sessions
- * sealed under eight bytes is one nobody finds.
- */
-function kek(env: Env): Promise<CryptoKey> {
-  if (kekCache?.raw !== env.JAR_KEY) {
-    const raw = bytes(env.JAR_KEY ?? '');
-    if (raw.length !== 32) {
-      // The length and nothing else. The value is the secret.
-      throw new Error('JAR_KEY must decode to 32 bytes, got ' + raw.length);
-    }
-    kekCache = {
-      raw: env.JAR_KEY,
-      key: crypto.subtle.importKey('raw', raw, 'HKDF', false, ['deriveKey']),
-    };
-  }
-  return kekCache.key;
-}
-
-/** Per-user subkey. HKDF rather than a stored per-user DEK: a wrapped DEK would
- *  live in the same table, with the same Time Travel history, unwrapped by the
- *  same KEK on every request — so it buys none of the three things an envelope
- *  is supposed to buy. This gives the key separation for free. */
-async function userKey(env: Env, uid: string, kid: number): Promise<CryptoKey> {
-  return crypto.subtle.deriveKey(
-    {
-      name: 'HKDF',
-      hash: 'SHA-256',
-      salt: enc.encode('kid:' + kid),
-      info: enc.encode('jar:' + uid),
-    },
-    await kek(env),
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['encrypt', 'decrypt'],
-  );
-}
-
-/** Binding kid|uid as additional authenticated data is the most valuable line in
- *  this file, and it is a correctness guard as much as a crypto one: a row mix-up
- *  fails CLOSED instead of quietly decrypting somebody else's session. */
-const aad = (uid: string, kid: number) => enc.encode(kid + '|' + uid);
-
-export async function seal(env: Env, uid: string, kid: number, data: unknown): Promise<string> {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv, additionalData: aad(uid, kid) },
-    await userKey(env, uid, kid),
-    enc.encode(JSON.stringify(data)),
-  );
-  const out = new Uint8Array(12 + ct.byteLength);
-  out.set(iv);
-  out.set(new Uint8Array(ct), 12);
-  return b64(out);
-}
+// Schema and purpose bind the key and authenticated data. Moving a session
+// into a cache, or a cache into a scan, must never open successfully.
+export const CURRENT_KID = 2;
+export type Purpose = 'session:2' | 'store:4' | 'inv:3' | 'scan:2' | 'stop:2' | 'outbox:2';
+const aad = (uid: string, kid: number, purpose: Purpose) =>
+  enc.encode(JSON.stringify([kid, purpose, uid]));
+const key = (env: Env, uid: string, kid: number, purpose: Purpose) =>
+  derive(env, JSON.stringify([purpose, uid]), 'kid:' + kid);
 
 export class SealBroken extends Error {
   constructor() {
@@ -119,18 +17,58 @@ export class SealBroken extends Error {
   }
 }
 
-export async function open<T>(env: Env, uid: string, kid: number, blob: string): Promise<T> {
+export async function seal(
+  env: Env,
+  uid: string,
+  kid: number,
+  data: unknown,
+  purpose: Purpose = 'session:2',
+): Promise<string> {
+  if (kid !== CURRENT_KID) throw new SealBroken();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv, additionalData: aad(uid, kid, purpose) },
+    await key(env, uid, kid, purpose),
+    enc.encode(JSON.stringify(data)),
+  );
+  const raw = new Uint8Array(12 + ct.byteLength);
+  raw.set(iv);
+  raw.set(new Uint8Array(ct), 12);
+  return b64(raw);
+}
+
+export async function open<T>(
+  env: Env,
+  uid: string,
+  kid: number,
+  blob: string,
+  purpose: Purpose = 'session:2',
+): Promise<T> {
   try {
+    if (kid !== CURRENT_KID) throw new SealBroken();
     const raw = bytes(blob);
     const pt = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: raw.subarray(0, 12), additionalData: aad(uid, kid) },
-      await userKey(env, uid, kid),
+      { name: 'AES-GCM', iv: raw.subarray(0, 12), additionalData: aad(uid, kid, purpose) },
+      await key(env, uid, kid, purpose),
       raw.subarray(12),
     );
     return JSON.parse(dec.decode(pt)) as T;
   } catch {
-    // Tampering, a wrong uid, a rotated key, or corruption. All the same to us:
-    // the session is gone and the user signs in again. Never leak which.
+    throw new SealBroken();
+  }
+}
+
+/** Only QR preference adoption calls this, after Riot confirms the account. */
+export async function openLegacy<T>(env: Env, uid: string, blob: string): Promise<T> {
+  try {
+    const raw = bytes(blob);
+    const pt = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: raw.subarray(0, 12), additionalData: enc.encode('1|' + uid) },
+      await derive(env, 'jar:' + uid, 'kid:1'),
+      raw.subarray(12),
+    );
+    return JSON.parse(dec.decode(pt)) as T;
+  } catch {
     throw new SealBroken();
   }
 }

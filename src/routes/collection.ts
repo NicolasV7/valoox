@@ -19,6 +19,6 @@ export async function collection({ env, uid }: Ctx): Promise<Body> {
   if (s === 'gone') return EXPIRED;
 
   const inv = await fetchInventory(env, s.session, s.t);
-  await writeCache(env, 'inv', uid, inv, TTL);
+  if (!(await writeCache(env, 'inv', uid, inv, TTL))) return RESEED;
   return inv as unknown as Body;
 }

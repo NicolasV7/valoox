@@ -1,4 +1,5 @@
 import type { Env, Jar, RiotHeaders, Tokens } from '../types.ts';
+import type { Budget } from './budget.ts';
 import { AFFINITIES, CLIENT_PLATFORM, REAUTH_URL, VERSION_TTL } from './constants.ts';
 import { rf } from './http.ts';
 
@@ -18,8 +19,8 @@ export class RateLimited extends Error {
  * asking for application/json gets a 406 with no Location header — indistinguishable
  * from an expired session unless you look. Measured 2026-09-14.
  */
-export async function reauth(jar: Jar): Promise<Tokens | null> {
-  const res = await rf(REAUTH_URL, { jar, redirect: 'manual', headers: { Accept: '*/*' } });
+export async function reauth(jar: Jar, budget?: Budget): Promise<Tokens | null> {
+  const res = await rf(REAUTH_URL, { jar, budget, redirect: 'manual', headers: { Accept: '*/*' } });
   if (res.status === 429) throw new RateLimited();
 
   const loc = res.headers.get('location');
@@ -33,11 +34,12 @@ export async function reauth(jar: Jar): Promise<Tokens | null> {
   return access ? { access, id: p.get('id_token') } : null;
 }
 
-export async function entitlements(access: string): Promise<string> {
+export async function entitlements(access: string, budget?: Budget): Promise<string> {
   const res = await rf('https://entitlements.auth.riotgames.com/api/token/v1', {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + access, 'Content-Type': 'application/json' },
     body: '{}',
+    budget,
   });
   const d = (await res.json()) as { entitlements_token?: string };
   if (!d.entitlements_token) throw new Error('entitlements failed: ' + res.status);
@@ -76,10 +78,10 @@ export async function identify(
 /** A stale X-Riot-ClientVersion may be rejected outright, so keep it fresh.
  *  Public data, cached for an hour — the one cache in the system that holds
  *  nothing about anybody. */
-export async function clientVersion(env: Env): Promise<string> {
+export async function clientVersion(env: Env, budget?: Budget): Promise<string> {
   const hit = await env.VAL.get('version');
   if (hit) return hit;
-  const d = (await (await rf('https://valorant-api.com/v1/version')).json()) as {
+  const d = (await (await rf('https://valorant-api.com/v1/version', { budget })).json()) as {
     data: { riotClientVersion: string };
   };
   const v = d.data.riotClientVersion;
@@ -89,8 +91,11 @@ export async function clientVersion(env: Env): Promise<string> {
 
 /** The four headers every authenticated Riot data call must carry. Composed here
  *  because two of them are auth material and one is version-sensitive. */
-export async function dataHeaders(env: Env, t: Tokens): Promise<RiotHeaders> {
-  const [ent, ver] = await Promise.all([entitlements(t.access), clientVersion(env)]);
+export async function dataHeaders(env: Env, t: Tokens, budget?: Budget): Promise<RiotHeaders> {
+  const [ent, ver] = await Promise.all([
+    entitlements(t.access, budget),
+    clientVersion(env, budget),
+  ]);
   return {
     Authorization: 'Bearer ' + t.access,
     'X-Riot-Entitlements-JWT': ent,

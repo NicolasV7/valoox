@@ -1,10 +1,12 @@
 import type { Jar } from '../types.ts';
+import type { Budget } from './budget.ts';
 import { UA } from './constants.ts';
 import { absorb, serialize } from './jar.ts';
 import { assertAllowed } from './upstream.ts';
 
 interface RiotInit extends RequestInit {
   jar?: Jar;
+  budget?: Budget;
 }
 
 /**
@@ -16,9 +18,10 @@ interface RiotInit extends RequestInit {
  * and never a URL, because the storefront path contains the puuid.
  */
 export async function rf(url: string, init: RiotInit = {}): Promise<Response> {
-  const { jar, ...opts } = init;
+  const { jar, budget, ...opts } = init;
   const method = (opts.method ?? 'GET').toUpperCase();
   assertAllowed(method, url);
+  budget?.take();
 
   const headers: Record<string, string> = {
     Accept: 'application/json',
@@ -42,8 +45,13 @@ export async function rf(url: string, init: RiotInit = {}): Promise<Response> {
   // 30x at all, it already asked for 'manual', and it reads the Location
   // itself. A caller that gets an unexpected 30x now fails loudly instead of
   // quietly succeeding somewhere else, which is the right direction for this
-  // failure. A caller may still opt in by passing its own `redirect`.
-  const res = await fetch(url, { redirect: 'manual', ...opts, headers });
+  // failure. A caller cannot override the redirect policy.
+  const res = await fetch(url, {
+    ...opts,
+    headers,
+    redirect: 'manual',
+    signal: opts.signal ?? AbortSignal.timeout(12000),
+  });
 
   console.log(method + ' ' + new URL(url).host + ' -> ' + res.status);
   if (jar) absorb(jar, res);

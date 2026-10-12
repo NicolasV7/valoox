@@ -11,7 +11,7 @@ const env = {
 
 const UID_A = 'a'.repeat(32);
 const UID_B = 'b'.repeat(32);
-const KID = 1;
+const KID = 2;
 const jar = { jar: { ssid: 'secret-value', tdid: 'device' }, puuid: 'p', shard: 'na' };
 
 test('a sealed session opens back to exactly what went in', async () => {
@@ -45,7 +45,7 @@ test("another user's uid cannot open this row", async () => {
 
 test('a different key version cannot open this row', async () => {
   const blob = await seal(env, UID_A, KID, jar);
-  await assert.rejects(() => open(env, UID_A, 2, blob), SealBroken);
+  await assert.rejects(() => open(env, UID_A, KID + 1, blob), SealBroken);
 });
 
 test('the same plaintext seals differently every time', async () => {

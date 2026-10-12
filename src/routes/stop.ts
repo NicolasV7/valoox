@@ -1,77 +1,54 @@
-// Stopping the mail, from the mail.
-//
-// What it does and what it leaves alone are the whole design. The address
-// goes — not flagged, removed — and the claim on it is released, so it is
-// free the moment somebody wants it back, here or on another account. The
-// wishlist is untouched: what you starred is taste, and throwing it away
-// because a mailbox got noisy would be answering a different request.
-//
-// So the row stays, with nowhere to send. The daily job skips it, because
-// `setAlerts(false)` is exactly the flag it polls on, and nothing runs until
-// an address is put back.
-//
-// Not a GET. A link in a mail is followed by scanners before a person sees
-// it, and an unsubscribe that a scanner can fire is an unsubscribe nobody
-// asked for — the same reason the code is six digits and not a link. The page
-// behind the link posts this itself, which a scanner does not do.
-//
-// One answer per link, either way. A link that keeps working is one that can
-// undo a decision somebody already made by being tapped again a week later
-// from a thread they scrolled past — so `no` closes it exactly as `yes` does,
-// and the next message carries a link of its own.
-
+import { readJson } from '../lib/body.ts';
 import type { Body, Ctx } from '../lib/json.ts';
+import * as stops from '../storage/stops.ts';
 import type { Env } from '../types.ts';
-import { setAlerts } from '../vault/repo.ts';
-import { readSession, saveSession } from '../vault/session.ts';
-import { readStop, spend, wasSpent } from '../vault/stop.ts';
+import { mailGroup } from '../vault/removal.ts';
+import { prepared, readSession, saveSession } from '../vault/session.ts';
+import { readStop } from '../vault/stop.ts';
 
 export async function stopMail({ env, uid, req }: Ctx): Promise<Body> {
-  const body = (await req.json().catch(() => null)) as { t?: unknown; answer?: unknown } | null;
-
-  // No token at all is the other door: the Account screen, on the device that
-  // is already signed in, where the cookie is the answer and there is no link
-  // to spend.
-  if (body?.t === undefined || body.t === '') return off(env, uid);
-
-  // A token that was offered and does not verify is refused rather than
-  // quietly ignored. Falling back to the cookie here would mean a link with
-  // garbage in it turns off the alerts of whoever happens to open it — the
-  // signature would be decoration, and the link would be the attack.
-  const found = await readStop(env, body.t);
-  if (!found) return { ok: false, error: 'bad link' };
-  if (await wasSpent(env, found.id)) return { ok: false, error: 'used' };
-
-  // No answer is the page asking whether the link is still good, which it
-  // does on arrival so that nobody presses a button that was never going to
-  // work. Asking is not answering, so it spends nothing.
-  const answer = body.answer;
-  if (answer !== 'yes' && answer !== 'no') return { ok: true, live: true };
-
-  await spend(env, found.id, answer);
-  return answer === 'yes' ? off(env, found.uid) : { ok: true, kept: true };
-}
-
-async function off(env: Env, uid: string, retry = true): Promise<Body> {
-  const held = await readSession(env, uid);
-  // Nothing to stop is the same answer as stopped. A link followed after the
-  // session expired should read as done rather than as a failure.
-  if (!held) return { ok: true, was: null };
-
-  const was = held.session.mail?.to ?? null;
-  if (!was) return { ok: true, was: null, kept: held.session.wishlist?.length ?? 0 };
-
-  held.session.mail = undefined;
-  if (!(await saveSession(env, uid, held.session, held.ver))) {
-    if (retry) return off(env, uid, false);
-    return { ok: false, error: 'conflict' };
+  const body = await readJson(req, 4096);
+  if (body.t === undefined || body.t === '') return off(env, uid);
+  const token = await readStop(env, body.t);
+  if (!token) return { ok: false, error: 'bad link' };
+  for (let retry = 0; retry < 3; retry++) {
+    const held = await readSession(env, token.uid);
+    if (!held || held.session.mail?.gen !== token.gen) return { ok: false, error: 'used' };
+    if (!(await stops.available(env, token))) return { ok: false, error: 'used' };
+    if (body.answer !== 'yes' && body.answer !== 'no') return { ok: true, live: true };
+    const was = held.session.mail.to;
+    const claim = crypto.randomUUID();
+    const yes = body.answer === 'yes';
+    const group = yes ? await mailGroup(env, token.uid, held) : [];
+    const expected = group.map(([id, value]): [string, number] => [id, value.ver]);
+    const updates = await Promise.all(
+      group.map(async ([id, value]) => {
+        value.session.mail = undefined;
+        return prepared(env, id, value.session, value.ver, {
+          sql: 'EXISTS(SELECT 1 FROM stops WHERE id=? AND claim=?)',
+          values: [token.id, claim],
+        });
+      }),
+    );
+    if (await stops.consume(env, token, held.ver, claim, updates, expected)) {
+      return yes
+        ? { ok: true, was, kept: held.session.wishlist?.length ?? 0 }
+        : { ok: true, kept: true };
+    }
   }
-  await setAlerts(env, uid, false);
-
-  return { ok: true, was, kept: held.session.wishlist?.length ?? 0 };
+  return { ok: false, error: 'conflict' };
 }
-
-/** The link in a footer. One shape, built in one place, because two spellings
- *  of it is how one of them stops working without anybody noticing. */
+async function off(env: Env, uid: string): Promise<Body> {
+  for (let retry = 0; retry < 3; retry++) {
+    const held = await readSession(env, uid);
+    if (!held) return { ok: true, was: null };
+    const was = held.session.mail?.to ?? null;
+    held.session.mail = undefined;
+    if (await saveSession(env, uid, held.session, held.ver)) {
+      return { ok: true, was, kept: held.session.wishlist?.length ?? 0 };
+    }
+  }
+  return { ok: false, error: 'conflict' };
+}
 export const stopLink = (origin: string, token: string): string =>
   origin + '/stop?t=' + encodeURIComponent(token);

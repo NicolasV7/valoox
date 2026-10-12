@@ -1,6 +1,7 @@
 import type { Env, Session, StoreView, Tokens } from '../types.ts';
 import { fetchRank } from './account.ts';
 import { dataHeaders } from './auth.ts';
+import type { Budget } from './budget.ts';
 import { rf } from './http.ts';
 import { fetchLoadout } from './loadout.ts';
 import { ownedSet } from './owned.ts';
@@ -32,6 +33,7 @@ export async function fetchStore(
     /** Skip everything no alert has ever needed: rank, the equipped card, the
      *  wallet, and the ownership marks. */
     lean?: boolean;
+    budget?: Budget;
   } = {},
 ): Promise<StoreView> {
   const { seen, lean } = opts;
@@ -39,7 +41,7 @@ export async function fetchStore(
   // Once, and handed to everything below it. Each call mints an entitlements
   // JWT at Riot, and three callers each minting their own was three requests
   // for one header.
-  const h = await dataHeaders(env, t);
+  const h = await dataHeaders(env, t, opts.budget);
   const base = storeBase(s.shard as string);
 
   // Rank and card are not store data, but they share the header and the cache
@@ -49,6 +51,7 @@ export async function fetchStore(
       method: 'POST',
       headers: { ...h, 'Content-Type': 'application/json' },
       body: '{}',
+      budget: opts.budget,
     }),
     lean ? null : rf(base + 'v1/wallet/' + puuid, { headers: h }),
     lean ? null : fetchRank(s, h),

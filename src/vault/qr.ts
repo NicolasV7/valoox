@@ -1,121 +1,142 @@
-import type { Env, Jar } from '../types.ts';
+import { mint } from '../app/cookie.ts';
+import * as scans from '../storage/scans.ts';
+import type { Env, Jar, Session } from '../types.ts';
+import { adopt } from './adopt.ts';
 import { identify, reauth } from './auth.ts';
+import { clearCache } from './cache.ts';
 import { rf } from './http.ts';
-import {
-  clearCache,
-  clearScan,
-  createSession,
-  readScan,
-  saveSession,
-  writeScan,
-} from './session.ts';
+import { browserId } from './keys.ts';
+import { CURRENT_KID, open, seal } from './seal.ts';
+import { alerting } from './session.ts';
+import { markOf } from './who.ts';
 
-// Riot Mobile QR sign-in: the only auth path this service has.
-//
-// No password is ever handled. Riot's own app authenticates the user — password,
-// 2FA and any captcha all happen inside Riot's app, on Riot's infrastructure.
-// The username/password endpoint is gated behind hCaptcha Enterprise with
-// per-session rqdata and is not automatable at any price.
-//
-// Every call below carries the jar accumulated so far. Skipping that is the #1
-// cause of phantom "blocked" errors: the poll returns invalid_request with no jar
-// and a clean 200 with one.
-
-export async function start(env: Env, uid: string): Promise<{ url: string }> {
-  const jar: Jar = {};
-  await rf('https://auth.riotgames.com/.well-known/openid-configuration', { jar });
-
-  const res = await rf('https://authenticate.riotgames.com/api/v1/login', {
-    jar,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      client_id: 'riot-client',
-      language: 'en_GB',
-      platform: 'windows',
-      qrcode: {},
-      remember: true,
-      type: 'auth',
-    }),
-  });
-
-  // The response carries an hCaptcha block. It is never solved on this path.
-  const d = (await res.json()) as { suuid?: string; cluster?: string; timestamp?: string };
-  if (!d.suuid) throw new Error('qr start failed');
-
-  await writeScan(env, uid, jar);
-  return {
-    url:
-      'https://qrlogin.riotgames.com/riotmobile/?cluster=' +
-      d.cluster +
-      '&suuid=' +
-      d.suuid +
-      '&timestamp=' +
-      d.timestamp,
-  };
+interface Scan {
+  jar: Jar;
+  phase: 'start' | 'poll' | 'authorize' | 'identify';
+  legacy?: string;
 }
+const persist = (env: Env, row: scans.ScanRow, scan: Scan, release = true) =>
+  seal(env, row.uid, CURRENT_KID, scan, 'scan:2').then((blob) =>
+    scans.save(env, row, blob, release),
+  );
 
+export async function start(env: Env, uid: string, legacy?: string): Promise<{ url: string }> {
+  const scan: Scan = { jar: {}, phase: 'start', legacy };
+  const id = crypto.randomUUID();
+  await scans.begin(env, uid, id, CURRENT_KID, await seal(env, uid, CURRENT_KID, scan, 'scan:2'));
+  const row = await scans.claim(env, uid);
+  if (!row || row === 'busy' || row.id !== id) throw new Error('scan replaced');
+  try {
+    await rf('https://auth.riotgames.com/.well-known/openid-configuration', { jar: scan.jar });
+    const res = await rf('https://authenticate.riotgames.com/api/v1/login', {
+      jar: scan.jar,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: 'riot-client',
+        language: 'en_GB',
+        platform: 'windows',
+        qrcode: {},
+        remember: true,
+        type: 'auth',
+      }),
+    });
+    const d = (await res.json()) as { suuid?: string; cluster?: string; timestamp?: string };
+    if (!d.suuid || typeof d.suuid !== 'string') throw new Error('qr start failed');
+    scan.phase = 'poll';
+    if (!(await persist(env, row, scan))) throw new Error('scan cancelled');
+    const params = new URLSearchParams({
+      cluster: String(d.cluster ?? ''),
+      suuid: d.suuid,
+      timestamp: String(d.timestamp ?? ''),
+    });
+    return { url: 'https://qrlogin.riotgames.com/riotmobile/?' + params };
+  } catch (e) {
+    await persist(env, row, scan);
+    throw e;
+  }
+}
 export type PollResult =
-  | { status: 'expired' }
-  | { status: 'waiting' }
-  | { status: 'ok'; shard: string };
+  | { status: 'expired' | 'waiting' }
+  | { status: 'ok'; shard: string; secret: string };
 
 export async function poll(env: Env, uid: string): Promise<PollResult> {
-  const jar = await readScan(env, uid);
-  if (!jar) return { status: 'expired' };
-
-  const d = (await (
-    await rf('https://authenticate.riotgames.com/api/v1/login', { jar })
-  ).json()) as { success?: { login_token?: string } };
-
-  const token = d?.success?.login_token;
-  if (!token) {
-    await writeScan(env, uid, jar); // the poll rotates cookies; keep them
-    return { status: 'waiting' };
+  const row = await scans.claim(env, uid);
+  if (!row) return { status: 'expired' };
+  if (row === 'busy') return { status: 'waiting' };
+  let scan: Scan;
+  try {
+    scan = await open<Scan>(env, uid, row.kid, row.blob, 'scan:2');
+  } catch {
+    await scans.cancel(env, uid, row.id);
+    return { status: 'expired' };
   }
-
-  const sw = await rf('https://auth.riotgames.com/api/v1/login-token', {
-    jar,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      authentication_type: null,
-      code_verifier: '',
-      login_token: token,
-      persist_login: true,
-    }),
-  });
-  if (sw.status !== 204) throw new Error('login-token swap returned ' + sw.status);
-
-  await rf('https://auth.riotgames.com/api/v1/authorization', {
-    jar,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      client_id: 'riot-client',
-      nonce: '1',
-      redirect_uri: 'http://localhost/redirect',
-      response_type: 'token id_token',
-      scope: 'openid link ban lol_region account',
-    }),
-  });
-  if (!jar.ssid) throw new Error('no ssid after authorization');
-
-  // Persist the moment the jar is valid. The login_token is single-use, so a
-  // failure below would otherwise throw away a sign-in that cannot be repeated.
-  // The jar is stored whole. Pruning it would save ~55% of its bytes, which
-  // mattered when the design put it in a 4 KB cookie — in D1 it buys nothing,
-  // and it is an untested change on the one path that cannot be tested without
-  // a real scan. The full jar is the configuration proven to reauth.
-  await createSession(env, uid, { jar });
-
-  const t = await reauth(jar);
-  if (!t) throw new Error('fresh jar failed to reauth');
-  const { puuid, shard } = await identify(t);
-
-  // ver 0 because we just inserted it; nothing else can have touched this uid.
-  await saveSession(env, uid, { jar, puuid, shard }, 0);
-  await clearScan(env, uid);
-  await clearCache(env, uid);
-  return { status: 'ok', shard };
+  let completed = false;
+  try {
+    const jar = scan.jar;
+    if (scan.phase === 'start') return { status: 'waiting' };
+    if (scan.phase === 'poll') {
+      const d = (await (
+        await rf('https://authenticate.riotgames.com/api/v1/login', { jar })
+      ).json()) as { success?: { login_token?: string } };
+      const token = d?.success?.login_token;
+      if (!token) return { status: 'waiting' };
+      const sw = await rf('https://auth.riotgames.com/api/v1/login-token', {
+        jar,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          authentication_type: null,
+          code_verifier: '',
+          login_token: token,
+          persist_login: true,
+        }),
+      });
+      if (sw.status !== 204) throw new Error('login-token swap failed');
+      scan.phase = 'authorize';
+      if (!(await persist(env, row, scan, false))) return { status: 'expired' };
+    }
+    if (scan.phase === 'authorize') {
+      await rf('https://auth.riotgames.com/api/v1/authorization', {
+        jar,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: 'riot-client',
+          nonce: '1',
+          redirect_uri: 'http://localhost/redirect',
+          response_type: 'token id_token',
+          scope: 'openid link ban lol_region account',
+        }),
+      });
+      if (!jar.ssid) throw new Error('authorization did not set a session');
+      scan.phase = 'identify';
+      if (!(await persist(env, row, scan, false))) return { status: 'expired' };
+    }
+    const t = await reauth(jar);
+    if (!t) throw new Error('fresh jar failed to reauth');
+    const who = await identify(t);
+    const previous = await adopt(env, uid, who.puuid, scan.legacy);
+    const session: Session = { ...previous.preferences, jar, ...who, name: who.name ?? '' };
+    const secret = mint();
+    const next = await browserId(env, secret);
+    const ok = await scans.finish(
+      env,
+      row,
+      {
+        uid: next,
+        kid: CURRENT_KID,
+        blob: await seal(env, next, CURRENT_KID, session),
+        acct: await markOf(env, who.puuid),
+        alerts: alerting(session),
+      },
+      previous.legacy,
+    );
+    if (!ok) return { status: 'expired' };
+    completed = true;
+    await clearCache(env, uid).catch(() => undefined);
+    return { status: 'ok', shard: who.shard, secret };
+  } finally {
+    if (!completed) await persist(env, row, scan);
+  }
 }

@@ -26,7 +26,7 @@ enabled = false
 # because firing at :00 alongside everyone else is the shape that gets throttled.
 # 00:30 UTC is 19:30 in Colombia: a reasonable hour to be told something.
 [triggers]
-crons = ["30 0 * * *"]
+crons = ["7,22,37,52 * * * *"]
 
 # Printed on every message, so it is a var and not a secret. It has to be an
 # address on a domain verified in Resend — the subdomain keeps the sending
@@ -69,11 +69,18 @@ run_worker_first = [
 [[d1_databases]]
 binding = "DB"
 database_name = "val-sessions"
-database_id = "564cac83-d7b7-4c0c-ab08-705a2b5f6549"
+database_id = "00000000-0000-4000-8000-000000000000"
 
 [[kv_namespaces]]
 binding = "VAL"
-id = "ecad056b1aa948c1af81ffd82ab9d5e3"
+id = "00000000000000000000000000000000"
+
+[[ratelimits]]
+name = "EDGE"
+namespace_id = "1588219472"
+[ratelimits.simple]
+limit = 180
+period = 60
 
 # --- the deployed one ------------------------------------------------------
 #
@@ -117,3 +124,10 @@ database_id = "564cac83-d7b7-4c0c-ab08-705a2b5f6549"
 [[env.live.kv_namespaces]]
 binding = "VAL"
 id = "ecad056b1aa948c1af81ffd82ab9d5e3"
+
+[[env.live.ratelimits]]
+name = "EDGE"
+namespace_id = "1588219472"
+[env.live.ratelimits.simple]
+limit = 180
+period = 60

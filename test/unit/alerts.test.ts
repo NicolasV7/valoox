@@ -37,6 +37,20 @@ test('nothing wanted, nothing sent', () => {
   assert.deepEqual(hits(view(['a']), []), []);
 });
 
+test('accessory matches bind the id to its item type', () => {
+  const store = {
+    ...view([]),
+    accessory: {
+      remaining: 3600,
+      items: [{ id: 'item', type: 'spray', cost: 5500, qty: 1 }],
+    },
+  } as StoreView;
+  assert.deepEqual(hits(store, [{ id: 'item', type: 'spray', name: 'Wanted' }]), [
+    { id: 'item', type: 'spray', name: 'Wanted', cost: 5500 },
+  ]);
+  assert.deepEqual(hits(store, [{ id: 'item', type: 'card', name: 'Other' }]), []);
+});
+
 test('several hits in one day come back together, not as several alerts', () => {
   assert.equal(hits(view(['a', 'b', 'c']), want('a', 'c')).length, 2);
 });
@@ -92,7 +106,7 @@ async function withFetch(reply: (n: number) => Response, body: () => Promise<voi
 }
 
 test('a message with nowhere to go is a failure, not a quiet success', async () => {
-  await assert.rejects(deliver({}, 'hola'), /ningún canal/);
+  await assert.rejects(deliver({}, 'hola'), /notification channel/);
 });
 
 test('a channel that times out is retried, and a late success still counts', async () => {

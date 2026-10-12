@@ -77,6 +77,12 @@ jobs:
         with:
           subject-path: public/app.js
 
+      - run: npm run migrate:live
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: "false"
+
       # --env live, which is the environment holding the two custom domains.
       # The default environment is the portable one a fork gets and would put
       # this on a workers.dev address under another name.

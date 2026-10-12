@@ -37,6 +37,10 @@ export async function live(env: Env, uid: string): Promise<Live | 'gone' | null>
 
   // The jar was rolled forward by absorb(). Losing the CAS means another tab
   // already persisted a newer jar — theirs wins and ours is dropped on purpose.
-  await saveSession(env, uid, session, ver);
+  if (!(await saveSession(env, uid, session, ver))) {
+    const current = await readSession(env, uid);
+    if (!current || current.session.puuid !== session.puuid) return 'gone';
+    return { session: current.session, t, seen: current.seen };
+  }
   return { session, t, seen };
 }

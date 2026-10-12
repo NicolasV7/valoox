@@ -85,22 +85,17 @@ test('the URL is never logged either', () => {
   assert.deepEqual(offenders, [], 'url in a log call: ' + offenders.join(', '));
 });
 
-test('the KV namespace holds caches only, never a session', () => {
-  // Sessions live in D1, sealed. A KV write of anything session-shaped would be
-  // an unsealed credential in a store with no per-row encryption boundary.
-  const session = files.find((f) => f.path === 'src/vault/session.ts');
-  assert.ok(session, 'session.ts moved — update this test, do not delete it');
-  const text = session.text;
-  const literals = [...text.matchAll(/VAL\.(?:put|get|delete)\('([^']+)/g)].map((m) => m[1]);
-  const ALLOWED = ['scan:'];
-  for (const k of literals) {
-    assert.ok(ALLOWED.includes(k), 'unexpected KV key prefix: ' + k);
-  }
-  // The cache keys are built from a versioned helper; pin both the names and the
-  // fact that a version exists, so a shape change cannot silently reuse a key.
-  assert.match(text, /export type Cache = 'store' \| 'inv';/);
-  assert.match(text, /const VERSION: Record<Cache, number>/, 'cache keys must carry a version');
-  assert.ok(literals.length > 0, 'the KV key regex stopped matching — fix the test, not the code');
+test('KV mutations are limited to public version and encrypted view caches', () => {
+  const writers = files
+    .filter((f) => /VAL\.(put|delete)\(/.test(code(f.text)))
+    .map((f) => f.path)
+    .sort();
+  assert.deepEqual(writers, ['src/vault/auth.ts', 'src/vault/cache.ts']);
+  const cache = files.find((f) => f.path === 'src/vault/cache.ts')?.text ?? '';
+  assert.match(cache, /const VERSION: Record<Cache, number>/);
+  assert.match(cache, /readSession/);
+  assert.match(cache, /'store:4'/);
+  assert.match(cache, /'inv:3'/);
 });
 
 // --- the front end ----------------------------------------------------------

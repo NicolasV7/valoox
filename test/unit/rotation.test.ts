@@ -16,7 +16,7 @@ const key = () =>
   ({ JAR_KEY: Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64') }) as Env;
 
 const UID = 'c'.repeat(32);
-const KID = 1;
+const KID = 2;
 const session = { jar: { ssid: 'live-session' }, puuid: 'p', shard: 'na' };
 
 test('rotating the key orphans every existing blob', async () => {

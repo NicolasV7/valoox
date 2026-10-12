@@ -1,118 +1,56 @@
-// One wishlist hit, out the door.
-//
-// Split from the job itself because the job is about not looking like
-// credential stuffing, and this is about what a person receives. Two subjects
-// that were sharing a file and are both shorter apart.
-//
-// Mail is the channel the product is built on and gets the designed message.
-// Discord is still on the list and gets the plain line: a webhook takes text,
-// and a webhook is a thing somebody set up on purpose. Either landing counts,
-// because the only claim being made is that it went somewhere.
-
-import { stopLink } from '../routes/stop.ts';
+import * as deliveries from '../storage/deliveries.ts';
 import type { Env, Hit, Session } from '../types.ts';
-import { rf } from '../vault/http.ts';
-import { send } from '../vault/mail.ts';
-import { mintStop } from '../vault/stop.ts';
-import { html, subject, text } from './mail/alert.ts';
-import { type Lang, langOf, words } from './mail/words.ts';
+import type { Budget } from '../vault/budget.ts';
+import { fingerprint } from '../vault/keys.ts';
+import { CURRENT_KID, seal } from '../vault/seal.ts';
+import { readSession } from '../vault/session.ts';
+import { markOf } from '../vault/who.ts';
+import { dispatch } from './dispatch.ts';
+import { type Lang, words } from './mail/words.ts';
+import { build } from './outbox.ts';
 
-/** Where the pictures in a message come from and where its links point. The
- *  job has no request to read an origin off, so this is the one place in the
- *  app that writes the address down. */
-const HOME = 'https://drop.valoox.store';
-
-/**
- * One channel, with a bounded retry.
- *
- * A 5xx or a connection that never opens is worth another go; a 4xx is the
- * channel telling us the request is wrong, and it will stay wrong. The timeout
- * is the important half: ntfy used to hang 19 to 39 seconds before Cloudflare
- * gave up on it, and a notifier that blocks for a minute is its own outage.
- */
-const TRIES = 3;
-const TIMEOUT = 6000;
-
-async function fire(url: string, init: RequestInit): Promise<Response> {
-  let last: Response | null = null;
-  for (let i = 0; i < TRIES; i++) {
-    try {
-      const res = await rf(url, { ...init, signal: AbortSignal.timeout(TIMEOUT) });
-      if (res.status < 500) return res;
-      last = res;
-    } catch {
-      // Aborted, or the connection never opened. Neither is worth logging: the
-      // status of the last attempt is the whole story.
-    }
-  }
-  // Ours, not the channel's: every attempt timed out before anything answered.
-  return last ?? new Response(null, { status: 504 });
-}
-
-/** The one line a channel with no layout gets, in the language the row asked
- *  for. It used to be written here, in Spanish only, so this channel answered
- *  in a language the reader may never have picked. */
+export { deliver } from './push.ts';
 export const message = (found: Hit[], lang: Lang): string =>
   words[lang].pushLine(found.map((h) => h.name));
 
-type Notify = NonNullable<Session['notify']>;
-
-/**
- * Discord. The payload carries no puuid, no uid and no credential — only skin
- * names the user themselves chose.
- *
- * A throttled push counted as delivered is the worst bug a notifier can have:
- * it reports success for something nobody received. So a non-2xx throws, with
- * the channel named — a bare "429" sent us measuring the wrong thing once.
- */
-export async function deliver(to: Notify, said: string): Promise<string[]> {
-  if (!to.discord) throw new Error('no hay ningún canal configurado');
-  const res = await fire('https://discord.com/api/webhooks/' + to.discord, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content: said }),
-  });
-  const report = ['discord ' + res.status];
-  if (!res.ok) throw new Error(report.join(', '));
-  return report;
-}
-
-/** True if anything carried it. Never throws: one row's bad luck is not the
- *  run's, and the job counts failures of its own. */
 export async function post(
   env: Env,
   uid: string,
   session: Session,
   found: Hit[],
   left: number,
+  budget?: Budget,
+  rotation = new Date().toISOString().slice(0, 10),
 ): Promise<boolean> {
-  const out: Array<Promise<boolean>> = [];
-  // Both channels speak it, so it is read once rather than inside the half
-  // that happens to have the address on it.
-  const lang = langOf(session.mail?.lang);
-
-  if (session.mail?.ok === true) {
-    const stop = stopLink(HOME, await mintStop(env, uid));
-    out.push(
-      send(
-        env,
-        session.mail.to,
-        subject(found, lang, session.name),
-        html(found, left, lang, HOME, stop, session.name, session.mail.tz),
-        text(found, lang, stop),
-      )
-        .then((r) => r.ok)
-        .catch(() => false),
+  const current = await readSession(env, uid);
+  if (!current || current.session.puuid !== session.puuid) return false;
+  const acct = (await markOf(env, session.puuid)) ?? uid;
+  let complete = true;
+  for (const channel of ['mail', 'discord'] as const) {
+    const to =
+      channel === 'mail'
+        ? session.mail?.ok && session.mail.to.toLowerCase()
+        : session.notify?.discord;
+    if (!to) continue;
+    if (
+      channel === 'mail' &&
+      (current.session.mail?.gen !== session.mail?.gen || !current.session.mail?.ok)
+    )
+      return false;
+    if (channel === 'discord' && current.session.notify?.discord !== to) return false;
+    const id = await fingerprint(env, 'delivery', JSON.stringify([acct, rotation, channel, to]));
+    const body = await build(env, uid, session, channel, found, left);
+    const queued = await deliveries.claim(
+      env,
+      id,
+      await seal(env, id, CURRENT_KID, body, 'outbox:2'),
     );
+    if (queued.state === 'done') continue;
+    if (queued.state !== 'claimed') {
+      complete = false;
+      continue;
+    }
+    complete = (await dispatch(env, id, queued, budget)) && complete;
   }
-
-  if (session.notify?.discord) {
-    out.push(
-      deliver(session.notify, message(found, lang))
-        .then(() => true)
-        .catch(() => false),
-    );
-  }
-
-  return (await Promise.all(out)).some(Boolean);
+  return complete;
 }

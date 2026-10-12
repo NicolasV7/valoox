@@ -23,6 +23,6 @@ export async function store({ env, uid }: Ctx): Promise<Body> {
   if (s === 'gone') return EXPIRED;
 
   const view = await fetchStore(env, s.session, s.t, { seen: s.seen });
-  await writeCache(env, 'store', uid, view, view.remaining);
+  if (!(await writeCache(env, 'store', uid, view, view.remaining))) return RESEED;
   return view as unknown as Body;
 }

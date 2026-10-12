@@ -31,7 +31,19 @@ export async function freshDb(): Promise<Env> {
     .map((line) => line.replace(/--.*$/, ''))
     .join('\n');
 
-  await env.DB.exec('DROP TABLE IF EXISTS s');
+  for (const table of [
+    'checks',
+    'families',
+    'messages',
+    'stops',
+    'otp',
+    'scans',
+    'limits',
+    'deliveries',
+    's',
+  ]) {
+    await env.DB.exec('DROP TABLE IF EXISTS ' + table);
+  }
   for (const statement of sql.split(';')) {
     const one = statement.replace(/\s+/g, ' ').trim();
     if (one) await env.DB.exec(one);

@@ -68,7 +68,7 @@ function declared(): Set<string> {
 function configured(): Set<string> {
   const toml = readFileSync('wrangler.toml', 'utf8');
   const out = new Set<string>();
-  for (const m of toml.matchAll(/^\s*binding\s*=\s*"([^"]+)"/gm)) out.add(m[1] as string);
+  for (const m of toml.matchAll(/^\s*(?:binding|name)\s*=\s*"([^"]+)"/gm)) out.add(m[1] as string);
   const vars = toml.slice(toml.indexOf('[vars]') + 1);
   const end = vars.search(/^\[/m);
   for (const m of (end > 0 ? vars.slice(0, end) : vars).matchAll(/^(\w+)\s*=/gm)) {

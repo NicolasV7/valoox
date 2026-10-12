@@ -1,8 +1,8 @@
 import { pending } from '../alerts/otp.ts';
+import { readJson } from '../lib/body.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
 import type { Env, Starred } from '../types.ts';
-import { setAlerts } from '../vault/repo.ts';
 import { readSession, saveSession } from '../vault/session.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -109,13 +109,10 @@ export function cleanWishlist(body: unknown, was: Starred[] = []): Starred[] {
 
 export const readWishlist = ({ env, uid }: Ctx): Promise<Body> => wishlist(env, uid, null);
 
-export const writeWishlist = async ({ env, uid, req }: Ctx): Promise<Body> =>
-  wishlist(env, uid, await req.json());
-
-/** Somewhere to put a hit. A verified address counts; an unverified one does
- *  not, which is the same rule the send side enforces. */
-const hasChannel = (s: { notify?: { discord?: string }; mail?: { ok: boolean } }) =>
-  !!s.notify?.discord || s.mail?.ok === true;
+export const writeWishlist = async ({ env, uid, req }: Ctx): Promise<Body> => {
+  if (!(await readSession(env, uid))) return RESEED;
+  return wishlist(env, uid, await readJson(req));
+};
 
 async function wishlist(env: Env, uid: string, body: unknown | null, retry = true): Promise<Body> {
   const held = await readSession(env, uid);
@@ -133,9 +130,6 @@ async function wishlist(env: Env, uid: string, body: unknown | null, retry = tru
       if (retry) return wishlist(env, uid, body, false);
       return { conflict: true };
     }
-    // The only preference kept in the clear, and only so the daily job can find
-    // the rows to poll without opening every sealed blob in the table.
-    await setAlerts(env, uid, session.wishlist.length > 0 && hasChannel(session));
   }
   return {
     wishlist: session.wishlist ?? [],

@@ -1,115 +1,16 @@
-import type { Env } from '../types.ts';
+// All SQL lives in storage/. It uses primary D1 reads, not eventual replicas.
 
-// The only module that talks to D1.
-//
-// Strongly consistent by construction: plain prepare(), never the Sessions API.
-// withSession() would reintroduce a window where a revoked session still reads
-// live — which for a credential that bypasses 2FA is exactly the wrong trade.
-
-export interface Row {
-  uid: string;
-  kid: number;
-  blob: string;
-  ver: number;
-  /** Seconds. When this row was last written, which is the last time a
-   *  request made the Worker touch Riot — reads come off a KV cache. Written
-   *  since the schema existed and selected by nothing until the Account
-   *  screen needed a date on it. */
-  last_used?: number;
-}
-
-const now = () => Math.floor(Date.now() / 1000);
-
-export async function get(env: Env, uid: string): Promise<Row | null> {
-  return env.DB.prepare('SELECT uid, kid, blob, ver, last_used FROM s WHERE uid = ?')
-    .bind(uid)
-    .first<Row>();
-}
-
-/**
- * Sign-in. Upsert rather than insert: a browser whose session expired still holds
- * its uid cookie AND its dead row, so the second sign-in from that browser would
- * hit `UNIQUE constraint failed: s.uid` — breaking re-entry at exactly the moment
- * the user has no working session to fall back on. Confirmed against D1.
- *
- * ver resets to 0 because the caller's follow-up save is pinned to 0.
- */
-export async function upsert(
-  env: Env,
-  uid: string,
-  kid: number,
-  blob: string,
-  acct: string | null,
-): Promise<void> {
-  const t = now();
-  await env.DB.prepare(
-    'INSERT INTO s (uid, kid, blob, ver, created_at, last_used, acct) VALUES (?, ?, ?, 0, ?, ?, ?) ' +
-      'ON CONFLICT(uid) DO UPDATE SET kid = excluded.kid, blob = excluded.blob, ver = 0, ' +
-      'last_used = excluded.last_used, acct = excluded.acct',
-  )
-    .bind(uid, kid, blob, t, t, acct)
-    .run();
-}
-
-/**
- * Compare-and-swap. Two tabs refreshing at once both roll the jar forward; the
- * loser must re-read rather than overwrite, or it persists a jar Riot has already
- * superseded and the session dies early. Returns false when someone else won.
- */
-export async function update(
-  env: Env,
-  uid: string,
-  kid: number,
-  blob: string,
-  ver: number,
-  /** Null leaves whatever the row already had: a session that has not resolved
-   *  its puuid yet must not erase the mark a previous request wrote. */
-  acct: string | null = null,
-): Promise<boolean> {
-  const r = await env.DB.prepare(
-    // `kid` is written with the blob, not left behind it. Every save re-seals
-    // under CURRENT_KID, so an update that did not move the kid made the row
-    // describe the wrong key the moment CURRENT_KID was bumped — the first
-    // request per user would store a kid:2 blob under a row saying kid:1, and
-    // every later read would derive the wrong subkey and fail closed. The
-    // migration path the comment on saveSession promises is this column.
-    'UPDATE s SET kid = ?, blob = ?, ver = ver + 1, last_used = ?, ' +
-      'acct = COALESCE(?, acct) WHERE uid = ? AND ver = ?',
-  )
-    .bind(kid, blob, now(), acct, uid, ver)
-    .run();
-  return r.meta.changes > 0;
-}
-
-/** The rows the alert job polls. `alerts` is the only plaintext preference in the
- *  table, and it says nothing beyond "this browser asked to be told". */
-export async function listAlerting(env: Env): Promise<Row[]> {
-  const r = await env.DB.prepare(
-    // Least recently served first. The job writes `last_used` on every row it
-    // gets through, so this is round-robin with no extra state — and without
-    // it rowid order meant the same people were served every night and the
-    // same people never were, silently, because the ceiling that cut them off
-    // is a subrequest limit and not an error anybody sees.
-    'SELECT uid, kid, blob, ver FROM s WHERE alerts = 1 ORDER BY last_used ASC',
-  ).all<Row>();
-  return r.results ?? [];
-}
-
-export async function setAlerts(env: Env, uid: string, on: boolean): Promise<void> {
-  await env.DB.prepare('UPDATE s SET alerts = ? WHERE uid = ?')
-    .bind(on ? 1 : 0, uid)
-    .run();
-}
-
-export async function remove(env: Env, uid: string): Promise<void> {
-  await env.DB.prepare('DELETE FROM s WHERE uid = ?').bind(uid).run();
-}
-
-/** Abandoned rows are the ones that would sit in a stale dump. Deleting them
- *  beats shortening their life: they are gone, not merely shorter-lived. */
-export async function prune(env: Env, olderThanDays = 10): Promise<number> {
-  const r = await env.DB.prepare('DELETE FROM s WHERE last_used < ?')
-    .bind(now() - olderThanDays * 86400)
-    .run();
-  return r.meta.changes;
-}
+export type { Row } from '../storage/rows.ts';
+export {
+  accountRows,
+  change,
+  checked,
+  get,
+  listAlerting,
+  now,
+  prune,
+  remove,
+  setAlerts,
+  update,
+  upsert,
+} from '../storage/rows.ts';

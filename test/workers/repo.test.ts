@@ -25,7 +25,7 @@ test('a second sign-in from the same browser overwrites instead of failing', asy
 
   const row = await repo.get(env, UID);
   expect(row?.blob).toBe('second');
-  expect(row?.ver).toBe(0); // reset, because the caller's follow-up save pins ver 0
+  expect(row?.ver).toBe(1); // Never reuse a previous writer's version.
 });
 
 test('compare-and-swap lets the first writer win and tells the second it lost', async () => {

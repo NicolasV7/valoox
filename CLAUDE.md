@@ -8,184 +8,155 @@ This file says what you may not break.
 
 ## The invariants
 
-These are not preferences. Each one is load-bearing, and most have a test behind
-them — if you need to change one, change the test in the same commit and say why
-in the message.
+These are not preferences. Each one is load-bearing and has a test. If one
+changes, change the test in the same commit and explain why in the message.
 
 **The password is never handled, stored, or asked for.** Sign-in is Riot
-Mobile's QR flow, approved inside Riot's own app. No screen has a password field,
-so there is nothing here to phish.
+Mobile's QR flow, approved inside Riot's own app. There is no password field.
 
-**Every outbound request goes through `src/vault/http.ts`.** It is the only
-module that calls `fetch()`, and its first act is `assertAllowed(method, url)`
-against the list in `src/vault/upstream.ts`. A new rule carries a `why:` in
-plain words. Endpoints that *change* something — buy, equip, queue, party, chat —
-are absent on purpose, which is what makes "read-only" checkable instead of
-promised.
+**Every outbound request goes through `src/vault/http.ts`.** It calls
+`assertAllowed(method, url)` against `src/vault/upstream.ts` before any fetch.
+Redirects stay manual even if a caller requests otherwise. New rules carry a
+`why:` in plain words. Buying, equipping, queueing, parties and chat are absent.
+Authentication writes are separate from reading the player's game data.
 
-**The session is sealed before it reaches the database.** AES-256-GCM under a key
-derived per browser (HKDF, `info = "jar:" + uid`), with `kid|uid` as additional
-data so a row swapped into another row's place fails closed. `JAR_KEY` lives in
-the Worker's secrets, never in D1. Rotating it is the kill switch: every existing
-ciphertext becomes undecryptable at once, so it must take effect immediately —
-nothing may cache a key across a rotation.
+**A database identifier is never a login credential.** The browser holds a
+256-bit `__Host-val` secret, Secure, HttpOnly, SameSite=Strict, Path=/ and with
+no Domain attribute. D1 and KV hold only keyed fingerprints, never that secret.
+Successful QR approval rotates it. Old `uid` cookies cannot authenticate.
+A legacy cookie may nominate preferences only after a fresh Riot QR confirms
+the same account. Do not adopt an old jar or unverified email code.
 
-**The jar never reaches the browser, and never reaches a log.** Neither does the
-puuid, the access token, or any URL that contains one. `[observability] enabled =
-false` in `wrangler.toml` is part of this, not a tuning choice: the storefront
-path carries the puuid and Workers Logs would persist it.
+**Private state is sealed before storage, with separate purposes.**
+AES-256-GCM uses fresh 96-bit IVs; HKDF and authenticated data bind the browser
+identifier, key version and purpose/schema. Session, store, inventory, QR, stop
+link and outbox keys are distinct. Caches also validate their public DTO shape.
+`JAR_KEY` is a 32-byte secret outside D1. A rotation immediately changes lookup
+identifiers and invalidates every old ciphertext. Cache derivations by the raw
+secret, never across a rotation.
 
-**The Worker parses no catalogue.** Names, renders, tiers and clips are joined in
-the browser against `valorant-api.com`. A Worker gets 10ms of CPU per request;
-that one number decided the architecture, and the daily job is a set intersection
-for the same reason.
+**D1 decides authentication and revocation.** Check it before returning a
+private KV view. A delayed KV deletion cannot undo logout. Disconnect atomically
+deletes the session and pending QR. Approval can commit only a live, exclusively
+claimed scan generation. Scans expire ten minutes after creation; polling does
+not extend that deadline. Every session mutation uses a monotonic CAS version
+and writes its alert flag in the same statement.
 
-**The page builds DOM, never HTML from strings.** Item names come from a
-community database this project does not control. CSP is `default-src 'none'`
-with `script-src 'self'` and no `unsafe-inline`, so colours are set through
-CSSOM (`style.setProperty`), never a `style` attribute.
+**Security counters and consumption are atomic.** OTP has five attempts in ten
+minutes, a keyed digest bound to browser, recipient and generation, and one
+transaction for consumption and verification. Recipient/account sending quotas
+also live in D1. Stop links expire, bind the mail generation and consume one
+answer atomically with removal. Signed provider events act only on their
+reserved message generation; failed CAS must permit a useful provider retry.
 
-**Nothing loads from a third party.** No CDN, no font host, no analytics, no
-embedded widget. Anything fixed is served from this origin — the two faces, and
-the fifteen images that never change: three coins, five tiers, seven sprays
-(`npm run art`). What stays off-origin is what rotates, because pinning a
-moving thing is how a page starts lying about what Riot is selling today.
-Three hosts, all of them Riot's own content and each pinned to one CSP
-directive: `valorant-api.com` for the catalogue
-(`connect-src`), `media.valorant-api.com` for artwork (`img-src`), and
-`valorant.dyn.riotcdn.net` for the skin clips (`media-src`). `media-src`
-streams audio and video and executes nothing; the clips are 13 MB each and
-keeping copies of them is the alternative. No other directive names a host,
-and `script-src` is exactly `'self'`.
+**The jar never reaches the browser or a log.** Neither does the puuid, access
+token, ciphertext or a URL containing one. Log fixed categories/statuses,
+never exception messages or stacks. `[observability] enabled = false` in
+`wrangler.toml` is load-bearing: storefront paths contain the puuid.
+
+**The Worker parses no catalogue.** Names, renders, tiers and clips are joined
+in the browser against `valorant-api.com`. The Worker has a small CPU budget.
+Alerts use UUID intersections, including typed accessory ids.
+
+**The job has a request budget.** An invocation spends at most 48 external
+requests, including retries and aborted calls. Process fair batches after
+00:30 UTC and continue every fifteen minutes. Combine browser lists per account
+and destination; reserve one delivery per daily rotation. Retries use an
+encrypted immutable outbox and Resend idempotency, without re-polling Riot.
+Discord has no idempotency API; do not promise exactly-once delivery.
+
+**The page builds DOM, never HTML from strings.** Community item names are
+untrusted. CSP is `default-src 'none'`, `script-src 'self'`, without
+`unsafe-inline`. Colours use CSSOM, never a style attribute. Clear all private
+browser state and invalidate outstanding requests when authentication changes.
+A failed logout must not show a confirmed disconnect.
+
+**All code and fixed assets load from this origin.** No external scripts,
+fonts, analytics or widgets. Fixed artwork is self-hosted. Three rotating
+content hosts are narrowly pinned: the community catalogue at
+`valorant-api.com` (connect-src), its artwork at `media.valorant-api.com`
+(img-src), and Riot's clips at `valorant.dyn.riotcdn.net` (media-src).
 
 ## The two mechanical rules
 
-**No file over 200 lines.** `test/unit/size.test.ts` fails the build. If a module
-is pushing the limit it is doing two jobs; split it along the seam, do not
-reformat to fit.
+**No file over 200 lines.** Split along a responsibility boundary; do not
+reformat to fit. `test/unit/size.test.ts` enforces this.
 
-**No user-facing text outside `web/i18n/`.** `test/unit/strings.test.ts` fails the
-build. Interpolation is a function, not concatenation:
+**No user-facing text outside `web/i18n/`.** Interpolation is a function:
 
 ```ts
-// no
-'Quedan ' + n + ' ofertas'
-// yes
 restantes: (n: number) => `Quedan ${n} ofertas`
 ```
 
-`es/` is the source locale and the one served. `en/` exists and is filled.
+Spanish is es-419 with tuteo; English carries the same keys. Code, comments
+and commit messages are English.
 
 ## What the copy may not say
 
-The product's whole argument is that its claims are checkable, so a claim it
-cannot back costs more than it buys.
-
 | Never | Because |
 | --- | --- |
-| "zero-knowledge", "zero data stored" | Both are false. One row exists. |
-| "we can't see it" | We seal it. That is a different sentence. |
-| "secure" | It describes nothing. Name the property instead. |
-| "revoked", on its own | Disconnecting deletes *our* access. Riot's session lives until it expires, and people make security decisions on that word. |
-| "delivered", about an email | A server cannot observe an inbox. Report the status the provider returned and stop. |
+| "zero-knowledge", "zero data stored" | Both are false. |
+| "we can't see it" | We seal it; the deployment account holds the key. |
+| "secure" | Name the particular property instead. |
+| "revoked", alone | Deletion ends our access, not Riot's credential. |
+| "delivered", about an inbox | Report the provider's own status. |
 
-Say what the code does. If a sentence cannot be traced to a line, cut it.
+Trace every claim to the code. Retention, retries and background state count.
 
 ## The map
 
 ```
-src/                 the Worker
-  index.ts           fetch + scheduled, nothing else
-  router.ts          the route table
-  routes/            auth · store · collection · wishlist · alerts · account
+src/
+  router.ts           methods, origin checks, abuse gates, route table
+  routes/             auth, store, inventory, preferences, email, stop, hook
+  storage/            primary D1 SQL and atomic transactions
   vault/
-    upstream.ts      the egress allowlist          <- read this first
-    http.ts          the only fetch() in the repo
-    seal.ts          HKDF per uid + AES-256-GCM
-    jar.ts           cookie in, Set-Cookie out
-    session.ts       the only thing that persists
-    repo.ts          D1
-    riot/            auth qr storefront wallet loadout owned offers shard
-  alerts/
-    cron.ts          the daily job, with its circuit breaker
-    match.ts         wishlist ∩ storefront
-    otp.ts           six digits, ten minutes, five attempts
-    mail/            send · alert · code · layout
-  lib/               json errors time
-
-web/                 the browser app. TypeScript, bundled to public/app.js
-  main.ts            mount and route
-  i18n/              index · es/* · en/*
-  design/            tokens · weave · measure · shapes
-  components/        the four shapes, nav, chips, skeleton, states
-  screens/           one per artboard
-  data/              api · catalogue · cache
-
-public/              served as-is by [assets]
-  index.html  app.css  _headers  .well-known/
-  app.js             build artifact, gitignored
-  fonts/             fetched by `npm run fonts`, gitignored
-  art/               fetched by `npm run art`, gitignored
-
-design/              the spec: DESIGN.md, tokens.css, palette.json, boards.md
+    upstream.ts       egress allowlist; read this first
+    http.ts           only outbound fetch
+    keys.ts, seal.ts  keyed identifiers and purpose-bound encryption
+    session.ts        sealed session and atomic alert flag
+    qr.ts             generation-bound QR lifecycle via storage/scans.ts
+    cache.ts          encrypted public DTOs, D1 revocation before reads
+    alerts.ts         fair batches, circuit breaker, invocation budget
+  alerts/             OTP, send quotas, immutable outbox, bounded dispatch
+  lib/                bounded bodies and private JSON responses
+web/                  Preact, DOM, account generation, browser catalogue joins
+migrations/           versioned upgrades; schema.sql is the fresh equivalent
+test/                 unit, actual component fixtures, workerd + real D1
+public/               shell and self-hosted assets; app.js/css are build outputs
 ```
 
-Two directories divide the Worker: `src/vault/` is anything Riot-facing,
-everything else is not. A Riot hostname outside `src/vault/` fails the build.
-
-Module names are lowercase and single-word, no suffixes: `seal.ts`, not
-`sealService.ts`.
+Riot hostnames stay in `src/vault/`. Module names are lowercase and one word.
 
 ## Running it
 
 ```sh
 npm ci
-npm run fonts        # once — downloads the two faces into public/fonts/
-npm run art          # once — downloads the coins, tiers and sprays into public/art/
-npm run dev          # builds web/ then starts the Worker
-npm run check        # typecheck + lint + tests + build. What CI runs.
-npm run deploy       # builds and deploys THIS copy, wherever it is
-npm run deploy:live  # the same, pointed at valoox.store
-```
-
-### On a phone
-
-This is a phone app and it has to be looked at on one. `npm run phone` puts the
-dev server behind Tailscale:
-
-```sh
-npm run phone        # once; the config persists
+npm run fonts
+npm run art
 npm run dev
+npm run check
+npm run deploy
+npm run deploy:live
 ```
 
-Then open `https://<machine>.<tailnet>.ts.net` on the phone — `tailscale status`
-names it. `npm run phone:off` takes it down.
+Deploy scripts apply versioned D1 migrations before the Worker. Use the live
+environment deliberately. Production secrets never belong in tracked files,
+command arguments or logs. Resend's Worker key has sending access for the
+verified sending domain, not administration access.
 
-It has to be HTTPS, which is the whole reason this is not just `--ip 0.0.0.0`:
-the `uid` cookie is `Secure`, so over plain http on a tailnet address the
-browser never stores it and sign-in silently never completes. Tailscale serves a
-real certificate for the MagicDNS name, so the cookie behaves exactly as it will
-in production.
+For a phone, use `npm run phone` and `npm run dev`. Tailscale serves HTTPS
+while Wrangler stays on 127.0.0.1. **Never Tailscale Funnel.** Do not run
+storage tests while the dev Worker is using the same local database.
 
-Nothing is exposed beyond the tailnet. `wrangler dev` stays bound to 127.0.0.1
-and the proxy runs on the same machine. **Never `tailscale funnel`** — that is
-the public internet, pointed at a dev server holding a real Riot session.
-
-The kill switch, which makes every stored session undecryptable and signs
-everybody out:
-
-```sh
-npx wrangler secret put JAR_KEY
-```
+The live kill switch is `npx wrangler secret put JAR_KEY --env live`.
 
 ## Commits
 
-Conventional prefixes, lowercase subject, written as a claim rather than a label
-("make the checks pass what CI actually runs", not "fix CI"). Bodies are long
-where the change deserves it: what was measured, what was rejected, and why.
+Conventional prefixes, lowercase subjects written as claims. Explain material
+behavior changes, measured evidence and tradeoffs in the body.
 
-Author is `NicolasV7 <159790870+NicolasV7@users.noreply.github.com>`. **Never add
-an AI co-author trailer.**
+Author: `NicolasV7 <159790870+NicolasV7@users.noreply.github.com>`.
+**Never add an AI co-author trailer.**
 
-`git checkout legacy-operator-terminal` is the app as it stood before the rewrite
-from the artboards.
+`git checkout legacy-operator-terminal` is the app before the artboard rewrite.

@@ -17,6 +17,7 @@
 // them quickly.
 
 import type { Env } from '../types.ts';
+import type { Budget } from './budget.ts';
 import { rf } from './http.ts';
 
 const API = 'https://api.resend.com/emails';
@@ -119,6 +120,7 @@ export async function send(
   subject: string,
   html: string,
   text: string,
+  options: { id?: string; budget?: Budget } = {},
 ): Promise<Sent> {
   if (!env.RESEND_KEY || !env.MAIL_FROM) {
     // Not configured is not the address's fault, and saying "refused" would
@@ -133,8 +135,17 @@ export async function send(
       headers: {
         Authorization: 'Bearer ' + env.RESEND_KEY,
         'Content-Type': 'application/json',
+        ...(options.id ? { 'Idempotency-Key': options.id } : {}),
       },
-      body: JSON.stringify({ from: env.MAIL_FROM, to: [to], subject, html, text }),
+      body: JSON.stringify({
+        from: env.MAIL_FROM,
+        to: [to],
+        subject,
+        html,
+        text,
+        ...(options.id ? { tags: [{ name: 'valoox_message', value: options.id }] } : {}),
+      }),
+      budget: options.budget,
       signal: AbortSignal.timeout(TIMEOUT),
     });
   } catch {

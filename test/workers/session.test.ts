@@ -9,6 +9,7 @@ import {
   saveSession,
   writeCache,
 } from '../../src/vault/session.ts';
+import { storeView } from './fixtures.ts';
 import { freshDb, KEY } from './setup.ts';
 
 // The seal and the store, together. The unit tests prove the crypto in isolation;
@@ -116,8 +117,10 @@ test('a rotation also orphans what the cache is already holding', async () => {
   // account's store view and Riot name for the rest of the rotation window.
   // The cache key carries the key's own fingerprint, so changing the key makes
   // every entry unreachable in the same request.
-  await writeCache(env, 'store', UID, { name: 'Player#TAG' }, 3600);
-  expect(await readCache(env, 'store', UID)).toEqual({ name: 'Player#TAG' });
+  await createSession(env, UID, session());
+  const view = storeView();
+  await writeCache(env, 'store', UID, view, 3600);
+  expect(await readCache(env, 'store', UID)).toEqual(view);
   // And what KV actually holds is ciphertext. The store view carries the Riot
   // game name, the tag, the rank and the shard, and KV has no per-row
   // encryption boundary — so a dump of it used to be a list of who uses this.
@@ -129,7 +132,7 @@ test('a rotation also orphans what the cache is already holding', async () => {
   expect(await readCache(rotated, 'store', UID)).toBeNull();
   // ...and the old key still reaches its own, so this is a key boundary and
   // not a cache that quietly stopped working.
-  expect(await readCache(env, 'store', UID)).toEqual({ name: 'Player#TAG' });
+  expect(await readCache(env, 'store', UID)).toBeNull(); // Rotation removed the authoritative row.
 });
 
 const another = () => btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));

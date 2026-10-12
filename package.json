@@ -14,7 +14,7 @@
     "watch": "node scripts/build.mjs --watch",
     "fonts": "node scripts/fonts.mjs",
     "art": "node scripts/art.mjs",
-    "deploy": "npm run fonts && npm run art && npm run build && wrangler d1 execute DB --remote --file=./schema.sql -y && wrangler deploy",
+    "deploy": "npm run fonts && npm run art && npm run build && npm run migrate && wrangler deploy",
     "test": "vitest run",
     "typecheck": "wrangler types && tsc --noEmit && tsc --noEmit -p web/tsconfig.json",
     "lint": "biome check .",
@@ -24,16 +24,18 @@
     "grid": "node scripts/grid.mjs",
     "copy": "node scripts/copy.mjs",
     "who": "node scripts/who.mjs",
-    "deploy:live": "npm run fonts && npm run art && npm run build && wrangler d1 execute DB --env live --remote --file=./schema.sql -y && wrangler deploy --env live"
+    "deploy:live": "npm run fonts && npm run art && npm run build && npm run migrate:live && wrangler deploy --env live",
+    "migrate": "node scripts/migrate.mjs",
+    "migrate:live": "node scripts/migrate.mjs --live"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
-    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@cloudflare/vitest-pool-workers": "^0.23.0",
     "@types/node": "^26.6.4",
     "esbuild": "^0.28.2",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11",
-    "wrangler": "^4.148.0"
+    "wrangler": "^4.149.0"
   },
   "dependencies": {
     "preact": "^11.0.0",
@@ -48,10 +50,10 @@
     ],
     "bindings": {
       "DB": {
-        "description": "One row per signed-in browser, holding that browser’s sealed Riot session. The schema is applied on deploy."
+        "description": "Sealed sessions and QR scans, atomic verification, revocation and alert delivery state. Versioned migrations run before deploy."
       },
       "VAL": {
-        "description": "Caches: the Riot client version, each account’s storefront for the life of a rotation, and the daily job’s circuit breaker."
+        "description": "Encrypted store and inventory views, and the public Riot client version."
       },
       "JAR_KEY": {
         "description": "32 random bytes, base64. Every session is sealed under a key derived from this one. Rotating it signs everybody out immediately."
@@ -64,7 +66,14 @@
       },
       "MAIL_FROM": {
         "description": "Who the mail comes from. Must be an address on a domain verified in Resend."
+      },
+      "EDGE": {
+        "description": "Coarse abuse protection before application work; D1 enforces atomic security limits."
       }
     }
+  },
+  "overrides": {
+    "sharp": "^0.35.5",
+    "undici": "^7.29.1"
   }
 }
