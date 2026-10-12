@@ -5,6 +5,8 @@ Only these areas change visually. Both use dark mode, Bricolage Grotesque,
 Azeret Mono for numbers, the existing type scale, and the shared 107° stage.
 Artwork colour is measured by the existing algorithm and set through CSSOM.
 No additional fonts, scripts, icon libraries or outbound hosts are introduced.
+The later visual revision restores the original compact Alerts rows and the
+Buy Me a Coffee button's own yellow, while keeping the surrounding design.
 
 ## Alerts
 

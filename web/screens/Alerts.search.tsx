@@ -135,7 +135,7 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
       {all && <p class="flow__note">{s.sellsCount(found.length)}</p>}
 
       {found.length > 0 && (
-        <div class="flow__list">
+        <div class="watch__list">
           {found.slice(0, shown).map((f) => (
             <Watch
               key={f.id}

@@ -11,7 +11,7 @@
 .flow__coffee > div { min-width: 0; flex: 1; }
 .flow__coffee h2 { margin: 6px 0 8px; }
 .flow__coffee img { flex: 0 0 72px; width: 72px; height: 92px; object-fit: contain; }
-.flow__coffee .btn { font-size: var(--t-small); }
+.flow__coffee .btn { background: rgb(var(--art)); color: var(--ink-inverse); font-size: var(--t-small); }
 .flow__build { margin-top: 26px; }
 .flow__build > summary, .flow__detail > summary { min-height: 62px; cursor: pointer; padding: 16px 0; font-weight: 500; }
 .flow__build > summary { color: var(--ink-3); font-size: var(--t-small); }

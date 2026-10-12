@@ -34,11 +34,11 @@ export function AlertsLoading({ step = 'list' }: { step?: 'list' | 'channel' | '
           <div class="flow__band">
             <h2>{s.weapons}</h2>
           </div>
-          <div class="flow__pending flow__pending--hero" aria-hidden="true" />
+          <div class="flow__pending flow__pending--row" aria-hidden="true" />
           <div class="flow__band">
             <h2>{s.accessories}</h2>
           </div>
-          <div class="flow__pending flow__pending--square" aria-hidden="true" />
+          <div class="flow__pending flow__pending--row" aria-hidden="true" />
         </>
       ) : (
         <div class="flow__pending flow__pending--surface" aria-hidden="true" />

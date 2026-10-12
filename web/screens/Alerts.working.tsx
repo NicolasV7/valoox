@@ -58,7 +58,7 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
         max={GUNS}
       />
       {guns.length ? (
-        <div class="flow__list">
+        <div class="watch__list">
           {guns.map((w) => (
             <Watch
               key={w.id}
@@ -81,7 +81,7 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
         max={BITS}
       />
       {bits.length ? (
-        <div class="flow__list">
+        <div class="watch__list">
           {bits.map((w) => (
             <Watch
               key={w.id}

@@ -8,7 +8,6 @@
 // the life of the page. The weave behind it is measured off that picture, so a
 // row is the colour of the thing on it.
 
-import { CARDS, TITLES } from '../data/findable.ts';
 import type { Star as Saved } from '../data/stars.ts';
 import { usePiece } from '../data/usePiece.ts';
 import { artStyle, useArt } from '../design/useArt.ts';
@@ -71,50 +70,25 @@ export function Watch({
   const icon = piece?.tall ?? piece?.icon ?? null;
   const art = useArt(icon);
   const gun = type === LEVELS;
-  const text = bare || type === TITLES;
-  const common = t().common;
-  const kind = gun
-    ? common.kind.skin
-    : type === CARDS
-      ? common.kind.card
-      : t().alerts.kinds[
-          type === 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475'
-            ? 'spray'
-            : type === 'dd3bf334-87f3-40bd-b043-682a57a8dc3a'
-              ? 'buddy'
-              : 'title'
-        ];
-  const tier = item.tier?.toLowerCase();
-  const word = tier && tier in common.tier ? common.tier[tier as keyof typeof common.tier] : kind;
 
   const name = OPENS[type];
   const to = name ? ({ name, id: item.id } as Route) : null;
 
   return (
-    <div
-      class={
-        'watch stage ' +
-        (text ? 'watch--bare' : gun ? 'watch--gun' : type === CARDS ? 'watch--card' : 'watch--bit')
-      }
-      style={artStyle(art)}
-    >
+    <div class={'watch stage stage--row' + (bare ? ' watch--bare' : '')} style={artStyle(art)}>
       {to && (
         <a class="hit" href={href(to)} onClick={intercept(to, from)}>
           <span class="sr">{item.name}</span>
         </a>
       )}
-      {!text &&
+      {!bare &&
         (icon ? (
           <img class={gun ? 'watch__art' : 'watch__art watch__art--square'} src={icon} alt="" />
         ) : (
           <span class="watch__art" />
         ))}
       <span class="watch__id">
-        <span class="watch__kind label">{word}</span>
         <span class="watch__name">{item.name}</span>
-        {gun && !!item.levels && !!item.chromas && (
-          <span class="watch__meta">{t().flows.skinDetails(item.levels, item.chromas)}</span>
-        )}
         {note && <span class="watch__note num">{note}</span>}
       </span>
       <button
