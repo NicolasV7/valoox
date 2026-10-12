@@ -2,6 +2,7 @@ import * as codes from '../storage/codes.ts';
 import { now } from '../storage/rows.ts';
 import type { Env } from '../types.ts';
 import { fingerprint } from '../vault/keys.ts';
+import { refused } from '../vault/mail.ts';
 import { prepared, readSession } from '../vault/session.ts';
 
 export const LIFE = { minutes: 10, tries: 5, cooldown: 60 };
@@ -39,6 +40,7 @@ export async function check(env: Env, uid: string, to: string, code: string): Pr
     const held = await readSession(env, uid);
     const mail = held?.session.mail;
     if (!held || !mail?.gen || mail.to !== to) return 'gone';
+    if (refused(mail.said)) return 'gone';
     const claim = crypto.randomUUID();
     held.session.mail = { ...mail, ok: true };
     const verified = await prepared(env, uid, held.session, held.ver, {

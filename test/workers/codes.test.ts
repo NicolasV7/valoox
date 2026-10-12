@@ -93,3 +93,14 @@ test('expired codes have no pending state and never verify', async () => {
   expect(await otp.pending(env, UID)).toBeNull();
   expect(await otp.check(env, UID, TO, code)).toBe('gone');
 });
+
+test('an old code cannot undo a provider rejection for its current generation', async () => {
+  const code = await issue();
+  const held = await readSession(env, UID);
+  if (!held?.session.mail) throw new Error('fixture');
+  held.session.mail.said = 'email.bounced';
+  await saveSession(env, UID, held.session, held.ver);
+  expect(await otp.check(env, UID, TO, code)).toBe('gone');
+  expect((await readSession(env, UID))?.session.mail?.ok).toBe(false);
+  expect(await repo.listAlerting(env)).toEqual([]);
+});

@@ -96,10 +96,10 @@ export const account = {
   keepListWhy:
     'Ids and the names you saw when you starred them, plus the tier, the levels ' +
     'and the measured colour. It lives inside the same sealed row.',
-  keepMail: 'Your email, once proved',
+  keepMail: 'Your email and its verification',
   keepMailWhy:
-    'The address, a flag saying a code came back from it, and the language and ' +
-    'time zone of the tab that set it. It goes with the jar when you disconnect.',
+    'The address you entered, whether you confirmed the code, and the tab’s ' +
+    'language and time zone. It lives inside your encrypted session.',
 
   noPassword: 'Your password',
   noPasswordWhy: 'Never typed here. There is no field for it anywhere in the app.',

@@ -96,10 +96,10 @@ export const account = {
   keepListWhy:
     'Ids y los nombres que viste al marcarlos, más el tier, los niveles y el ' +
     'color medido. Vive dentro de la misma fila sellada.',
-  keepMail: 'Tu correo, una vez probado',
+  keepMail: 'Tu correo y su verificación',
   keepMailWhy:
-    'La dirección, la marca de que un código volvió desde ella, el idioma y la ' +
-    'zona horaria de la pestaña que la puso. Se va con el frasco al desconectar.',
+    'La dirección que escribiste, si confirmaste el código, el idioma y la zona ' +
+    'horaria de la pestaña. Vive dentro de tu sesión cifrada.',
 
   noPassword: 'Tu contraseña',
   noPasswordWhy: 'Nunca se escribe aquí. No hay campo para eso en ninguna pantalla.',
