@@ -5,7 +5,7 @@
 Your VALORANT daily store and collection, on your phone, without opening the
 game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
 
-**[Open the app](https://drop.valoox.store)** · [Architecture](docs/architecture.html)
+**[Open the app](https://drop.valoox.store)** · [Architecture](#architecture)
 · [Security and limitations](SECURITY.md) · [Design](DESIGN.md)
 
 ## Features
@@ -26,6 +26,38 @@ Catalogue data, item artwork and clips use narrowly allowed external hosts.
 
 English is the source and fallback language. A Spanish browser preference selects
 the Spanish translation, including emails requested from that tab.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  B["Browser<br/>Preact + host-only cookie"]
+  C["Community catalogue<br/>valorant-api.com"]
+  R["Riot<br/>QR sign-in + account reads"]
+  N["Resend + Discord<br/>Email + webhook alerts"]
+
+  subgraph CF["Cloudflare"]
+    W["Worker<br/>API + scheduled jobs"]
+    D[("D1<br/>Encrypted sessions + atomic state")]
+    K[("KV<br/>Encrypted views")]
+    A["Egress allowlist<br/>19 rules"]
+    T["Cron<br/>Every 15 minutes"]
+  end
+
+  B -->|Same-origin API| W
+  B -->|Client-side catalogue joins| C
+  W -->|Session checks + state| D
+  W -->|Private cached views| K
+  T -->|Alert batches| W
+  W -->|All outbound requests| A
+  A -->|Authentication + reads| R
+  A -->|Notifications| N
+```
+
+D1 authorizes private cache reads. Sessions and views are encrypted by the Worker
+with purpose-bound keys derived from `JAR_KEY`, which stays outside the databases.
+[Open the interactive architecture](docs/architecture.html) for source links
+and the detailed session flow.
 
 ## Local development
 
