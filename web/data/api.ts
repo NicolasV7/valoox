@@ -8,6 +8,7 @@
 // written for a log — `storefront 403`, `sealed blob did not open` — and
 // rendering it would put a stack trace in front of somebody checking a shop.
 
+import * as privateState from './private.ts';
 import type { Fault, Inventory, Prefs, Scan, StoreView } from './types.ts';
 
 export class ApiError extends Error {
@@ -37,9 +38,10 @@ export type Reseed = typeof NEEDS_RESEED | typeof EXPIRED;
 export const reseeded = (v: unknown): v is Reseed => v === NEEDS_RESEED || v === EXPIRED;
 
 async function call<T>(path: string, init?: RequestInit): Promise<T | Reseed> {
+  const generation = privateState.epoch();
   let res: Response;
   try {
-    res = await fetch(path, { ...init, credentials: 'same-origin' });
+    res = await fetch(path, { ...init, signal: privateState.signal(), credentials: 'same-origin' });
   } catch {
     // Offline, or the request never left. Not Riot's doing and not ours.
     throw new ApiError('us', 0);
@@ -47,7 +49,11 @@ async function call<T>(path: string, init?: RequestInit): Promise<T | Reseed> {
   if (!res.ok) throw new ApiError(faultFor(res.status), res.status);
 
   const body = (await res.json()) as T & { needsReseed?: boolean; expired?: boolean };
-  if (body?.needsReseed) return body.expired ? EXPIRED : NEEDS_RESEED;
+  if (!privateState.current(generation)) throw new ApiError('us', 0);
+  if (body?.needsReseed) {
+    privateState.reset(body.expired ? 'expired' : 'out');
+    return body.expired ? EXPIRED : NEEDS_RESEED;
+  }
   return body;
 }
 
@@ -65,9 +71,17 @@ export const prefs = () => call<Prefs>('/api/prefs');
 export const startScan = () => call<Scan>('/api/qr', { method: 'POST' });
 
 /** Polls it. `waiting` until the phone approves, then `ok`. */
-export const pollScan = () => call<Scan>('/api/qr');
+export const pollScan = async () => {
+  const scan = await call<Scan>('/api/qr');
+  if (!reseeded(scan) && scan.status === 'ok') privateState.reset('login');
+  return scan;
+};
 
-export const logout = () => call<{ ok: true }>('/api/logout', { method: 'POST' });
+export const logout = async () => {
+  const answer = await call<{ ok: boolean }>('/api/logout', { method: 'POST' });
+  if (!reseeded(answer) && answer.ok) privateState.reset('logout');
+  return answer;
+};
 
 /** A POST with a JSON body, for the few routes that take one. Returns the
  *  Worker's own answer — including its `error` field, which on these routes is

@@ -11,8 +11,10 @@
 // a field that outlives the page is a field you did not ask to come back.
 
 import { useState } from 'preact/hooks';
+import { listen } from './private.ts';
 
 const kept = new Map<string, string>();
+listen(() => kept.clear());
 
 /** A text field whose value outlives the screen. The key names the screen, so
  *  two weapons do not share one. */

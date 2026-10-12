@@ -13,6 +13,7 @@
 import { useCallback } from 'preact/hooks';
 import * as api from './api.ts';
 import { held, tell, usePrefs } from './channel.ts';
+import { current, epoch } from './private.ts';
 import type { Prefs } from './types.ts';
 
 /** Riot's own item type for a skin level. A row saved before the app kept the
@@ -63,6 +64,7 @@ export interface Star {
 }
 
 const write = async (next: Star[]): Promise<void> => {
+  const generation = epoch();
   const was = held();
   // Show it, then say it. A failure puts the old list back rather than leaving
   // a star that looks saved and is not.
@@ -70,6 +72,7 @@ const write = async (next: Star[]): Promise<void> => {
   const got = await api
     .post<Prefs>('/api/prefs', { wishlist: next, notify: { discord: was?.discord ?? '' } })
     .catch(() => null);
+  if (!current(generation)) return;
   if (got && typeof got === 'object' && 'wishlist' in got) tell(got as Prefs);
   else if (was) tell(was);
 };

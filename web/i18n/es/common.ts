@@ -48,7 +48,7 @@ export const common = {
     expiredWhy:
       'Aquí no pasó nada malo. Riot termina una sesión pasado un tiempo, y al ' +
       'instante tras un cambio de contraseña o un cierre en todos lados. Escanea ' +
-      'otra vez y vuelve todo.',
+      'otra vez para abrir una sesión nueva.',
     riot: 'Riot no contestó',
     riotWhy: 'Puede ser mantenimiento, o unos minutos lentos. Lo que guardamos sigue intacto.',
     us: 'Algo se rompió de este lado',

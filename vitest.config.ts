@@ -13,7 +13,7 @@ export default defineConfig({
   test: {
     projects: [
       {
-        test: { name: 'unit', include: ['test/unit/**/*.test.ts'], environment: 'node' },
+        test: { name: 'unit', include: ['test/unit/**/*.test.{ts,mjs}'], environment: 'node' },
       },
       {
         plugins: [

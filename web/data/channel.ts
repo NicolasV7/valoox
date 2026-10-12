@@ -9,6 +9,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { locale } from '../i18n/index.ts';
 import * as api from './api.ts';
 import { reseeded } from './api.ts';
+import { current, epoch, listen } from './private.ts';
 import type { Prefs } from './types.ts';
 
 let kept: Prefs | null = null;
@@ -27,13 +28,20 @@ export function tell(next: Prefs | null) {
 /** Ask again, now. Called after anything that changes the address or proves
  *  it, where the answer is the point and a cached one is wrong. */
 export async function reload(): Promise<void> {
+  const generation = epoch();
   const got = await api.prefs().catch(() => null);
+  if (!current(generation)) return;
   last = Date.now();
   if (got && !reseeded(got)) tell(got);
 }
 
 let flight: Promise<void> | null = null;
 let last = 0;
+listen(() => {
+  flight = null;
+  last = 0;
+  tell(null);
+});
 
 /**
  * Ask again, but only if nobody just did.
@@ -47,9 +55,10 @@ let last = 0;
  */
 function freshen(): void {
   if (flight || Date.now() - last < 2000) return;
-  flight = reload().finally(() => {
-    flight = null;
+  const active = reload().finally(() => {
+    if (flight === active) flight = null;
   });
+  flight = active;
 }
 
 export function usePrefs(): Prefs | null {

@@ -107,18 +107,20 @@ export const account = {
   noLogWhy:
     'El registro de peticiones está apagado. La ruta de la tienda lleva tu id de ' +
     'cuenta, así que registrarla sería registrarte.',
-  noReach: 'Una forma de alcanzarte después de desconectar',
+  noReach: 'El acceso de este navegador después de desconectar',
   noReachWhy:
-    'El frasco y la dirección se van juntos, y la fila entera con ellos. No queda ' +
-    'nada que pueda tocar tu cuenta ni con qué escribirte.',
+    'Se borra la sesión de este navegador. Las tareas dejan de usar sus cachés y ' +
+    'mensajes pendientes, aunque las copias cifradas caducan más tarde. Si conectaste ' +
+    'otro navegador, su sesión sigue activa.',
 
   twoLocks:
     'Dos cerraduras, no una: la base guarda texto cifrado y la clave se guarda en ' +
     'otro lado. Rotar esa clave retira todos los frascos a la vez.',
   alsoKv:
-    'Fuera de esa fila, lo que caduca solo: tienda e inventario en caché; el hash ' +
-    'de un código de seis dígitos, diez minutos; un id de mensaje de este ' +
-    'navegador, una semana.',
+    'También guardamos cachés cifradas, QR pendientes por diez minutos, pruebas de ' +
+    'correo por diez minutos y registros de mensajes por una semana. Hay límites ' +
+    'de envío, enlaces de baja con vencimiento y una cola cifrada de avisos. Las ' +
+    'copias de recuperación de la base pueden conservar datos borrados durante siete días.',
 
   // --- irse ----------------------------------------------------------------
   leaveTitle: 'Desconectar este navegador',
@@ -140,6 +142,7 @@ export const account = {
     'La lista se va con la fila porque vive adentro de ella. No hay una segunda ' +
     'tabla con tu id de Riot.',
   cancel: 'Cancelar',
+  leaveFailed: 'No pudimos confirmar la desconexión. Tu sesión sigue visible aquí. Reintenta.',
   noDialog: 'No hay diálogo de confirmación encima: esta pantalla es la confirmación.',
 
   // --- riot dijo que no ----------------------------------------------------

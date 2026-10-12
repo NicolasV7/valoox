@@ -39,7 +39,7 @@ front of you."* It states a limit, it is checkable, and it has no adjectives.
   the session" and "Riot changed something" are different screens.
 - No exclamation marks. No "oops". No "we're sorry for the inconvenience".
 
-Spanish is rioplatense second person — *tenés*, *marcá*, *pegala*. English is the
+Spanish is es-419 with tuteo — *tienes*, *marca*, *pégala*. English is the
 canvas copy, already written on the artboards; lift it rather than re-inventing.
 
 ## Where strings live

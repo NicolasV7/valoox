@@ -12,6 +12,7 @@ import { Tabs } from './components/Tabs.tsx';
 import type { ApiError } from './data/api.ts';
 import * as api from './data/api.ts';
 import { EXPIRED, reseeded } from './data/api.ts';
+import * as privateState from './data/private.ts';
 import type { Fault, Inventory, StoreView } from './data/types.ts';
 import { useRoute, wasAt } from './route.ts';
 import { Screen } from './screen.tsx';
@@ -44,16 +45,27 @@ export function App() {
   // for the life of the page. The store does not wait on it and it does not
   // wait on the store.
   const [inv, setInv] = useState<Inventory | null>(null);
+  useEffect(
+    () =>
+      privateState.listen((reason) => {
+        setInv(null);
+        setState({ at: 'out', gone: reason === 'expired' });
+      }),
+    [],
+  );
 
   const load = useCallback(async () => {
+    const generation = privateState.epoch();
     setState({ at: 'loading' });
     try {
       const view = await api.store();
+      if (!privateState.current(generation)) return;
       // Two kinds of nothing: never scanned, and a session Riot has just
       // retired. The second is a screen of its own — see Account.gone.tsx.
       if (reseeded(view)) return setState({ at: 'out', gone: view === EXPIRED });
       setState({ at: 'in', view });
     } catch (e) {
+      if (!privateState.current(generation)) return;
       const err = e as ApiError;
       setState({ at: 'fail', fault: err.fault ?? 'us', status: err.status ?? 0 });
     }
@@ -67,14 +79,19 @@ export function App() {
   // has to be remembered — see route.ts.
   const wants = needsOwned(route);
   useEffect(() => {
-    if (!wants || inv) return;
+    if (!wants || inv || state.at !== 'in') return;
+    const generation = privateState.epoch();
+    let active = true;
     void api
       .inventory()
       .then((got) => {
-        if (!reseeded(got)) setInv(got);
+        if (active && privateState.current(generation) && !reseeded(got)) setInv(got);
       })
       .catch(() => undefined);
-  }, [wants, inv]);
+    return () => {
+      active = false;
+    };
+  }, [wants, inv, state.at]);
 
   const scan = useScan(load);
 

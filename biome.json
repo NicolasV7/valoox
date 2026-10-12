@@ -6,6 +6,7 @@
       "web/**/*.ts",
       "web/**/*.tsx",
       "test/**/*.ts",
+      "test/**/*.mjs",
       "scripts/**/*.mjs",
       "scripts/**/*.ts",
       "design/**/*.css",

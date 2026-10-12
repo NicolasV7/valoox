@@ -46,7 +46,7 @@ export const common = {
     expiredWhy:
       'Nothing went wrong here. Riot ends a session after a while — at once ' +
       'after a password change or a sign-out-everywhere. Scan again and ' +
-      'everything is back.',
+      'open a new session.',
     riot: 'Riot did not answer',
     riotWhy: 'Maintenance, or a slow few minutes. What we hold is untouched.',
     us: 'Something broke on our side',

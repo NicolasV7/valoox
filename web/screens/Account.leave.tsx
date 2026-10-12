@@ -23,6 +23,7 @@ const ACCOUNT: Route = { name: 'account' };
 export function AccountLeave({ onGone }: { onGone: () => void }) {
   const s = t().account;
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   return (
     <main class="screen deck">
@@ -61,16 +62,26 @@ export function AccountLeave({ onGone }: { onGone: () => void }) {
         </button>
       </div>
       <p class="legal deck__note">{s.noDialog}</p>
+      {failed && (
+        <p class="legal deck__note" role="alert">
+          {s.leaveFailed}
+        </p>
+      )}
     </main>
   );
 
   async function leave() {
     setBusy(true);
-    await api.logout().catch(() => null);
-    // Everything on screen is about a row that no longer exists, so the app
-    // goes back to the one question it starts from rather than redrawing a
-    // tab over a session that is gone.
-    onGone();
+    setFailed(false);
+    try {
+      const result = await api.logout();
+      if (api.reseeded(result) || !result.ok) throw new Error('logout');
+      onGone();
+    } catch {
+      setFailed(true);
+    } finally {
+      setBusy(false);
+    }
   }
 }
 

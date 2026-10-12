@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import * as api from './data/api.ts';
 import { reseeded } from './data/api.ts';
+import { listen } from './data/private.ts';
 import { POLL_EVERY, type ScanState } from './screens/Scan.tsx';
 
 /**
@@ -35,6 +36,8 @@ export function useScan(onApproved: () => Promise<void>) {
   const warm = useRef<Promise<string | null> | null>(null);
   /** The code that is on screen, so both endings can keep showing it. */
   const shown = useRef<string | undefined>(undefined);
+  const asking = useRef(false);
+  const run = useRef(0);
 
   const stop = useCallback(() => {
     clearInterval(timer.current);
@@ -60,11 +63,13 @@ export function useScan(onApproved: () => Promise<void>) {
 
   const start = useCallback(async () => {
     stop();
+    const generation = ++run.current;
     clearTimeout(held.current);
     setState({ phase: 'starting' });
 
     prefetch();
     const url = await warm.current;
+    if (generation !== run.current) return;
     warm.current = null;
     if (!url) {
       setState({ phase: 'expired', url: shown.current });
@@ -74,7 +79,15 @@ export function useScan(onApproved: () => Promise<void>) {
     setState({ phase: 'ready', url });
 
     const ask = async () => {
-      const seen = await api.pollScan().catch(() => null);
+      if (asking.current || generation !== run.current) return;
+      asking.current = true;
+      const seen = await api
+        .pollScan()
+        .catch(() => null)
+        .finally(() => {
+          asking.current = false;
+        });
+      if (generation !== run.current) return;
       if (!seen || reseeded(seen)) return;
       if (seen.status === 'expired') {
         stop();
@@ -87,7 +100,9 @@ export function useScan(onApproved: () => Promise<void>) {
         // what makes it readable. load() catches its own failures, so a Riot
         // that never answers still lets go of the screen.
         await onApproved();
-        held.current = setTimeout(() => setState(null), LINGER) as unknown as number;
+        held.current = setTimeout(() => {
+          if (generation === run.current) setState(null);
+        }, LINGER) as unknown as number;
       }
     };
 
@@ -101,6 +116,20 @@ export function useScan(onApproved: () => Promise<void>) {
     };
     document.addEventListener('visibilitychange', awake.current);
   }, [onApproved, prefetch, stop]);
+
+  useEffect(
+    () =>
+      listen((reason) => {
+        if (reason === 'login') return;
+        run.current++;
+        stop();
+        clearTimeout(held.current);
+        warm.current = null;
+        shown.current = undefined;
+        setState(null);
+      }),
+    [stop],
+  );
 
   // A code left polling after the screen is gone is a request every two seconds
   // for as long as the tab lives.

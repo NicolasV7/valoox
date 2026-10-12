@@ -1,0 +1,108 @@
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { runInNewContext } from 'node:vm';
+import { build } from 'esbuild';
+import { host } from './hooks.mjs';
+
+export async function fixture(entry, actor) {
+  const root = process.cwd();
+  const hooks = host();
+  const mocks = {
+    'web/route.ts':
+      "export const useRoute=()=>({name:'collection',tab:'weapons'}); export const wasAt=()=>0; export const go=()=>{};",
+    'web/sign-in.ts':
+      'export const useScan=(fn)=>{ globalThis.approve=fn; return {state:null,start:()=>{},prefetch:()=>{}}; };',
+    'web/i18n/index.ts':
+      'export const locale=()=>"en"; export const t=()=>({account:new Proxy({}, {get:(_,key)=>String(key)}), common:{loading:"loading"}});',
+  };
+  const ui = [
+    'web/screen.tsx',
+    'web/components/Tabs.tsx',
+    'web/components/Back.tsx',
+    'web/screens/Account.gone.tsx',
+    'web/screens/Fail.tsx',
+    'web/screens/Gate.tsx',
+    'web/screens/Scan.tsx',
+    'web/screens/Stopped.tsx',
+    'web/screens/Store.loading.tsx',
+  ];
+  for (const path of ui) {
+    const name = path.split('/').pop().split('.')[0];
+    const exported = path.endsWith('Account.gone.tsx')
+      ? 'AccountGone'
+      : path.endsWith('Store.loading.tsx')
+        ? 'StoreLoading'
+        : name === 'screen'
+          ? 'Screen'
+          : name;
+    mocks[path] = 'export function ' + exported + '(){return null;}';
+  }
+  const result = await build({
+    stdin: { contents: entry, resolveDir: root, loader: 'ts' },
+    bundle: true,
+    write: false,
+    platform: 'node',
+    format: 'cjs',
+    target: 'node24',
+    jsx: 'automatic',
+    jsxImportSource: 'preact',
+    plugins: [
+      {
+        name: 'fixtures',
+        setup(builder) {
+          builder.onResolve({ filter: /^preact\/hooks$/ }, () => ({
+            path: 'hooks',
+            namespace: 'fixture',
+          }));
+          builder.onLoad({ filter: /.*/, namespace: 'fixture' }, () => ({
+            contents:
+              'export const {useState,useCallback,useEffect,useLayoutEffect}=globalThis.hooks;',
+          }));
+          builder.onLoad({ filter: /[\\/]web[\\/].*\.(ts|tsx)$/ }, async ({ path }) => {
+            const key = path.slice(root.length + 1).replace(/\\/g, '/');
+            return {
+              contents: mocks[key] ?? (await readFile(path, 'utf8')),
+              loader: path.endsWith('tsx') ? 'tsx' : 'ts',
+            };
+          });
+        },
+      },
+    ],
+    absWorkingDir: resolve(root),
+  });
+  const context = {
+    module: { exports: {} },
+    hooks: hooks.hooks,
+    actor,
+    AbortController,
+    setTimeout,
+    clearTimeout,
+    fetch: async (path) => {
+      if (path === '/api/logout' && actor.fail) throw new Error('fixture');
+      const value =
+        path === '/api/logout'
+          ? { ok: true }
+          : path === '/api/store'
+            ? actor.store
+            : path === '/api/inventory'
+              ? actor.inventory
+              : actor.prefs;
+      return { ok: true, json: async () => value };
+    },
+  };
+  runInNewContext(result.outputFiles[0].text, context);
+  const app = context.module.exports;
+  return {
+    app,
+    context,
+    render(fn) {
+      hooks.begin();
+      const tree = fn();
+      hooks.flush();
+      return tree;
+    },
+    async settle() {
+      for (let i = 0; i < 8; i++) await Promise.resolve();
+    },
+  };
+}

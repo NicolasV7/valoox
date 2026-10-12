@@ -107,18 +107,20 @@ export const account = {
   noLogWhy:
     'Request logging is off. The storefront path carries your account id, so ' +
     'logging it would be logging you.',
-  noReach: 'A way to reach you after you disconnect',
+  noReach: 'This browser’s access after disconnecting',
   noReachWhy:
-    'The jar and the address go together, and the whole row with them. Nothing ' +
-    'is left that can reach your account or write to you.',
+    'This browser’s session is deleted. Jobs stop using its caches and pending ' +
+    'messages, although encrypted copies expire later. If you connected another ' +
+    'browser, its session stays active.',
 
   twoLocks:
     'Two locks, not one: the database holds ciphertext and the key is held ' +
     'elsewhere. Rotating that key retires every stored jar at once.',
   alsoKv:
-    'Outside that row, what expires on its own: your store and inventory cached; ' +
-    'the hash of a six-digit code, ten minutes; a message id for this browser, ' +
-    'a week.',
+    'We also keep encrypted caches, pending QR scans for ten minutes, mail proofs ' +
+    'for ten minutes and message records for a week. There are sending limits, ' +
+    'expiring stop links and an encrypted alert queue. Database recovery copies ' +
+    'may retain deleted data for seven days.',
 
   // --- leaving -------------------------------------------------------------
   leaveTitle: 'Disconnect this browser',
@@ -139,6 +141,8 @@ export const account = {
     'The list goes with the row because it lives inside it. There is no second ' +
     'table keyed to your Riot id.',
   cancel: 'Cancel',
+  leaveFailed:
+    'We could not confirm the disconnect. Your session is still visible here. Try again.',
   noDialog: 'No confirmation dialog on top of this: this screen is the confirmation.',
 
   // --- riot said no --------------------------------------------------------
