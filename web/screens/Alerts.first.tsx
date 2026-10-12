@@ -1,11 +1,4 @@
-import {
-  FlowArt,
-  FlowBrand,
-  FlowHeading,
-  FlowRow,
-  FlowState,
-  FlowStep,
-} from '../components/Flow.tsx';
+import { FlowArt, FlowHeading, FlowRow, FlowState, FlowStep } from '../components/Flow.tsx';
 import type { Prefs } from '../data/types.ts';
 import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
@@ -26,7 +19,6 @@ export function AlertsFirst({
   const ok = mail?.ok === true;
   return (
     <main class="screen flow">
-      <FlowBrand />
       <FlowHeading eyebrow={f.startList} title={f.firstTitle} lead={f.firstLead} />
       <FlowArt art={FLOW.first}>
         <span class="label">{s.noneYet}</span>

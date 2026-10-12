@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
 import { spell, useLeft } from '../components/Countdown.tsx';
-import { FlowArt, FlowBrand, FlowHeading, FlowInfo } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading, FlowInfo } from '../components/Flow.tsx';
 import { useAction } from '../data/action.ts';
 import { reseeded } from '../data/api.ts';
 import { again, prove, refused, reload, usePrefs, useWatch } from '../data/channel.ts';
@@ -31,7 +31,6 @@ export function AlertsCode() {
   if (!prefs) return <AlertsLoading step="code" />;
   return (
     <main class="screen flow">
-      <FlowBrand />
       <Back to={{ name: 'alerts', step: 'channel' }} said={s.whereItGoes} />
       <FlowHeading
         eyebrow={f.finalStep}

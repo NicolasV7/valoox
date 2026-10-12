@@ -1,4 +1,4 @@
-import { FlowBrand, FlowHeading, FlowRow } from '../components/Flow.tsx';
+import { FlowHeading, FlowRow } from '../components/Flow.tsx';
 import { t } from '../i18n/index.ts';
 import { Privacy } from './Account.privacy.tsx';
 import { Profile } from './Account.profile.tsx';
@@ -7,7 +7,6 @@ export function AccountLoading() {
   const f = t().flows;
   return (
     <main class="screen flow" aria-busy="true">
-      <FlowBrand />
       <FlowHeading eyebrow={f.corner} title={t().account.title} />
       <Profile who={null} />
       <div class="flow__band">

@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
-import { FlowArt, FlowBrand, FlowHeading, FlowInfo, FlowState } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading, FlowInfo, FlowState } from '../components/Flow.tsx';
 import { useAction } from '../data/action.ts';
 import { post, reseeded } from '../data/api.ts';
 import { held, reload, usePrefs } from '../data/channel.ts';
@@ -24,7 +24,6 @@ export function AlertsRemove() {
   if (!to)
     return (
       <main class="screen flow">
-        <FlowBrand />
         <FlowHeading
           eyebrow={f.listWithYou}
           title={f.keptTitle}
@@ -47,7 +46,6 @@ export function AlertsRemove() {
     );
   return (
     <main class="screen flow">
-      <FlowBrand />
       <Back to={CHANNEL} said={f.emailLabel} />
       <FlowHeading eyebrow={f.quietInbox} title={f.stopTitle} lead={f.stopLead(to)} />
       <FlowArt art={FLOW.stop} />

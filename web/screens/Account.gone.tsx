@@ -1,4 +1,4 @@
-import { FlowArt, FlowBrand, FlowHeading, FlowInfo } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading, FlowInfo } from '../components/Flow.tsx';
 import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
 
@@ -16,7 +16,6 @@ export function AccountGone({
   const f = t().flows;
   return (
     <main class="screen flow">
-      <FlowBrand />
       <FlowHeading
         eyebrow={removed ? f.freshStart : s.itEnded}
         title={removed ? f.removedAccess : f.endedTitle}

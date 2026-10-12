@@ -15,7 +15,7 @@
 
 import { useMemo } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
-import { FlowBrand, FlowHeading, FlowRetry } from '../components/Flow.tsx';
+import { FlowHeading, FlowRetry } from '../components/Flow.tsx';
 import { Search } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
 import { Watch } from '../components/Watch.tsx';
@@ -97,7 +97,6 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
 
   return (
     <main class="screen flow">
-      <FlowBrand />
       <Back to={ALERTS} said={t().common.nav.alerts} />
       <FlowHeading eyebrow={f.onRadar} title={s.addSomethingTitle} lead={f.searchLead} />
 

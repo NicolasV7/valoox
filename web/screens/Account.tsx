@@ -1,4 +1,4 @@
-import { FlowBrand, FlowHeading, FlowRetry, FlowRow, FlowState } from '../components/Flow.tsx';
+import { FlowHeading, FlowRetry, FlowRow, FlowState } from '../components/Flow.tsx';
 import { Chevron } from '../components/icons.tsx';
 import { refused, reload, usePrefs, usePrefsError } from '../data/channel.ts';
 import { LEVELS } from '../data/findable.ts';
@@ -30,7 +30,6 @@ export function Account({ who }: { who: Who }) {
   const guns = all.filter((w) => (w.type ?? LEVELS) === LEVELS).length;
   return (
     <main class="screen flow">
-      <FlowBrand />
       <FlowHeading eyebrow={f.corner} title={s.title} />
       <Profile key={who.card ?? ''} who={who} />
       <div class="flow__band">

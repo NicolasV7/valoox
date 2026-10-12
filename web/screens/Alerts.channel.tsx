@@ -1,7 +1,7 @@
 import { useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
 import { useLeft } from '../components/Countdown.tsx';
-import { FlowArt, FlowBrand, FlowHeading, FlowInfo, FlowState } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading, FlowInfo, FlowState } from '../components/Flow.tsx';
 import { useAction } from '../data/action.ts';
 import { reseeded } from '../data/api.ts';
 import { again, open, refused, reload, usePrefs, waiting } from '../data/channel.ts';
@@ -34,7 +34,6 @@ export function AlertsChannel() {
   if (!prefs) return <AlertsLoading step="channel" />;
   return (
     <main class="screen flow">
-      <FlowBrand />
       <Back to={ALERTS} said={t().common.nav.alerts} />
       <FlowHeading eyebrow={f.destination} title={s.whereItGoes} lead={f.inboxLead} />
       <FlowArt art={FLOW.email} className="flow__mail">

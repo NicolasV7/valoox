@@ -7,6 +7,7 @@ Artwork colour is measured by the existing algorithm and set through CSSOM.
 No additional fonts, scripts, icon libraries or outbound hosts are introduced.
 The later visual revision restores the original compact Alerts rows and the
 Buy Me a Coffee button's own yellow, while keeping the surrounding design.
+Alerts and Account omit the valoox masthead, including loading and subpages.
 
 ## Alerts
 

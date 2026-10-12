@@ -1,5 +1,5 @@
 import { Back } from '../components/Back.tsx';
-import { FlowBrand, FlowHeading, FlowRetry } from '../components/Flow.tsx';
+import { FlowHeading, FlowRetry } from '../components/Flow.tsx';
 import { reload, usePrefsError } from '../data/channel.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS } from '../route.ts';
@@ -19,7 +19,6 @@ export function AlertsLoading({ step = 'list' }: { step?: 'list' | 'channel' | '
           : { eyebrow: f.radar, title: t().common.nav.alerts, lead: f.alertsLead };
   return (
     <main class="screen flow" aria-busy={!failed}>
-      <FlowBrand />
       {step !== 'list' && <Back to={ALERTS} said={t().common.nav.alerts} />}
       <FlowHeading {...heading} />
       {step === 'list' ? (

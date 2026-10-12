@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
-import { FlowArt, FlowBrand, FlowHeading, FlowInfo } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading, FlowInfo } from '../components/Flow.tsx';
 import { useAction } from '../data/action.ts';
 import * as api from '../data/api.ts';
 import { FLOW } from '../design/flows.ts';
@@ -16,7 +16,6 @@ export function AccountLeave({ onGone }: { onGone: () => void }) {
   const [failed, setFailed] = useState(false);
   return (
     <main class="screen flow">
-      <FlowBrand />
       <Back to={ACCOUNT} said={s.title} />
       <FlowHeading eyebrow={f.wayOut} title={f.leaveTitle} lead={f.leaveLead} />
       <FlowArt art={FLOW.disconnect} />

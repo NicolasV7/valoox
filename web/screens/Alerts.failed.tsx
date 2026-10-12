@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { FlowArt, FlowBrand, FlowHeading, FlowState } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading, FlowState } from '../components/Flow.tsx';
 import { useAction } from '../data/action.ts';
 import { reseeded } from '../data/api.ts';
 import { again, reload, usePrefs } from '../data/channel.ts';
@@ -21,7 +21,6 @@ export function AlertsFailed() {
   const word = blocked ? s.wasBlocked : bounced ? s.wasBounced : s.wasRefused;
   return (
     <main class="screen flow">
-      <FlowBrand />
       <FlowHeading
         eyebrow={f.attention}
         title={word}

@@ -4,15 +4,6 @@ import { artStyle, useArt } from '../design/useArt.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept, type Route, type Whence } from '../route.ts';
 import { Chevron } from './icons.tsx';
-import { Wordmark } from './Mark.tsx';
-
-export function FlowBrand() {
-  return (
-    <div class="flow__brand">
-      <Wordmark />
-    </div>
-  );
-}
 
 export function FlowHeading({
   eyebrow,

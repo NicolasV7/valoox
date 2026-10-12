@@ -1,5 +1,5 @@
 import { Back } from '../components/Back.tsx';
-import { FlowArt, FlowBrand, FlowHeading } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading } from '../components/Flow.tsx';
 import { usePrefs } from '../data/channel.ts';
 import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
@@ -13,7 +13,6 @@ export function AccountKeep() {
   const prefs = usePrefs();
   return (
     <main class="screen flow">
-      <FlowBrand />
       <Back to={ACCOUNT} said={s.title} />
       <FlowHeading eyebrow={f.details} title={s.keepTitle} lead={f.keepLead} />
       <FlowArt art={FLOW.custody} className="flow__mail">

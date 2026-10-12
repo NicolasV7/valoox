@@ -1,5 +1,5 @@
 import { Countdown } from '../components/Countdown.tsx';
-import { FlowArt, FlowBrand, FlowHeading, FlowRow, FlowState } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading, FlowRow, FlowState } from '../components/Flow.tsx';
 import { Watch } from '../components/Watch.tsx';
 import { waiting } from '../data/channel.ts';
 import { LEVELS, TITLES } from '../data/findable.ts';
@@ -28,7 +28,6 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
   const from: Whence = { to: { name: 'alerts' }, said: t().common.nav.alerts };
   return (
     <main class="screen flow">
-      <FlowBrand />
       <FlowHeading eyebrow={f.radar} title={t().common.nav.alerts} lead={f.alertsLead} />
       <FlowArt art={FLOW.watching} className="flow__hero">
         <div>

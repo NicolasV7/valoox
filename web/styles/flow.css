@@ -4,14 +4,6 @@
   padding-top: 0;
   color: var(--ink);
 }
-.flow__brand {
-  display: flex;
-  align-items: center;
-  min-height: 58px;
-  margin-inline: calc(-1 * var(--gut));
-  padding-inline: var(--gut);
-  border-bottom: 1px solid var(--rule);
-}
 .flow__heading { margin: 24px 0; }
 .flow__heading h1 { margin: 8px 0 10px; line-height: 1.15; }
 .flow__heading p { color: var(--ink-2); overflow-wrap: anywhere; }
