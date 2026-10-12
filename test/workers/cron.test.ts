@@ -20,7 +20,6 @@ beforeEach(async () => {
     ...(await freshDb()),
     JAR_KEY: KEY,
     RESEND_KEY: 'test-api-key',
-    MAIL_FROM: 'alerts@example.invalid',
   };
   calls = [];
   mails = [];
