@@ -46,7 +46,7 @@
       "url": "https://github.com/NicolasV7/valoox",
       "provider": "github",
       "link_mode": "web",
-      "revision": "main"
+      "revision": "82ff015259da2e7aeccbacbcfd768f7ec6a8281c"
     }
   },
   "components": [
@@ -54,7 +54,7 @@
       "id": "browser",
       "type": "frontend",
       "label": "Navegador",
-      "sublabel": "cookie uid · public/",
+      "sublabel": "cookie __Host-val",
       "pos": [
         40,
         270
@@ -65,8 +65,12 @@
       ],
       "sources": [
         {
-          "path": "web/main.tsx",
-          "label": "vistas"
+          "path": "src/app/cookie.ts",
+          "label": "secreto de 256 bits"
+        },
+        {
+          "path": "web/data/private.ts",
+          "label": "datos de una cuenta"
         }
       ]
     },
@@ -94,7 +98,7 @@
       "id": "kv",
       "type": "database",
       "label": "KV  VAL",
-      "sublabel": "solo cachés versionadas",
+      "sublabel": "vistas cifradas",
       "pos": [
         320,
         90
@@ -105,16 +109,16 @@
       ],
       "sources": [
         {
-          "path": "src/vault/session.ts",
-          "label": "store1: / inv2:"
+          "path": "src/vault/cache.ts",
+          "label": "store4: / inv3:"
         }
       ]
     },
     {
       "id": "cron",
       "type": "cloud",
-      "label": "Cron  30 0 * * *",
-      "sublabel": "alertas + prune",
+      "label": "Cron cada 15 min",
+      "sublabel": "lotes tras 00:30 UTC",
       "pos": [
         700,
         90
@@ -134,7 +138,7 @@
       "id": "notify",
       "type": "external",
       "label": "Tu correo",
-      "sublabel": "Resend · una vez al día",
+      "sublabel": "cola por cuenta y destino",
       "pos": [
         980,
         90
@@ -205,7 +209,7 @@
       "id": "seal",
       "type": "security",
       "label": "Sellado",
-      "sublabel": "AES-256-GCM · HKDF por uid",
+      "sublabel": "HKDF por uso y navegador",
       "pos": [
         320,
         430
@@ -238,7 +242,7 @@
       "id": "d1",
       "type": "database",
       "label": "D1  val-sessions",
-      "sublabel": "una fila sellada por navegador",
+      "sublabel": "sesión + estado atómico",
       "pos": [
         320,
         580
@@ -271,7 +275,7 @@
     },
     {
       "kind": "security-group",
-      "label": "el jar existe en claro solo aquí, durante el pedido",
+      "label": "jar en claro solo al ejecutar",
       "wraps": [
         "worker",
         "seal"
@@ -284,7 +288,7 @@
       "id": "ui-api",
       "from": "browser",
       "to": "worker",
-      "label": "GET /api/* + cookie uid",
+      "label": "API + secreto de cookie",
       "variant": "emphasis"
     },
     {
@@ -300,7 +304,7 @@
       "id": "worker-kv",
       "from": "worker",
       "to": "kv",
-      "label": "caché 60 s, sin credenciales",
+      "label": "vista, sesión activa en D1",
       "fromSide": "top",
       "toSide": "bottom",
       "labelDy": -22
@@ -345,14 +349,14 @@
       "id": "allow-riot",
       "from": "allow",
       "to": "riot",
-      "label": "solo lectura",
+      "label": "cuenta propia",
       "variant": "security"
     },
     {
       "id": "cron-worker",
       "from": "cron",
       "to": "worker",
-      "label": "diario",
+      "label": "por lotes",
       "variant": "dashed"
     },
     {
@@ -370,18 +374,18 @@
       "dot": "cyan",
       "title": "Qué entra y qué sale",
       "items": [
-        "El navegador solo manda una cookie uid de 16 bytes al azar",
-        "Riot autentica por QR en su app: la contraseña no pasa por aquí",
-        "Toda salida cruza la allowlist; el webhook se guarda como id/token, nunca como URL"
+        "Cookie renovada al aprobar el QR; D1 guarda un resumen con clave",
+        "QR cifrado: diez minutos de vigencia y cancelación al desconectar",
+        "Allowlist: sin compras, equipamiento ni chat"
       ]
     },
     {
       "dot": "amber",
       "title": "Custodia de la sesión",
       "items": [
-        "La fila guarda iv‖ciphertext‖tag; el puuid nunca es columna en claro",
-        "additionalData = kid|uid: una fila cruzada falla cerrada",
-        "Rotar JAR_KEY deja huérfanas todas las filas: es el kill switch"
+        "Sesión, cachés, QR, baja y cola usan claves y datos autenticados distintos",
+        "D1 decide revocación, intentos del OTP y consumo de enlaces",
+        "Rotar JAR_KEY invalida credenciales y cifrados anteriores"
       ]
     }
   ]

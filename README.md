@@ -9,14 +9,14 @@ One Cloudflare Worker on the free plan. Sign in by scanning a QR code with Riot
 Mobile — there is no password field on any screen, because the password never
 comes here.
 
-**[valoox.store](https://valoox.store)** — or run your own copy:
+**[drop.valoox.store](https://drop.valoox.store)** — or run your own copy:
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/NicolasV7/valoox)
 
 That forks this repository into your GitHub, creates the D1 database and the KV
 namespace in your own Cloudflare account, asks you for the secrets below, and
 deploys. It lands on a `workers.dev` address, which is what the `Secure` cookie
-needs, and the schema is applied as part of the deploy. See
+needs, and versioned migrations are applied by the deploy script. See
 [Running your own](#running-your-own).
 
 ## What it does
@@ -25,8 +25,8 @@ needs, and the schema is applied as part of the deploy. See
   what you already own marked.
 - Your whole collection: every weapon, skin, variant and chroma, plus sprays,
   buddies, cards and titles.
-- Star anything. If it turns up in your store, you get one email, once, just
-  after the store rotates.
+- Star anything. The job checks after rotation, combines browser lists by
+  account/destination and queues one daily alert with provider idempotency.
 
 ## The file to read first
 
@@ -42,26 +42,27 @@ disagree.
 
 - **The session is sealed before it reaches the database.** AES-256-GCM under a
   key derived per browser, with the key in the Worker's secrets and never in
-  D1. One row per signed-in browser; the Riot account id lives inside the
-  sealed blob and is never a column.
+  D1. Its identifiers cannot replay the browser cookie. QR scans are encrypted,
+  security counters are atomic in D1, and caches require a live session.
 - **The Worker parses no catalogue.** Names, artwork, tiers and clips are
   joined in the browser against `valorant-api.com`. A Worker gets 10ms of CPU
   per request, and that one number decided the architecture.
-- **Nothing loads from a third party.** No CDN, no font host, no analytics. The
-  only hosts anywhere in the CSP are Riot's own, one per directive.
+- **Code and fixed assets load from this origin.** No external scripts, font
+  host or analytics. The community catalogue, its artwork and Riot clips each
+  have a narrow CSP directive.
 
 ```mermaid
 flowchart LR
-  B["Browser<br/>uid cookie"]
+  B["Browser<br/>host-only secret"]
   W["Worker val<br/>11 routes /api/*"]
   A["Egress allowlist<br/>upstream.ts"]
   R["Riot"]
   K["KV<br/>caches"]
   S["Sealed<br/>AES-256-GCM"]
-  D["D1<br/>one row per browser"]
+  D["D1<br/>sealed sessions + atomic state"]
   C["valorant-api.com<br/>3.5 MB"]
   M["Your inbox"]
-  T["Cron 00:30"]
+  T["Cron batches after 00:30"]
 
   B -->|GET /api/*| W
   B -.->|the catalogue is joined here| C
@@ -80,11 +81,13 @@ flowchart LR
 The account screen prints the commit the deployed page was built from and
 links to it here. That says where the code came from, not who put it up.
 
+Configure a scoped Cloudflare token and account id in GitHub Secrets to enable
+the deploy workflow. Without them the workflow explicitly skips deployment.
 When a deploy runs from CI the browser bundle is attested with Sigstore, and
 then it is checkable without taking my word for it:
 
 ```sh
-curl -sO https://valoox.store/app.js
+curl -sO https://drop.valoox.store/app.js
 gh attestation verify app.js --repo NicolasV7/valoox
 ```
 
@@ -94,7 +97,10 @@ answering a request is this commit. [`SECURITY.md`](SECURITY.md) says so too.
 
 ## Running your own
 
-The button above does all of this for you. By hand it is:
+Use your own resource ids in the portable defaults; placeholders prevent a stray
+portable deploy from touching live storage. By hand:
+
+Use Node 24 or newer; storage regression tests use its built-in SQLite.
 
 ```sh
 gh repo fork NicolasV7/valoox --clone && cd valoox
@@ -110,7 +116,7 @@ Three secrets, and only the first is required:
 | | |
 | --- | --- |
 | `JAR_KEY` | 32 random bytes, base64. Every session is sealed under a key derived from it; rotating it signs everybody out at once. |
-| `RESEND_KEY` | [resend.com](https://resend.com) API key, for the six-digit code and the morning alert. Without it the app runs and the alerts tab says it has nowhere to send. |
+| `RESEND_KEY` | [resend.com](https://resend.com) sending-only API key for your verified domain, for the six-digit code and the morning alert. Without it the app runs and the alerts tab says it has nowhere to send. |
 | `RESEND_HOOK` | A Resend webhook signing secret, so a bounce can be believed. Without it the webhook route rejects everything, which is the correct failure. |
 
 Your copy is yours and it is not valoox.store — different Worker, different
@@ -134,7 +140,7 @@ needs. `npm run phone:off` takes it down.
 
 ## What this does not claim
 
-It is not zero-knowledge and it does not store nothing: there is one row, and
+It is not zero-knowledge and it does not store nothing: there is sealed state, and
 `/account/keep` lists exactly what is in it. Disconnecting deletes what we
 hold — Riot's own session keeps existing on their side until it expires, and
 saying otherwise would be a claim about a system nobody here controls.

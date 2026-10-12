@@ -1,0 +1,14 @@
+{
+  "diagram_type": "architecture",
+  "specification_sha256": "2ccb1c8ca15cfbb2d7d31b160a72a75aa20ac49224b1e6ce92742284412e15b5",
+  "artifact_sha256": "3bdc4d3c3088727de5a24858d243c110101754478f7a16b8cfbae01c54bf66d6",
+  "specification_bytes": 7668,
+  "artifact_bytes": 815198,
+  "revision": "82ff015259da2e7aeccbacbcfd768f7ec6a8281c",
+  "validation": "9/9 showcase, 0 errors, 0 warnings",
+  "browser_evidence": "passed",
+  "visual_review": "passed",
+  "correction_rounds": 1,
+  "visual_evidence": "arquitectura.visual-check.json",
+  "ui_language": "English viewer controls; Spanish authored content"
+}
