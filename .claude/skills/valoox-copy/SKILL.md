@@ -14,8 +14,8 @@ code costs more than it buys.
 | Never | Why |
 | --- | --- |
 | "zero-knowledge", "zero data stored" | Both are false. One row exists per browser. |
-| "we can't see it", "no podemos verlo" | We seal it. That is a different, true sentence — say that one. |
-| "secure", "seguro" | It describes nothing. Name the property: sealed, allowlisted, never logged. |
+| "we can't see it" | We seal it. That is a different, true sentence — say that one. |
+| "secure" | It describes nothing. Name the property: sealed, allowlisted, never logged. |
 | "revoked" alone | Disconnecting deletes *our* access. Riot's session lives until it expires on its own, and people make security decisions on that word. |
 | "delivered", about an email | A server cannot observe an inbox. Report the status the provider returned. |
 | "military-grade", "bank-level", "enterprise" | Nothing here is any of those and the reader knows it. |
@@ -39,8 +39,9 @@ front of you."* It states a limit, it is checkable, and it has no adjectives.
   the session" and "Riot changed something" are different screens.
 - No exclamation marks. No "oops". No "we're sorry for the inconvenience".
 
-Spanish is es-419 with tuteo — *tienes*, *marca*, *pégala*. English is the
-canvas copy, already written on the artboards; lift it rather than re-inventing.
+English is the source and fallback copy, already written on the artboards.
+Spanish is an es-419 translation using an informal singular voice. Both
+bundles follow these rules; the browser's language preference selects one.
 
 ## Where strings live
 
@@ -50,10 +51,10 @@ build on a user-facing literal anywhere else.
 ```
 web/i18n/
   index.ts          t() and the active locale
-  es/store.ts       ← the source locale, and the one served
-  es/…
-  en/store.ts
+  en/store.ts       ← the source and fallback locale
   en/…
+  es/store.ts       ← the Spanish translation
+  es/…
 ```
 
 **Interpolation is a function.** This is the rule that makes the difference
@@ -61,13 +62,13 @@ between a file that can be translated and one that cannot:
 
 ```ts
 // no — the sentence is split around a value and the order is frozen
-'Quedan ' + n + ' ofertas'
+'There are ' + n + ' offers'
 
 // yes
-restantes: (n: number) => `Quedan ${n} ofertas`,
+remaining: (n: number) => `${n} offers left`,
 ```
 
-The same applies to plurals. Do not write `n === 1 ? ' ítem' : ' ítems'` at the
+The same applies to plurals. Do not write `n === 1 ? ' item' : ' items'` at the
 call site; put the branch inside the string function, where a translator can
 change it to a language with three plural forms.
 

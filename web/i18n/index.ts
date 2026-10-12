@@ -12,13 +12,13 @@
 import { en } from './en/index.ts';
 import { es } from './es/index.ts';
 
-export type Strings = typeof es;
+export type Strings = typeof en;
 export type Locale = keyof typeof BUNDLES;
 
-const BUNDLES = { es, en };
+const BUNDLES = { en, es };
 
-/** Spanish is the source locale and the one served. */
-const DEFAULT: Locale = 'es';
+/** English is the source and fallback locale; Spanish remains a translation. */
+const DEFAULT: Locale = 'en';
 
 let active: Strings = BUNDLES[DEFAULT];
 let code: Locale = DEFAULT;

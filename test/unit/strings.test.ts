@@ -6,7 +6,7 @@ import { test } from 'vitest';
 // Every user-facing string lives in web/i18n/, and nowhere else.
 //
 // The reason is not tidiness. A sentence written at its point of use gets split
-// around the value it contains — `'Quedan ' + n + ' ofertas'` — and a split
+// around the value it contains — `'There are ' + n + ' offers'` — and a split
 // sentence has a frozen word order, which is a translation that cannot be made.
 // Keeping them together is what keeps them a function of their arguments.
 //

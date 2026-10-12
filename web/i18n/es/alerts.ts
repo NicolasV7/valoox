@@ -1,12 +1,12 @@
-// Los avisos. La única pestaña cuyo tema entero es nuestro: qué marcaste y a
-// dónde iría viven en nuestra propia fila, así que nada aquí espera a Riot.
+// Alerts. The one tab whose whole subject is ours: what you starred and where
+// it would go live in our own row, so nothing here waits on Riot.
 
 export const alerts = {
   what:
     'Marca las skins que estás esperando. Cuando una aparece en tu tienda te la ' +
     'enviamos — una vez, apenas tu tienda rota.',
 
-  // --- primera vez ---------------------------------------------------------
+  // --- first run -----------------------------------------------------------
   noneYet: 'Todavía no marcaste nada',
   someYet: (n: number) => `${n} marcadas`,
   twoThings: 'Dos cosas por hacer, en este orden: elegir a dónde va el aviso, y marcar una skin.',
@@ -16,35 +16,35 @@ export const alerts = {
 
   yourEmail: 'Tu correo',
   oneAddress: 'Una dirección, verificada una vez.',
-  // El nombre de Riot va en el encabezado del correo, debajo de la marca:
-  // `who` en `src/alerts/mail/layout.ts`.
+  // The Riot name goes in the email header, under the wordmark: `who` in
+  // `src/alerts/mail/layout.ts`.
   sameInbox:
     'La misma casilla sirve para varias cuentas. Cada correo lleva arriba el ' +
     'nombre de Riot al que corresponde.',
 
   searchASkin: 'Buscar una skin…',
-  // La condición es `mail.ok`, no que haya una dirección escrita: AlertsFirst
-  // abre el buscador con `mail?.ok === true` y con nada más.
+  // The gate is `mail.ok`, not an address being typed: AlertsFirst opens the
+  // search on `mail?.ok === true` and nothing else.
   opensOnce: 'Se abre cuando haya una dirección verificada.',
 
-  // La fila es la que arma `cleanWishlist` en `src/routes/wishlist.ts`, y la
-  // misma lista que enumera `account.keepListWhy`. Nada que no estuviera ya
-  // en la pantalla donde apretaste la estrella.
+  // The row is the one `cleanWishlist` builds in `src/routes/wishlist.ts`, and
+  // the same list `account.keepListWhy` spells out. Nothing that was not
+  // already on the screen the star was pressed on.
   whatAStarIs:
     'Una marca aquí es una fila en nuestra base con lo que ya tenías en ' +
     'pantalla: el id de la skin, el nombre, el tier, los niveles y el color medido.',
 
-  // --- esperando -----------------------------------------------------------
+  // --- waiting -------------------------------------------------------------
   whereItGoes: 'A dónde va',
   watching: 'Vigilando',
-  // La espera es corta porque esta pantalla no toca Riot ni el catálogo: una
-  // sola llamada a este origen. Los nombres y los renders llegan después.
+  // The wait is short because this screen touches neither Riot nor the
+  // catalogue: one call to this origin. Names and renders come after.
   waitingWhy:
     'Lo que vigilas y a dónde va son nuestros: una sola llamada a este origen, ' +
     'nada a Riot. Los nombres y los renders llegan después, del catálogo de la ' +
     'comunidad.',
 
-  // --- dónde va ------------------------------------------------------------
+  // --- where it goes -------------------------------------------------------
   email: 'Correo',
   verified: 'Verificado',
   notVerified: 'Sin verificar',
@@ -55,29 +55,29 @@ export const alerts = {
   sendATest: 'Enviar el código',
   badAddress: 'Eso no tiene forma de dirección. Revisa el arroba y el punto.',
   waitSeconds: (n: number) => `Espera ${n} segundos antes de pedir otro código.`,
-  // Un servidor no ve una casilla: lo único que sabemos es que salió.
+  // A server cannot see an inbox: all we know is that it went out.
   oneIsOut: 'Ya hay un código en camino a esa casilla.',
   testIsProof:
     'Ese código es la verificación: lo escribes de vuelta y la dirección queda ' +
     'probada. Hasta que eso pase, aquí no se envía nada más.',
-  // Un segundo canal duplica las formas de perder el correo de la mañana y
-  // parte al medio la atención que se le presta a cualquiera de los dos.
+  // A second channel doubles the ways a morning email goes missing and
+  // halves the attention paid to either.
   oneChannel: 'Un solo canal, no un menú: una casilla es el único lugar que todo el mundo ya mira.',
   whyACode:
     'Por qué un código y no un enlace: a un enlace lo abren los escáneres antes ' +
     'que una persona, y eso verificaría una dirección que nadie leyó.',
-  // La vieja no sigue recibiendo: `setChannel` pisa `mail.to` y deja `ok` en
-  // false, y `post()` solo envía con `mail.ok === true`. No quedó dónde
-  // guardar la dirección anterior.
+  // The old one does not keep receiving: `setChannel` overwrites `mail.to` and
+  // leaves `ok` false, and `post()` only sends on `mail.ok === true`. There is
+  // nowhere left to hold the previous address.
   changeItLater:
     'Si la cambias después, la nueva arranca sin verificar: el código va ahí y ' +
     'no sale ningún correo hasta que lo escribas de vuelta.',
 
   watch: (name: string) => `Vigilar ${name}`,
 
-  // Por qué la estrella no toma el toque. No es "no está en la tienda hoy":
-  // es que ese objeto se entrega por un contrato y una tienda no lo vende
-  // nunca, así que el aviso no podría sonar jamás. Ver data/sellable.ts.
+  // Why the star refuses the tap. Not "not in the store today" — this one is
+  // handed out by a contract, so no store ever carries it and the alert could
+  // never fire. See data/sellable.ts.
   notSoldOne: (name: string) => `${name} no sale en la tienda`,
   notSoldWhy: 'Esto se gana, no se vende, así que un aviso nunca sonaría.',
 
@@ -89,11 +89,11 @@ export const alerts = {
   standbyNone: 'Para marcar algo hace falta primero una dirección verificada.',
   addAnAddress: 'Poner una dirección',
 
-  // --- la lista andando ----------------------------------------------------
+  // --- the working list ----------------------------------------------------
   change: 'Cambiar',
   weapons: 'Armas',
-  // Dentro de Armas, para distinguirlas del cuerpo a cuerpo. No "Armas" otra
-  // vez: una pestaña con el nombre de la que está encima no dice nada.
+  // Inside Weapons, to tell them from melee. Not "Weapons" again: a tab named
+  // after the one above it says nothing.
   firearms: 'De fuego',
   accessories: 'Accesorios',
   rotatesIn: 'rota en',
@@ -102,22 +102,22 @@ export const alerts = {
   addSomething: 'Agregar algo…',
   addSomethingTitle: 'Agregar algo',
   outOf: (n: number, max: number) => `${n} / ${max}`,
-  // No hay de dónde saber qué vende Riot: el catálogo público no lo dice y el
-  // endpoint que lo decía ya no existe.
+  // There is no way to know what Riot sells: the public catalogue does not
+  // say, and the endpoint that did is gone.
   onlyWhatTurnsUp:
     'El trabajo diario cruza esta lista con tu tienda y envía lo que coincide. ' +
     'Lo que entregan los pases y los contratos no se puede marcar; de lo demás, ' +
     'nadie puede decirte cuándo rota.',
-  // El techo es por mantener pequeña la fila, no por cómputo: el trabajo diario
-  // es una intersección de conjuntos y casi no gasta.
+  // The ceiling is about keeping the row small, not about compute: the daily
+  // job is a set intersection and barely uses any.
   hundredWhy:
     'Cincuenta armas y cien accesorios: son dos rotaciones distintas y llenar ' +
     'una no debería frenarte en la otra.',
   outOfBoth: (g: number, gm: number, b: number, bm: number) => `${g}/${gm} · ${b}/${bm}`,
-  /** Una pestaña con cuántas cosas hay detrás. */
+  /** A tab, with how much sits behind it. */
   withCount: (said: string, n: number) => `${said} ${n}`,
 
-  // --- agregar -------------------------------------------------------------
+  // --- adding --------------------------------------------------------------
   kinds: { spray: 'Grafiti', buddy: 'Amuleto', card: 'Tarjeta', title: 'Título' },
   sellsCount: (n: number) => (n === 1 ? '1 que no tienes.' : `${n} que no tienes.`),
   listFull: (max: number) => `Esta lista está llena: ${max}. Saca una para marcar otra.`,
@@ -129,7 +129,7 @@ export const alerts = {
     'El buscador corre contra el catálogo que el navegador ya tiene, así que ' +
     'filtra mientras escribes sin preguntar nada al Worker ni a Riot.',
 
-  // --- el código -----------------------------------------------------------
+  // --- the code ------------------------------------------------------------
   sentOut: 'Enviado',
   typeTheCode: 'Escribe el código que te enviamos',
   sixDigitsTo: (to: string) => `Seis dígitos, a ${to}. Dura diez minutos y admite cinco intentos.`,
@@ -142,13 +142,13 @@ export const alerts = {
     'Diez minutos y cinco intentos, y después el código muere y pides otro: seis ' +
     'dígitos son un millón de combinaciones y sin techo un script paciente llega.',
   whatHappensAfter: 'Qué pasa después',
-  // Lo que impide que esto sea un botón para mandarle correo a desconocidos.
+  // What keeps this from being a button that mails strangers.
   afterWhy:
     'La dirección queda verificada y el correo de la mañana empieza a ir ahí. A ' +
     'una dirección que no trajo un código de vuelta no se le envía nada, ni una ' +
     'sola vez.',
 
-  // --- rechazado -----------------------------------------------------------
+  // --- refused -------------------------------------------------------------
   refusedLede: 'Salió una prueba y el proveedor la rechazó. Tus marcas quedaron intactas.',
   bouncedLede:
     'La prueba salió y el servidor del otro lado la devolvió. Tus marcas quedaron intactas.',
@@ -167,15 +167,15 @@ export const alerts = {
   bouncedWhy:
     'El correo salió y el servidor del otro lado lo devolvió. Enviar lo mismo ' +
     'otra vez no puede funcionar: hace falta otra dirección.',
-  // Sin uso desde que una casilla sirve para varias cuentas. Se deja porque
-  // el Worker todavía puede devolver 'taken' si alguna vez vuelve la regla.
+  // Unused since one inbox serves several accounts. Kept because the Worker
+  // can still return 'taken' if that rule ever comes back.
   taken:
     'Esa dirección ya está verificada en otra cuenta. Hace falta otra, o ' +
     'desconecta la otra cuenta primero.',
   changeIt: 'Esa dirección rebotó: el servidor del otro lado la devolvió. Hace falta cambiarla.',
-  // Esta pantalla aparece con `gotThere(said)`, o sea `email.delivered` o
-  // `email.opened`. Eso es lo que dijo el proveedor, no que la casilla lo
-  // tenga: "ya llegó" sería una afirmación que nadie puede ver.
+  // This one shows on `gotThere(said)`, which is `email.delivered` or
+  // `email.opened`. That is what the provider said, not that an inbox holds
+  // it: "reached the inbox" would be a claim nobody can see.
   alreadyThere:
     'El proveedor dice que el servidor del otro lado lo aceptó, y el código ' +
     'sigue vivo. Cuando venza, el botón vuelve.',

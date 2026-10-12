@@ -1,14 +1,14 @@
-// La cuenta, y cómo irse.
+// The account, and leaving.
 //
-// Account y no Ajustes: aquí no hay nada que configurar. Quién entró, las
-// cosas que hay que decir en voz alta, el café, y la salida. El orden es la
-// regla — cuanto más abajo, más permanente — y lo único destructivo va
-// último y en rojo.
+// Account and not Settings: there is nothing here to configure. Who is signed
+// in, the things worth saying out loud, the coffee, and the way out. The
+// order is the rule — the further down, the more permanent — and the only
+// destructive thing is last and red.
 
 export const account = {
   title: 'Cuenta',
 
-  // --- quién entró ---------------------------------------------------------
+  // --- who is signed in ----------------------------------------------------
   live: 'Conectado',
   region: 'Región',
 
@@ -16,7 +16,7 @@ export const account = {
   daysAgo: (n: number) => (n === 1 ? 'hace un día' : `hace ${n} días`),
   hoursAgo: (n: number) => (n === 1 ? 'hace una hora' : `hace ${n} horas`),
 
-  // --- las secciones -------------------------------------------------------
+  // --- the sections --------------------------------------------------------
   alerts: 'Avisos',
   whereAlertsGo: 'A dónde van los avisos',
   noAddress: 'Sin dirección todavía',
@@ -35,9 +35,9 @@ export const account = {
   source: 'Código',
   sourceUnder: 'El Worker, el esquema y los tests',
 
-  // De qué commit se armó esta página. Lo estampa el build — ver web/built.ts —
-  // y la nota de abajo dice exactamente qué prueba y qué no, porque decir de más
-  // aquí sería peor que no decir nada.
+  // Which commit this page was built from. Stamped by the build — see
+  // web/built.ts — and the note below says exactly what that proves and what
+  // it does not, because overclaiming here would be worse than silence.
   version: 'Versión',
   versionAt: (sha: string, at: string) => (at ? `${sha} · ${at.slice(0, 10)}` : sha),
   versionDirty: (sha: string) => `${sha}, con cambios sin guardar`,
@@ -57,7 +57,7 @@ export const account = {
   notAffiliated: 'Sin relación con Riot Games',
   notAffiliatedUnder: 'Y qué quiere decir eso aquí',
 
-  /** El sitio al que sale una fila, en la columna de la derecha. */
+  /** Where a row goes, in the right-hand column. */
   onGithub: 'github',
   onApi: 'valorant-api.com',
 
@@ -77,7 +77,7 @@ export const account = {
   disconnect: 'Desconectar',
   disconnectUnder: 'Borra el frasco y tu correo.',
 
-  // --- qué guardamos -------------------------------------------------------
+  // --- what we keep --------------------------------------------------------
   keepTitle: 'Qué guardamos',
   keepLede:
     'Primero lo importante: la sesión que esta app guarda lee tu cuenta sin ' +
@@ -122,7 +122,7 @@ export const account = {
     'de envío, enlaces de baja con vencimiento y una cola cifrada de avisos. Las ' +
     'copias de recuperación de la base pueden conservar datos borrados durante siete días.',
 
-  // --- irse ----------------------------------------------------------------
+  // --- leaving -------------------------------------------------------------
   leaveTitle: 'Desconectar este navegador',
   leaveLede:
     'Se borra una fila y esta app deja de poder alcanzar tu cuenta. Escanear un ' +
@@ -145,7 +145,7 @@ export const account = {
   leaveFailed: 'No pudimos confirmar la desconexión. Tu sesión sigue visible aquí. Reintenta.',
   noDialog: 'No hay diálogo de confirmación encima: esta pantalla es la confirmación.',
 
-  // --- riot dijo que no ----------------------------------------------------
+  // --- riot said no --------------------------------------------------------
   gone: 'Tu sesión venció en Riot',
   scanAgain: 'Escanear otra vez',
   notNow: 'Ahora no',

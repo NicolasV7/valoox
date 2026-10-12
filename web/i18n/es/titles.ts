@@ -1,4 +1,4 @@
-// Los títulos: la pestaña y uno abierto. La única parte de la app sin arte.
+// Player titles: the tab, and one opened. The one part of the app with no art.
 
 export const titles = {
   of: (have: number, all: number) => `${have} de ${all} títulos`,
@@ -9,9 +9,9 @@ export const titles = {
   yours: 'Tuyos',
   notYours: 'No son tuyos',
 
-  // El banderín y el único degradado gris de la app están a la vista en el
-  // título abierto, así que no se nombran. Esta nota dice la forma —por qué es
-  // una lista y no una grilla— y el cierre que llevan las cuatro pestañas.
+  // The pennant and the one grey ramp are on screen on the opened title, so
+  // they are not named. This note says the shape — why it is a list rather than
+  // a grid — and the closing line every tab carries.
   noArt:
     'Un título es un texto, así que es una lista y no una grilla: lo que se ' +
     'compara son palabras. Están todos los del juego, no solo los tuyos.',

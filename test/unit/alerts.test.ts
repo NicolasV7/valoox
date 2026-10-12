@@ -106,7 +106,7 @@ async function withFetch(reply: (n: number) => Response, body: () => Promise<voi
 }
 
 test('a message with nowhere to go is a failure, not a quiet success', async () => {
-  await assert.rejects(deliver({}, 'hola'), /notification channel/);
+  await assert.rejects(deliver({}, 'hello'), /notification channel/);
 });
 
 test('a channel that times out is retried, and a late success still counts', async () => {
@@ -115,7 +115,7 @@ test('a channel that times out is retried, and a late success still counts', asy
   const calls = await withFetch(
     (n) => new Response(null, { status: n < 3 ? 522 : 204 }),
     async () => {
-      assert.deepEqual(await deliver({ discord: HOOK }, 'hola'), ['discord 204']);
+      assert.deepEqual(await deliver({ discord: HOOK }, 'hello'), ['discord 204']);
     },
   );
   assert.equal(calls, 3, 'the first two attempts should have been retried');
@@ -125,7 +125,7 @@ test('a channel that never answers fails loudly, and says which one', async () =
   const calls = await withFetch(
     () => new Response(null, { status: 522 }),
     async () => {
-      await assert.rejects(deliver({ discord: HOOK }, 'hola'), /discord 522/);
+      await assert.rejects(deliver({ discord: HOOK }, 'hello'), /discord 522/);
     },
   );
   assert.equal(calls, 3, 'it should stop at three, not keep going');
@@ -137,7 +137,7 @@ test('a refusal is not retried — a 4xx will stay a 4xx', async () => {
   const calls = await withFetch(
     () => new Response(null, { status: 404 }),
     async () => {
-      await assert.rejects(deliver({ discord: HOOK }, 'hola'), /discord 404/);
+      await assert.rejects(deliver({ discord: HOOK }, 'hello'), /discord 404/);
     },
   );
   assert.equal(calls, 1, 'a 404 is final');

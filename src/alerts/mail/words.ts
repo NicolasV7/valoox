@@ -50,7 +50,7 @@ const es: Words = {
   },
   levels: (n) => n + ' niveles',
   chromas: (n) => n + ' variantes',
-  // No "la primera mañana": `waited()` in alert.ts is whole days since the star
+  // No "the first morning": `waited()` in alert.ts is whole days since the star
   // was pressed, and nothing keeps a last-sent date, so first is unknowable.
   youStarred: (days) =>
     days > 1
@@ -66,7 +66,7 @@ const es: Words = {
   pushTest: 'Prueba de valoox. Los avisos llegan bien por aquí.',
   riotNotice: 'Sin relación con Riot Games. VALORANT y su arte son de Riot Games, Inc.',
   oneADay: 'Un correo por día como máximo, y solo cuando algo de tu lista está en tu tienda.',
-  // No "ningún id interno": the stop link in the footer is `<uid>.<nonce>.<sig>`,
+  // No "internal identifiers absent": the stop link carries a signed row reference,
   // so this email does carry the row's id. What it does not carry is the jar.
   hitFoot:
     'Este correo lleva nombres de skins y el nombre de Riot de la cuenta. Nada de ' +

@@ -1,14 +1,14 @@
-// Una ranura, abierta: todas las skins que el juego tiene para esa arma, las
-// que son tuyas separadas de las que no. Los huecos son la mitad de lo que una
-// colección cuenta.
+// One slot, opened: every skin the game has for this weapon, the ones you own
+// apart from the ones you do not. The gaps are half of what a collection tells
+// you.
 
 export const weapon = {
-  /** Cuántas tienes de cuántas hay. Solo cuentan las que tienen tier: la
-   *  estándar viene con el arma y no es una skin que se pueda tener o no. */
+  /** How many of how many. Only the ones with a tier count: the standard skin
+   *  comes with the weapon and is not something you can have or not have. */
   of: (have: number, all: number) => `${have} de ${all}`,
 
   search: (n: number, gun: string) => `Buscar entre ${n} skins de ${gun}`,
-  // El filtro corre sobre la lista que ya está en memoria; el Worker no la ve.
+  // The filter runs over the list already in memory; the Worker never sees it.
   searchWhy: (n: number) =>
     `Nombre, tema o tier. Las ${n} ya están en el navegador, así que buscar no ` +
     `vuelve al Worker.`,
@@ -20,10 +20,10 @@ export const weapon = {
   levels: (n: number) => (n === 1 ? '1 nivel' : `${n} niveles`),
   variants: (n: number) => (n === 1 ? '1 variante' : `${n} variantes`),
 
-  // Ninguna fila muestra precio, sea tuya o no: esta pantalla es la colección y
-  // no la tienda, así que la copia no habla de ninguno.
+  // No row here shows a price, owned or not — this screen is the collection,
+  // not the store — so the copy says nothing about one.
   weave: 'La trama detrás de cada fila lleva el color de esa skin, medido del render y no elegido.',
 
-  // --- mientras no llega el catálogo ---------------------------------------
+  // --- before the catalogue lands ------------------------------------------
   waitingWhy: 'Riot ya contestó con los ids; falta el catálogo que les pone nombre y render.',
 };

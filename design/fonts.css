@@ -14,7 +14,7 @@
   font-stretch: 100%;
   font-style: normal;
   font-display: swap;
-  /* Latin only. Spanish lives entirely inside U+0000–00FF, ñ and ¿ included. */
+  /* Latin only. This subset includes the characters needed for Spanish. */
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+20AC, U+2122;
 }
 

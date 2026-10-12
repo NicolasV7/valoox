@@ -17,8 +17,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 
 const OUT = 'public/fonts';
 
-// Only `latin`. Spanish lives entirely inside U+0000–00FF — ñ, the accented
-// vowels, ¿ and ¡ included — so latin-ext would be a second download nobody
+// Only `latin`. This subset covers Spanish, including accented vowels and
+// punctuation, so latin-ext would be a second download nobody
 // renders. Add it the day the app speaks a language that needs it.
 const SUBSET = 'latin';
 

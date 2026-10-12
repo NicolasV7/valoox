@@ -85,11 +85,12 @@ reformat to fit. `test/unit/size.test.ts` enforces this.
 **No user-facing text outside `web/i18n/`.** Interpolation is a function:
 
 ```ts
-restantes: (n: number) => `Quedan ${n} ofertas`
+remaining: (n: number) => `${n} offers left`
 ```
 
-Spanish is es-419 with tuteo; English carries the same keys. Code, comments
-and commit messages are English.
+English is the source and fallback locale. Spanish is an es-419 translation
+with the same keys; the browser's language preference selects the bundle.
+Code, comments, documentation and commit messages are English.
 
 ## What the copy may not say
 

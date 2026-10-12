@@ -150,7 +150,7 @@ export async function send(
     });
   } catch {
     // Aborted, or the connection never opened. Ours, not the address's.
-    return { ok: false, status: 0, said: 'resend sin respuesta' };
+    return { ok: false, status: 0, said: 'resend no response' };
   }
 
   const said = 'resend ' + res.status;

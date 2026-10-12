@@ -35,7 +35,7 @@ export const common = {
   },
 
   // One pair for every kind of thing, so it carries no gender: this chip sits
-  // on a grafiti and a título as often as on a tarjeta.
+  // on a spray or title just as often as on a card.
   owned: 'Ya lo tienes',
   notOwned: 'No lo tienes',
   equipped: 'En uso',

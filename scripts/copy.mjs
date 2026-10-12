@@ -7,7 +7,7 @@
 //   npm run copy
 //
 // Key parity is the one that breaks the build if it slips — a key present in
-// `es` and missing from `en` is a `tsc` error, but the reverse is only a dead
+// `en` and missing from `es` is a `tsc` error, but the reverse is only a dead
 // string, and a locale quietly drifting is how a translation rots.
 
 import { readdirSync, readFileSync } from 'node:fs';

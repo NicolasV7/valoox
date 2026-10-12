@@ -1,12 +1,12 @@
-// Los grafitis: la pestaña y uno abierto. Un grafiti es cuadrado, así que es
-// una grilla y no el tablero de ranuras que tienen las armas.
+// Sprays: the tab, and one opened. A spray is square, so this is a grid rather
+// than the slot board the weapons get.
 
 export const sprays = {
   of: (have: number, all: number) => `${have} de ${all} grafitis`,
 
-  /** Qué ranura de la rueda ocupa. Las cuatro se dicen igual: estar en la
-   *  rueda ya es estar equipado, y "equipado" al lado de "ranura 3" son dos
-   *  palabras para lo mismo. */
+  /** Which slot on the wheel it sits in. All four read the same way: being on
+   *  the wheel is what equipped means, and "equipped" beside "slot 3" is two
+   *  words for one fact. */
   slot: (n: number) => `ranura ${n}`,
 
   search: (n: number) => `Buscar entre ${n} grafitis`,
@@ -15,28 +15,28 @@ export const sprays = {
   yours: 'Tuyos',
   notYours: 'No son tuyos',
 
-  // El lavado de cada celda es el color medido de su propio dibujo, que es lo
-  // único que mantiene legible una pared de cuadrados. Se ve en pantalla, así
-  // que no hace falta decirlo aquí: colourWhy lo explica una sola vez, abajo.
+  // Each tile is washed in the measured colour of its own art, which is the
+  // only way a wall of squares stays readable. That is visible on screen, so
+  // it is not said here: colourWhy explains it once, below.
   grid:
     'Un grafiti es cuadrado, así que aquí hay una grilla y no el tablero de ' +
     'ranuras de las armas. Están todos los del juego, no solo los tuyos.',
-  /** La rueda tiene cuatro ranuras y una puede estar vacía: Riot tiene un
-   *  grafiti llamado "None" y eso es lo que envía cuando no hay nada puesto. */
+  /** The wheel has four slots and one can be empty: Riot has a spray called
+   *  "None" and that is what comes back when nothing is in it. */
   wheel: (on: number, rest: number) =>
     `${on} están en la rueda ahora mismo, uno por ranura y hasta cuatro. Los ` +
     `otros ${rest} son tuyos, fuera de la rueda.`,
 
-  // --- mientras no llegó el catálogo ---------------------------------------
+  // --- before the catalogue lands ------------------------------------------
   waitingWhy:
     'Esperando el catálogo de grafitis: un solo fetch que el navegador guarda, ' +
     'así que esta pantalla es solo de la primera visita.',
 
-  // --- uno abierto ---------------------------------------------------------
+  // --- one opened ----------------------------------------------------------
   colourFrom: 'De dónde sale el color',
-  // El tono es una media pesada por croma sobre los píxeles con más de 12% de
-  // alfa y la saturación sale del percentil 88 — ALPHA_FLOOR y VIVID en
-  // design/hsv.ts. El estimador es nuestro, no del que mira un grafiti.
+  // The hue is a chroma-weighted mean over the pixels above 12% alpha and the
+  // saturation comes from the 88th percentile — ALPHA_FLOOR and VIVID in
+  // design/hsv.ts. The estimator is ours, not the reader's.
   colourWhy: (rgb: string) =>
     `rgb(${rgb}), medido del dibujo y no elegido: el navegador lee los píxeles ` +
     `de la imagen en un canvas de 96px.`,

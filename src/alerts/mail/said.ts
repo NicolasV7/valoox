@@ -7,9 +7,9 @@
 // The locale comes from the tab that asked, so a mail arrives in the language
 // of the screen that sent it.
 
-export type Lang = 'es' | 'en';
+export type Lang = 'en' | 'es';
 
-export const langOf = (raw: unknown): Lang => (raw === 'en' ? 'en' : 'es');
+export const langOf = (raw: unknown): Lang => (raw === 'es' ? 'es' : 'en');
 
 export interface Words {
   subject: (code: string) => string;

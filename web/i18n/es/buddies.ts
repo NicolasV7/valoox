@@ -1,12 +1,12 @@
-// Los amuletos: la pestaña y uno abierto. Un amuleto es cuadrado igual que un
-// grafiti, así que usa la misma grilla; lo que cambia es la línea de abajo.
+// Buddies: the tab, and one opened. A buddy is square like a spray, so it uses
+// the same grid; what changes is the line underneath.
 
 export const buddies = {
-  /** Instancias, no amuletos distintos: Riot los entrega por instancia, así
-   *  que este número es más grande que la cantidad de celdas. */
+  /** Instances, not distinct buddies: Riot hands them out by instance, so this
+   *  number is larger than the number of cells. */
   of: (have: number, all: number) => `${have} de ${all} amuletos`,
 
-  /** De qué arma cuelga. */
+  /** Which gun it hangs off. */
   on: (gun: string) => `en tu ${gun.toLowerCase()}`,
   onMany: (n: number) => `en ${n} armas`,
 
@@ -16,9 +16,9 @@ export const buddies = {
   yours: 'Tuyos',
   notYours: 'No son tuyos',
 
-  // La grilla de los grafitis, reusada en lugar de ganarse una segunda. Lo
-  // único que un amuleto no comparte es la línea de abajo, así que esta nota
-  // dice eso y el cierre que llevan las cuatro pestañas, nada más.
+  // The spray grid, borrowed outright rather than earning a second one. The
+  // line underneath is the only thing a buddy does not share, so that and the
+  // closing line every tab carries are all this note says.
   grid:
     'Un amuleto también es cuadrado, así que usa la grilla de los grafitis. La ' +
     'línea de abajo dice de qué arma cuelga. Están todos los del juego, no solo los tuyos.',
@@ -26,15 +26,15 @@ export const buddies = {
     `El número de arriba son ${have} instancias y aquí abajo hay ${kinds} ` +
     `amuletos distintos. Riot los cobra por instancia.`,
 
-  // --- mientras no llegó el catálogo ---------------------------------------
+  // --- before the catalogue lands ------------------------------------------
   waitingWhy:
     'Esperando el catálogo de amuletos: un solo fetch que el navegador guarda, ' +
     'así que esta pantalla es solo de la primera visita.',
 
-  // --- uno abierto ---------------------------------------------------------
+  // --- one opened ----------------------------------------------------------
   colourFrom: 'De dónde sale el color',
-  // Misma lectura que la del grafiti (design/hsv.ts). Sin pesar los píxeles
-  // vivos, todos los amuletos del juego promedian al mismo gris.
+  // The same reading as the spray's (design/hsv.ts). Without weighting the
+  // vivid pixels, every buddy in the game averages to the same grey.
   colourWhy: (rgb: string) =>
     `rgb(${rgb}), medido de este amuleto. Un amuleto es chico y casi todo ` +
     `contorno, así que la lectura pesa los píxeles vivos por encima de los planos.`,

@@ -1,17 +1,16 @@
-# Si encuentras algo, quiero saberlo antes que cualquier otra persona.
+# If you find a vulnerability, please report it privately first.
 Contact: mailto:nicolas@delapava.dev
-Preferred-Languages: es, en
+Preferred-Languages: en
 Canonical: https://valoox.store/.well-known/security.txt
 Canonical: https://drop.valoox.store/.well-known/security.txt
 Policy: https://github.com/NicolasV7/valoox/blob/main/SECURITY.md
 Expires: 2027-10-09T00:00:00.000Z
 
-# Lo que más me interesa, en orden:
-#  1. Cualquier forma de leer la sesión de otro usuario.
-#  2. Cualquier forma de hacer que el servidor llame a un endpoint de Riot
-#     que no esté en src/vault/upstream.ts. El repositorio es público:
+# Reports of particular interest, in order:
+#  1. Any way to read another user's session.
+#  2. Any way to make the server call a Riot endpoint outside the allowlist
+#     in src/vault/upstream.ts. The repository is public:
 #     https://github.com/NicolasV7/valoox
-#  3. XSS en el origen. La página puede alcanzar una sesión que saltea 2FA.
+#  3. XSS on this origin. The browser can use an already authenticated session.
 #
-# El detalle completo, con lo que ya se sabe y no cuenta como hallazgo, está
-# en SECURITY.md.
+# See SECURITY.md for the full policy, including known limitations.

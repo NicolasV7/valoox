@@ -16,9 +16,9 @@ product may not make.
 `web/components/` for text nodes and for `title`, `placeholder`, `aria-label` and
 `alt` with a literal. Every one of them should be `t().something`.
 
-**2. No concatenation around a value.** `'Quedan ' + n + ' ofertas'` cannot be
+**2. No concatenation around a value.** `'There are ' + n + ' offers'` cannot be
 translated — the word order is frozen. It must be a function:
-`restantes: (n) => …`. Same for every hand-written plural branch.
+`remaining: (n) => …`. Same for every hand-written plural branch.
 
 **3. `es/` and `en/` have the same keys.** A key in one and not the other is a
 string that will render as `undefined` the day someone switches locale. List any

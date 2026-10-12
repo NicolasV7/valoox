@@ -1,6 +1,6 @@
-// Lo que tienes, y lo que tienes puesto. Son dos preguntas distintas y esta
-// pestaña contesta las dos: la grilla muestra todas las armas del juego, no
-// solo las que vestiste.
+// What you have, and what you have on. Two different questions, and this tab
+// answers both: the grid shows every weapon in the game, not only the ones you
+// have dressed.
 
 export const collection = {
   title: 'Colección',

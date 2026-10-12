@@ -1,4 +1,4 @@
-// La pantalla a la que lleva el pie de un correo.
+// The screen the footer of an email leads to.
 
 export const stopped = {
   sure: '¿Parar los avisos?',
