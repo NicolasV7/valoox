@@ -1,0 +1,93 @@
+.crowd {
+  position: absolute;
+  inset: 0;
+}
+.st {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 17px;
+  border: 3px solid #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+  color: #0e0e11;
+  font-family: "Azeret Mono", monospace;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.st svg {
+  display: block;
+  flex: none;
+}
+.back .st {
+  filter: blur(4.5px) saturate(0.65);
+  box-shadow: none;
+}
+.s-worker {
+  left: 532px;
+  top: 92px;
+  background: #5a9fe2;
+  transform: rotate(-6deg);
+  z-index: 4;
+}
+.s-sealed {
+  left: 712px;
+  top: 36px;
+  background: #009587;
+  color: #f2f4f5;
+  transform: rotate(5deg);
+  z-index: 3;
+}
+.s-allow {
+  left: 660px;
+  top: 168px;
+  background: #fad663;
+  transform: rotate(-3deg);
+  z-index: 5;
+}
+.s-cron {
+  left: 928px;
+  top: 36px;
+  background: #f5955b;
+  transform: rotate(4deg);
+  z-index: 2;
+}
+.s-qr {
+  left: 912px;
+  top: 144px;
+  background: #d1548d;
+  color: #f2f4f5;
+  transform: rotate(-5deg);
+  z-index: 4;
+}
+.s-row {
+  left: 1088px;
+  top: 246px;
+  background: #f2f4f5;
+  transform: rotate(6deg);
+  z-index: 3;
+}
+.s-check {
+  left: 586px;
+  top: 240px;
+  background: #f2f4f5;
+  transform: rotate(-2deg);
+  z-index: 6;
+}
+.b-1 {
+  left: 846px;
+  top: 232px;
+  background: #5a9fe2;
+  opacity: 0.34;
+  transform: rotate(-12deg);
+}
+.b-2 {
+  left: 1058px;
+  top: 62px;
+  background: #fad663;
+  opacity: 0.2;
+  transform: rotate(11deg);
+}

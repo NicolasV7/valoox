@@ -23,6 +23,7 @@
     "mail": "node scripts/mailpreview.mjs",
     "grid": "node scripts/grid.mjs",
     "copy": "node scripts/copy.mjs",
+    "banner": "node scripts/banner.mjs",
     "who": "node scripts/who.mjs",
     "deploy:live": "npm run fonts && npm run art && npm run build && npm run migrate:live && wrangler deploy --env live",
     "migrate": "node scripts/migrate.mjs",

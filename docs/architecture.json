@@ -2,7 +2,8 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "valoox — arquitectura",
+    "title": "valoox — architecture",
+    "locale": "en",
     "quality_profile": "showcase",
     "viewBox": [
       1220,
@@ -10,36 +11,36 @@
     ],
     "views": [
       {
-        "id": "pedido",
-        "label": "Un pedido de tienda",
+        "id": "request",
+        "label": "A store request",
         "focus": [
           "browser",
           "worker",
           "allow",
           "riot"
         ],
-        "note": "Del navegador al Worker, y del Worker a Riot por la única salida que existe."
+        "note": "From the browser to the Worker, then to Riot through the only outbound gateway."
       },
       {
-        "id": "custodia",
-        "label": "Custodia del jar",
+        "id": "custody",
+        "label": "Session custody",
         "focus": [
           "worker",
           "seal",
           "d1",
           "key"
         ],
-        "note": "Dónde se guarda sellada la sesión de Riot y dónde se abre."
+        "note": "Where the Riot session is stored encrypted and where it is opened."
       },
       {
-        "id": "catalogo",
-        "label": "Catálogo en el navegador",
+        "id": "catalogue",
+        "label": "Browser catalogue",
         "focus": [
           "browser",
           "catalog",
           "kv"
         ],
-        "note": "Los 3,5 MB de valorant-api se unen en el cliente; el Worker nunca los toca."
+        "note": "The browser joins the 3.5 MB community catalogue; the Worker never parses it."
       }
     ],
     "repository": {
@@ -53,7 +54,7 @@
     {
       "id": "browser",
       "type": "frontend",
-      "label": "Navegador",
+      "label": "Browser",
       "sublabel": "cookie __Host-val",
       "pos": [
         40,
@@ -66,11 +67,11 @@
       "sources": [
         {
           "path": "src/app/cookie.ts",
-          "label": "secreto de 256 bits"
+          "label": "256-bit secret"
         },
         {
           "path": "web/data/private.ts",
-          "label": "datos de una cuenta"
+          "label": "One account's data"
         }
       ]
     },
@@ -78,7 +79,7 @@
       "id": "catalog",
       "type": "external",
       "label": "valorant-api.com",
-      "sublabel": "3,5 MB · Cache Storage",
+      "sublabel": "3.5 MB · Cache Storage",
       "pos": [
         40,
         580
@@ -90,7 +91,7 @@
       "sources": [
         {
           "path": "web/data/catalogue.ts",
-          "label": "índices"
+          "label": "Indexes"
         }
       ]
     },
@@ -98,7 +99,7 @@
       "id": "kv",
       "type": "database",
       "label": "KV  VAL",
-      "sublabel": "vistas cifradas",
+      "sublabel": "Encrypted views",
       "pos": [
         320,
         90
@@ -117,8 +118,8 @@
     {
       "id": "cron",
       "type": "cloud",
-      "label": "Cron cada 15 min",
-      "sublabel": "lotes tras 00:30 UTC",
+      "label": "Cron every 15 min",
+      "sublabel": "Batches after 00:30 UTC",
       "pos": [
         700,
         90
@@ -137,8 +138,8 @@
     {
       "id": "notify",
       "type": "external",
-      "label": "Tu correo",
-      "sublabel": "cola por cuenta y destino",
+      "label": "Your inbox",
+      "sublabel": "Account + destination queue",
       "pos": [
         980,
         90
@@ -157,7 +158,7 @@
       "id": "worker",
       "type": "backend",
       "label": "Worker  val",
-      "sublabel": "11 rutas /api/*",
+      "sublabel": "11 routes /api/*",
       "pos": [
         320,
         270
@@ -175,8 +176,8 @@
     {
       "id": "allow",
       "type": "security",
-      "label": "Allowlist de egreso",
-      "sublabel": "19 reglas · único fetch()",
+      "label": "Egress allowlist",
+      "sublabel": "19 rules · one fetch()",
       "pos": [
         700,
         270
@@ -208,8 +209,8 @@
     {
       "id": "seal",
       "type": "security",
-      "label": "Sellado",
-      "sublabel": "HKDF por uso y navegador",
+      "label": "Encryption",
+      "sublabel": "HKDF by purpose + browser",
       "pos": [
         320,
         430
@@ -228,7 +229,7 @@
       "id": "key",
       "type": "security",
       "label": "JAR_KEY",
-      "sublabel": "secret, fuera de la base",
+      "sublabel": "Secret outside storage",
       "pos": [
         580,
         430
@@ -242,7 +243,7 @@
       "id": "d1",
       "type": "database",
       "label": "D1  val-sessions",
-      "sublabel": "sesión + estado atómico",
+      "sublabel": "Session + atomic state",
       "pos": [
         320,
         580
@@ -261,7 +262,7 @@
   "boundaries": [
     {
       "kind": "region",
-      "label": "Cloudflare — plan gratuito",
+      "label": "Cloudflare — free plan",
       "wraps": [
         "kv",
         "cron",
@@ -275,7 +276,7 @@
     },
     {
       "kind": "security-group",
-      "label": "jar en claro solo al ejecutar",
+      "label": "Plaintext session only at runtime",
       "wraps": [
         "worker",
         "seal"
@@ -288,14 +289,14 @@
       "id": "ui-api",
       "from": "browser",
       "to": "worker",
-      "label": "API + secreto de cookie",
+      "label": "API + cookie secret",
       "variant": "emphasis"
     },
     {
       "id": "ui-catalog",
       "from": "browser",
       "to": "catalog",
-      "label": "el join pasa aquí, no en el Worker",
+      "label": "Catalogue joined in the browser",
       "fromSide": "bottom",
       "toSide": "top",
       "labelDy": 24
@@ -304,7 +305,7 @@
       "id": "worker-kv",
       "from": "worker",
       "to": "kv",
-      "label": "vista, sesión activa en D1",
+      "label": "View after D1 session check",
       "fromSide": "top",
       "toSide": "bottom",
       "labelDy": -22
@@ -313,7 +314,7 @@
       "id": "worker-seal",
       "from": "worker",
       "to": "seal",
-      "label": "abre el jar",
+      "label": "Opens the session",
       "variant": "security",
       "fromSide": "bottom",
       "toSide": "top",
@@ -332,7 +333,7 @@
       "id": "key-seal",
       "from": "key",
       "to": "seal",
-      "label": "deriva la subclave",
+      "label": "Derives a subkey",
       "variant": "security",
       "labelDy": -28
     },
@@ -340,7 +341,7 @@
       "id": "worker-allow",
       "from": "worker",
       "to": "allow",
-      "label": "toda llamada saliente",
+      "label": "Every outbound request",
       "variant": "emphasis",
       "labelDx": 62,
       "labelDy": -35
@@ -349,21 +350,21 @@
       "id": "allow-riot",
       "from": "allow",
       "to": "riot",
-      "label": "cuenta propia",
+      "label": "Your own account",
       "variant": "security"
     },
     {
       "id": "cron-worker",
       "from": "cron",
       "to": "worker",
-      "label": "por lotes",
+      "label": "Batches",
       "variant": "dashed"
     },
     {
       "id": "allow-notify",
       "from": "allow",
       "to": "notify",
-      "label": "aviso",
+      "label": "Alert",
       "variant": "dashed",
       "fromSide": "top",
       "toSide": "bottom"
@@ -372,20 +373,20 @@
   "cards": [
     {
       "dot": "cyan",
-      "title": "Qué entra y qué sale",
+      "title": "What goes in and out",
       "items": [
-        "Cookie renovada al aprobar el QR; D1 guarda un resumen con clave",
-        "QR cifrado: diez minutos de vigencia y cancelación al desconectar",
-        "Allowlist: sin compras, equipamiento ni chat"
+        "QR approval rotates the cookie; D1 stores a keyed fingerprint",
+        "Encrypted QR expires in ten minutes and is cancelled on disconnect",
+        "Allowlist excludes purchases, equipping and chat"
       ]
     },
     {
       "dot": "amber",
-      "title": "Custodia de la sesión",
+      "title": "Session custody",
       "items": [
-        "Sesión, cachés, QR, baja y cola usan claves y datos autenticados distintos",
-        "D1 decide revocación, intentos del OTP y consumo de enlaces",
-        "Rotar JAR_KEY invalida credenciales y cifrados anteriores"
+        "Session, cache, QR, stop links and outbox use distinct encryption purposes",
+        "D1 decides revocation, OTP attempts and link consumption",
+        "Rotating JAR_KEY invalidates old credentials and ciphertext"
       ]
     }
   ]

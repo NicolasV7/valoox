@@ -1,0 +1,115 @@
+/* The app's tier palette warms the ground behind the stickers. */
+.wash {
+  position: absolute;
+  inset: 0;
+}
+.wash i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(2px);
+}
+.w-1 {
+  left: 470px;
+  top: -62px;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(90, 159, 226, 0.34) 0%, rgba(90, 159, 226, 0) 68%);
+}
+.w-2 {
+  left: 620px;
+  top: 28px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 149, 135, 0.28) 0%, rgba(0, 149, 135, 0) 66%);
+}
+.w-3 {
+  left: 600px;
+  top: 76px;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(250, 214, 99, 0.28) 0%, rgba(250, 214, 99, 0) 66%);
+}
+.w-4 {
+  left: 880px;
+  top: 50px;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(209, 84, 141, 0.3) 0%, rgba(209, 84, 141, 0) 66%);
+}
+.w-5 {
+  left: 940px;
+  top: -96px;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(245, 149, 91, 0.28) 0%, rgba(245, 149, 91, 0) 68%);
+}
+
+.weave {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      107deg,
+      rgba(0, 0, 0, 0) 0 31%,
+      rgba(255, 255, 255, 0.022) 31% 45%,
+      rgba(0, 0, 0, 0) 45% 51%,
+      rgba(255, 255, 255, 0.012) 51% 58%,
+      rgba(0, 0, 0, 0) 58% 72%,
+      rgba(255, 255, 255, 0.017) 72% 77%,
+      rgba(0, 0, 0, 0) 77%
+    ),
+    repeating-linear-gradient(107deg, rgba(255, 255, 255, 0.018) 0 1px, rgba(0, 0, 0, 0) 1px 23px);
+}
+
+/* Real sprays sit behind the badges and fade into the existing ground. */
+.sprays {
+  position: absolute;
+  inset: 0;
+}
+.spray {
+  position: absolute;
+  object-fit: contain;
+  opacity: 0.78;
+  filter: saturate(0.8) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+  mask-image: linear-gradient(to bottom, #000 0 58%, rgba(0, 0, 0, 0.65) 83%, transparent 100%);
+}
+.spray-wingman {
+  left: 1090px;
+  top: 76px;
+  width: 176px;
+  height: 196px;
+  transform: rotate(8deg);
+}
+.spray-crab {
+  left: 818px;
+  top: 187px;
+  width: 178px;
+  height: 166px;
+  transform: rotate(-8deg);
+}
+
+.floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 110px;
+  background: linear-gradient(
+    to bottom,
+    rgba(14, 14, 17, 0) 0%,
+    rgba(14, 14, 17, 0.55) 58%,
+    #0e0e11 100%
+  );
+}
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    97deg,
+    #0e0e11 0%,
+    rgba(14, 14, 17, 0.97) 28%,
+    rgba(14, 14, 17, 0.74) 38%,
+    rgba(14, 14, 17, 0) 50%
+  );
+}

@@ -1,162 +1,118 @@
-![valoox](design/banner.png)
+![valoox — your VALORANT store without opening the game](design/banner.png)
 
 # valoox
 
-Your VALORANT daily store and your collection, on your phone, without opening
-the game.
+Your VALORANT daily store and collection, on your phone, without opening the
+game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
 
-One Cloudflare Worker on the free plan. Sign in by scanning a QR code with Riot
-Mobile — there is no password field on any screen, because the password never
-comes here.
+**[Open the app](https://drop.valoox.store)** · [Architecture](docs/architecture.html)
+· [Security and limitations](SECURITY.md) · [Design](DESIGN.md)
 
-**[drop.valoox.store](https://drop.valoox.store)** — or run your own copy:
+## Features
+
+- Daily offers, night market, bundles and accessories, with owned items marked.
+- Weapon skins, variants, sprays, buddies, cards and titles in your collection.
+- Wishlist alerts by verified email or Discord webhook. Batches run every fifteen
+  minutes outside the first half hour of each UTC day. Lists are grouped by
+  account and destination; email retries use Resend idempotency.
+
+One Cloudflare Worker serves a Preact app, with D1 for sessions and atomic state
+and KV for encrypted views. Riot sessions use purpose-bound AES-256-GCM keys;
+D1 checks authentication and revocation before private cache reads. Every
+outbound request passes the [19-rule allowlist](src/vault/upstream.ts), which
+excludes purchases, equipping and chat. The browser joins the community
+catalogue; code, fonts and fixed artwork are served from the app's own origin.
+Catalogue data, item artwork and clips use narrowly allowed external hosts.
+
+English is the source and fallback language. A Spanish browser preference selects
+the Spanish translation, including emails requested from that tab.
+
+## Local development
+
+Use Node 24 or newer. Copy [.dev.vars.example](.dev.vars.example) to `.dev.vars`
+and fill in `JAR_KEY` with 32 random bytes encoded as base64. Email is optional.
+
+```sh
+npm ci
+npm run fonts
+npm run art
+npm run migrate -- --local
+npm run dev
+```
+
+`npm run check` runs type checks, lint, tests and the browser build.
+`npm run phone` serves local development over Tailscale HTTPS;
+`npm run phone:off` removes it. Keep the connection private; never use Funnel.
+
+## Deploy your own copy
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/NicolasV7/valoox)
 
-That forks this repository into your GitHub, creates the D1 database and the KV
-namespace in your own Cloudflare account, asks you for the secrets below, and
-deploys. It lands on a `workers.dev` address, which is what the `Secure` cookie
-needs, and versioned migrations are applied by the deploy script. See
-[Running your own](#running-your-own).
+The button provisions resources in your own account. For manual setup, create
+the bindings below and replace the default placeholder IDs in `wrangler.toml`:
 
-## What it does
-
-- Today's store, the night market, bundles and the weekly accessory store, with
-  what you already own marked.
-- Your whole collection: every weapon, skin, variant and chroma, plus sprays,
-  buddies, cards and titles.
-- Star anything. The job checks after rotation, combines browser lists by
-  account/destination and queues one daily alert with provider idempotency.
-
-## The file to read first
-
-`src/vault/upstream.ts` is the egress allowlist: host, path and method, frozen.
-Every outbound request passes it before `fetch` is called, and the endpoints
-that **change** something — buy, equip, queue, party, chat — are simply not on
-it. That is what makes "read-only" checkable instead of promised.
-
-Nineteen rules. The number is on the Account screen and a test fails if the two
-disagree.
-
-## How the pieces fit
-
-- **The session is sealed before it reaches the database.** AES-256-GCM under a
-  key derived per browser, with the key in the Worker's secrets and never in
-  D1. Its identifiers cannot replay the browser cookie. QR scans are encrypted,
-  security counters are atomic in D1, and caches require a live session.
-- **The Worker parses no catalogue.** Names, artwork, tiers and clips are
-  joined in the browser against `valorant-api.com`. A Worker gets 10ms of CPU
-  per request, and that one number decided the architecture.
-- **Code and fixed assets load from this origin.** No external scripts, font
-  host or analytics. The community catalogue, its artwork and Riot clips each
-  have a narrow CSP directive.
-
-```mermaid
-flowchart LR
-  B["Browser<br/>host-only secret"]
-  W["Worker val<br/>11 routes /api/*"]
-  A["Egress allowlist<br/>upstream.ts"]
-  R["Riot"]
-  K["KV<br/>caches"]
-  S["Sealed<br/>AES-256-GCM"]
-  D["D1<br/>sealed sessions + atomic state"]
-  C["valorant-api.com<br/>3.5 MB"]
-  M["Your inbox"]
-  T["Cron batches after 00:30"]
-
-  B -->|GET /api/*| W
-  B -.->|the catalogue is joined here| C
-  W --> K
-  W --> S --> D
-  W --> A --> R
-  A -.-> M
-  T -.-> W
+```sh
+npx wrangler d1 create val-sessions
+npx wrangler kv namespace create VAL
+npx wrangler secret put JAR_KEY
+npm run deploy
 ```
 
-[Interactive diagram](docs/arquitectura.html), generated from
-`docs/arquitectura.json`.
+The default environment uses a separate Worker on `workers.dev`. Both deploy
+scripts apply versioned D1 migrations before publishing. `npm run deploy:live`
+targets this project's `val` Worker and custom domains; use it only with the
+corresponding account, bindings and secrets.
 
-## Which version you are looking at
+| Worker setting | Purpose |
+| --- | --- |
+| `JAR_KEY` | Required secret: 32 random bytes, base64. Rotation invalidates existing sessions and encrypted state. |
+| `RESEND_KEY` | Optional sending-only API key restricted to your verified sending domain. |
+| `RESEND_HOOK` | Webhook signing secret required to accept Resend delivery events. |
+| `MAIL_FROM` | Plain variable: a sender address on your verified domain. Change it for your own deployment. |
 
-The account screen prints the commit the deployed page was built from and
-links to it here. That says where the code came from, not who put it up.
+### Email with Resend
 
-Configure a scoped Cloudflare token and account id in GitHub Secrets to enable
-the deploy workflow. Without them the workflow explicitly skips deployment.
-When a deploy runs from CI the browser bundle is attested with Sigstore, and
-then it is checkable without taking my word for it:
+1. [Verify your sending domain](https://resend.com/docs/dashboard/domains/introduction)
+   and set `MAIL_FROM` to an address on it.
+2. Create a [sending-only API key](https://resend.com/docs/api-reference/api-keys/create-api-key)
+   restricted to that domain; save it as the Worker's `RESEND_KEY` secret.
+3. Add `https://<your-app-host>/api/hook/resend` as a
+   [Resend webhook](https://resend.com/docs/webhooks/introduction). Subscribe to
+   email events and save its signing secret as `RESEND_HOOK`.
+4. In the app, open Alerts and verify the recipient address with the emailed code.
+
+Use `npx wrangler secret put <NAME>` for your own default deployment, or append
+`--env live` for this project's production environment. Worker secrets belong
+in Cloudflare; local equivalents belong in the ignored `.dev.vars` file.
+
+### GitHub Actions
+
+Add repository Actions secrets named `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID`. The token needs access to deploy Workers, use the configured
+KV binding, apply D1 migrations and manage the configured zone's Workers routes.
+Scope it to the deployment account and zone.
+
+The [Deploy workflow](.github/workflows/deploy.yml) runs on pushes to `main` or
+manual dispatch. It skips deployment when the token is absent. Successful runs
+check the code, attest `public/app.js`, apply live migrations and deploy.
+The Account screen links to the browser build's source commit. Verify a CI-built
+browser bundle with:
 
 ```sh
 curl -sO https://drop.valoox.store/app.js
 gh attestation verify app.js --repo NicolasV7/valoox
 ```
 
-That covers the browser half. Cloudflare publishes no hash of the Worker
-bundle it runs, so there is no way from outside to confirm the Worker
-answering a request is this commit. [`SECURITY.md`](SECURITY.md) says so too.
+The attestation covers the browser bundle. It does not attest the running Worker.
+Disconnecting removes this app's access; it does not revoke Riot's session or
+erase Cloudflare backup history. See [SECURITY.md](SECURITY.md) for retention and
+the remaining limits.
 
-## Running your own
+## License and artwork
 
-Use your own resource ids in the portable defaults; placeholders prevent a stray
-portable deploy from touching live storage. By hand:
+[AGPL-3.0](LICENSE). See [PRODUCT.md](PRODUCT.md) for project identity and fork
+guidance. Not affiliated with Riot Games. VALORANT and its artwork, including
+the banner's sprays, belong to Riot Games, Inc.
 
-Use Node 24 or newer; storage regression tests use its built-in SQLite.
-
-```sh
-gh repo fork NicolasV7/valoox --clone && cd valoox
-npm ci
-npx wrangler d1 create val-sessions        # put the id in wrangler.toml
-npx wrangler kv namespace create VAL       # likewise
-npx wrangler secret put JAR_KEY            # see .dev.vars.example
-npm run deploy
-```
-
-Three secrets, and only the first is required:
-
-| | |
-| --- | --- |
-| `JAR_KEY` | 32 random bytes, base64. Every session is sealed under a key derived from it; rotating it signs everybody out at once. |
-| `RESEND_KEY` | [resend.com](https://resend.com) sending-only API key for your verified domain, for the six-digit code and the morning alert. Without it the app runs and the alerts tab says it has nowhere to send. |
-| `RESEND_HOOK` | A Resend webhook signing secret, so a bounce can be believed. Without it the webhook route rejects everything, which is the correct failure. |
-
-Your copy is yours and it is not valoox.store — different Worker, different
-database, different key, and nothing of mine can read anything of yours. The
-licence covers the code. The name and the mark are not part of it, so call it
-something else before you point anyone at it.
-
-## Running it
-
-```sh
-npm ci
-npm run fonts     # once — downloads the two typefaces
-npm run art       # once — downloads the fixed artwork
-npm run dev       # builds the front end, then starts the Worker
-npm run check     # typecheck + lint + tests + build. What CI runs.
-```
-
-It is a phone app, so look at it on a phone: `npm run phone` puts the dev
-server behind Tailscale with a real certificate, which the `Secure` cookie
-needs. `npm run phone:off` takes it down.
-
-## What this does not claim
-
-It is not zero-knowledge and it does not store nothing: there is sealed state, and
-`/account/keep` lists exactly what is in it. Disconnecting deletes what we
-hold — Riot's own session keeps existing on their side until it expires, and
-saying otherwise would be a claim about a system nobody here controls.
-
-Found something? [`SECURITY.md`](SECURITY.md) says what I most want to hear
-about, and what is already known and is not a finding.
-
-Not affiliated with Riot Games. VALORANT and its artwork belong to Riot Games,
-Inc.
-
-## Licence
-
-[AGPL-3.0](LICENSE). The permissive licences let somebody run a modified copy
-of this and never show you what they changed, which is the one thing a site
-whose argument is "read the code" cannot allow. Run it, fork it, change it —
-and if you serve it to anybody, the source of what you served has to be
-available to them too.
-
-The name and the mark are not part of that. Call your fork something else.
+The banner source is [design/banner.html](design/banner.html). After fetching
+fonts and artwork, `npm run banner` renders its PNG using local Chrome or Edge.

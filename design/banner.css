@@ -1,0 +1,66 @@
+@import url("wash.css");
+@import url("badge.css");
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("../public/fonts/bricolage.woff2") format("woff2");
+  font-weight: 200 700;
+}
+
+@font-face {
+  font-family: "Azeret Mono";
+  src: url("../public/fonts/azeret.woff2") format("woff2");
+  font-weight: 400 700;
+}
+
+html,
+body {
+  margin: 0;
+  background: #0e0e11;
+}
+
+.band {
+  position: relative;
+  width: 1280px;
+  height: 340px;
+  overflow: hidden;
+  color: #f2f4f5;
+  font-family: "Bricolage Grotesque", sans-serif;
+  background: radial-gradient(130% 88% at 22% -18%, #1a1e25 0%, #121419 46%, #0e0e11 100%);
+}
+
+.said {
+  position: absolute;
+  left: 64px;
+  top: 66px;
+  width: 600px;
+}
+.mark {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 22px;
+}
+.mark span {
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+h1 {
+  margin: 0;
+  font-size: 46px;
+  font-weight: 200;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+h1 b {
+  font-weight: 500;
+}
+.under {
+  margin: 22px 0 0;
+  font-family: "Azeret Mono", monospace;
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a7aeb3;
+}

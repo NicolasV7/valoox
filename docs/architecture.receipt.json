@@ -1,0 +1,16 @@
+{
+  "diagram_type": "architecture",
+  "output": "architecture.html",
+  "specification_sha256": "3955fcb70bd78170325b795414eb1c87ebc20de5998b466885af8bdf5b021225",
+  "artifact_sha256": "8db5bb0e36d1a5f762f8974bde279b6e9dba0da8542fa7c644395f9bd14020e6",
+  "specification_bytes": 7662,
+  "artifact_bytes": 815117,
+  "revision": "82ff015259da2e7aeccbacbcfd768f7ec6a8281c",
+  "validation": "9/9 showcase, 0 errors, 0 warnings",
+  "browser_evidence": "passed",
+  "visual_review": "passed",
+  "correction_rounds": 0,
+  "visual_evidence": "architecture.visual-check.json",
+  "ui_language": "English viewer controls and authored content",
+  "visual_review_scope": "Default READ view at 1440x900 and 2048x1320 in both themes; labels, routes, node fit and cards inspected from the four artifact-bound screenshots."
+}
