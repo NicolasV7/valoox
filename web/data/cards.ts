@@ -43,7 +43,7 @@ let held: Promise<Card[]> | null = null;
 /** Every card, in Riot's own order. Never rejects. */
 export function cards(): Promise<Card[]> {
   held ??= fetch(V1 + 'playercards')
-    .then((r) => (r.ok ? r.json() : null))
+    .then((r) => (r.ok ? (r.json() as Promise<{ data?: Raw[] }>) : null))
     .then((j: { data?: Raw[] } | null) =>
       (j?.data ?? []).map((c) => {
         if (c.isHiddenIfNotOwned) keepHidden(c.uuid);

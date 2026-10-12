@@ -1,91 +1,50 @@
-// Where it goes.
-//
-// One channel: an address, proved. The test button and the proof are the same
-// action, because a notifier that will mail any address on request is a spam
-// cannon with somebody else's return label on it.
-//
-// The address is checked here before the button does anything, and checked
-// again by the Worker, which is the one that counts. What this one buys is the
-// difference between being told now and being told after a round trip.
-
 import { useRef, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
 import { useLeft } from '../components/Countdown.tsx';
-import { Mail } from '../components/icons.tsx';
+import { FlowArt, FlowBrand, FlowHeading, FlowInfo, FlowState } from '../components/Flow.tsx';
+import { useAction } from '../data/action.ts';
+import { reseeded } from '../data/api.ts';
 import { again, open, refused, reload, usePrefs, waiting } from '../data/channel.ts';
 import { sameMailbox } from '../data/mailbox.ts';
-import { SPRAY } from '../design/sprays.ts';
+import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
-import { ALERTS, go } from '../route.ts';
+import { ALERTS, go, href, intercept } from '../route.ts';
+import { AlertsLoading } from './Alerts.loading.tsx';
 
-/** The same shape the Worker uses, for the same reason it is not RFC 5322:
- *  the real check is whether a code comes back. */
 const ADDRESS = /^[^\s@,;:<>"']{1,64}@[^\s@,;:<>"'.]{1,63}(\.[^\s@,;:<>"'.]{1,63})+$/;
+const REMOVE = { name: 'alerts', step: 'remove' } as const;
 
 export function AlertsChannel() {
   const s = t().alerts;
+  const f = t().flows;
   const prefs = usePrefs();
   const [to, setTo] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const [said, setSaid] = useState<string | null>(null);
   const [until, setUntil] = useState<number | null>(null);
+  const { busy, run } = useAction();
   const wait = useLeft(until);
   const field = useRef<HTMLInputElement>(null);
-
   const now = to ?? prefs?.mail?.to ?? '';
-  // Same INBOX, not same string — see data/mailbox.ts. Typing a `+` is not
-  // changing the address, and neither is a dot inside a gmail local part.
   const here = sameMailbox(now, prefs?.mail?.to);
-  const ok = prefs?.mail?.ok === true && here;
-  // A code is already in that mailbox. Sending a second one beside it is the
-  // move that makes somebody read two messages to find out which digits
-  // count, so the button stops offering it and points at the boxes instead.
-  // Typing a different address brings the send back, because the code that
-  // is out is not for that one.
-  const typing = here && !ok && waiting(prefs);
-  // The refusal belongs to the address it was about. Typing a different one
-  // makes it somebody else's history, so the chip stops reporting it.
   const bad = refused(prefs?.mail?.said) && here;
+  const ok = prefs?.mail?.ok === true && here && !bad;
+  const typing = here && !ok && waiting(prefs);
   const valid = ADDRESS.test(now.trim()) && now.trim().length <= 254;
-  // The address that failed is the one send that cannot work, so the button
-  // is shut until it is a different one. The Worker refuses it too; this is
-  // only the half that says so before the round trip.
-  const stuck = bad;
-  // Nothing has a state until there is something to have a state about. An
-  // empty field labelled "not verified" is an accusation about a blank.
-  const stated = now.trim().length > 0;
-  // A verified address has nothing to send: the code it would carry has
-  // already been carried back. So while the field still says what the row
-  // says, the only control is the one that takes you to changing it — and the
-  // moment a single character differs, `ok` is false and the send button is
-  // there on its own. No second piece of state decides that; the field does.
-  const locked = ok;
 
+  if (!prefs) return <AlertsLoading step="channel" />;
   return (
-    <main class="screen bell">
+    <main class="screen flow">
+      <FlowBrand />
       <Back to={ALERTS} said={t().common.nav.alerts} />
-      <div class="bell__crown">
-        <h1 class="bell__title">{s.whereItGoes}</h1>
-        {/* One channel, posted carefully. Picked for what it is of, like the
-            rest — see design/sprays.ts. */}
-        <img src={SPRAY.sending} alt="" width="84" height="84" />
-      </div>
-
-      <div class={bad ? 'bell__card bell__card--bad' : 'bell__card'}>
-        <p class="bell__kind">
-          <Mail />
-          {s.email}
-          {stated && (
-            <span class={state(ok, bad)}>
-              <span class="bell__dot" />
-              {ok ? s.verified : bad ? verdict(prefs?.mail?.said) : s.notVerified}
-            </span>
-          )}
-        </p>
-
-        <label class="bell__label" for="addr">
-          {s.anAddress}
-        </label>
+      <FlowHeading eyebrow={f.destination} title={s.whereItGoes} lead={f.inboxLead} />
+      <FlowArt art={FLOW.email} className="flow__mail">
+        <div>
+          <h2>{f.emailAlerts}</h2>
+          <p>{f.codeFirst}</p>
+        </div>
+      </FlowArt>
+      <label class="flow__field" for="addr">
+        <span class="label">{f.emailLabel}</span>
         <input
           ref={field}
           id="addr"
@@ -93,104 +52,89 @@ export function AlertsChannel() {
           inputMode="email"
           autocomplete="email"
           spellcheck={false}
-          class={locked ? 'bell__input bell__input--shut' : 'bell__input'}
           value={now}
+          maxLength={254}
+          disabled={busy}
+          placeholder={f.emailPlaceholder}
           onInput={(e) => {
-            setTo((e.currentTarget as HTMLInputElement).value);
+            setTo(e.currentTarget.value);
             setSaid(null);
           }}
         />
-
-        {locked ? (
-          <button type="button" class="btn btn--quiet bell__go" onClick={edit}>
-            {s.editAddress}
-          </button>
-        ) : typing ? (
-          <button
-            type="button"
-            class="btn bell__go"
-            onClick={() => go({ name: 'alerts', step: 'code' })}
-          >
-            {s.typeTheCode}
-          </button>
-        ) : (
-          <button
-            type="button"
-            class="btn bell__go"
-            disabled={!valid || busy || stuck || wait > 0}
-            onClick={start}
-          >
-            {busy ? t().common.loading : s.sendATest}
-          </button>
-        )}
-
-        <p class={said || stuck || wait > 0 ? 'bell__why bell__why--bad' : 'bell__why'}>
-          {/* The dot only joins once there is a state it is reporting. */}
-          {(stated || said) && <span class="bell__dot" />}
-          <span>
-            {wait > 0
-              ? s.waitSeconds(wait)
-              : (said ?? (stuck ? s.changeIt : typing ? s.oneIsOut : s.testIsProof))}
-          </span>
+      </label>
+      {now.trim() && (
+        <FlowState kind={bad ? 'bad' : ok ? 'ok' : 'wait'}>
+          {bad ? s.wasRefused : ok ? s.verified : s.notVerified}
+        </FlowState>
+      )}
+      {ok ? (
+        <button
+          type="button"
+          class="btn btn--quiet"
+          onClick={() => {
+            field.current?.focus();
+            field.current?.select();
+          }}
+        >
+          {s.editAddress}
+        </button>
+      ) : typing ? (
+        <button type="button" class="btn" onClick={() => go({ name: 'alerts', step: 'code' })}>
+          {s.typeTheCode}
+        </button>
+      ) : (
+        <button
+          type="button"
+          class="btn"
+          disabled={!valid || busy || bad || wait > 0}
+          onClick={start}
+        >
+          {busy ? t().common.loading : s.sendATest}
+        </button>
+      )}
+      {(said || bad || wait > 0) && (
+        <p class="flow__problem" role="alert">
+          {wait > 0 ? s.waitSeconds(wait) : (said ?? s.changeIt)}
         </p>
-      </div>
-
-      <p class="legal bell__note">{s.sameInbox}</p>
-      <p class="legal bell__note">{s.oneChannel}</p>
-      <p class="legal bell__note">{s.whyACode}</p>
-      <p class="legal bell__note">{s.changeItLater}</p>
+      )}
+      {typing && <p class="flow__note">{s.oneIsOut}</p>}
+      <FlowInfo title={f.whyCode}>{f.proofWhy}</FlowInfo>
+      <p class="flow__note">{f.changing}</p>
+      <p class="flow__note">{s.sameInbox}</p>
+      {prefs.mail && (
+        <a class="flow__leave" href={href(REMOVE)} onClick={intercept(REMOVE)}>
+          {f.removeEmail}
+        </a>
+      )}
     </main>
   );
 
-  /** Puts the cursor in the field. Synchronous, inside the click, because a
-   *  focus deferred to the next render has lost the gesture and iOS opens no
-   *  keyboard for one — which is also why the field is not readOnly: iOS
-   *  opens no keyboard for one of those either, however it was focused. */
-  function edit() {
-    setSaid(null);
-    field.current?.focus();
-  }
-
-  async function start() {
-    setBusy(true);
-    setSaid(null);
-    const address = now.trim();
-    // Re-sending to the address already stored is the same button, so it uses
-    // the route that does not need the address handed to it again.
-    const res = address === prefs?.mail?.to ? await again() : await open(address);
-    setBusy(false);
-    if (typeof res !== 'object' || res === null) return;
-
-    const out = res as { error?: string; wait?: number; sent?: boolean; said?: string };
-    // A moment, not a count: see useLeft in components/Countdown.tsx.
-    if (out.error === 'wait') return setUntil(Date.now() + (out.wait ?? 0) * 1000);
-    if (out.error === 'address') return setSaid(s.badAddress);
-    if (out.error === 'taken') return setSaid(s.taken);
-    if (out.error === 'bounced') return setSaid(s.changeIt);
-    if (out.error === 'opened') return setSaid(s.alreadyThere);
-    await reload();
-
-    // It went: the next screen is the one that asks for the code.
-    if (out.sent) return go({ name: 'alerts', step: 'code' });
-    // The provider refused the address itself, which is a screen of its own
-    // because the useful next move is not on this one.
-    if (refused(out.said)) return go(ALERTS);
-    // Anything else — a 5xx, a timeout, our own key missing — is not the
-    // address's fault, so it stays here with the word the provider used.
-    setSaid(out.said ?? '');
+  function start() {
+    return run(
+      async (active) => {
+        setSaid(null);
+        const address = now.trim();
+        const out = address === prefs?.mail?.to ? await again() : await open(address);
+        if (!active() || reseeded(out)) return;
+        if (out.error === 'wait') return setUntil(Date.now() + (out.wait ?? 60) * 1000);
+        if (out.error === 'address') return setSaid(s.badAddress);
+        if (out.error === 'taken') return setSaid(s.taken);
+        if (out.error === 'bounced') return setSaid(s.changeIt);
+        if (out.error === 'opened') {
+          await reload();
+          if (active()) setSaid(s.alreadyThere);
+          return;
+        }
+        if (!(await reload())) {
+          if (active()) setSaid(f.networkFailed);
+          return;
+        }
+        if (!active()) return;
+        if (out.sent) return go({ name: 'alerts', step: 'code' });
+        if (refused(out.said)) return go(ALERTS);
+        setSaid(f.providerUnavailable);
+      },
+      () => setSaid(f.networkFailed),
+    );
   }
 }
-
-/** What went wrong, in a word. The provider's own string says it in theirs —
- *  `resend 422`, `email.bounced` — and on a chip that reads as a fault code
- *  for the reader to look up. These three are the distinctions that change
- *  what to do about it, which is what makes them worth drawing. */
-const verdict = (said: string | undefined): string => {
-  const s = t().alerts;
-  if (said === 'email.suppressed') return s.wasBlocked;
-  if (said === 'email.bounced' || said === 'email.complained') return s.wasBounced;
-  return s.wasRefused;
-};
-
-const state = (ok: boolean, bad: boolean) =>
-  'bell__state ' + (ok ? 'bell__state--ok' : bad ? 'bell__state--bad' : 'bell__state--wait');

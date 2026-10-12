@@ -1,26 +1,11 @@
-// Alerts, working.
-//
-// Both halves show their own state rather than one summary: where it goes is
-// a different fact from what is watched, and a screen that collapses them into
-// "3 alerts set up" is a screen that cannot tell you the address bounced.
-//
-// The two clocks are Riot's own. Guns rotate daily and accessories weekly, and
-// those are different numbers — writing one and calling it "the rotation"
-// would be the screen guessing about the half it was not told.
-//
-// The four kinds of accessory are NOT split here. They are split where you go
-// looking for one — see Alerts.search.tsx — and that is the screen with a
-// field in it. This one is the list you already made: it is yours, it is
-// short, and putting tabs on it hides most of your own list behind a tap to
-// save a scroll you were going to do anyway.
-
 import { Countdown } from '../components/Countdown.tsx';
-import { Chevron, Mail, Search } from '../components/icons.tsx';
+import { FlowArt, FlowBrand, FlowHeading, FlowRow, FlowState } from '../components/Flow.tsx';
 import { Watch } from '../components/Watch.tsx';
 import { waiting } from '../data/channel.ts';
 import { LEVELS, TITLES } from '../data/findable.ts';
 import { BITS, GUNS, useStars } from '../data/stars.ts';
 import type { Prefs, StoreView } from '../data/types.ts';
+import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept, type Route, type Whence } from '../route.ts';
 import { AlertsStandby } from './Alerts.standby.tsx';
@@ -31,51 +16,49 @@ const ADD: Route = { name: 'alerts', step: 'add' };
 
 export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }) {
   const s = t().alerts;
+  const f = t().flows;
   const mail = prefs.mail;
-  // Six digits already out: the card leads to the boxes rather than back to
-  // the field they were asked for in.
-  const to = waiting(prefs) && mail?.ok !== true ? CODE : CHANNEL;
   const { stars, on, shut, toggle } = useStars();
   const all = stars ?? [];
-  // Anything starred before the type was kept is a gun: that is all the app
-  // could star back then.
   const guns = all.filter((w) => (w.type ?? LEVELS) === LEVELS);
   const bits = all.filter((w) => (w.type ?? LEVELS) !== LEVELS);
-  // Only when the whole section is titles. One title among the sprays keeps
-  // the column, because there the alignment is what the column is for.
   const wordy = bits.length > 0 && bits.every((w) => w.type === TITLES);
   const ok = mail?.ok === true;
-  // A starred row opens the thing, and the way back out of it is this list.
+  const to = waiting(prefs) && !ok ? CODE : CHANNEL;
   const from: Whence = { to: { name: 'alerts' }, said: t().common.nav.alerts };
-
   return (
-    <main class="screen bell">
-      <header class="bell__head">
-        <h1>{t().common.nav.alerts}</h1>
-        <p class="small">{s.what}</p>
-      </header>
-
-      <a class="watch__to" href={href(to)} onClick={intercept(to)}>
-        <span class="watch__cap">
-          <span class="label">{s.whereItGoes}</span>
-          <span class="watch__change">{s.change}</span>
-        </span>
-        <span class="watch__who">
-          <Mail />
-          <span class="watch__addr">{mail?.to || s.yourEmail}</span>
-          <span class={ok ? 'bell__state bell__state--ok' : 'bell__state bell__state--wait'}>
-            <span class="bell__dot" />
+    <main class="screen flow">
+      <FlowBrand />
+      <FlowHeading eyebrow={f.radar} title={t().common.nav.alerts} lead={f.alertsLead} />
+      <FlowArt art={FLOW.watching} className="flow__hero">
+        <div>
+          <span class="label">{f.onRadar}</span>
+          <strong class="flow__number">
+            {all.length} <span>{f.worthWaiting(all.length)}</span>
+          </strong>
+          <span class="small">{f.listPromise}</span>
+        </div>
+      </FlowArt>
+      <FlowRow
+        to={to}
+        label={s.whereItGoes}
+        title={mail?.to || s.yourEmail}
+        state={
+          <FlowState kind={ok ? 'ok' : 'wait'}>
             {ok ? s.verified : waiting(prefs) ? s.oneIsOut : s.notVerified}
-          </span>
-          <Chevron size={15} />
-        </span>
-      </a>
-
+          </FlowState>
+        }
+      />
       {!ok && <AlertsStandby starred={all.length} />}
-
-      <Group said={s.weapons} left={view.remaining} />
+      <Group
+        title={s.weapons}
+        left={view.remaining}
+        since={view.fetchedAt}
+        count={guns.length}
+        max={GUNS}
+      />
       {guns.length ? (
-        <div class="watch__list">
+        <div class="flow__list">
           {guns.map((w) => (
             <Watch
               key={w.id}
@@ -88,12 +71,17 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
           ))}
         </div>
       ) : (
-        <p class="legal bell__note">{s.noGuns}</p>
+        <p class="flow__note">{s.noGuns}</p>
       )}
-
-      <Group said={s.accessories} left={view.accessory?.remaining ?? null} />
+      <Group
+        title={s.accessories}
+        left={view.accessory?.remaining ?? null}
+        since={view.fetchedAt}
+        count={bits.length}
+        max={BITS}
+      />
       {bits.length ? (
-        <div class="watch__list">
+        <div class="flow__list">
           {bits.map((w) => (
             <Watch
               key={w.id}
@@ -107,39 +95,40 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
           ))}
         </div>
       ) : (
-        <p class="legal bell__note">{s.noBits}</p>
+        <p class="flow__note">{s.noBits}</p>
       )}
-
-      <div class="watch__add">
-        {ok ? (
-          <a class="find watch__find" href={href(ADD)} onClick={intercept(ADD)}>
-            <Search />
-            {s.addSomething}
-          </a>
-        ) : (
-          <span class="find watch__find watch__find--shut">
-            <Search />
-            {s.addSomething}
-          </span>
-        )}
-        <span class="watch__count num">{s.outOfBoth(guns.length, GUNS, bits.length, BITS)}</span>
-      </div>
-
-      <p class="legal bell__note">{s.onlyWhatTurnsUp}</p>
-      <p class="legal bell__note">{s.hundredWhy}</p>
+      <a class="btn" href={href(ADD)} onClick={intercept(ADD)}>
+        {f.add}
+      </a>
+      <p class="flow__note">{f.noMatch}</p>
+      <p class="flow__note">{s.hundredWhy}</p>
     </main>
   );
 }
 
-/** A section heading with the clock that governs it. Null when Riot did not
- *  send one — an accessory shop is absent, not zero. */
-function Group({ said, left }: { said: string; left: number | null }) {
+function Group({
+  title,
+  left,
+  since,
+  count,
+  max,
+}: {
+  title: string;
+  left: number | null;
+  since: number;
+  count: number;
+  max: number;
+}) {
   return (
-    <div class="watch__cap watch__cap--sect">
-      <h2 class="label">{said}</h2>
+    <div class="flow__band">
+      <div>
+        <h2>{title}</h2>
+        <span class="flow__count num">{t().alerts.outOf(count, max)}</span>
+      </div>
       {left !== null && (
-        <span class="watch__clock">
-          {t().alerts.rotatesIn} <Countdown from={left} />
+        <span class="flow__clock">
+          <Countdown from={left} since={since} />
+          <span class="flow__clock-label">{t().alerts.rotatesIn}</span>
         </span>
       )}
     </div>

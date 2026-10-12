@@ -3,7 +3,7 @@
 // A star says "tell me when this turns up in my store". For a battle pass
 // reward that is a promise nothing can keep: it is not merchandise, it will
 // never be in a panel, and the alert would simply never fire. So the star does
-// not take the tap, and says why.
+// not appear in an unowned catalogue list. Owned rewards remain visible.
 //
 // HOW THIS IS KNOWN, because the last attempt at it failed and the failure is
 // worth writing down. Asking "is this sold?" has no answer: the public
@@ -135,3 +135,10 @@ export const sold = (from: Set<string> | null, ...ids: Array<string | undefined>
   for (const id of ids) if (id && kept.has(id)) return false;
   return !from || !ids.some((id) => id && from.has(id));
 };
+
+/** Keep every owned reward; hide an unowned item only when evidence rules it out. */
+export const visible = (
+  from: Set<string> | null,
+  own: Set<string>,
+  ...ids: Array<string | undefined>
+): boolean => ids.some((id) => !!id && own.has(id)) || sold(from, ...ids);

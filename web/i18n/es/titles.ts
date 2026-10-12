@@ -12,9 +12,7 @@ export const titles = {
   // The pennant and the one grey ramp are on screen on the opened title, so
   // they are not named. This note says the shape — why it is a list rather than
   // a grid — and the closing line every tab carries.
-  noArt:
-    'Un título es un texto, así que es una lista y no una grilla: lo que se ' +
-    'compara son palabras. Están todos los del juego, no solo los tuyos.',
+  noArt: 'Tus títulos siguen visibles. Las recompensas conocidas que no tienes están ocultas.',
 
   waitingWhy:
     'Esperando el catálogo de títulos: un solo fetch que el navegador guarda, ' +

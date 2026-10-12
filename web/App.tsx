@@ -14,11 +14,14 @@ import * as api from './data/api.ts';
 import { EXPIRED, reseeded } from './data/api.ts';
 import * as privateState from './data/private.ts';
 import type { Fault, Inventory, StoreView } from './data/types.ts';
+import { useWishlistError } from './data/watchlist.ts';
+import { t } from './i18n/index.ts';
 import { useRoute, wasAt } from './route.ts';
 import { Screen } from './screen.tsx';
 import { AccountGone } from './screens/Account.gone.tsx';
 import { Fail } from './screens/Fail.tsx';
 import { Gate } from './screens/Gate.tsx';
+import { InitialLoading } from './screens/Initial.loading.tsx';
 import { Scan } from './screens/Scan.tsx';
 import { Stopped } from './screens/Stopped.tsx';
 import { StoreLoading } from './screens/Store.loading.tsx';
@@ -26,12 +29,13 @@ import { useScan } from './sign-in.ts';
 
 type State =
   | { at: 'loading' }
-  | { at: 'out'; gone?: boolean }
+  | { at: 'out'; gone?: boolean; ended?: boolean }
   | { at: 'in'; view: StoreView }
   | { at: 'fail'; fault: Fault; status: number };
 
 export function App() {
   const route = useRoute();
+  const wishlistFailed = useWishlistError();
   const [state, setState] = useState<State>({ at: 'loading' });
 
   // Put the scroll back where this entry left it — see route.ts. Layout rather
@@ -49,7 +53,7 @@ export function App() {
     () =>
       privateState.listen((reason) => {
         setInv(null);
-        setState({ at: 'out', gone: reason === 'expired' });
+        setState({ at: 'out', gone: reason === 'expired', ended: reason === 'logout' });
       }),
     [],
   );
@@ -99,7 +103,7 @@ export function App() {
   // they cannot. A person deciding whether to hand over a session should see
   // the whole argument at once, and a code half off the bottom of the screen is
   // a code nobody scans. Everything after sign-in scrolls normally.
-  const locked = state.at === 'out' || !!scan.state;
+  const locked = (state.at === 'out' && !state.gone && !state.ended) || !!scan.state;
 
   return <div class={locked ? 'shell shell--lock' : 'shell'}>{inside()}</div>;
 
@@ -110,7 +114,7 @@ export function App() {
     // of an unsubscribe link is the oldest trick in the genre.
     if (route.name === 'stopped') return <Stopped token={route.token} />;
 
-    if (state.at === 'loading' && !scan.state) return <StoreLoading />;
+    if (state.at === 'loading' && !scan.state) return <InitialLoading route={route} />;
 
     if (state.at === 'fail') {
       return <Fail fault={state.fault} status={state.status} onRetry={load} />;
@@ -129,8 +133,14 @@ export function App() {
     // A session Riot has just retired is not the same screen as never having
     // scanned: one is a stranger's wall, the other is an explanation and a
     // button. The Worker is the only place that distinction exists.
-    if (state.at === 'out' && state.gone) {
-      return <AccountGone onScan={scan.start} onWait={() => setState({ at: 'out' })} />;
+    if (state.at === 'out' && (state.gone || state.ended)) {
+      return (
+        <AccountGone
+          removed={state.ended}
+          onScan={scan.start}
+          onWait={() => setState({ at: 'out' })}
+        />
+      );
     }
     if (state.at === 'out') return <Gate onScan={scan.start} onIntent={scan.prefetch} />;
 
@@ -139,7 +149,17 @@ export function App() {
 
     return (
       <>
-        <Screen route={route} view={state.view} inv={inv} onGone={() => setState({ at: 'out' })} />
+        {wishlistFailed && (
+          <p class="watch__failure" role="alert">
+            {t().flows.wishlistFailed}
+          </p>
+        )}
+        <Screen
+          route={route}
+          view={state.view}
+          inv={inv}
+          onGone={() => setState({ at: 'out', ended: true })}
+        />
         <Tabs />
       </>
     );

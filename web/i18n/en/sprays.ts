@@ -18,14 +18,11 @@ export const sprays = {
   // Each tile is washed in the measured colour of its own art, which is the
   // only way a wall of squares stays readable. That is visible on screen, so
   // it is not said here: colourWhy explains it once, below.
-  grid:
-    'A spray is square, so this is a grid rather than the slot board the ' +
-    'weapons get. Every spray in the game is here, not only yours.',
+  grid: 'Owned sprays stay visible. Known rewards you do not own are hidden.',
   /** The wheel has four slots and one can be empty: Riot has a spray called
    *  "None" and that is what comes back when nothing is in it. */
   wheel: (on: number, rest: number) =>
-    `${on} are on the wheel right now, one per slot and up to four. The other ` +
-    `${rest} are yours, off the wheel.`,
+    `${on} equipped on the wheel, up to four. ${rest} owned off the wheel.`,
 
   // --- before the catalogue lands ------------------------------------------
   waitingWhy:

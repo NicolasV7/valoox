@@ -9,11 +9,18 @@ import { useEffect, useState } from 'preact/hooks';
 import { locale } from '../i18n/index.ts';
 import * as api from './api.ts';
 import { reseeded } from './api.ts';
+import { protectWishlist, wishlistVersion } from './optimistic.ts';
 import { current, epoch, listen } from './private.ts';
 import type { Prefs } from './types.ts';
 
 let kept: Prefs | null = null;
 const listeners = new Set<(p: Prefs | null) => void>();
+let failed = false;
+const failures = new Set<(value: boolean) => void>();
+const failure = (value: boolean) => {
+  failed = value;
+  for (const fn of failures) fn(value);
+};
 
 /** The copy every screen is rendering. Exposed because the wishlist writes
  *  through it: the stars and the address are one row and one fetch, and two
@@ -21,26 +28,34 @@ const listeners = new Set<(p: Prefs | null) => void>();
 export const held = (): Prefs | null => kept;
 
 export function tell(next: Prefs | null) {
-  kept = next;
-  for (const fn of listeners) fn(next);
+  kept = next ? protectWishlist(next) : null;
+  for (const fn of listeners) fn(kept);
 }
 
 /** Ask again, now. Called after anything that changes the address or proves
  *  it, where the answer is the point and a cached one is wrong. */
-export async function reload(): Promise<void> {
+export async function reload(): Promise<boolean> {
   const generation = epoch();
+  const version = wishlistVersion();
+  failure(false);
   const got = await api.prefs().catch(() => null);
-  if (!current(generation)) return;
+  if (!current(generation)) return false;
   last = Date.now();
-  if (got && !reseeded(got)) tell(got);
+  if (got && !reseeded(got)) {
+    tell(protectWishlist(got, kept, version));
+    return true;
+  }
+  failure(true);
+  return false;
 }
 
-let flight: Promise<void> | null = null;
+let flight: Promise<boolean> | null = null;
 let last = 0;
 listen(() => {
   flight = null;
   last = 0;
   tell(null);
+  failure(false);
 });
 
 /**
@@ -78,6 +93,17 @@ export function usePrefs(): Prefs | null {
   }, []);
 
   return prefs;
+}
+
+export function usePrefsError(): boolean {
+  const [value, set] = useState(failed);
+  useEffect(() => {
+    failures.add(set);
+    return () => {
+      failures.delete(set);
+    };
+  }, []);
+  return value;
 }
 
 /**
@@ -119,7 +145,11 @@ export const refused = (said: string | undefined): boolean =>
  *  page left open does not go on believing in a code that expired while it
  *  sat there. */
 export const waiting = (prefs: Prefs | null): boolean =>
-  !!prefs?.code && prefs.code.until > Date.now();
+  !!prefs?.mail &&
+  !prefs.mail.ok &&
+  !!prefs.code &&
+  prefs.code.tries > 0 &&
+  prefs.code.until > Date.now();
 
 /** The provider saying the message got where it was going: the receiving
  *  server took it, or its pictures were fetched from a mailbox. Neither is

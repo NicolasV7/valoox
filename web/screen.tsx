@@ -18,6 +18,7 @@ import { Account } from './screens/Account.tsx';
 import { AlertsChannel } from './screens/Alerts.channel.tsx';
 import { AlertsCode } from './screens/Alerts.code.tsx';
 import { AlertsLoading } from './screens/Alerts.loading.tsx';
+import { AlertsRemove } from './screens/Alerts.remove.tsx';
 import { AlertsSearch } from './screens/Alerts.search.tsx';
 import { Alerts } from './screens/Alerts.tsx';
 import { BuddiesLoading } from './screens/Buddies.loading.tsx';
@@ -73,7 +74,9 @@ export function Screen({
   if (route.name === 'alerts') {
     if (route.step === 'channel') return <AlertsChannel />;
     if (route.step === 'code') return <AlertsCode />;
-    if (route.step === 'add') return inv ? <AlertsSearch inv={inv} /> : <AlertsLoading />;
+    if (route.step === 'remove') return <AlertsRemove />;
+    if (route.step === 'add')
+      return inv ? <AlertsSearch inv={inv} /> : <AlertsLoading step="add" />;
     return <Alerts view={view} />;
   }
   if (route.name === 'skin') {

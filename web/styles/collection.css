@@ -15,6 +15,7 @@
 
 .coll__title {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 12px;
 }
@@ -48,10 +49,18 @@
 /* The underline is an inset shadow rather than a border, so it sits on the
  * rule rather than pushing the row off it. */
 .coll__tab {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   padding-bottom: 11px;
   font-size: 14.5px;
   color: var(--ink-4);
   text-decoration: none;
+}
+
+@media (max-width: 359px) {
+  .coll__tabs { gap: 8px; justify-content: space-between; }
+  .coll__tab { font-size: var(--t-small); }
 }
 
 .coll__tab--on {

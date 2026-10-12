@@ -1,0 +1,59 @@
+.flow__clock { text-align: right; color: var(--clock); font-size: var(--t-floor); }
+.flow__clock > span { display: block; }
+.flow__clock .flow__clock-label { color: var(--ink-4); }
+.flow__count { color: var(--ink-4); font-size: var(--t-floor); }
+.flow__list { display: grid; gap: 10px; }
+.flow .watch { border-radius: var(--r); }
+.flow .watch.stage { background-color: var(--stage); }
+.flow .watch--gun {
+  display: block;
+  min-height: 163px;
+  padding: 82px 18px 14px;
+}
+.flow .watch--gun .watch__art {
+  position: absolute;
+  width: 85%;
+  height: 72px;
+  top: 9px;
+  left: 4%;
+  object-fit: contain;
+  transform: rotate(-5deg);
+}
+.flow .watch--gun .watch__id { margin-right: 32px; }
+.flow .watch--gun > .star { position: absolute; top: auto; right: 8px; bottom: 16px; }
+.flow .watch--bit, .flow .watch--card { grid-template-columns: 72px 1fr auto; min-height: 110px; padding: 10px; }
+.flow .watch--bit .watch__art, .flow .watch--card .watch__art { width: 72px; height: 78px; margin: 0; object-fit: contain; }
+.flow .watch--card { min-height: 160px; }
+.flow .watch--card .watch__art { width: 56px; height: 140px; object-fit: cover; border-radius: var(--r-sm); }
+.flow .watch--bare { grid-template-columns: 1fr auto; min-height: 72px; padding: 14px; }
+.flow .watch__name { font-size: var(--t-item); font-weight: 500; white-space: normal; overflow-wrap: anywhere; }
+.flow .watch__note { font: inherit; font-size: var(--t-small); letter-spacing: 0; text-transform: none; }
+.flow .watch__kind { display: block; margin-bottom: 4px; font-size: var(--t-label); }
+.flow .watch__meta { display: block; margin-top: 4px; color: var(--ink-3); font-size: var(--t-small); }
+.flow .star { width: 44px; height: 44px; padding: 0; justify-content: center; align-items: center; }
+.flow .watch__field, .flow .watch__picks { margin-inline: 0; }
+.flow .watch__field { min-height: 54px; margin-top: 0; border-radius: var(--r); }
+.flow .watch__field input { min-width: 0; font: inherit; }
+.flow .watch__picks { flex-wrap: wrap; }
+.flow .watch__picks .pill { min-height: 44px; }
+.flow__standby { margin: 20px 0; padding: 0 0 18px; border-bottom: 1px solid var(--rule); }
+.flow__standby .flow__art { min-height: 170px; display: flex; margin: 0; padding: 16px; border-radius: var(--r); }
+.flow__standby .flow__art > div { min-width: 0; flex: 1; }
+.flow__standby h2 { margin-bottom: 7px; }
+.flow__standby p { color: var(--ink-3); font-size: var(--t-small); }
+.flow__standby .flow__spray { flex: 0 0 90px; width: 90px; height: 110px; }
+.flow__code { font-family: var(--num) !important; font-size: var(--t-section) !important; text-align: center; letter-spacing: .2em; }
+.flow__bounds { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; color: var(--ink-4); font-size: var(--t-label); }
+.flow__bounds > span { display: grid; gap: 4px; }
+.flow__bounds [role='timer'] { color: var(--clock); }
+.flow__list .watch--waiting { min-height: 163px; display: grid; grid-template-columns: 1fr; padding: 18px; background: var(--raised); }
+.flow__pending--hero { min-height: 170px; }
+.flow__pending--weapon { height: 72px; }
+.flow__pending--square { height: 110px; }
+.flow__pending--surface { min-height: 168px; }
+.watch__failure { padding: 16px var(--gut); color: var(--bad); background: var(--sunk-bad); border-bottom: 1px solid var(--rule-bad); font-size: var(--t-small); }
+@media (max-width: 359px) {
+  .flow .watch--bit, .flow .watch--card { grid-template-columns: 56px 1fr auto; gap: 8px; }
+  .flow .watch--bit .watch__art, .flow .watch--card .watch__art { width: 56px; }
+  .flow .watch__name { font-size: var(--t-body); }
+}

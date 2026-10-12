@@ -1,64 +1,81 @@
-// What we keep, and what we do not.
-//
-// The first sentence is the one that matters: the session this app holds
-// reads your account without a password and without a second factor. That is
-// what scanning hands over, and saying it first is what earns the rest of the
-// page the right to be read.
-//
-// Every line here names something that exists in the code. The sealed row is
-// one row; the things that are not in it — a cached store, a code's hash, a
-// message id — expire on their own and are named rather than left out, because
-// a page that enumerates storage and mentions only the part it is proud of is
-// not describing what the Worker does.
-
 import { Back } from '../components/Back.tsx';
-import { SPRAY } from '../design/sprays.ts';
+import { FlowArt, FlowBrand, FlowHeading } from '../components/Flow.tsx';
+import { usePrefs } from '../data/channel.ts';
+import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
-import type { Route } from '../route.ts';
+import { href, intercept } from '../route.ts';
 
-const ACCOUNT: Route = { name: 'account' };
+const ACCOUNT = { name: 'account' } as const;
 
 export function AccountKeep() {
   const s = t().account;
-
+  const f = t().flows;
+  const prefs = usePrefs();
   return (
-    <main class="screen deck">
+    <main class="screen flow">
+      <FlowBrand />
       <Back to={ACCOUNT} said={s.title} />
-
-      <div class="bell__crown deck__crown">
-        <h1 class="deck__title">{s.keepTitle}</h1>
-        {/* Cypher at a laptop with a hand over Killjoy's eyes: what is kept,
-            and who can read it. */}
-        <img src={SPRAY.secrets} alt="" width="84" height="84" />
+      <FlowHeading eyebrow={f.details} title={s.keepTitle} lead={f.keepLead} />
+      <FlowArt art={FLOW.custody} className="flow__mail">
+        <div>
+          <span class="label">{f.sealedFirst}</span>
+          <h2>{f.serverSide}</h2>
+        </div>
+      </FlowArt>
+      <div class="flow__band">
+        <h2>{f.stored}</h2>
       </div>
-      <p class="lede deck__lede">{s.keepLede}</p>
-
-      <h2 class="label deck__band">{s.kept}</h2>
-      <div class="deck__list">
-        <Fact said={s.keepJar} why={s.keepJarWhy} />
-        <Fact said={s.keepWho} why={s.keepWhoWhy} />
-        <Fact said={s.keepList} why={s.keepListWhy} />
-        <Fact said={s.keepMail} why={s.keepMailWhy} />
+      <Fact title={f.session} state={f.sealedFirst} open>
+        {s.keepJarWhy} {s.keepWhoWhy}
+      </Fact>
+      <Fact title={f.watchlist} state={prefs ? f.favourites(prefs.wishlist.length) : undefined}>
+        {s.keepListWhy}
+      </Fact>
+      <Fact
+        title={f.emailAlerts}
+        state={prefs?.mail ? (prefs.mail.ok ? s.verified : s.notVerified) : undefined}
+      >
+        {s.keepMailWhy}
+      </Fact>
+      <Fact title={f.cached} state={f.sealedFirst}>
+        {f.cachedWhy}
+      </Fact>
+      <div class="flow__band">
+        <h2>{f.excluded}</h2>
       </div>
-
-      <h2 class="label deck__band">{s.notKept}</h2>
-      <div class="deck__list deck__list--not">
-        <Fact said={s.noPassword} why={s.noPasswordWhy} />
-        <Fact said={s.noLog} why={s.noLogWhy} />
-        <Fact said={s.noReach} why={s.noReachWhy} />
-      </div>
-
-      <p class="legal deck__note">{s.twoLocks}</p>
-      <p class="legal deck__note">{s.alsoKv}</p>
+      <ul class="flow__excluded">
+        <li>{f.noPassword}</li>
+        <li>{f.purchaseHistory}</li>
+        <li>{f.noRequests}</li>
+      </ul>
+      <p class="flow__note">{s.keepLede}</p>
+      <p class="flow__note">{s.alsoKv}</p>
+      <p class="flow__note">{f.retention}</p>
+      <a class="btn btn--quiet" href={href(ACCOUNT)} onClick={intercept(ACCOUNT)}>
+        {s.title}
+      </a>
     </main>
   );
 }
 
-function Fact({ said, why }: { said: string; why: string }) {
+function Fact({
+  title,
+  state,
+  children,
+  open = false,
+}: {
+  title: string;
+  state?: string;
+  children: preact.ComponentChildren;
+  open?: boolean;
+}) {
   return (
-    <div class="deck__fact">
-      <span class="deck__said">{said}</span>
-      <span class="deck__why">{why}</span>
-    </div>
+    <details class="flow__detail" open={open}>
+      <summary>
+        {title}
+        {state && <span>{state}</span>}
+      </summary>
+      <p>{children}</p>
+    </details>
   );
 }

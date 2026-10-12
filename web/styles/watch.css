@@ -26,20 +26,7 @@
   gap: 0 12px;
   min-height: 64px;
   padding: 10px 8px 10px 4px;
-  background:
-    linear-gradient(
-      107deg,
-      rgba(0, 0, 0, 0) 0 31%,
-      rgba(var(--art), 0.072) 31% 45%,
-      rgba(0, 0, 0, 0) 45% 51%,
-      rgba(var(--art), 0.038) 51% 58%,
-      rgba(0, 0, 0, 0) 58% 72%,
-      rgba(var(--art), 0.054) 72% 77%,
-      rgba(0, 0, 0, 0) 77%
-    ),
-    repeating-linear-gradient(107deg, rgba(var(--art), 0.043) 0 1px, rgba(0, 0, 0, 0) 1px 23px),
-    radial-gradient(84% 128% at 30% 50%, rgba(var(--art), 0.255) 0%, rgba(var(--art), 0) 70%),
-    var(--stage-row);
+  /* The shared .stage class supplies the original weave. */
 }
 
 /* Nothing in this list has a picture, so there is no column. See the note on

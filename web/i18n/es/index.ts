@@ -8,6 +8,7 @@ import { buddies } from './buddies.ts';
 import { cards } from './cards.ts';
 import { collection } from './collection.ts';
 import { common } from './common.ts';
+import { flows } from './flows.ts';
 import { gate } from './gate.ts';
 import { piece } from './piece.ts';
 import { skin } from './skin.ts';
@@ -34,4 +35,5 @@ export const es = {
   stopped,
   account,
   alerts,
+  flows,
 };

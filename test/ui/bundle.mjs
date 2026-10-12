@@ -9,11 +9,9 @@ export async function fixture(entry, actor) {
   const hooks = host();
   const mocks = {
     'web/route.ts':
-      "export const useRoute=()=>({name:'collection',tab:'weapons'}); export const wasAt=()=>0; export const go=()=>{};",
+      "export const useRoute=()=>({name:'collection',tab:'weapons'}); export const wasAt=()=>0; export const go=(r)=>globalThis.routes.push(r); export const href=(r)=>'/'+r.name; export const intercept=()=>()=>{}; export const ALERTS={name:'alerts'};",
     'web/sign-in.ts':
       'export const useScan=(fn)=>{ globalThis.approve=fn; return {state:null,start:()=>{},prefetch:()=>{}}; };',
-    'web/i18n/index.ts':
-      'export const locale=()=>"en"; export const t=()=>({account:new Proxy({}, {get:(_,key)=>String(key)}), common:{loading:"loading"}});',
   };
   const ui = [
     'web/screen.tsx',
@@ -56,7 +54,7 @@ export async function fixture(entry, actor) {
           }));
           builder.onLoad({ filter: /.*/, namespace: 'fixture' }, () => ({
             contents:
-              'export const {useState,useCallback,useEffect,useLayoutEffect}=globalThis.hooks;',
+              'export const {useState,useRef,useMemo,useCallback,useEffect,useLayoutEffect}=globalThis.hooks;',
           }));
           builder.onLoad({ filter: /[\\/]web[\\/].*\.(ts|tsx)$/ }, async ({ path }) => {
             const key = path.slice(root.length + 1).replace(/\\/g, '/');
@@ -77,7 +75,14 @@ export async function fixture(entry, actor) {
     AbortController,
     setTimeout,
     clearTimeout,
-    fetch: async (path) => {
+    setInterval: () => 1,
+    clearInterval: () => {},
+    routes: [],
+    calls: [],
+    fetch: async (path, init) => {
+      context.calls.push({ path, body: init?.body ? JSON.parse(init.body) : null });
+      const reply = await actor.reply?.(path, init);
+      if (reply) return reply;
       if (path === '/api/logout' && actor.fail) throw new Error('fixture');
       const value =
         path === '/api/logout'
@@ -95,6 +100,7 @@ export async function fixture(entry, actor) {
   return {
     app,
     context,
+    dispose: () => hooks.dispose(),
     render(fn) {
       hooks.begin();
       const tree = fn();

@@ -141,11 +141,13 @@ const charm = async (id: string): Promise<Piece | null> => {
 };
 
 export const piece = (type: string, id: string): Promise<Piece | null> =>
-  type === CHARM
-    ? charm(id)
-    : BY_TYPE[type]
-      ? one(BY_TYPE[type] as string, id)
-      : Promise.resolve(null);
+  !id
+    ? Promise.resolve(null)
+    : type === CHARM
+      ? charm(id)
+      : BY_TYPE[type]
+        ? one(BY_TYPE[type] as string, id)
+        : Promise.resolve(null);
 
 /** The icon for a competitive tier, from the table Riot is using right now.
  *

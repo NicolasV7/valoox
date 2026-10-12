@@ -11,10 +11,8 @@
 // a hundred ids is two kilobytes, which is cheaper than the merge would be.
 
 import { useCallback } from 'preact/hooks';
-import * as api from './api.ts';
-import { held, tell, usePrefs } from './channel.ts';
-import { current, epoch } from './private.ts';
-import type { Prefs } from './types.ts';
+import { held, usePrefs } from './channel.ts';
+import { saveWishlist } from './watchlist.ts';
 
 /** Riot's own item type for a skin level. A row saved before the app kept the
  *  type is a gun, because a gun is all it could star then. */
@@ -63,18 +61,6 @@ export interface Star {
   art?: string;
 }
 
-const write = async (next: Star[]): Promise<void> => {
-  const generation = epoch();
-  const was = held();
-  // Show it, then say it. A failure puts the old list back rather than leaving
-  // a star that looks saved and is not.
-  if (was) tell({ ...was, wishlist: next });
-  const got = await api.post<Prefs>('/api/prefs', { wishlist: next }).catch(() => null);
-  if (!current(generation)) return;
-  if (got && typeof got === 'object' && 'wishlist' in got) tell(got as Prefs);
-  else if (was) tell(was);
-};
-
 /**
  * The starred list, and one way to change it.
  *
@@ -106,7 +92,7 @@ export function useStars(): {
     const has = now.some((w) => w.id === item.id);
     const cap = capOf(item.type);
     if (!has && now.filter((w) => capOf(w.type) === cap).length >= cap) return;
-    void write(has ? now.filter((w) => w.id !== item.id) : [...now, item]);
+    void saveWishlist(has ? now.filter((w) => w.id !== item.id) : [...now, item]);
   }, []);
 
   const count = (type?: string) => {

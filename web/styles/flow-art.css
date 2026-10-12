@@ -1,0 +1,65 @@
+/* Every coloured surface inherits the original 107-degree .stage weave. */
+.flow__art {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 14px;
+  min-height: 236px;
+  padding: 20px;
+  margin: 20px 0 28px;
+  border-radius: var(--r-lg);
+  isolation: isolate;
+}
+.flow__spray { width: 180px; height: 180px; object-fit: contain; }
+.flow__spray--missing { visibility: hidden; }
+.flow__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 170px;
+  margin-top: 0;
+  border-radius: var(--r);
+}
+.flow__hero > div { position: relative; z-index: 1; width: 70%; }
+.flow__hero .flow__spray {
+  position: absolute;
+  right: 0;
+  bottom: 10px;
+  width: 136px;
+  height: 136px;
+  transform: rotate(-8deg);
+}
+.flow__number { display: block; margin: 10px 0; font-size: var(--t-hero); font-weight: 200; line-height: 1.05; }
+.flow__number span { display: inline-block; max-width: 13ch; font-family: var(--ui); font-size: var(--t-body); line-height: 1.3; font-weight: 400; }
+.flow__hero .small { display: block; max-width: 23ch; }
+.flow__mail {
+  display: flex;
+  justify-content: space-between;
+  min-height: 168px;
+  border-radius: var(--r);
+}
+.flow__mail > div { min-width: 0; flex: 1; }
+.flow__mail p { margin-top: 6px; color: var(--ink-3); }
+.flow__mail .flow__spray { flex: 0 0 94px; width: 94px; height: 108px; }
+.flow__trust {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 189px;
+  margin-top: 26px;
+  padding: 18px 12px;
+  border-radius: var(--r);
+}
+.flow__trust .flow__spray { flex: 0 0 84px; width: 84px; height: 112px; order: -1; }
+.flow__trust > div { min-width: 0; flex: 1; }
+.flow__trust h2 { margin: 6px 0; }
+.flow__trust p { color: var(--ink-3); font-size: var(--t-small); }
+.flow__trust a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: inherit; font-size: var(--t-small); }
+.flow__trust a > svg { transform: rotate(-90deg); }
+@media (max-width: 359px) {
+  .flow__hero { padding: 16px; }
+  .flow__hero .flow__spray { width: 108px; height: 108px; }
+  .flow__mail .flow__spray { flex-basis: 74px; width: 74px; }
+  .flow__trust .flow__spray { flex-basis: 64px; width: 64px; }
+}

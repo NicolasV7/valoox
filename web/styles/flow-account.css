@@ -1,0 +1,34 @@
+.flow__identity { margin-top: 0; border-radius: var(--r-lg); }
+.flow__card-art { width: 100%; height: 144px; object-fit: cover; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.flow__card-art--empty { display: grid; place-items: center; background: var(--raised); color: var(--ink-4); }
+.flow__identity-copy { padding: 18px; }
+.flow__identity-copy h2 { margin: 8px 0 10px; font-size: var(--t-screen); font-weight: 300; overflow-wrap: anywhere; }
+.flow__identity-copy h2 > span { margin-left: 4px; color: var(--ink-3); font-size: var(--t-item); }
+.flow__identity-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; color: var(--ink-3); font-size: var(--t-floor); }
+.flow__proof { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: var(--t-small); color: var(--ink-3); }
+.flow__proof > span { border-bottom: 1px solid var(--rule); padding-bottom: 8px; }
+.flow__coffee { display: flex; align-items: center; gap: 10px; margin: 30px 0; padding-top: 24px; border-top: 1px solid var(--rule); }
+.flow__coffee > div { min-width: 0; flex: 1; }
+.flow__coffee h2 { margin: 6px 0 8px; }
+.flow__coffee img { flex: 0 0 72px; width: 72px; height: 92px; object-fit: contain; }
+.flow__coffee .btn { font-size: var(--t-small); }
+.flow__build { margin-top: 26px; }
+.flow__build > summary, .flow__detail > summary { min-height: 62px; cursor: pointer; padding: 16px 0; font-weight: 500; }
+.flow__build > summary { color: var(--ink-3); font-size: var(--t-small); }
+.flow__build .deck__card { margin: 0; padding: 0; border: 0; background: transparent; }
+.flow__build .deck__row { flex-wrap: wrap; min-height: 64px; }
+.flow__build .deck__under { white-space: normal; overflow-wrap: anywhere; font-size: var(--t-small); }
+.flow__build .deck__end { font-size: var(--t-floor); }
+.flow__detail { border-bottom: 1px solid var(--rule); }
+.flow__detail > summary { line-height: 1.4; }
+.flow__detail > summary > span { display: inline-block; color: var(--ink-4); margin-left: 8px; font-weight: 400; font-size: var(--t-floor); }
+.flow__detail p { padding-bottom: 18px; color: var(--ink-3); font-size: var(--t-small); }
+.flow__removed, .flow__excluded { display: grid; gap: 14px; padding: 0; margin: 18px 0; list-style: none; }
+.flow__removed li, .flow__excluded li { padding-left: 18px; position: relative; color: var(--ink-3); font-size: var(--t-small); }
+.flow__removed li::before, .flow__excluded li::before { content: '−'; position: absolute; left: 0; color: var(--ink-4); }
+.flow__removed li::before { color: var(--bad); }
+.flow .btn--gone { color: var(--bad); border: 1px solid var(--rule-bad); background: var(--sunk-bad); }
+.flow .btn--gone:disabled { color: var(--ink-4); background: var(--raised); }
+.flow__pending--card { height: 144px; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.flow__identity[aria-busy='true'] { min-height: 277px; background: var(--card); }
+.flow__identity[aria-busy='true'] h2 .flow__pending { height: 40px; }

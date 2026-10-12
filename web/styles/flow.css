@@ -1,0 +1,121 @@
+/* Approved screens use the existing typefaces, tokens and dark scheme. */
+.flow {
+  color-scheme: dark;
+  padding-top: 0;
+  color: var(--ink);
+}
+.flow__brand {
+  display: flex;
+  align-items: center;
+  min-height: 58px;
+  margin-inline: calc(-1 * var(--gut));
+  padding-inline: var(--gut);
+  border-bottom: 1px solid var(--rule);
+}
+.flow__heading { margin: 24px 0; }
+.flow__heading h1 { margin: 8px 0 10px; line-height: 1.15; }
+.flow__heading p { color: var(--ink-2); overflow-wrap: anywhere; }
+.flow__dot { color: var(--ink-4); }
+.flow .back { min-height: 44px; padding-top: 12px; }
+.flow h2 { font-size: var(--t-item); font-weight: 500; line-height: 1.25; }
+.flow h3 { margin: 0; font-size: var(--t-item); font-weight: 500; line-height: 1.25; }
+.flow .label { letter-spacing: .035em; }
+.flow__band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 26px 0 12px;
+}
+.flow__band h2 { font-weight: 400; }
+.flow__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 88px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--rule);
+  color: inherit;
+  text-decoration: none;
+}
+.flow__row-copy { display: grid; flex: 1; min-width: 0; gap: 4px; }
+.flow__row strong { font-weight: 500; overflow-wrap: anywhere; }
+.flow__row > svg { transform: rotate(-90deg); }
+.flow__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-floor);
+  color: var(--ink-4);
+}
+.flow__state::before {
+  content: '';
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.flow__state--ok { color: var(--ok); }
+.flow__state--bad { color: var(--bad); }
+.flow__note { margin-top: 18px; color: var(--ink-4); font-size: var(--t-small); }
+.flow__info { padding-top: 22px; margin-top: 28px; border-top: 1px solid var(--rule); }
+.flow__info h2 { font-size: var(--t-body); }
+.flow__info p, .flow__step p { margin-top: 7px; color: var(--ink-3); }
+.flow__step { display: flex; gap: 14px; padding: 20px 0; border-bottom: 1px solid var(--rule); }
+.flow__step > span { color: var(--ink-4); font-size: var(--t-label); }
+.flow__step > div { min-width: 0; }
+.flow .btn { min-height: 48px; margin-top: 16px; }
+.flow__field { display: block; margin: 20px 0 10px; }
+.flow__field > .label { display: block; margin-bottom: 10px; }
+.flow__field input {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px;
+  color: var(--ink);
+  background: var(--sunk);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  font: inherit;
+  font-size: var(--t-body);
+}
+.flow__field input::placeholder { color: var(--ink-4); }
+.flow__problem {
+  margin-top: 18px;
+  padding: 18px;
+  color: var(--bad);
+  background: var(--sunk-bad);
+  border: 1px solid var(--rule-bad);
+  border-radius: var(--r);
+  overflow-wrap: anywhere;
+}
+.flow__problem strong { display: block; margin-top: 8px; font-weight: 500; }
+.flow__leave {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px;
+  gap: 12px;
+  margin-top: 26px;
+  padding-block: 16px;
+  border-block: 1px solid var(--rule);
+  color: var(--bad);
+  text-decoration: none;
+}
+.flow__leave .small { display: block; margin-top: 4px; color: var(--ink-4); }
+.flow__leave > svg { transform: rotate(-90deg); }
+.flow__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.flow__summary strong { font-size: var(--t-screen); font-weight: 200; }
+.flow__pending { display: block; background: var(--raised); border-radius: var(--r-sm); }
+.flow__pending--line { width: 65%; height: 23px; }
+.flow__pending--small { width: 40%; height: 16px; }
+@media (pointer: coarse) {
+  .flow__field input { font-size: max(16px, var(--t-body)); }
+}

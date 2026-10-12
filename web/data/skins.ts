@@ -92,7 +92,7 @@ let held: Promise<Index> | null = null;
 
 function index(): Promise<Index> {
   held ??= fetch(V1 + 'weapons')
-    .then((r) => (r.ok ? r.json() : null))
+    .then((r) => (r.ok ? (r.json() as Promise<{ data?: Raw[] }>) : null))
     .then((j: { data?: Raw[] } | null) => build(j?.data ?? []))
     .catch(() => ({ racks: [], byLevel: new Map<string, Found>() }));
   return held;

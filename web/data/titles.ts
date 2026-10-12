@@ -31,7 +31,7 @@ let held: Promise<Title[]> | null = null;
 /** Every title, in Riot's own order. Never rejects. */
 export function titles(): Promise<Title[]> {
   held ??= fetch(V1 + 'playertitles')
-    .then((r) => (r.ok ? r.json() : null))
+    .then((r) => (r.ok ? (r.json() as Promise<{ data?: Raw[] }>) : null))
     .then((j: { data?: Raw[] } | null) =>
       (j?.data ?? [])
         .map((t) => {

@@ -14,9 +14,10 @@ import type { Buddy } from '../data/buddies.ts';
 import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
+import { visible } from '../data/sellable.ts';
 import type { Inventory } from '../data/types.ts';
 import { useGuns } from '../data/useGuns.ts';
-import { useBuddies } from '../data/useIndex.ts';
+import { useBuddies, useGiven } from '../data/useIndex.ts';
 import { warm } from '../data/warm.ts';
 import { t } from '../i18n/index.ts';
 import { BuddiesLoading } from './Buddies.loading.tsx';
@@ -29,6 +30,7 @@ export const BUDDY = 'dd3bf334-87f3-40bd-b043-682a57a8dc3a';
 export function Buddies({ inv }: { inv: Inventory }) {
   const s = t().buddies;
   const all = useBuddies();
+  const given = useGiven();
   const [find, setFind] = useKept('buddies');
   // The ones that are not yours arrive a window at a time. The ones that are
   // never do: there are tens of them and they are why the tab was opened.
@@ -59,26 +61,28 @@ export function Buddies({ inv }: { inv: Inventory }) {
   const guns = useGuns(Object.values(hung).flat());
 
   const sorted = useMemo(() => {
-    if (!all) return null;
-    const mine = (b: Buddy) => b.levels.some((l) => own.has(l));
+    if (!all || !given) return null;
+    const listed = all.filter((b) => visible(given, own, b.id, ...b.levels));
+    const mine = (b: Buddy) => own.has(b.id) || b.levels.some((l) => own.has(l));
     const on = (b: Buddy) => b.levels.some((l) => hung[l]);
     return {
-      mine: all
+      mine: listed
         .filter(mine)
         .sort((a, b) => Number(on(b)) - Number(on(a)) || a.name.localeCompare(b.name)),
-      rest: all.filter((b) => !mine(b)).sort((a, b) => a.name.localeCompare(b.name)),
+      rest: listed.filter((b) => !mine(b)).sort((a, b) => a.name.localeCompare(b.name)),
     };
-  }, [all, own, hung]);
+  }, [all, own, hung, given]);
 
   if (!all || !sorted) return <BuddiesLoading />;
 
   const yours = sift(sorted.mine, find);
   const theirs = sift(sorted.rest, find);
   const carried = (b: Buddy) => b.levels.flatMap((l) => hung[l] ?? []).map((g) => guns[g] ?? '');
+  const total = sorted.mine.length + sorted.rest.length;
 
   return (
     <main class="screen coll">
-      <CollectionTabs on="buddies" said={s.of(held.length, all.length)} />
+      <CollectionTabs on="buddies" said={s.of(sorted.mine.length, total)} />
 
       <div class="find wall__find">
         <span class="find__glass">
@@ -87,8 +91,8 @@ export function Buddies({ inv }: { inv: Inventory }) {
         <input
           type="search"
           value={find}
-          placeholder={s.search(all.length)}
-          aria-label={s.search(all.length)}
+          placeholder={s.search(total)}
+          aria-label={s.search(total)}
           onInput={(e) => setFind((e.currentTarget as HTMLInputElement).value)}
         />
       </div>

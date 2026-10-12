@@ -1,6 +1,6 @@
 // The Sprays tab. Square art, so a grid; each tile washed in its own colour.
 //
-// All 921, split the way the skin list splits: the ones on your wheel first,
+// Owned and eligible sprays: the ones on your wheel first,
 // then the rest of yours, then the ones that are not. A collection is as much
 // about the gaps as about what fills them, and with nine hundred of them on
 // the other side of that line the search is not a convenience.
@@ -14,9 +14,10 @@ import { More } from '../components/More.tsx';
 import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
+import { visible } from '../data/sellable.ts';
 import type { Spray } from '../data/sprays.ts';
 import type { Inventory } from '../data/types.ts';
-import { useSprays } from '../data/useIndex.ts';
+import { useGiven, useSprays } from '../data/useIndex.ts';
 import { warm } from '../data/warm.ts';
 import { t } from '../i18n/index.ts';
 import { CollectionTabs } from './Collection.tabs.tsx';
@@ -29,6 +30,7 @@ export const SPRAY = 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475';
 export function Sprays({ inv }: { inv: Inventory }) {
   const s = t().sprays;
   const all = useSprays();
+  const given = useGiven();
   const [find, setFind] = useKept('sprays');
   // The ones that are not yours arrive a window at a time. The ones that are
   // never do: there are tens of them and they are why the tab was opened.
@@ -44,30 +46,32 @@ export function Sprays({ inv }: { inv: Inventory }) {
   const wheel = useMemo(() => inv.worn?.sprays ?? [], [inv]);
 
   const sorted = useMemo(() => {
-    if (!all) return null;
+    if (!all || !given) return null;
+    const listed = all.filter((x) => visible(given, own, x.id));
     // Where it sits on the wheel, and everything else after the wheel ends.
     const at = (id: string) => {
       const on = wheel.indexOf(id);
       return on < 0 ? wheel.length : on;
     };
-    const mine = all
+    const mine = listed
       .filter((x) => own.has(x.id))
       .sort((a, b) => at(a.id) - at(b.id) || a.name.localeCompare(b.name));
     // Riot's own order is the order they shipped them, which is no order at
     // all at nine hundred. Sorted once here rather than on every keystroke.
-    const rest = all.filter((x) => !own.has(x.id)).sort((a, b) => a.name.localeCompare(b.name));
+    const rest = listed.filter((x) => !own.has(x.id)).sort((a, b) => a.name.localeCompare(b.name));
     return { mine, rest };
-  }, [all, own, wheel]);
+  }, [all, own, wheel, given]);
 
   if (!all || !sorted) return <SpraysLoading />;
 
   const yours = sift(sorted.mine, find);
   const theirs = sift(sorted.rest, find);
   const on = sorted.mine.filter((x) => wheel.includes(x.id)).length;
+  const total = sorted.mine.length + sorted.rest.length;
 
   return (
     <main class="screen coll">
-      <CollectionTabs on="sprays" said={s.of(sorted.mine.length, all.length)} />
+      <CollectionTabs on="sprays" said={s.of(sorted.mine.length, total)} />
 
       <div class="find wall__find">
         <span class="find__glass">
@@ -76,8 +80,8 @@ export function Sprays({ inv }: { inv: Inventory }) {
         <input
           type="search"
           value={find}
-          placeholder={s.search(all.length)}
-          aria-label={s.search(all.length)}
+          placeholder={s.search(total)}
+          aria-label={s.search(total)}
           onInput={(e) => setFind((e.currentTarget as HTMLInputElement).value)}
         />
       </div>

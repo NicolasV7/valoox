@@ -2,8 +2,7 @@
 // the same grid; what changes is the line underneath.
 
 export const buddies = {
-  /** Instances, not distinct buddies: Riot hands them out by instance, so this
-   *  number is larger than the number of cells. */
+  /** Distinct owned buddies out of the visible catalogue. Instances appear below. */
   of: (have: number, all: number) => `${have} de ${all} amuletos`,
 
   /** Which gun it hangs off. */
@@ -19,12 +18,10 @@ export const buddies = {
   // The spray grid, borrowed outright rather than earning a second one. The
   // line underneath is the only thing a buddy does not share, so that and the
   // closing line every tab carries are all this note says.
-  grid:
-    'Un amuleto también es cuadrado, así que usa la grilla de los grafitis. La ' +
-    'línea de abajo dice de qué arma cuelga. Están todos los del juego, no solo los tuyos.',
+  grid: 'Los amuletos equipados indican qué arma los lleva. Las recompensas conocidas que no tienes están ocultas.',
   instances: (have: number, kinds: number) =>
-    `El número de arriba son ${have} instancias y aquí abajo hay ${kinds} ` +
-    `amuletos distintos. Riot los cobra por instancia.`,
+    `${have} ${have === 1 ? 'instancia propia' : 'instancias propias'} de ${kinds} ` +
+    `${kinds === 1 ? 'amuleto distinto' : 'amuletos distintos'}. Riot los entrega por instancia.`,
 
   // --- before the catalogue lands ------------------------------------------
   waitingWhy:

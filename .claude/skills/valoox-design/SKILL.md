@@ -81,8 +81,10 @@ There is no seventh. In particular there is no **delivered**: a server cannot se
 whether a message was read, so a send reports the status the provider returned
 and stops there. Do not add a check mark that implies more.
 
-Not-yours is 55% opacity and a hollow star — present, dimmed, still openable.
-Never hidden, never disabled.
+Not-yours is 55% opacity and a hollow star — dimmed, still openable.
+The approved catalogue revision hides known rewards when unowned, rather than
+showing a disabled grey star. Owned rewards always remain visible. See
+`design/flows.md` for the approved dark Alerts and Account revision.
 
 ## Loading
 

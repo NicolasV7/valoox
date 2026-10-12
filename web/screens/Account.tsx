@@ -1,190 +1,90 @@
-// Account, not Settings: there is nothing here to configure.
-//
-// Who is signed in, the things worth saying out loud, and the way out. The
-// order is the rule — the further down, the more permanent — and the only
-// destructive thing is last and red.
-//
-// Every fact on it is one the app already had. The name and the equipped card
-// ride in with the store, the address and the starred count come off the row
-// this app owns, and the two that did not reach the browser before — the
-// region and when the session last touched Riot — were already on the session
-// and already a column nothing had selected.
-
-import { useEffect, useState } from 'preact/hooks';
-import { built, commitUrl, short } from '../built.ts';
-import { Mark } from '../components/Mark.tsx';
-import { cardArt } from '../data/catalogue.ts';
-import { usePrefs } from '../data/channel.ts';
-import { BOTH } from '../data/stars.ts';
+import { FlowBrand, FlowHeading, FlowRetry, FlowRow, FlowState } from '../components/Flow.tsx';
+import { Chevron } from '../components/icons.tsx';
+import { refused, reload, usePrefs, usePrefsError } from '../data/channel.ts';
+import { LEVELS } from '../data/findable.ts';
 import type { Account as Who } from '../data/types.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept, type Route } from '../route.ts';
+import { AccountBuild } from './Account.build.tsx';
 import { Coffee } from './Account.coffee.tsx';
-import { Row } from './Account.row.tsx';
+import { Privacy } from './Account.privacy.tsx';
+import { Profile } from './Account.profile.tsx';
 
 const CHANNEL: Route = { name: 'alerts', step: 'channel' };
 const WATCHING: Route = { name: 'alerts' };
-const KEEP: Route = { name: 'account', step: 'keep' };
 const LEAVE: Route = { name: 'account', step: 'leave' };
-
-/** The two places this app points at that are not this app.
- *
- *  Written here rather than in i18n because a URL is not translated, and
- *  together rather than apart because they are the same decision: the only
- *  outbound links on any screen. */
-const SOURCE = 'https://github.com/NicolasV7/valoox';
 const COFFEE = 'https://buymeacoffee.com/termoo';
-const MADE_BY = 'https://github.com/NicolasV7';
-/** The allowlist itself, which is what the row above it is about. The board
- *  points this at a page on the site; the file is the better answer, and it is
- *  the thing a person would actually want to see. */
-const ALLOWLIST = SOURCE + '/blob/main/src/vault/upstream.ts';
-const CATALOGUE = 'https://valorant-api.com';
 
-/** How many rules the egress allowlist holds. Written down here and checked
- *  by a test, so the number on screen cannot drift from the list — the whole
- *  argument of that sentence is that it is countable. */
+// Checked against the actual allowlist by test/unit/upstream.test.ts.
 export const RULES = 18;
 
 export function Account({ who }: { who: Who }) {
   const s = t().account;
+  const f = t().flows;
   const prefs = usePrefs();
-  const art = useCardArt(who.card);
-
-  // Both alerts screens are reached from two places. Saying which one this
-  // is means the back control points here rather than at the alerts tab.
+  const failed = usePrefsError();
   const from = { to: { name: 'account' } as const, said: s.title };
-
-  const at = who.name.lastIndexOf('#');
-  const ok = prefs?.mail?.ok === true;
-  const starred = prefs?.wishlist.length ?? 0;
-
+  const bad = refused(prefs?.mail?.said);
+  const ok = prefs?.mail?.ok === true && !bad;
+  const all = prefs?.wishlist ?? [];
+  const guns = all.filter((w) => (w.type ?? LEVELS) === LEVELS).length;
   return (
-    <main class="screen deck">
-      <header class="deck__head">
-        <h1>{s.title}</h1>
-      </header>
-
-      <div class="deck__who">
-        {art ? (
-          <img class="deck__face" src={art} alt="" />
-        ) : (
-          <span class="deck__face deck__face--none">
-            <Mark size={22} />
-          </span>
-        )}
-        <span class="deck__id">
-          <span class="deck__name">
-            {at > 0 ? who.name.slice(0, at) : who.name}
-            {at > 0 && <span class="faint">{who.name.slice(at)}</span>}
-          </span>
-          <span class="deck__since num">{since(who)}</span>
-        </span>
-        <span class="bell__state bell__state--ok deck__live">
-          <span class="bell__dot" />
-          {s.live}
-        </span>
+    <main class="screen flow">
+      <FlowBrand />
+      <FlowHeading eyebrow={f.corner} title={s.title} />
+      <Profile key={who.card ?? ''} who={who} />
+      <div class="flow__band">
+        <h2>{f.setup}</h2>
+        <span class="label">{f.browser}</span>
       </div>
-
-      <h2 class="label deck__band">{s.alerts}</h2>
-      <div class="deck__card">
-        <Row
-          to={CHANNEL}
-          from={from}
-          said={s.whereAlertsGo}
-          under={prefs?.mail?.to || s.noAddress}
-          end={prefs?.mail ? (ok ? s.verified : s.notVerified) : undefined}
+      <FlowRow
+        to={CHANNEL}
+        from={from}
+        label={f.alertEmail}
+        title={prefs?.mail?.to || s.noAddress}
+        loading={!prefs}
+        state={
+          prefs?.mail && (
+            <FlowState kind={bad ? 'bad' : ok ? 'ok' : 'wait'}>
+              {bad ? t().alerts.wasRefused : ok ? s.verified : s.notVerified}
+            </FlowState>
+          )
+        }
+      />
+      <FlowRow
+        to={WATCHING}
+        from={from}
+        label={f.watchlist}
+        title={f.favourites(all.length)}
+        loading={!prefs}
+        detail={prefs ? f.listSplit(guns, all.length - guns) : undefined}
+      />
+      {!prefs && (
+        <FlowRetry
+          failed={failed}
+          retry={() => {
+            void reload();
+          }}
         />
-        <Row
-          to={WATCHING}
-          from={from}
-          said={s.watching}
-          under={s.starredCount(starred)}
-          end={s.outOf(starred, BOTH)}
-          last
-        />
+      )}
+      <Privacy />
+      <div class="flow__band">
+        <h2>{f.checkable}</h2>
       </div>
-
-      <h2 class="label deck__band">{s.honest}</h2>
-      <div class="deck__card">
-        <Row to={KEEP} from={from} said={s.whatWeKeep} under={s.whatWeKeepUnder} />
-        <Row
-          out={ALLOWLIST}
-          said={s.whatItCalls}
-          under={s.whatItCallsUnder(RULES)}
-          end={s.onGithub}
-        />
-        {/* The board sends this to a page on the site that does not exist yet,
-            so it stays a line of text. A chevron that goes nowhere is worse
-            than no chevron. */}
-        <Row said={s.notAffiliated} under={s.notAffiliatedUnder} last />
+      <div class="flow__proof">
+        <span>{f.noPassword}</span>
+        <span>{f.readOnly}</span>
       </div>
-
       <Coffee to={COFFEE} />
-
-      <h2 class="label deck__band">{s.build}</h2>
-      <div class="deck__card">
-        <Row out={MADE_BY} said={s.madeBy} under={s.madeByUnder} end={s.onGithub} />
-        <Row out={SOURCE} said={s.source} under={s.sourceUnder} end={s.onGithub} />
-        {/* Which commit this page is. A dirty build has no commit holding what
-            you are looking at, so it names no link — a chevron to a hash that
-            is not what is running would be worse than none. */}
-        <Row
-          out={commitUrl(SOURCE) ?? undefined}
-          said={s.version}
-          under={built.dirty ? s.versionDirty(short()) : s.versionAt(short(), built.at)}
-          end={commitUrl(SOURCE) ? s.onGithub : undefined}
-        />
-        <Row out={CATALOGUE} said={s.catalogue} under={s.catalogueUnder} end={s.onApi} last />
-      </div>
-      <p class="legal deck__note">{s.versionProves}</p>
-      <p class="legal deck__note">{s.legal}</p>
-
-      <h2 class="label deck__band">{s.leaving}</h2>
-      <a class="deck__leave" href={href(LEAVE)} onClick={intercept(LEAVE)}>
-        <span class="deck__id">
-          <span class="deck__danger">{s.disconnect}</span>
-          <span class="deck__under">{s.disconnectUnder}</span>
+      <AccountBuild rules={RULES} />
+      <a class="flow__leave" href={href(LEAVE)} onClick={intercept(LEAVE)}>
+        <span>
+          {f.disconnect}
+          <span class="small">{f.disconnectHint}</span>
         </span>
+        <Chevron />
       </a>
+      <p class="flow__note">{t().common.riotNotice}</p>
     </main>
   );
-
-  /** "4 days ago", from the last time a request made the Worker reach Riot.
-   *  Not "when you last opened the app": a cached read never touches Riot.
-   *
-   *  The shard and the words "Session used" used to ride along, which put
-   *  three facts on a line under a name on a phone. The shard is in the row
-   *  below and the sentence was scaffolding around the only number anyone
-   *  reads. */
-  function since(acct: Who): string {
-    return acct.seen ? ago(acct.seen) : '';
-  }
-
-  function ago(seconds: number): string {
-    const hours = Math.floor((Date.now() / 1000 - seconds) / 3600);
-    if (hours < 1) return s.justNow;
-    if (hours < 24) return s.hoursAgo(hours);
-    return s.daysAgo(Math.floor(hours / 24));
-  }
-}
-
-/** The equipped player card, as the one picture that is yours. It is a uuid
- *  on the store view and a crop on somebody else's CDN, so it is resolved
- *  here rather than carried. */
-function useCardArt(id: string | null | undefined): string | null {
-  const [art, setArt] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!id) return setArt(null);
-    let alive = true;
-    void cardArt(id).then((url) => {
-      if (alive) setArt(url);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [id]);
-
-  return art;
 }

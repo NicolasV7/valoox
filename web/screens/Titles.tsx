@@ -14,9 +14,10 @@ import { StarMark } from '../components/StarMark.tsx';
 import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
+import { visible } from '../data/sellable.ts';
 import type { Title } from '../data/titles.ts';
 import type { Inventory } from '../data/types.ts';
-import { useTitles } from '../data/useIndex.ts';
+import { useGiven, useTitles } from '../data/useIndex.ts';
 import { warm } from '../data/warm.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
@@ -29,6 +30,7 @@ export const TITLE = 'de7caa6b-adf7-4588-bbd1-143831e786c6';
 export function Titles({ inv }: { inv: Inventory }) {
   const s = t().titles;
   const all = useTitles();
+  const given = useGiven();
   const [find, setFind] = useKept('titles');
   // The ones that are not yours arrive a window at a time. The ones that are
   // never do: there are tens of them and they are why the tab was opened.
@@ -39,24 +41,26 @@ export function Titles({ inv }: { inv: Inventory }) {
   const worn = inv.worn?.title ?? null;
 
   const sorted = useMemo(() => {
-    if (!all) return null;
-    const mine = all.filter((x) => own.has(x.id));
+    if (!all || !given) return null;
+    const listed = all.filter((x) => visible(given, own, x.id));
+    const mine = listed.filter((x) => own.has(x.id));
     return {
       mine: mine.sort(
         (a, b) => Number(b.id === worn) - Number(a.id === worn) || a.name.localeCompare(b.name),
       ),
-      rest: all.filter((x) => !own.has(x.id)).sort((a, b) => a.name.localeCompare(b.name)),
+      rest: listed.filter((x) => !own.has(x.id)).sort((a, b) => a.name.localeCompare(b.name)),
     };
-  }, [all, own, worn]);
+  }, [all, own, worn, given]);
 
   if (!all || !sorted) return <TitlesLoading />;
 
   const yours = sift(sorted.mine, find);
   const theirs = sift(sorted.rest, find);
+  const total = sorted.mine.length + sorted.rest.length;
 
   return (
     <main class="screen coll">
-      <CollectionTabs on="titles" said={s.of(sorted.mine.length, all.length)} />
+      <CollectionTabs on="titles" said={s.of(sorted.mine.length, total)} />
 
       <div class="find wall__find">
         <span class="find__glass">
@@ -65,8 +69,8 @@ export function Titles({ inv }: { inv: Inventory }) {
         <input
           type="search"
           value={find}
-          placeholder={s.search(all.length)}
-          aria-label={s.search(all.length)}
+          placeholder={s.search(total)}
+          aria-label={s.search(total)}
           onInput={(e) => setFind((e.currentTarget as HTMLInputElement).value)}
         />
       </div>

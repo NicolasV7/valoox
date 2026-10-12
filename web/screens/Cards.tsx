@@ -12,8 +12,9 @@ import type { Card } from '../data/cards.ts';
 import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
+import { visible } from '../data/sellable.ts';
 import type { Inventory } from '../data/types.ts';
-import { useCards } from '../data/useIndex.ts';
+import { useCards, useGiven } from '../data/useIndex.ts';
 import { warm } from '../data/warm.ts';
 import { t } from '../i18n/index.ts';
 import { CardsLoading } from './Cards.loading.tsx';
@@ -26,6 +27,7 @@ export const CARD = '3f296c07-64c3-494c-923b-fe692a4fa1bd';
 export function Cards({ inv }: { inv: Inventory }) {
   const s = t().cards;
   const all = useCards();
+  const given = useGiven();
   const [find, setFind] = useKept('cards');
   // The ones that are not yours arrive a window at a time. The ones that are
   // never do: there are tens of them and they are why the tab was opened.
@@ -36,24 +38,26 @@ export function Cards({ inv }: { inv: Inventory }) {
   const worn = inv.worn?.card ?? null;
 
   const sorted = useMemo(() => {
-    if (!all) return null;
-    const mine = all.filter((c) => own.has(c.id));
+    if (!all || !given) return null;
+    const listed = all.filter((c) => visible(given, own, c.id));
+    const mine = listed.filter((c) => own.has(c.id));
     return {
       mine: mine.sort(
         (a, b) => Number(b.id === worn) - Number(a.id === worn) || a.name.localeCompare(b.name),
       ),
-      rest: all.filter((c) => !own.has(c.id)).sort((a, b) => a.name.localeCompare(b.name)),
+      rest: listed.filter((c) => !own.has(c.id)).sort((a, b) => a.name.localeCompare(b.name)),
     };
-  }, [all, own, worn]);
+  }, [all, own, worn, given]);
 
   if (!all || !sorted) return <CardsLoading />;
 
   const yours = sift(sorted.mine, find);
   const theirs = sift(sorted.rest, find);
+  const total = sorted.mine.length + sorted.rest.length;
 
   return (
     <main class="screen coll">
-      <CollectionTabs on="cards" said={s.of(sorted.mine.length, all.length)} />
+      <CollectionTabs on="cards" said={s.of(sorted.mine.length, total)} />
 
       <div class="find wall__find">
         <span class="find__glass">
@@ -62,8 +66,8 @@ export function Cards({ inv }: { inv: Inventory }) {
         <input
           type="search"
           value={find}
-          placeholder={s.search(all.length)}
-          aria-label={s.search(all.length)}
+          placeholder={s.search(total)}
+          aria-label={s.search(total)}
           onInput={(e) => setFind((e.currentTarget as HTMLInputElement).value)}
         />
       </div>

@@ -2,8 +2,7 @@
 // the same grid; what changes is the line underneath.
 
 export const buddies = {
-  /** Instances, not distinct buddies: Riot hands them out by instance, so this
-   *  number is larger than the number of cells. */
+  /** Distinct owned buddies out of the visible catalogue. Instances appear below. */
   of: (have: number, all: number) => `${have} of ${all} buddies`,
 
   /** Which gun it hangs off. */
@@ -19,12 +18,10 @@ export const buddies = {
   // The spray grid, borrowed outright rather than earning a second one. The
   // line underneath is the only thing a buddy does not share, so that and the
   // closing line every tab carries are all this note says.
-  grid:
-    'A buddy is square too, so it borrows the spray grid. The line underneath ' +
-    'says which weapon is carrying it. Every buddy in the game is here, not only yours.',
+  grid: 'Equipped buddies name the weapon carrying them. Known rewards you do not own are hidden.',
   instances: (have: number, kinds: number) =>
-    `The count above is ${have} instances and there are ${kinds} distinct ` +
-    `buddies below it. Riot bills buddies by instance.`,
+    `${have} owned ${have === 1 ? 'instance' : 'instances'} across ${kinds} distinct ` +
+    `${kinds === 1 ? 'buddy' : 'buddies'}. Riot grants buddies by instance.`,
 
   // --- before the catalogue lands ------------------------------------------
   waitingWhy:

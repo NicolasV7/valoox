@@ -1,4 +1,4 @@
-// One slot, opened: every skin the game has for this weapon.
+// One slot, opened: owned skins and eligible unowned skins for this weapon.
 //
 // The equipped one takes the top, then the others you own, then the ones you
 // do not — the gaps are half of what a collection tells you. 105 Vandal skins
@@ -14,9 +14,10 @@ import { Back, COLLECTION } from '../components/Back.tsx';
 import { Search } from '../components/icons.tsx';
 import { sift as pick } from '../data/find.ts';
 import { useKept } from '../data/kept.ts';
+import { visible } from '../data/sellable.ts';
 import type { Skin } from '../data/skins.ts';
 import type { Inventory } from '../data/types.ts';
-import { useWeapon } from '../data/useIndex.ts';
+import { useGiven, useWeapon } from '../data/useIndex.ts';
 import { t } from '../i18n/index.ts';
 import { Worn } from './Weapon.hero.tsx';
 import { WeaponLoading } from './Weapon.loading.tsx';
@@ -29,6 +30,7 @@ const SKINS = 'e7c63390-eda7-46e0-bb7a-a6abdacd2433';
 export function Weapon({ id, inv }: { id: string; inv: Inventory }) {
   const s = t().weapon;
   const gun = useWeapon(id);
+  const given = useGiven();
   // Keyed by the weapon, so two of them do not share one field.
   const [find, setFind] = useKept('weapon:' + id);
 
@@ -36,18 +38,20 @@ export function Weapon({ id, inv }: { id: string; inv: Inventory }) {
   const on = inv.worn?.guns[id];
 
   const sorted = useMemo(() => {
-    if (!gun) return null;
+    if (!gun || !given) return null;
     const mine = (k: Skin) => owned.has(k.id) || k.levels.some((l) => owned.has(l.id));
     const worn = gun.skins.find((k) => k.levels.some((l) => l.id === on?.level));
     // The default skin is in here too and it is not a thing you can want or
     // not want, so the tier filter drops it: it is the only one with none.
-    const rest = gun.skins.filter((k) => k !== worn && k.tier);
+    const rest = gun.skins.filter(
+      (k) => k !== worn && k.tier && visible(given, owned, k.id, ...k.levels.map((l) => l.id)),
+    );
     return { worn, yours: rest.filter(mine), theirs: rest.filter((k) => !mine(k)) };
-  }, [gun, owned, on]);
+  }, [gun, owned, on, given]);
 
   if (!gun || !sorted) return <WeaponLoading />;
 
-  const all = gun.skins.filter((k) => k.tier).length;
+  const all = sorted.yours.length + sorted.theirs.length + (sorted.worn?.tier ? 1 : 0);
   const have = sorted.yours.length + (sorted.worn?.tier ? 1 : 0);
   const yours = sift(sorted.yours, find);
   const theirs = sift(sorted.theirs, find);

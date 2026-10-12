@@ -1,146 +1,143 @@
-// The code, typed back.
-//
-// Six boxes rather than one field, because six digits read back off a phone
-// are read in pairs and a single field gives you nowhere to lose your place.
-// One real input underneath them carries the typing, so paste, autofill and
-// the keyboard's own one-time-code suggestion all work — six separate inputs
-// break all three.
-
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { Back } from '../components/Back.tsx';
-import { useLeft } from '../components/Countdown.tsx';
-import { again, landed, prove, refused, reload, usePrefs, useWatch } from '../data/channel.ts';
-import { SPRAY } from '../design/sprays.ts';
+import { spell, useLeft } from '../components/Countdown.tsx';
+import { FlowArt, FlowBrand, FlowHeading, FlowInfo } from '../components/Flow.tsx';
+import { useAction } from '../data/action.ts';
+import { reseeded } from '../data/api.ts';
+import { again, prove, refused, reload, usePrefs, useWatch } from '../data/channel.ts';
+import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS, go } from '../route.ts';
-
-const BOXES = [0, 1, 2, 3, 4, 5];
+import { AlertsLoading } from './Alerts.loading.tsx';
 
 export function AlertsCode() {
   const s = t().alerts;
+  const f = t().flows;
   const prefs = usePrefs();
   const [code, setCode] = useState('');
-  const [busy, setBusy] = useState(false);
   const [said, setSaid] = useState<string | null>(null);
   const [until, setUntil] = useState<number | null>(null);
+  const { busy, run } = useAction();
   const wait = useLeft(until);
-  const field = useRef<HTMLInputElement>(null);
-
-  const to = prefs?.mail?.to ?? '';
-  const sent = prefs?.mail?.said ?? '';
-  const bad = refused(sent);
-  // It is in the mailbox and the code in it is the one these boxes want, so
-  // another send would only add a second code to the same thread. The control
-  // goes away rather than greying out with a reason on it: there is nothing to
-  // decide here, and Verify is the only thing left to do. The Worker refuses a
-  // second send too — this is only the half that stops you asking for one.
-  const here = landed(sent);
-
-  // Six empty boxes and a message that already bounced is the one state this
-  // screen could sit in for ever without saying so: the answer arrives at the
-  // webhook, not here. So it asks, and leaves the moment there is an answer.
-  useWatch(!bad);
+  const left = useLeft(prefs?.code?.until ?? null);
+  const bad = refused(prefs?.mail?.said);
+  const live = !!prefs?.mail && !prefs.mail.ok && !!prefs.code && prefs.code.tries > 0 && left > 0;
+  // Poll only while a code is outstanding, including while this tab sleeps.
+  useWatch(!!prefs?.mail && !prefs.mail.ok && !bad);
   useEffect(() => {
-    if (bad) go(ALERTS);
-  }, [bad]);
+    if (bad || prefs?.mail?.ok) go(ALERTS);
+  }, [bad, prefs?.mail?.ok]);
 
+  if (!prefs) return <AlertsLoading step="code" />;
   return (
-    <main class="screen bell">
+    <main class="screen flow">
+      <FlowBrand />
       <Back to={{ name: 'alerts', step: 'channel' }} said={s.whereItGoes} />
-
-      {/* The channel took it, which is the only thing this line claims — and
-          the only thing anybody could do with the provider's own word for it
-          is misread it as delivery. The colour is still read off the status
-          rather than assumed, so it cannot go stale. */}
-      <p class={refused(sent) ? 'bell__sent bell__sent--bad' : 'bell__sent'}>
-        <span class="bell__dot" />
-        {s.sentOut}
-      </p>
-      <div class="bell__crown">
-        <h1 class="bell__ask">{s.typeTheCode}</h1>
-        {/* A clock already running: ten minutes and five attempts. */}
-        <img src={SPRAY.countdown} alt="" width="84" height="84" />
-      </div>
-      <p class="lede bell__to">{s.sixDigitsTo(to)}</p>
-
-      {/* The boxes are the picture; the input under them is the field. */}
-      <button type="button" class="pin" onClick={() => field.current?.focus()}>
-        {BOXES.map((i) => (
-          <span class={i === code.length ? 'pin__box pin__box--on' : 'pin__box'} key={i}>
-            {code[i] ?? ''}
-          </span>
-        ))}
-      </button>
-      <input
-        ref={field}
-        class="pin__field"
-        type="text"
-        inputMode="numeric"
-        autocomplete="one-time-code"
-        maxLength={6}
-        value={code}
-        aria-label={s.typeTheCode}
-        onInput={(e) => {
-          const next = (e.currentTarget as HTMLInputElement).value.replace(/\D/g, '').slice(0, 6);
-          setCode(next);
-          setSaid(null);
-        }}
+      <FlowHeading
+        eyebrow={f.finalStep}
+        title={f.proofTitle}
+        lead={prefs.mail?.to ? f.codeTo(prefs.mail.to) : f.noCode}
       />
-
-      <div class="bell__pair">
-        <button type="button" class="btn" disabled={code.length !== 6 || busy} onClick={check}>
-          {s.verify}
-        </button>
-        {!here && (
-          <button type="button" class="btn btn--quiet" disabled={busy || wait > 0} onClick={more}>
+      <FlowArt art={FLOW.proof} />
+      <label class="flow__field" for="verification">
+        <span class="label">{f.codeLabel}</span>
+        <input
+          id="verification"
+          class="flow__code"
+          type="text"
+          inputMode="numeric"
+          autocomplete="one-time-code"
+          maxLength={6}
+          value={code}
+          disabled={busy || !live}
+          onInput={(e) => {
+            setCode(e.currentTarget.value.replace(/\D/g, '').slice(0, 6));
+            setSaid(null);
+          }}
+        />
+      </label>
+      <div class="flow__bounds">
+        <span>
+          {f.codeTime}
+          <span class="num" role="timer">
+            {spell(left)}
+          </span>
+        </span>
+        <span>{f.attempts(prefs.code?.tries ?? 0)}</span>
+      </div>
+      <button
+        type="button"
+        class="btn"
+        disabled={!live || code.length !== 6 || busy}
+        onClick={check}
+      >
+        {busy ? t().common.loading : f.verify}
+      </button>
+      {!live && (
+        <>
+          <p class="flow__note">{f.noCode}</p>
+          <button
+            type="button"
+            class="btn btn--quiet"
+            disabled={busy || wait > 0 || !prefs.mail}
+            onClick={more}
+          >
             {s.sendItAgain}
           </button>
-        )}
-      </div>
-
+        </>
+      )}
       {(wait > 0 || said) && (
-        <p class="bell__why bell__why--bad bell__why--mid">
+        <p class="flow__problem" role="alert">
           {wait > 0 ? s.waitSeconds(wait) : said}
         </p>
       )}
-
-      <p class="legal bell__note">{s.tenAndFive}</p>
-
-      <h2 class="label bell__step">{s.whatHappensAfter}</h2>
-      <p class="legal bell__under">{s.afterWhy}</p>
+      <FlowInfo title={s.whatHappensAfter}>{f.proofWhy}</FlowInfo>
+      <p class="flow__note">{s.tenAndFive}</p>
     </main>
   );
 
-  async function check() {
-    setBusy(true);
-    const res = (await prove(code)) as { ok?: boolean; error?: string; left?: number | null };
-    setBusy(false);
-    if (res?.ok) {
-      await reload();
-      return go(ALERTS);
-    }
-    setCode('');
-    const how = res?.error;
-    setSaid(
-      how === 'gone'
-        ? s.codeGone
-        : how === 'spent'
-          ? s.codeSpent
-          : how === 'taken'
-            ? s.taken
-            : s.codeWrong(res?.left ?? 0),
+  function check() {
+    return run(
+      async (active) => {
+        const res = await prove(code);
+        if (!active() || reseeded(res)) return;
+        if (res.ok) {
+          const read = await reload();
+          if (active()) {
+            if (read) go(ALERTS);
+            else setSaid(f.networkFailed);
+          }
+          return;
+        }
+        setCode('');
+        await reload();
+        if (!active()) return;
+        setSaid(
+          res.error === 'gone'
+            ? s.codeGone
+            : res.error === 'spent'
+              ? s.codeSpent
+              : res.error === 'wrong'
+                ? s.codeWrong(res.left ?? 0)
+                : f.networkFailed,
+        );
+      },
+      () => setSaid(f.networkFailed),
     );
   }
-
-  async function more() {
-    setBusy(true);
-    const res = (await again()) as { error?: string; wait?: number; sent?: boolean };
-    setBusy(false);
-    setCode('');
-    // A moment, not a count: see useLeft. The line counts itself down and
-    // goes away on its own when the cooldown is up.
-    if (res?.error === 'wait') return setUntil(Date.now() + (res.wait ?? 0) * 1000);
-    await reload();
-    if (res?.error === 'bounced' || !res?.sent) go(ALERTS);
+  function more() {
+    return run(
+      async (active) => {
+        const res = await again();
+        if (!active() || reseeded(res)) return;
+        setCode('');
+        if (res.error === 'wait') return setUntil(Date.now() + (res.wait ?? 60) * 1000);
+        await reload();
+        if (!active()) return;
+        if (res.error === 'bounced' || refused(res.said)) return go(ALERTS);
+        if (!res.sent) setSaid(res.error === 'opened' ? s.alreadyThere : f.providerUnavailable);
+      },
+      () => setSaid(f.networkFailed),
+    );
   }
 }

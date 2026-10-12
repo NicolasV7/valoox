@@ -12,6 +12,8 @@ game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
 
 - Daily offers, night market, bundles and accessories, with owned items marked.
 - Weapon skins, variants, sprays, buddies, cards and titles in your collection.
+- Known rewards are hidden from unowned catalogue lists; owned rewards remain visible.
+- Dark Alerts and Account screens, including email removal and disconnect confirmations.
 - Wishlist alerts by verified email. Batches run every fifteen
   minutes outside the first half hour of each UTC day. Lists are grouped by
   account and destination; email retries use Resend idempotency.

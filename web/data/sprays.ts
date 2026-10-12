@@ -52,7 +52,7 @@ let held: Promise<Spray[]> | null = null;
  *  load leaves the tab empty rather than breaking the collection. */
 export function sprays(): Promise<Spray[]> {
   held ??= fetch(V1 + 'sprays')
-    .then((r) => (r.ok ? r.json() : null))
+    .then((r) => (r.ok ? (r.json() as Promise<{ data?: Raw[] }>) : null))
     .then((j: { data?: Raw[] } | null) =>
       (j?.data ?? []).map((s) => {
         if (s.isHiddenIfNotOwned) keepHidden(s.uuid);

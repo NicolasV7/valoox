@@ -24,7 +24,8 @@ function callers(): Map<string, string[]> {
   };
 
   for (const file of globSync('web/**/*.tsx')) {
-    for (const [, name] of read(file).matchAll(/SPRAY\.(\w+)/g)) add(name, file);
+    for (const [, group, name] of read(file).matchAll(/(SPRAY|FLOW)\.(\w+)/g))
+      add(group === 'FLOW' ? 'flow-' + name : name, file);
   }
   for (const file of globSync('src/**/*.ts')) {
     for (const [, name] of read(file).matchAll(/'\/art\/spray-([\w-]+)\.png'/g)) add(name, file);
@@ -40,14 +41,16 @@ test('no sticker is on two screens', () => {
 });
 
 test('every sticker a screen asks for is one the build fetches', () => {
-  const art = read('scripts/art.mjs');
+  const art = read('scripts/artwork.mjs');
   const known = new Set([...art.matchAll(/'spray-([\w-]+)'/g)].map((m) => m[1]));
   const names = read('web/design/sprays.ts');
 
   const missing: string[] = [];
   for (const [sticker] of callers()) {
     // web/ names them through the map, src/ by the file's own stem.
-    const stem = new RegExp(sticker + ":\\s*art\\('([\\w-]+)'\\)").exec(names)?.[1] ?? sticker;
+    const stem = sticker.startsWith('flow-')
+      ? sticker
+      : (new RegExp(sticker + ":\\s*art\\('([\\w-]+)'\\)").exec(names)?.[1] ?? sticker);
     if (!known.has(stem)) missing.push(sticker);
   }
   assert.deepEqual(missing, [], 'asked for but never fetched: ' + missing.join(', '));

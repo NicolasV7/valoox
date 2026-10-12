@@ -12,9 +12,7 @@ export const cards = {
   // The tile crops the tall art rather than shrinking it, and the wash behind
   // it is that painting's own measured colour. Both are on screen already;
   // what is not visible is why there are two columns, so that is all it adds.
-  grid:
-    'Dos columnas, no tres: una tarjeta es un retrato 2:5 y a un tercio del ' +
-    'ancho deja de ser una imagen. Están todas las del juego, no solo las tuyas.',
+  grid: 'Tus tarjetas siguen visibles. Las recompensas conocidas que no tienes están ocultas.',
 
   waitingWhy:
     'Esperando el catálogo de tarjetas: un solo fetch que el navegador guarda, ' +

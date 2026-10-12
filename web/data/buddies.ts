@@ -67,7 +67,7 @@ export const byLevel = (): Promise<Map<string, Buddy>> =>
  *  load leaves the tab empty rather than breaking the collection. */
 export function buddies(): Promise<Buddy[]> {
   held ??= fetch(V1 + 'buddies')
-    .then((r) => (r.ok ? r.json() : null))
+    .then((r) => (r.ok ? (r.json() as Promise<{ data?: Raw[] }>) : null))
     .then((j: { data?: Raw[] } | null) =>
       (j?.data ?? []).map((b) => {
         // Both ids, because the wishlist stores the level and the collection

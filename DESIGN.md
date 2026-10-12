@@ -5,6 +5,10 @@ The spec is the canvas: 122 artboards at
 This file is the part of it that has to survive without the link —
 `design/boards.md` maps every screen to its board.
 
+Alerts and Account now follow the approved Art-led revision in
+[design/flows.md](design/flows.md). It supersedes their original canvas boards,
+uses the existing typography and weave, and ships only in dark mode.
+
 Values live in `design/tokens.css`, once. Nothing below restates a hex.
 
 ## The world
@@ -110,7 +114,7 @@ A card gets two columns; a spray gets three.
 | State | How it reads |
 | --- | --- |
 | Yours | a tick, never a badge |
-| Not yours | 55% opacity, hollow star. Present, dimmed, still openable |
+| Not yours | 55% opacity, hollow star. Available catalogue entries remain openable; known rewards are hidden unless owned |
 | Equipped | a light chip on the art. One per slot |
 | Verified | the address carried a code back |
 | Not verified | saved, and nothing is sent to it yet |

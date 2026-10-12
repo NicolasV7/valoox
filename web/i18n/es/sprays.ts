@@ -18,14 +18,11 @@ export const sprays = {
   // Each tile is washed in the measured colour of its own art, which is the
   // only way a wall of squares stays readable. That is visible on screen, so
   // it is not said here: colourWhy explains it once, below.
-  grid:
-    'Un grafiti es cuadrado, así que aquí hay una grilla y no el tablero de ' +
-    'ranuras de las armas. Están todos los del juego, no solo los tuyos.',
+  grid: 'Tus grafitis siguen visibles. Las recompensas conocidas que no tienes están ocultas.',
   /** The wheel has four slots and one can be empty: Riot has a spray called
    *  "None" and that is what comes back when nothing is in it. */
   wheel: (on: number, rest: number) =>
-    `${on} están en la rueda ahora mismo, uno por ranura y hasta cuatro. Los ` +
-    `otros ${rest} son tuyos, fuera de la rueda.`,
+    `${on} equipados en la rueda, hasta cuatro. ${rest} tuyos fuera de la rueda.`,
 
   // --- before the catalogue lands ------------------------------------------
   waitingWhy:

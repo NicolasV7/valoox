@@ -3,11 +3,7 @@
 // One filter, and it removes a row that could only ever disappoint: anything
 // already owned, because the daily store never offers you something you have.
 //
-// Not two: whether Riot SELLS a thing is answered elsewhere and answered the
-// other way round — see data/sellable.ts — and it is not a filter. A contract
-// reward stays in this list and stays browsable; what it loses is the star.
-// Taking the row out would make the screen quietly disagree with the game's
-// own collection, which is where people come from when they search here.
+// Known rewards are also excluded. Collection screens still keep owned rewards.
 //
 // The other was melee, kept out on the belief that the daily panel is four
 // guns. It is not — a knife turns up in that panel like anything else, and
@@ -16,6 +12,7 @@
 import { type Buddy, bare as bareBuddy } from './buddies.ts';
 import { bare as bareCard, type Card } from './cards.ts';
 import { fold, MISS, score } from './find.ts';
+import { sold } from './sellable.ts';
 import type { Rack } from './skins.ts';
 import { bare as bareSpray, type Spray } from './sprays.ts';
 import { tierOf } from './tiers.ts';
@@ -61,14 +58,20 @@ const row = (
 
 /** Every weapon, melee included, and only the base level: the store sells a
  *  skin, and level 2 is not a thing that turns up on its own. */
-export function guns(racks: Rack[], owned: Set<string>): Findable[] {
+export function guns(
+  racks: Rack[],
+  owned: Set<string>,
+  given: Set<string> | null = null,
+): Findable[] {
   const out: Findable[] = [];
   for (const rack of racks) {
     for (const w of rack.weapons) {
       for (const skin of w.skins) {
         const id = skin.levels[0]?.id;
+        const ids = [skin.id, ...skin.levels.map((l) => l.id), ...skin.chromas.map((c) => c.id)];
         // No tier is a default skin: the gun you already have, in grey.
-        if (!id || !skin.tier || owned.has(id)) continue;
+        if (!id || !skin.tier || ids.some((uuid) => owned.has(uuid)) || !sold(given, ...ids))
+          continue;
         out.push({
           ...row(id, skin.name, LEVELS, w.name, null),
           tier: tierOf(skin.tier)?.name,
@@ -88,14 +91,19 @@ export function bits(
   titles: Title[],
   owned: Set<string>,
   words: { spray: string; buddy: string; card: string; title: string },
+  given: Set<string> | null = null,
 ): Findable[] {
   const out: Findable[] = [];
   const take = (id: string, name: string, type: string, of: string) => {
-    if (!owned.has(id)) out.push(row(id, name, type, of, null));
+    if (!owned.has(id) && sold(given, id)) out.push(row(id, name, type, of, null));
   };
   for (const s of sprays) take(s.id, bareSpray(s.name), SPRAYS, words.spray);
   // A charm is sold as its first level, which is also what the loadout speaks.
-  for (const b of buddies) take(b.levels[0] ?? b.id, bareBuddy(b.name), BUDDIES, words.buddy);
+  for (const b of buddies) {
+    const ids = [b.id, ...b.levels];
+    if (ids.some((id) => owned.has(id)) || !sold(given, ...ids)) continue;
+    take(b.levels[0] ?? b.id, bareBuddy(b.name), BUDDIES, words.buddy);
+  }
   for (const c of cards) take(c.id, bareCard(c.name), CARDS, words.card);
   for (const t of titles) take(t.id, t.name, TITLES, words.title);
   return out;

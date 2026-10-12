@@ -1,83 +1,63 @@
-// Alerts, first run.
-//
-// Two steps in the order they have to happen: a channel, then a star. The
-// search stays shut until there is a channel, because starring with nowhere
-// to send is a row that can only disappoint — and a notifier quietly sending
-// to nowhere is the one failure it must not hide.
-
-import { Chevron, Mail } from '../components/icons.tsx';
+import {
+  FlowArt,
+  FlowBrand,
+  FlowHeading,
+  FlowRow,
+  FlowState,
+  FlowStep,
+} from '../components/Flow.tsx';
 import type { Prefs } from '../data/types.ts';
-import { SPRAY } from '../design/sprays.ts';
+import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
 
 export function AlertsFirst({
   mail,
-  starred,
   coded,
 }: {
   mail: Prefs['mail'];
   starred: number;
-  /** Six digits already in that mailbox: step one is typing them, not
-   *  asking for them again. */
   coded: boolean;
 }) {
   const s = t().alerts;
+  const f = t().flows;
   const to = { name: 'alerts', step: coded ? 'code' : 'channel' } as const;
-  const ADD = { name: 'alerts', step: 'add' } as const;
+  const add = { name: 'alerts', step: 'add' } as const;
   const ok = mail?.ok === true;
-
   return (
-    <main class="screen bell">
-      <header class="bell__head">
-        <h1>{t().common.nav.alerts}</h1>
-        <p class="small">{s.what}</p>
-      </header>
-
-      <div class="nothing bell__none">
-        <img src={SPRAY.crab} alt="" width="86" height="86" />
-        <p class="lede">{starred === 0 ? s.noneYet : s.someYet(starred)}</p>
-        <p class="small">{s.twoThings}</p>
-      </div>
-
-      <h2 class="label bell__step">{s.stepOne}</h2>
-      <a class="bell__row" href={href(to)} onClick={intercept(to)}>
-        <span class="bell__at">
-          <Mail />
-        </span>
-        <span class="bell__id">
-          <span class="bell__name">{mail?.to || s.yourEmail}</span>
-          <span class={ok ? 'bell__said bell__said--ok' : 'bell__said'}>
-            {ok ? s.verified : coded ? s.oneIsOut : mail?.to ? s.notVerifiedYet : s.oneAddress}
-          </span>
-        </span>
-        <span class="bell__chev">
-          <Chevron size={16} />
-        </span>
-      </a>
-
-      <h2 class="label bell__step">{s.stepTwo}</h2>
-      {ok ? (
-        <a class="bell__row" href={href(ADD)} onClick={intercept(ADD)}>
-          <span class="bell__id">
-            <span class="bell__name">{s.searchASkin}</span>
-            <span class="bell__said">{s.pickSomething}</span>
-          </span>
-          <span class="bell__chev">
-            <Chevron size={16} />
-          </span>
-        </a>
-      ) : (
-        /* Shut until step one is done, and the reason is on it. */
-        <div class="bell__row bell__row--shut">
-          <span class="bell__id">
-            <span class="bell__name">{s.searchASkin}</span>
-            <span class="bell__said">{s.opensOnce}</span>
-          </span>
-        </div>
+    <main class="screen flow">
+      <FlowBrand />
+      <FlowHeading eyebrow={f.startList} title={f.firstTitle} lead={f.firstLead} />
+      <FlowArt art={FLOW.first}>
+        <span class="label">{s.noneYet}</span>
+      </FlowArt>
+      <FlowStep number={1} title={f.pickInbox}>
+        {f.inboxProof}
+      </FlowStep>
+      {mail && (
+        <FlowRow
+          to={to}
+          label={s.whereItGoes}
+          title={mail.to}
+          state={
+            <FlowState kind={ok ? 'ok' : 'wait'}>
+              {ok ? s.verified : coded ? s.oneIsOut : s.notVerified}
+            </FlowState>
+          }
+        />
       )}
-
-      <p class="legal bell__note">{s.whatAStarIs}</p>
+      <FlowStep number={2} title={f.makeList}>
+        {f.listKinds}
+      </FlowStep>
+      <a class="btn" href={href(ok ? add : to)} onClick={intercept(ok ? add : to)}>
+        {ok ? f.add : f.setUp}
+      </a>
+      {!ok && (
+        <a class="btn btn--quiet" href={href(add)} onClick={intercept(add)}>
+          {f.buildList}
+        </a>
+      )}
+      <p class="flow__note">{s.sameInbox}</p>
     </main>
   );
 }

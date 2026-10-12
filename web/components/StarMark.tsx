@@ -34,7 +34,7 @@ export function StarMark({ item, size = 15 }: { item: Star; size?: number }) {
   const lit = on(item.id);
   // A contract reward is not merchandise: it is given out by a pass and no
   // store panel will ever carry it, so an alert on it could not fire. The
-  // thing stays on screen and stays browsable — only the star is refused.
+  // Lists omit unowned rewards; this guard also covers direct item links.
   // Unknown while the index loads, and unknown means yes.
   const can = sold(useGiven(), item.id);
   const closed = !lit && (shut(item.type) || !can);
