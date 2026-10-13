@@ -60,6 +60,8 @@ async function watching(uid: string, account = uid) {
     mail: { to: 'person@example.invalid', ok: true, gen: crypto.randomUUID() },
   });
 }
+// Nine sealed D1 sessions and six failed dispatches can exceed five seconds on
+// a shared CI runner. The assertions measure the actual outbound request budget.
 test('failed email deliveries remain within the external request ceiling', async () => {
   mailFails = true;
   for (let i = 0; i < 9; i++) await watching(String(i).padStart(64, '0'), crypto.randomUUID());
@@ -71,7 +73,7 @@ test('failed email deliveries remain within the external request ceiling', async
   expect(
     await env.DB.prepare('SELECT COUNT(*) AS n FROM deliveries WHERE state=0').first(),
   ).toEqual({ n: 6 });
-});
+}, 15000);
 test('invalid opt-in flags cannot starve valid rows in later batches', async () => {
   for (let i = 0; i < 9; i++) {
     await createSession(env, String(i).padStart(64, '0'), session());

@@ -1,4 +1,4 @@
-import { beforeEach, expect, test } from 'vitest';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import type { Env } from '../../src/types.ts';
 import { CURRENT_KID, seal } from '../../src/vault/seal.ts';
 import { clearCache, createSession, readCache, writeCache } from '../../src/vault/session.ts';
@@ -11,6 +11,7 @@ beforeEach(async () => {
   await createSession(env, UID, session());
   await clearCache(env, UID);
 });
+afterEach(() => vi.restoreAllMocks());
 
 test.each(['daily', 'bundle', 'night', 'accessory'])(
   'a propagated KV entry is rejected when its %s rotation is past',
@@ -34,12 +35,14 @@ test.each(['daily', 'bundle', 'night', 'accessory'])(
 );
 
 test('KV minimum TTL does not extend a short-lived store view', async () => {
+  const now = Math.floor(Date.now() / 1000) * 1000;
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
   const view = { ...storeView(), remaining: 1 };
   await writeCache(env, 'store', UID, view, 1);
   const key = (await env.VAL.list({ prefix: 'store4:' })).keys[0]?.name as string;
   expect(await readCache(env, 'store', UID)).toEqual(view);
-  const aged = { ...view, fetchedAt: view.fetchedAt - 2 };
-  await env.VAL.put(key, await seal(env, UID, CURRENT_KID, aged, 'store:4'), { expirationTtl: 60 });
+  clock.mockReturnValue(now + 1000);
+  expect(await env.VAL.get(key)).not.toBeNull();
   expect(await readCache(env, 'store', UID)).toBeNull();
 });
 
