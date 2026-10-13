@@ -15,6 +15,10 @@ export const store = {
 
   discount: (percent: number) => `−${percent}%`,
   allOwned: 'Ya lo tienes completo',
+  refreshFailed:
+    'No se pudo actualizar la tienda. Estas ofertas pueden haber vencido. Se reintentará automáticamente.',
+  retry: 'Reintentar',
+  catalogueMissing: 'Los detalles aún no están en el catálogo.',
 
   disconnect: 'Desconectar',
   notice:
@@ -55,7 +59,7 @@ export const offer = {
 // The bundle, opened. Riot sends between four and ten pieces and each carries
 // its own price, so the screen says where every number came from.
 export const bundle = {
-  pieces: (n: number) => `${n} piezas`,
+  pieces: (n: number) => `${n} ${n === 1 ? 'pieza' : 'piezas'}`,
   tier: (name: string) => `Tier ${name}`,
   contents: 'Qué trae',
 

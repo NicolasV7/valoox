@@ -1,3 +1,4 @@
+import { expiresAt } from '../lib/expiry.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { EXPIRED, RESEED } from '../lib/json.ts';
 import type { StoreView } from '../types.ts';
@@ -8,9 +9,9 @@ import { fetchStore } from '../vault/storefront.ts';
 /**
  * Today's store.
  *
- * The cache lives exactly as long as the data does: Riot's payload carries its
- * own `remaining`, and that is the TTL. So the entry expires at the moment the
- * store rotates, with nothing scheduled and nothing to invalidate.
+ * Daily offers, bundles, accessories and Night Market rotate independently.
+ * Cache until the first deadline; cache reads also check the payload because
+ * KV eviction alone cannot guarantee freshness across locations.
  */
 export async function store({ env, uid }: Ctx): Promise<Body> {
   const hit = (await readCache(env, 'store', uid)) as StoreView | null;
@@ -23,6 +24,7 @@ export async function store({ env, uid }: Ctx): Promise<Body> {
   if (s === 'gone') return EXPIRED;
 
   const view = await fetchStore(env, s.session, s.t, { seen: s.seen });
-  if (!(await writeCache(env, 'store', uid, view, view.remaining))) return RESEED;
+  const ttl = Math.max(0, Math.ceil((expiresAt(view) - Date.now()) / 1000));
+  if (!(await writeCache(env, 'store', uid, view, ttl))) return RESEED;
   return view as unknown as Body;
 }

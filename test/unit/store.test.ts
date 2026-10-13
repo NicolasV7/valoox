@@ -67,7 +67,7 @@ test('daily offers come from Rewards[0].ItemID, not OfferID', () => {
     { id: 'skin-a', cost: 1775 },
     { id: 'skin-b', cost: 875 },
   ]);
-  assert.equal(out.remaining, 3600, 'drives both the countdown and the cache TTL');
+  assert.equal(out.remaining, 3600, 'the daily offers carry their own countdown');
   assert.equal(out.fetchedAt, 1000, 'the clock is injected, never read inside');
 });
 

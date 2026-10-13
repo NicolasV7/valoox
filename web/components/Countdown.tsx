@@ -1,15 +1,14 @@
 // How long is left, ticking.
 //
 // The seconds come from Riot, not from a clock we set: the storefront payload
-// carries its own `remaining`, and the cache in front of it expires on the same
-// number. So the page and the server agree about when the store rotates without
-// either of them knowing what time it is.
+// carries each section's `remaining`, anchored to the view's fetchedAt. The
+// earliest deadline invalidates the view; data/rotation.ts requests its replacement.
 //
 // Tabular figures are the point. A countdown that shifts sideways every second
 // reads as broken, which is why --num carries font-variant-numeric and why this
 // never uses the UI face.
 
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { t } from '../i18n/index.ts';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -72,8 +71,8 @@ export function Countdown({
   since?: number;
   className?: string;
 }) {
-  const until = (since ?? Date.now() / 1000) + from;
-  const read = () => Math.max(0, Math.round(until - Date.now() / 1000));
+  const until = useMemo(() => (since ?? Date.now() / 1000) + from, [since, from]);
+  const read = () => Math.max(0, Math.ceil(until - Date.now() / 1000));
   const [left, setLeft] = useState(read);
 
   useEffect(() => {

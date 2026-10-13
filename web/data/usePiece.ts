@@ -6,7 +6,7 @@
 // and again inside a bundle is fetched once.
 
 import { useEffect, useState } from 'preact/hooks';
-import { bundle, type Piece, piece, skin } from './catalogue.ts';
+import { type Piece, piece, skin } from './catalogue.ts';
 import { type Family, familyOf } from './skins.ts';
 
 function resolve(get: () => Promise<Piece | null>, key: string): Piece | null {
@@ -32,8 +32,7 @@ export const useSkin = (id: string) => resolve(() => skin(id), id);
 /** A bundle's contents and the accessory store are mixed types. */
 export const usePiece = (type: string, id: string) => resolve(() => piece(type, id), type + id);
 
-/** A bundle's own name and its banner. */
-export const useBundle = (id: string) => resolve(() => bundle(id), id);
+export { useBundle } from './useBundle.ts';
 
 /** The levels and chromas beside the one that was opened. Null until the
  *  weapons index lands, and null forever for anything that is not a skin. */

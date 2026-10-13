@@ -4,7 +4,7 @@ import { runInNewContext } from 'node:vm';
 import { build } from 'esbuild';
 import { host } from './hooks.mjs';
 
-export async function fixture(entry, actor) {
+export async function fixture(entry, actor, globals = {}) {
   const root = process.cwd();
   const hooks = host();
   const mocks = {
@@ -73,10 +73,16 @@ export async function fixture(entry, actor) {
     hooks: hooks.hooks,
     actor,
     AbortController,
-    setTimeout,
+    setTimeout: (fn, delay) => {
+      const timer = setTimeout(fn, delay);
+      timer.unref?.();
+      return timer;
+    },
     clearTimeout,
     setInterval: () => 1,
     clearInterval: () => {},
+    document: Object.assign(new EventTarget(), { hidden: false }),
+    navigator: { onLine: true },
     routes: [],
     calls: [],
     fetch: async (path, init) => {
@@ -94,7 +100,9 @@ export async function fixture(entry, actor) {
               : actor.prefs;
       return { ok: true, json: async () => value };
     },
+    ...globals,
   };
+  context.window ??= Object.assign(new EventTarget(), { setTimeout: context.setTimeout });
   runInNewContext(result.outputFiles[0].text, context);
   const app = context.module.exports;
   return {

@@ -47,6 +47,8 @@ export interface Piece {
 
 // .../AK_Soulstealer_Lv1_PrimaryAsset
 const LEVEL = /_Lv(\d)_/;
+type Entry = { data?: Record<string, string> };
+type Tiers = { data?: Array<{ tiers: Array<{ tier: number; largeIcon: string | null }> }> };
 
 const seen = new Map<string, Promise<Piece | null>>();
 
@@ -56,10 +58,14 @@ function one(kind: string, id: string): Promise<Piece | null> {
   if (held) return held;
 
   const run = fetch(V1 + key)
-    .then((r) => (r.ok ? r.json() : null))
-    .then((j: { data?: Record<string, string> } | null) => {
+    .then((r) => (r.ok ? (r.json() as Promise<Entry>) : null))
+    .then((j) => {
       const d = j?.data;
-      if (!d) return null;
+      if (!d) {
+        seen.delete(key);
+        return null;
+      }
+      if (kind === 'bundles' && !d.displayIcon && !d.displayIcon2) seen.delete(key);
       return {
         // titleText first: a player title's displayName is the catalogue entry
         // ("Fortune Title") and its titleText is the thing you actually wear
@@ -81,7 +87,10 @@ function one(kind: string, id: string): Promise<Piece | null> {
         banner: d.displayIcon2 || null,
       };
     })
-    .catch(() => null);
+    .catch(() => {
+      seen.delete(key);
+      return null;
+    });
 
   seen.set(key, run);
   return run;
@@ -158,8 +167,8 @@ let tiers: Promise<Record<number, string>> | null = null;
 
 export function rankIcon(tier: number): Promise<string | null> {
   tiers ??= fetch(V1 + 'competitivetiers')
-    .then((r) => (r.ok ? r.json() : null))
-    .then((j: { data?: Array<{ tiers: Array<{ tier: number; largeIcon: string | null }> }> }) => {
+    .then((r) => (r.ok ? (r.json() as Promise<Tiers>) : null))
+    .then((j) => {
       const now = j?.data?.[j.data.length - 1];
       const map: Record<number, string> = {};
       for (const t of now?.tiers ?? []) if (t.largeIcon) map[t.tier] = t.largeIcon;
@@ -173,9 +182,6 @@ export function rankIcon(tier: number): Promise<string | null> {
  *  fallback because a handful of old cards never got a wide render. */
 export const cardArt = (id: string): Promise<string | null> =>
   fetch(V1 + 'playercards/' + id)
-    .then((r) => (r.ok ? r.json() : null))
-    .then(
-      (j: { data?: Record<string, string> } | null) =>
-        j?.data?.wideArt ?? j?.data?.largeArt ?? null,
-    )
+    .then((r) => (r.ok ? (r.json() as Promise<Entry>) : null))
+    .then((j) => j?.data?.wideArt ?? j?.data?.largeArt ?? null)
     .catch(() => null);

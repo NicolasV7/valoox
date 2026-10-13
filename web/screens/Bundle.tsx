@@ -28,9 +28,10 @@ import { Totals } from './Bundle.totals.tsx';
 export function Bundle({ bundle, since }: { bundle: BundleData; since?: number }) {
   const s = t().bundle;
   const found = useBundle(bundle.id);
+  const banner = found?.icon ?? found?.banner;
   // The ground under the whole screen is sampled from the banner, so the page
   // itself takes the bundle's colour rather than only the artwork sitting on it.
-  const art = useArt(found?.icon);
+  const art = useArt(banner);
 
   const guns = bundle.items.filter((it) => shapeOf(it.type) === 'row');
   const rest = bundle.items.filter((it) => shapeOf(it.type) !== 'row');
@@ -54,7 +55,7 @@ export function Bundle({ bundle, since }: { bundle: BundleData; since?: number }
       style={artStyle(art)}
     >
       <div class="bundle__hero">
-        {found?.icon && <img class="bundle__art" src={found.icon} alt="" />}
+        {banner && <img class="bundle__art" src={banner} alt="" />}
 
         <a class="chip chip--back" href={href(STORE)} onClick={intercept(STORE)}>
           <span class="chip__chev">
@@ -66,12 +67,20 @@ export function Bundle({ bundle, since }: { bundle: BundleData; since?: number }
 
         <div class="bundle__id">
           <h1 class="bundle__name">
-            {found?.name ?? <span class="skel" style={{ width: '208px', height: '36px' }} />}
+            {found?.name ??
+              (found === undefined ? (
+                <span class="skel" style={{ width: '208px', height: '36px' }} />
+              ) : (
+                t().store.bundle
+              ))}
           </h1>
           <p class="bundle__what">
             {s.pieces(bundle.items.length)}
             {tier && ' · ' + s.tier(t().common.tier[tier.name])}
           </p>
+          {found !== undefined && !found?.icon && !found?.banner && (
+            <p class="bundle__what">{t().store.catalogueMissing}</p>
+          )}
         </div>
       </div>
 

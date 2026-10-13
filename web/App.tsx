@@ -6,14 +6,15 @@
 // expires between two taps lands on the sign-in screen by itself rather than
 // through a listener somebody has to remember to wire up.
 
-import { useCallback, useEffect, useLayoutEffect, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useState } from 'preact/hooks';
 import { needsOwned } from './belong.ts';
+import { StoreRefresh } from './components/StoreRefresh.tsx';
 import { Tabs } from './components/Tabs.tsx';
-import type { ApiError } from './data/api.ts';
 import * as api from './data/api.ts';
-import { EXPIRED, reseeded } from './data/api.ts';
+import { reseeded } from './data/api.ts';
 import * as privateState from './data/private.ts';
-import type { Fault, Inventory, StoreView } from './data/types.ts';
+import { useStore } from './data/store.ts';
+import type { Inventory } from './data/types.ts';
 import { useWishlistError } from './data/watchlist.ts';
 import { t } from './i18n/index.ts';
 import { useRoute, wasAt } from './route.ts';
@@ -27,16 +28,10 @@ import { Stopped } from './screens/Stopped.tsx';
 import { StoreLoading } from './screens/Store.loading.tsx';
 import { useScan } from './sign-in.ts';
 
-type State =
-  | { at: 'loading' }
-  | { at: 'out'; gone?: boolean; ended?: boolean }
-  | { at: 'in'; view: StoreView }
-  | { at: 'fail'; fault: Fault; status: number };
-
 export function App() {
   const route = useRoute();
   const wishlistFailed = useWishlistError();
-  const [state, setState] = useState<State>({ at: 'loading' });
+  const { state, setState, load, refresh } = useStore();
 
   // Put the scroll back where this entry left it — see route.ts. Layout rather
   // than effect, so it happens before the frame paints and nobody sees the top
@@ -51,33 +46,11 @@ export function App() {
   const [inv, setInv] = useState<Inventory | null>(null);
   useEffect(
     () =>
-      privateState.listen((reason) => {
+      privateState.listen(() => {
         setInv(null);
-        setState({ at: 'out', gone: reason === 'expired', ended: reason === 'logout' });
       }),
     [],
   );
-
-  const load = useCallback(async () => {
-    const generation = privateState.epoch();
-    setState({ at: 'loading' });
-    try {
-      const view = await api.store();
-      if (!privateState.current(generation)) return;
-      // Two kinds of nothing: never scanned, and a session Riot has just
-      // retired. The second is a screen of its own — see Account.gone.tsx.
-      if (reseeded(view)) return setState({ at: 'out', gone: view === EXPIRED });
-      setState({ at: 'in', view });
-    } catch (e) {
-      if (!privateState.current(generation)) return;
-      const err = e as ApiError;
-      setState({ at: 'fail', fault: err.fault ?? 'us', status: err.status ?? 0 });
-    }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   // Which screens need it lives in one place rather than in a condition that
   // has to be remembered — see route.ts.
@@ -161,6 +134,7 @@ export function App() {
           onGone={() => setState({ at: 'out', ended: true })}
         />
         <Tabs />
+        {state.refreshFailed && <StoreRefresh busy={!!state.refreshing} onRetry={refresh} />}
       </>
     );
   }

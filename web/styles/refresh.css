@@ -1,0 +1,44 @@
+/* A rotation failed. Keep the current screen and forms in place. */
+.store-refresh {
+  position: fixed;
+  z-index: 10;
+  bottom: calc(78px + env(safe-area-inset-bottom));
+  left: max(12px, calc(50% - 208px));
+  right: max(12px, calc(50% - 208px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  background: var(--card);
+  color: var(--ink-3);
+  font-size: var(--t-small);
+}
+
+.store-refresh button {
+  flex: none;
+  min-height: 44px;
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.store-refresh button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* The store is real even when a new bundle's catalogue entry has not arrived. */
+.promo__missing {
+  position: absolute;
+  z-index: 1;
+  top: 50px;
+  left: 14px;
+  right: 14px;
+  color: var(--ink-4);
+  font-size: var(--t-floor);
+}

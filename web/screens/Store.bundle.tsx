@@ -38,9 +38,18 @@ export function BundleCard({ bundle, since }: { bundle: Bundle; since?: number }
 
         <Countdown from={bundle.remaining} since={since} className="promo__clock" />
 
+        {found !== undefined && !found?.icon && !found?.banner && (
+          <span class="promo__missing">{t().store.catalogueMissing}</span>
+        )}
+
         <span class="promo__foot">
           <span class="promo__name">
-            {found?.name ?? <span class="skel" style={{ width: '168px', height: '22px' }} />}
+            {found?.name ??
+              (found === undefined ? (
+                <span class="skel" style={{ width: '168px', height: '22px' }} />
+              ) : (
+                t().bundle.pieces(bundle.items.length)
+              ))}
           </span>
           <span class="promo__price">
             {bundle.allOwned && <span class="faint">{t().store.allOwned}</span>}

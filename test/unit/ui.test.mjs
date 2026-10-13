@@ -10,7 +10,7 @@ const view = (name) => ({
   accessory: null,
   wallet: { vp: 0, rad: 0, kc: 0 },
   account: { name, rank: null },
-  fetchedAt: 1,
+  fetchedAt: Math.floor(Date.now() / 1000),
 });
 test('the actual App clears inventory before loading a different approved account', async () => {
   const actor = {

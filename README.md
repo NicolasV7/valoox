@@ -11,6 +11,8 @@ game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
 ## Features
 
 - Daily offers, night market, bundles and accessories, with owned items marked.
+- Store rotations refresh automatically when any countdown expires or when an
+  expired tab becomes visible again. Failed refreshes keep the screen open and retry.
 - Weapon skins, variants, sprays, buddies, cards and titles in your collection.
 - Known rewards are hidden from unowned catalogue lists; owned rewards remain visible.
 - Dark Alerts and Account screens, including email removal and disconnect confirmations.
