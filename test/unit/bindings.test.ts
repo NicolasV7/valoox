@@ -1,7 +1,7 @@
 import assert from 'node:assert';
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
+import { sources } from '../sources.ts';
 
 // Every binding the Worker reads is declared where CI can see it.
 //
@@ -18,22 +18,13 @@ import { test } from 'vitest';
 // So: anything read off `env` must be declared in src/types.ts, or be a
 // binding or a var in wrangler.toml. Both of those are committed.
 
-function sources(dir = 'src', out: string[] = []) {
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    const p = join(dir, e.name);
-    if (e.isDirectory()) sources(p, out);
-    else if (e.name.endsWith('.ts')) out.push(readFileSync(p, 'utf8'));
-  }
-  return out;
-}
-
 const code = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 /** Everything `env.FOO` and `env['FOO']`, plus the destructured `const { FOO }
  *  = env` shape, across the Worker. */
 function read(): Set<string> {
   const out = new Set<string>();
-  for (const text of sources()) {
+  for (const { text } of sources('src')) {
     const src = code(text);
     for (const m of src.matchAll(/\benv\s*\.\s*([A-Za-z_]\w*)/g)) out.add(m[1] as string);
     for (const m of src.matchAll(/\benv\s*\[\s*['"]([^'"]+)['"]\s*\]/g)) out.add(m[1] as string);

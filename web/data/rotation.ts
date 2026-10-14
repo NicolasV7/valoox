@@ -2,9 +2,15 @@ import { expiresAt } from '../../src/lib/expiry.ts';
 import type { StoreView } from './types.ts';
 
 const BACKOFF = [2000, 5000, 15000, 60000];
+const MAX_ATTEMPTS = 8;
+
+export interface Rotation {
+  changed(): void;
+  stop(): void;
+}
 
 /** One scheduler for the whole store, including clocks on other screens. */
-export function rotate(read: () => StoreView | null, refresh: () => Promise<void>): () => void {
+export function rotate(read: () => StoreView | null, refresh: () => Promise<void>): Rotation {
   let active = true;
   let busy = false;
   let timer = 0;
@@ -14,7 +20,7 @@ export function rotate(read: () => StoreView | null, refresh: () => Promise<void
   const schedule = () => {
     clearTimeout(timer);
     const view = read();
-    if (!active || !view) return;
+    if (!active || !view || attempts >= MAX_ATTEMPTS) return;
     // Cap long waits: wall-clock changes and background throttling must not
     // leave a deadline tied to the clock that happened to schedule this timer.
     const delay = Math.min(60000, Math.max(0, expiresAt(view) - Date.now(), next - Date.now()));
@@ -32,6 +38,7 @@ export function rotate(read: () => StoreView | null, refresh: () => Promise<void
       schedule();
       return;
     }
+    if (attempts >= MAX_ATTEMPTS) return;
     if (Date.now() < next) return schedule();
     busy = true;
     try {
@@ -56,10 +63,21 @@ export function rotate(read: () => StoreView | null, refresh: () => Promise<void
   document.addEventListener('visibilitychange', wake);
   for (const event of ['focus', 'online', 'pageshow']) window.addEventListener(event, wake);
   schedule();
-  return () => {
-    active = false;
-    clearTimeout(timer);
-    document.removeEventListener('visibilitychange', wake);
-    for (const event of ['focus', 'online', 'pageshow']) window.removeEventListener(event, wake);
+  return {
+    changed() {
+      if (!active || busy) return;
+      const view = read();
+      if (view && expiresAt(view) > Date.now()) {
+        attempts = 0;
+        next = 0;
+      }
+      schedule();
+    },
+    stop() {
+      active = false;
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', wake);
+      for (const event of ['focus', 'online', 'pageshow']) window.removeEventListener(event, wake);
+    },
   };
 }

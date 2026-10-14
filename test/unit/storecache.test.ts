@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   live: vi.fn(async () => ({ session: {}, t: {} })),
   fetch: vi.fn(),
 }));
-vi.mock('../../src/vault/session.ts', () => ({ readCache: mocks.read, writeCache: mocks.write }));
+vi.mock('../../src/vault/cache.ts', () => ({ readCache: mocks.read, writeCache: mocks.write }));
 vi.mock('../../src/vault/live.ts', () => ({ live: mocks.live }));
 vi.mock('../../src/vault/storefront.ts', () => ({ fetchStore: mocks.fetch }));
 afterEach(() => {

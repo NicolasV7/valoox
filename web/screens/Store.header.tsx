@@ -5,11 +5,10 @@
 // seconds. The equipped player card sits behind it at low opacity: it is the
 // one piece of personalisation Riot gives that costs nothing to show.
 
-import { useEffect, useState } from 'preact/hooks';
 import { Countdown } from '../components/Countdown.tsx';
 import { Money } from '../components/Money.tsx';
-import { cardArt, rankIcon } from '../data/catalogue.ts';
 import type { Account, Wallet } from '../data/types.ts';
+import { useCardArt, useRankIcon } from '../data/usePiece.ts';
 import { t } from '../i18n/index.ts';
 
 /** Riot's competitive tiers, by index. 0 is unranked and 1–2 never existed. */
@@ -56,33 +55,11 @@ export function StoreHeader({
   /** When `remaining` was true — see components/Countdown.tsx. */
   since?: number;
 }) {
-  const [art, setArt] = useState<string | null>(null);
-  const [badge, setBadge] = useState<string | null>(null);
+  const art = useCardArt(account.card);
+  const badge = useRankIcon(account.rank?.tier);
   const [name, tag] = (account.name || '').split('#');
   const rank = account.rank;
   const named = rank && TIERS[rank.tier];
-
-  useEffect(() => {
-    if (!account.card) return;
-    let live = true;
-    void cardArt(account.card).then((url) => {
-      if (live) setArt(url);
-    });
-    return () => {
-      live = false;
-    };
-  }, [account.card]);
-
-  useEffect(() => {
-    if (!rank) return;
-    let live = true;
-    void rankIcon(rank.tier).then((url) => {
-      if (live) setBadge(url);
-    });
-    return () => {
-      live = false;
-    };
-  }, [rank]);
 
   return (
     <header class="head">

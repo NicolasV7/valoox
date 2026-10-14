@@ -4,7 +4,7 @@ import { runInNewContext } from 'node:vm';
 import { build } from 'esbuild';
 import { host } from './hooks.mjs';
 
-export async function fixture(entry, actor, globals = {}) {
+export async function fixture(entry, actor, globals = {}, modules = {}) {
   const root = process.cwd();
   const hooks = host();
   const mocks = {
@@ -35,6 +35,7 @@ export async function fixture(entry, actor, globals = {}) {
           : name;
     mocks[path] = 'export function ' + exported + '(){return null;}';
   }
+  Object.assign(mocks, modules);
   const result = await build({
     stdin: { contents: entry, resolveDir: root, loader: 'ts' },
     bundle: true,

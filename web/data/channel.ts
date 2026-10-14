@@ -10,10 +10,13 @@ import { locale } from '../i18n/index.ts';
 import * as api from './api.ts';
 import { reseeded } from './api.ts';
 import { protectWishlist, wishlistVersion } from './optimistic.ts';
+import { poll } from './poll.ts';
 import { current, epoch, listen } from './private.ts';
 import type { Prefs } from './types.ts';
 
 let kept: Prefs | null = null;
+let revision = 0;
+let latest: Promise<boolean> | null = null;
 const listeners = new Set<(p: Prefs | null) => void>();
 let failed = false;
 const failures = new Set<(value: boolean) => void>();
@@ -34,25 +37,35 @@ export function tell(next: Prefs | null) {
 
 /** Ask again, now. Called after anything that changes the address or proves
  *  it, where the answer is the point and a cached one is wrong. */
-export async function reload(): Promise<boolean> {
+export function reload(): Promise<boolean> {
   const generation = epoch();
+  const request = ++revision;
   const version = wishlistVersion();
   failure(false);
-  const got = await api.prefs().catch(() => null);
-  if (!current(generation)) return false;
-  last = Date.now();
-  if (got && !reseeded(got)) {
-    tell(protectWishlist(got, kept, version));
-    return true;
-  }
-  failure(true);
-  return false;
+  const task = api
+    .prefs()
+    .catch(() => null)
+    .then((got) => {
+      if (!current(generation)) return false;
+      // Superseded callers await the newest read instead of reporting a false failure.
+      if (request !== revision) return latest ?? false;
+      last = Date.now();
+      if (got && !reseeded(got)) {
+        tell(protectWishlist(got, kept, version));
+        return true;
+      }
+      failure(true);
+      return false;
+    });
+  latest = task;
+  return task;
 }
 
 let flight: Promise<boolean> | null = null;
 let last = 0;
 listen(() => {
   flight = null;
+  latest = null;
   last = 0;
   tell(null);
   failure(false);
@@ -112,14 +125,11 @@ export function usePrefsError(): boolean {
  * boxes and the message has already bounced, and nothing on the page would
  * ever say so.
  */
-export function useWatch(on: boolean, every = 4000): void {
+export function useWatch(until: number | null, every = 4000): void {
   useEffect(() => {
-    if (!on) return;
-    const id = setInterval(() => {
-      void reload();
-    }, every);
-    return () => clearInterval(id);
-  }, [on, every]);
+    if (until === null) return;
+    return poll(reload, until, every);
+  }, [until, every]);
 }
 
 /** What the provider last said, read as a verdict rather than a sentence.

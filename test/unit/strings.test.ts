@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { test } from 'vitest';
+import { sources } from '../sources.ts';
 
 // Every user-facing string lives in web/i18n/, and nowhere else.
 //
@@ -16,16 +16,6 @@ import { test } from 'vitest';
 
 const ROOT = 'web';
 const I18N = 'web/i18n/';
-
-function sources(dir: string, out: Array<{ path: string; text: string }> = []) {
-  if (!existsSync(dir)) return out;
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    const p = join(dir, e.name).replace(/\\/g, '/');
-    if (e.isDirectory()) sources(p, out);
-    else if (/\.(ts|tsx)$/.test(e.name)) out.push({ path: p, text: readFileSync(p, 'utf8') });
-  }
-  return out;
-}
 
 const files = sources(ROOT).filter((f) => !f.path.startsWith(I18N));
 

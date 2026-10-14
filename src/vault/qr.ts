@@ -3,7 +3,7 @@ import * as scans from '../storage/scans.ts';
 import type { Env, Jar, Session } from '../types.ts';
 import { adopt } from './adopt.ts';
 import { identify, reauth } from './auth.ts';
-import { clearCache } from './cache.ts';
+import { clearCache } from './evict.ts';
 import { rf } from './http.ts';
 import { browserId } from './keys.ts';
 import { CURRENT_KID, open, seal } from './seal.ts';

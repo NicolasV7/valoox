@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import type { Env } from '../../src/types.ts';
+import { clearCache, readCache, writeCache } from '../../src/vault/cache.ts';
 import { CURRENT_KID, seal } from '../../src/vault/seal.ts';
-import { clearCache, createSession, readCache, writeCache } from '../../src/vault/session.ts';
+import { createSession } from '../../src/vault/session.ts';
 import { session, storeView, UID } from './fixtures.ts';
 import { freshDb, KEY } from './setup.ts';
 

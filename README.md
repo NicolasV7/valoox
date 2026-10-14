@@ -12,7 +12,10 @@ game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
 
 - Daily offers, night market, bundles and accessories, with owned items marked.
 - Store rotations refresh automatically when any countdown expires or when an
-  expired tab becomes visible again. Failed refreshes keep the screen open and retry.
+  expired tab becomes visible again. After eight unsuccessful automatic attempts,
+  requests stop and manual retry remains available. Fresh data resumes the scheduler.
+- Missing bundle metadata gets up to six catalogue attempts while visible and online.
+  Reopening that screen starts another bounded attempt sequence.
 - Weapon skins, variants, sprays, buddies, cards and titles in your collection.
 - Known rewards are hidden from unowned catalogue lists; owned rewards remain visible.
 - Dark Alerts and Account screens, including email removal and disconnect confirmations.
@@ -78,6 +81,16 @@ npm run dev
 ```
 
 `npm run check` runs type checks, lint, tests and the browser build.
+Source contracts require fewer than 200 lines per authored file and reject runtime
+module cycles. Generated bundles, the Archify export/model and measured palette
+data are excluded. Application code, scripts, tests and configuration are covered.
+Email-code status checks stop at expiry and pause while hidden or offline. QR
+polling stops on approval, expiry, unmount, or ten minutes of unsuccessful reads.
+CI checks stop after ten minutes; deployments stop after twenty minutes.
+
+`npm run who` reads aggregate current-version session counts from live D1;
+`npm run who -- local` uses local D1. Session writes, including background alerts,
+are reported as updates, not page visits. Legacy rows are listed separately.
 `npm run phone` serves local development over Tailscale HTTPS;
 `npm run phone:off` removes it. Keep the connection private; never use Funnel.
 

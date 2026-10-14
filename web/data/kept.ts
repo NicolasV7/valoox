@@ -10,7 +10,7 @@
 // not per entry. It is not persisted anywhere: a reload is a fresh start, and
 // a field that outlives the page is a field you did not ask to come back.
 
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { listen } from './private.ts';
 
 const kept = new Map<string, string>();
@@ -19,12 +19,13 @@ listen(() => kept.clear());
 /** A text field whose value outlives the screen. The key names the screen, so
  *  two weapons do not share one. */
 export function useKept(key: string): [string, (next: string) => void] {
-  const [value, set] = useState(() => kept.get(key) ?? '');
+  const [found, set] = useState(() => ({ key, value: kept.get(key) ?? '' }));
+  useEffect(() => listen(() => set({ key, value: '' })), [key]);
   return [
-    value,
+    found.key === key ? found.value : (kept.get(key) ?? ''),
     (next: string) => {
       kept.set(key, next);
-      set(next);
+      set({ key, value: next });
     },
   ];
 }

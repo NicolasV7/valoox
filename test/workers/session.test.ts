@@ -1,14 +1,8 @@
 import { beforeEach, expect, test } from 'vitest';
 import type { Env, Session } from '../../src/types.ts';
+import { readCache, writeCache } from '../../src/vault/cache.ts';
 import * as repo from '../../src/vault/repo.ts';
-import {
-  createSession,
-  forget,
-  readCache,
-  readSession,
-  saveSession,
-  writeCache,
-} from '../../src/vault/session.ts';
+import { createSession, forget, readSession, saveSession } from '../../src/vault/session.ts';
 import { storeView } from './fixtures.ts';
 import { freshDb, KEY } from './setup.ts';
 

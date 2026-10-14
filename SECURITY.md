@@ -70,13 +70,21 @@ A webhook racing the send response cannot be silently discarded or regress a
 later provider state. Unknown mappings are ignored; repeated CAS failures
 return a retryable response.
 
-Abandoned sessions are pruned after ten days. Session-linked security state
-cascades on deletion. Expired scans, codes, limits, stop records, mappings and
+Sessions are pruned after ten days without a session write. Background alert
+checks also write sessions, so closing the page does not start that deadline.
+Session-linked security state cascades on deletion. Expired scans, codes,
+limits, stop records, mappings and
 delivery records are pruned by the scheduled job. D1 Time Travel retains
 deleted ciphertext for the platform retention period; deletion is not physical
 erasure. Rotating `JAR_KEY` also orphans that old ciphertext.
 
 ## Abuse and background work
+
+Browser rotation recovery makes at most eight unsuccessful automatic attempts
+before requiring manual recovery. Missing bundle metadata gets six catalogue
+attempts per mount/id. Email-code status polling is serial, pauses while hidden
+or offline, and stops at code expiry. QR polling also stops locally after ten
+minutes and cannot restart after its component unmounts.
 
 A coarse edge limit runs before application work. Atomic D1 gates additionally
 bound QR starts by browser/IP and outgoing mail by account/recipient. Supported

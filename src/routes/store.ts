@@ -2,8 +2,8 @@ import { expiresAt } from '../lib/expiry.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { EXPIRED, RESEED } from '../lib/json.ts';
 import type { StoreView } from '../types.ts';
+import { readCache, writeCache } from '../vault/cache.ts';
 import { live } from '../vault/live.ts';
-import { readCache, writeCache } from '../vault/session.ts';
 import { fetchStore } from '../vault/storefront.ts';
 
 /**

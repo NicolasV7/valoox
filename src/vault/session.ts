@@ -1,11 +1,10 @@
 import type { Env, Session } from '../types.ts';
-import { clearCache } from './cache.ts';
+import { clearCache } from './evict.ts';
 import * as repo from './repo.ts';
 import { CURRENT_KID, open, SealBroken, seal } from './seal.ts';
 import { sessionShape } from './shape.ts';
 import { markOf } from './who.ts';
 
-export { clearCache, readCache, writeCache } from './cache.ts';
 export interface Held {
   session: Session;
   ver: number;

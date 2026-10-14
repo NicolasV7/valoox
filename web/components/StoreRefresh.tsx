@@ -1,6 +1,6 @@
 import { t } from '../i18n/index.ts';
 
-/** Failed rotations leave the current screen usable while automatic retries continue. */
+/** Failed rotations keep the current screen available for bounded retries and manual recovery. */
 export function StoreRefresh({ busy, onRetry }: { busy: boolean; onRetry: () => Promise<void> }) {
   return (
     <div class="store-refresh" role="status">

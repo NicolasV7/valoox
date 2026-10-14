@@ -1,8 +1,8 @@
 import type { Body, Ctx } from '../lib/json.ts';
 import { EXPIRED, RESEED } from '../lib/json.ts';
+import { readCache, writeCache } from '../vault/cache.ts';
 import { fetchInventory, type Inventory } from '../vault/inventory.ts';
 import { live } from '../vault/live.ts';
-import { readCache, writeCache } from '../vault/session.ts';
 
 /** An inventory changes only when you buy something. An hour is plenty, and it
  *  keeps a tab refresh from costing a full Riot round trip. */

@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import * as api from './data/api.ts';
 import { reseeded } from './data/api.ts';
 import { listen } from './data/private.ts';
-import { POLL_EVERY, type ScanState } from './screens/Scan.tsx';
+import { POLL_EVERY, SCAN_LIFE, type ScanState } from './data/scan.ts';
 
 /**
  * How long the approved screen stays after the store has landed.
@@ -36,7 +36,7 @@ export function useScan(onApproved: () => Promise<void>) {
   const warm = useRef<Promise<string | null> | null>(null);
   /** The code that is on screen, so both endings can keep showing it. */
   const shown = useRef<string | undefined>(undefined);
-  const asking = useRef(false);
+  const asking = useRef<number | null>(null);
   const run = useRef(0);
 
   const stop = useCallback(() => {
@@ -64,6 +64,7 @@ export function useScan(onApproved: () => Promise<void>) {
   const start = useCallback(async () => {
     stop();
     const generation = ++run.current;
+    const until = Date.now() + SCAN_LIFE;
     clearTimeout(held.current);
     setState({ phase: 'starting' });
 
@@ -79,13 +80,20 @@ export function useScan(onApproved: () => Promise<void>) {
     setState({ phase: 'ready', url });
 
     const ask = async () => {
-      if (asking.current || generation !== run.current) return;
-      asking.current = true;
+      if (generation !== run.current) return;
+      if (Date.now() >= until) {
+        run.current++;
+        stop();
+        setState({ phase: 'expired', url: shown.current });
+        return;
+      }
+      if (asking.current === generation) return;
+      asking.current = generation;
       const seen = await api
         .pollScan()
         .catch(() => null)
         .finally(() => {
-          asking.current = false;
+          if (asking.current === generation) asking.current = null;
         });
       if (generation !== run.current) return;
       if (!seen || reseeded(seen)) return;
@@ -100,6 +108,7 @@ export function useScan(onApproved: () => Promise<void>) {
         // what makes it readable. load() catches its own failures, so a Riot
         // that never answers still lets go of the screen.
         await onApproved();
+        if (generation !== run.current) return;
         held.current = setTimeout(() => {
           if (generation === run.current) setState(null);
         }, LINGER) as unknown as number;
@@ -135,8 +144,10 @@ export function useScan(onApproved: () => Promise<void>) {
   // for as long as the tab lives.
   useEffect(
     () => () => {
+      run.current++;
       stop();
       clearTimeout(held.current);
+      warm.current = null;
     },
     [stop],
   );

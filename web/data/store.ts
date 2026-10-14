@@ -5,7 +5,7 @@ import { expiresAt } from '../../src/lib/expiry.ts';
 import * as api from './api.ts';
 import { EXPIRED, reseeded } from './api.ts';
 import * as privateState from './private.ts';
-import { rotate } from './rotation.ts';
+import { type Rotation, rotate } from './rotation.ts';
 import type { Fault, StoreView } from './types.ts';
 
 export type StoreState =
@@ -19,6 +19,7 @@ export function useStore() {
   const current = useRef<StoreView | null>(null);
   const mounted = useRef(true);
   const pending = useRef<{ epoch: number; task: Promise<void> } | null>(null);
+  const rotation = useRef<Rotation | null>(null);
 
   useEffect(() => {
     mounted.current = true;
@@ -61,6 +62,7 @@ export function useStore() {
         }
       } finally {
         if (pending.current?.epoch === generation) pending.current = null;
+        if (mounted.current && privateState.current(generation)) rotation.current?.changed();
       }
     })();
     pending.current = { epoch: generation, task };
@@ -73,7 +75,13 @@ export function useStore() {
   }, [load]);
   const inside = state.at === 'in';
   useEffect(() => {
-    if (inside) return rotate(() => current.current, refresh);
+    if (!inside) return;
+    const clock = rotate(() => current.current, refresh);
+    rotation.current = clock;
+    return () => {
+      if (rotation.current === clock) rotation.current = null;
+      clock.stop();
+    };
   }, [inside, refresh]);
 
   return { state, setState, load, refresh };

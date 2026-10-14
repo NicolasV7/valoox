@@ -15,8 +15,7 @@ export const store = {
 
   discount: (percent: number) => `−${percent}%`,
   allOwned: 'You already own all of it',
-  refreshFailed:
-    'The store could not update. These offers may have expired. Retrying automatically.',
+  refreshFailed: 'The store could not update. These offers may have expired. Try again shortly.',
   retry: 'Retry now',
   catalogueMissing: 'Catalogue details are not available yet.',
 

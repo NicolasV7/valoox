@@ -63,7 +63,7 @@ function have(dir, one) {
 }
 
 async function main() {
-  if (have(OUT, FACES[0].file)) {
+  if (have(OUT, 'OFL.txt') && FACES.every((face) => have(OUT, face.file))) {
     console.log(OUT + ' is already there (--force to fetch it again)');
     return;
   }

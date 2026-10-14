@@ -1,23 +1,13 @@
 import assert from 'node:assert';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
+import { sources } from '../sources.ts';
 
 // Two greps that hold the architecture in place. Neither is clever; both catch
 // the specific mistakes that would quietly undo a security property, and a
 // mechanical check is the only kind that survives a tired evening.
 
-function sources(dir = 'src', out: Array<{ path: string; text: string }> = []) {
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    const p = join(dir, e.name);
-    if (e.isDirectory()) sources(p, out);
-    else if (e.name.endsWith('.ts'))
-      out.push({ path: p.replace(/\\/g, '/'), text: readFileSync(p, 'utf8') });
-  }
-  return out;
-}
-
-const files = sources();
+const files = sources('src');
 
 /** Comments say things like "never reaches fetch()" on purpose. Strip them, or
  *  the checks below flag the documentation instead of the code. */
@@ -90,9 +80,10 @@ test('KV mutations are limited to public version and encrypted view caches', () 
     .filter((f) => /VAL\.(put|delete)\(/.test(code(f.text)))
     .map((f) => f.path)
     .sort();
-  assert.deepEqual(writers, ['src/vault/auth.ts', 'src/vault/cache.ts']);
+  assert.deepEqual(writers, ['src/vault/auth.ts', 'src/vault/cache.ts', 'src/vault/evict.ts']);
   const cache = files.find((f) => f.path === 'src/vault/cache.ts')?.text ?? '';
-  assert.match(cache, /const VERSION: Record<Cache, number>/);
+  const namespace = files.find((f) => f.path === 'src/vault/evict.ts')?.text ?? '';
+  assert.match(namespace, /const VERSION: Record<Cache, number>/);
   assert.match(cache, /readSession/);
   assert.match(cache, /'store:4'/);
   assert.match(cache, /'inv:3'/);
@@ -105,22 +96,10 @@ test('KV mutations are limited to public version and encrypted view caches', () 
 // Found rather than listed. A hardcoded list is a guard that a new module opts
 // out of by existing, which is the opposite of what this file is for: the whole
 // value of these checks is that nobody has to remember them.
-function front(dir: string, out: Array<{ path: string; text: string }> = []) {
-  if (!existsSync(dir)) return out;
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    const p = join(dir, e.name).replace(/\\/g, '/');
-    if (e.isDirectory()) front(p, out);
-    // public/app.js and app.css are the build output. Checking a bundle tells
-    // you about the bundler; the source it was built from is in web/ and is
-    // checked there, which is where a mistake would actually be made.
-    else if (/\.(js|tsx?|html)$/.test(e.name) && p !== 'public/app.js') {
-      out.push({ path: p, text: readFileSync(p, 'utf8') });
-    }
-  }
-  return out;
-}
-
-const web = [...front('public'), ...front('web')];
+const FRONT = /\.(js|tsx?|html)$/;
+const web = [...sources('public', FRONT), ...sources('web', FRONT)].filter(
+  (f) => f.path !== 'public/app.js',
+);
 
 test('the front end has files to check at all', () => {
   assert.ok(web.length > 4, 'found only ' + web.length + ' front-end files — the roots moved');

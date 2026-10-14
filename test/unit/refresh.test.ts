@@ -32,7 +32,7 @@ test('a bundle expires exactly at its deadline, independently of the daily clock
   const refresh = vi.fn(async () => {
     current = view(3600);
   });
-  stop = rotate(() => current, refresh);
+  stop = rotate(() => current, refresh).stop;
   await vi.advanceTimersByTimeAsync(999);
   expect(refresh).not.toHaveBeenCalled();
   await vi.advanceTimersByTimeAsync(1);
@@ -52,7 +52,7 @@ test('simultaneous clocks and resume events share one in-flight refresh', async 
         finish = resolve;
       }),
   );
-  stop = rotate(() => current, refresh);
+  stop = rotate(() => current, refresh).stop;
   await vi.advanceTimersByTimeAsync(0);
   for (const event of ['focus', 'online', 'pageshow']) win.dispatchEvent(new Event(event));
   doc.dispatchEvent(new Event('visibilitychange'));
@@ -73,7 +73,7 @@ test.each(['hidden', 'offline'])(
     const refresh = vi.fn(async () => {
       current = view(3600);
     });
-    stop = rotate(() => current, refresh);
+    stop = rotate(() => current, refresh).stop;
     doc.hidden = state === 'hidden';
     net.onLine = state !== 'offline';
     await vi.advanceTimersByTimeAsync(60000);
@@ -95,7 +95,7 @@ test.each(['zero', 'failure'])(
       if (mode === 'failure') throw new Error('fixture');
       current = view(0);
     });
-    stop = rotate(() => current, refresh);
+    stop = rotate(() => current, refresh).stop;
     await vi.advanceTimersByTimeAsync(0);
     expect(refresh).toHaveBeenCalledTimes(1);
     for (const [i, delay] of [2000, 5000, 15000, 60000, 60000].entries()) {
@@ -113,7 +113,7 @@ test('clock changes and bfcache restoration catch up without overflowing long ti
   const refresh = vi.fn(async () => {
     current = view(3600);
   });
-  stop = rotate(() => current, refresh);
+  stop = rotate(() => current, refresh).stop;
   await vi.advanceTimersByTimeAsync(60000);
   expect(refresh).not.toHaveBeenCalled();
   vi.setSystemTime(Date.now() + 86400 * 366 * 1000);
@@ -130,7 +130,7 @@ test('cleanup during a request removes listeners and prevents later timers or re
         finish = resolve;
       }),
   );
-  stop = rotate(() => view(0), refresh);
+  stop = rotate(() => view(0), refresh).stop;
   await vi.advanceTimersByTimeAsync(0);
   stop();
   finish();
@@ -138,4 +138,23 @@ test('cleanup during a request removes listeners and prevents later timers or re
   doc.dispatchEvent(new Event('visibilitychange'));
   win.dispatchEvent(new Event('online'));
   expect(refresh).toHaveBeenCalledTimes(1);
+});
+
+test('eight failed refreshes stop automatic requests until fresh data arrives', async () => {
+  let current = view(0);
+  const refresh = vi.fn(async () => {
+    current = view(0);
+  });
+  const clock = rotate(() => current, refresh);
+  stop = clock.stop;
+  await vi.advanceTimersByTimeAsync(86400000);
+  expect(refresh).toHaveBeenCalledTimes(8);
+  expect(vi.getTimerCount()).toBe(0);
+  for (const event of ['focus', 'online', 'pageshow']) win.dispatchEvent(new Event(event));
+  await vi.advanceTimersByTimeAsync(600000);
+  expect(refresh).toHaveBeenCalledTimes(8);
+  current = view(3600);
+  clock.changed();
+  await vi.advanceTimersByTimeAsync(3600000);
+  expect(refresh).toHaveBeenCalledTimes(9);
 });

@@ -58,3 +58,33 @@ test('QR approval rotates private state before the next store load', async () =>
   expect(await api.pollScan()).toEqual({ status: 'ok', shard: 'na' });
   expect(held()).toBeNull();
 });
+
+test('an older preference read cannot replace the result of a newer read', async () => {
+  const pending: Array<(response: Response) => void> = [];
+  vi.stubGlobal('fetch', () => new Promise<Response>((resolve) => pending.push(resolve)));
+  const first = reload();
+  const second = reload();
+  const latest = { ...prefs, mail: { ...prefs.mail, to: 'new@example.invalid' } };
+  pending[1]?.(Response.json(latest));
+  expect(await second).toBe(true);
+  pending[0]?.(Response.json(prefs));
+  expect(await first).toBe(true);
+  expect(held()).toEqual(latest);
+});
+
+test('a superseded caller waits for the newest pending preference read', async () => {
+  const pending: Array<(response: Response) => void> = [];
+  vi.stubGlobal('fetch', () => new Promise<Response>((resolve) => pending.push(resolve)));
+  const first = reload();
+  const second = reload();
+  let finished = false;
+  void first.then(() => {
+    finished = true;
+  });
+  pending[0]?.(Response.json(prefs));
+  for (let i = 0; i < 8; i++) await Promise.resolve();
+  expect(finished).toBe(false);
+  pending[1]?.(Response.json(prefs));
+  expect(await second).toBe(true);
+  expect(await first).toBe(true);
+});

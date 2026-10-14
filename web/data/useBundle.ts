@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
 import { bundle, type Piece } from './catalogue.ts';
 
+const MAX_ATTEMPTS = 6;
+
 /** New bundles can reach Riot's store before the public catalogue publishes them. */
 export function useBundle(id: string): Piece | null | undefined {
   const [found, setFound] = useState<{ id: string; value: Piece | null | undefined }>({
@@ -16,19 +18,28 @@ export function useBundle(id: string): Piece | null | undefined {
     let timer = 0;
     const read = async () => {
       clearTimeout(timer);
-      if (!live || done || busy || document.hidden || navigator.onLine === false) return;
+      if (
+        !live ||
+        done ||
+        busy ||
+        attempts >= MAX_ATTEMPTS ||
+        document.hidden ||
+        navigator.onLine === false
+      )
+        return;
       if (Date.now() < next) {
         timer = window.setTimeout(read, next - Date.now());
         return;
       }
       busy = true;
+      attempts++;
       const value = await bundle(id);
       busy = false;
       if (!live) return;
       setFound({ id, value });
       done = !!(value && (value.icon || value.banner));
-      if (!done) {
-        next = Date.now() + Math.min(300000, 30000 * 2 ** Math.min(attempts++, 4));
+      if (!done && attempts < MAX_ATTEMPTS) {
+        next = Date.now() + Math.min(300000, 30000 * 2 ** Math.min(attempts - 1, 4));
         timer = window.setTimeout(read, next - Date.now());
       }
     };

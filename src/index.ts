@@ -7,8 +7,8 @@ export default {
   /**
    * Abandoned rows are the ones that would sit in a stale dump long after their
    * owner stopped caring. Deleting them beats shortening their life: they are
-   * gone, not merely shorter-lived. Active sessions roll their own last_used
-   * forward on every visit and are untouched.
+   * gone, not merely shorter-lived. Session writes, including background alert
+   * checks, advance last_used. Cached page reads do not reset this clock.
    *
    * Honest caveat for the disclosure page: D1 Time Travel retains deleted rows
    * for 7 days with no purge API, so a DELETE is not erasure. Rotating JAR_KEY

@@ -13,23 +13,9 @@ import { Check, Clock, Riot } from '../components/icons.tsx';
 import { Marked } from '../components/Marked.tsx';
 import { QrCode } from '../components/QrCode.tsx';
 import { Thinking } from '../components/Thinking.tsx';
+import { POLL_EVERY, type ScanState } from '../data/scan.ts';
 import { SPRAY } from '../design/sprays.ts';
 import { t } from '../i18n/index.ts';
-
-/** How often the Worker asks Riot whether the phone has approved it.
- *
- *  Exported because the waiting indicator rings out on exactly this beat, and
- *  two numbers that have to match are one number. */
-export const POLL_EVERY = 2000;
-
-export type ScanState =
-  | { phase: 'starting' }
-  | { phase: 'ready'; url: string }
-  // The url rides along into both endings. The code is spent either way, but it
-  // is still the thing that was on screen a second ago, and a plate that empties
-  // to white loses the only continuity the three phases have.
-  | { phase: 'expired'; url?: string }
-  | { phase: 'approved'; url?: string };
 
 export function Scan({
   state,

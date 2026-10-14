@@ -22,8 +22,8 @@ export function AlertsCode() {
   const left = useLeft(prefs?.code?.until ?? null);
   const bad = refused(prefs?.mail?.said);
   const live = !!prefs?.mail && !prefs.mail.ok && !!prefs.code && prefs.code.tries > 0 && left > 0;
-  // Poll only while a code is outstanding, including while this tab sleeps.
-  useWatch(!!prefs?.mail && !prefs.mail.ok && !bad);
+  // Provider updates matter only while this code is usable and the tab is awake.
+  useWatch(live && !bad ? (prefs?.code?.until ?? null) : null);
   useEffect(() => {
     if (bad || prefs?.mail?.ok) go(ALERTS);
   }, [bad, prefs?.mail?.ok]);

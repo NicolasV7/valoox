@@ -16,7 +16,7 @@ export const store = {
   discount: (percent: number) => `−${percent}%`,
   allOwned: 'Ya lo tienes completo',
   refreshFailed:
-    'No se pudo actualizar la tienda. Estas ofertas pueden haber vencido. Se reintentará automáticamente.',
+    'No se pudo actualizar la tienda. Estas ofertas pueden haber vencido. Intenta de nuevo en un momento.',
   retry: 'Reintentar',
   catalogueMissing: 'Los detalles aún no están en el catálogo.',
 

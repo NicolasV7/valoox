@@ -2,16 +2,11 @@ import { beforeEach, expect, test, vi } from 'vitest';
 import { mint } from '../../src/app/cookie.ts';
 import { route } from '../../src/router.ts';
 import type { Env } from '../../src/types.ts';
+import { readCache, writeCache } from '../../src/vault/cache.ts';
 import { browserId } from '../../src/vault/keys.ts';
 import * as repo from '../../src/vault/repo.ts';
 import { CURRENT_KID, open, seal } from '../../src/vault/seal.ts';
-import {
-  createSession,
-  forget,
-  readCache,
-  saveSession,
-  writeCache,
-} from '../../src/vault/session.ts';
+import { createSession, forget, saveSession } from '../../src/vault/session.ts';
 import { session, storeView, UID } from './fixtures.ts';
 import { freshDb, KEY } from './setup.ts';
 

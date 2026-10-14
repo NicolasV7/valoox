@@ -78,8 +78,11 @@ content hosts are narrowly pinned: the community catalogue at
 
 ## The two mechanical rules
 
-**No file over 200 lines.** Split along a responsibility boundary; do not
-reformat to fit. `test/unit/size.test.ts` enforces this.
+**Every authored source has fewer than 200 lines**, including comments and
+blank lines. Split along a responsibility boundary; do not reformat to fit.
+`test/unit/size.test.ts` covers application code, scripts, tests, migrations,
+workflows and configuration. Generated bundles/types, the standalone Archify
+diagram and its model, and the measured palette are artifacts outside this limit.
 
 **No user-facing text outside `web/i18n/`.** Interpolation is a function:
 
@@ -117,6 +120,7 @@ src/
     session.ts        sealed session and atomic alert flag
     qr.ts             generation-bound QR lifecycle via storage/scans.ts
     cache.ts          encrypted public DTOs, D1 revocation before reads
+    evict.ts          cache namespaces and eviction, independent of session reads
     alerts.ts         fair batches, circuit breaker, invocation budget
   alerts/             OTP, send quotas, immutable outbox, bounded dispatch
   lib/                bounded bodies and private JSON responses
