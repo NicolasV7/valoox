@@ -47,7 +47,7 @@
       "url": "https://github.com/NicolasV7/valoox",
       "provider": "github",
       "link_mode": "web",
-      "revision": "64929aa41cfbc073dbb72ad49aaea869dfafd414"
+      "revision": "bbb6994b9124a196de881a45855c550e058b56ff"
     }
   },
   "components": [
@@ -138,8 +138,8 @@
     {
       "id": "notify",
       "type": "external",
-      "label": "Resend / Discord",
-      "sublabel": "Email + private bot DMs",
+      "label": "Discord",
+      "sublabel": "Opted-in private bot DMs",
       "pos": [
         980,
         90
@@ -150,8 +150,8 @@
       ],
       "sources": [
         {
-          "path": "src/vault/mail.ts",
-          "label": "Verified email"
+          "path": "src/app/features.ts",
+          "label": "Email retained, disabled"
         },
         {
           "path": "src/vault/discord.ts",
@@ -389,7 +389,7 @@
       "title": "What goes in and out",
       "items": [
         "QR approval rotates the cookie; D1 stores a keyed fingerprint",
-        "Private Discord commands prove DMs; signed app removal stops alerts",
+        "Discord proves private DMs; valoox selects their language",
         "Allowlist excludes Riot purchases, equipping and chat"
       ]
     },
@@ -398,7 +398,7 @@
       "title": "Session custody",
       "items": [
         "Session, cache, QR, wishlist, stop links and outbox have distinct purposes",
-        "D1 decides revocation, OTP attempts and Discord opt-in",
+        "D1 governs consent and revocation; email is disabled",
         "Rotating JAR_KEY invalidates old credentials and ciphertext"
       ]
     }
