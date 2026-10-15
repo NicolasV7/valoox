@@ -21,6 +21,11 @@
 }
 .discord__command .flow__bounds { align-items: center; }
 .discord__command .btn { margin-top: 0; }
+.discord__instructions { list-style: decimal; margin: 8px 0 0; padding-left: 22px; }
+.discord__instructions > li { padding: 16px 0 20px 8px; }
+.discord__instructions > li + li { border-top: 1px solid var(--rule); }
+.discord__instructions > li::marker { color: var(--ink-4); font-family: var(--num); }
+.discord__instructions p { margin-top: 8px; color: var(--ink-3); }
 .discord__steps { display: flex; gap: 12px; list-style: none; padding: 0; margin: 28px 0 12px; }
 .discord__steps li { flex: 1; min-width: 0; display: grid; gap: 8px; padding-top: 12px; border-top: 2px solid var(--rule); color: var(--ink-4); font-size: var(--t-floor); }
 .discord__steps li[aria-current='step'] { border-color: var(--ink); color: var(--ink); }

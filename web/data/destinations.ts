@@ -2,7 +2,9 @@ import { refused } from './channel.ts';
 import type { Prefs } from './types.ts';
 
 export const receiving = (prefs: Prefs | null): boolean =>
-  !!prefs && ((prefs.mail?.ok === true && !refused(prefs.mail.said)) || prefs.discord?.ok === true);
+  !!prefs &&
+  ((prefs.emailAvailable === true && prefs.mail?.ok === true && !refused(prefs.mail.said)) ||
+    prefs.discord?.ok === true);
 
 export function connectionState(connection: Prefs['discord']): {
   kind: 'ok' | 'bad' | 'wait';

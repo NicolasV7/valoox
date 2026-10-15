@@ -40,7 +40,8 @@ CREATE TABLE checks (
 );
 CREATE TABLE deliveries (
   key TEXT PRIMARY KEY, state INTEGER NOT NULL DEFAULT 0,
-  lease INTEGER NOT NULL DEFAULT 0, expires INTEGER NOT NULL, owner TEXT, blob TEXT NOT NULL
+  lease INTEGER NOT NULL DEFAULT 0, expires INTEGER NOT NULL, owner TEXT, blob TEXT NOT NULL,
+  channel TEXT CHECK(channel IN ('mail','discord'))
 );
 CREATE INDEX messages_expiry ON messages(expires);
 CREATE INDEX scans_expiry ON scans(expires);
@@ -59,7 +60,7 @@ CREATE TABLE links (
   uid TEXT PRIMARY KEY REFERENCES s(uid) ON DELETE CASCADE,
   key TEXT NOT NULL UNIQUE, gen TEXT NOT NULL, kid INTEGER NOT NULL,
   expires INTEGER NOT NULL, claim TEXT, recipient TEXT,
-  state TEXT NOT NULL DEFAULT 'waiting'
+  state TEXT NOT NULL DEFAULT 'waiting', lang TEXT NOT NULL DEFAULT 'en'
 );
 CREATE INDEX links_expiry ON links(expires);
 

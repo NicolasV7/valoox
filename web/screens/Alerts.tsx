@@ -17,7 +17,8 @@ export function Alerts({ view }: { view: StoreView }) {
 
   if (!prefs) return <AlertsLoading />;
   // Keep the working list available when the other destination can still receive.
-  if (refused(prefs.mail?.said) && !prefs.discord?.ok) return <AlertsFailed />;
+  if (prefs.emailAvailable && refused(prefs.mail?.said) && !prefs.discord?.ok)
+    return <AlertsFailed />;
   // Nothing starred is a different screen, not an empty one: there are two
   // things to do first and they have an order, which a list with no rows in
   // it cannot show.

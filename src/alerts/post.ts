@@ -22,8 +22,8 @@ export async function post(
 ): Promise<boolean> {
   const current = await readSession(env, uid);
   if (!current || current.session.puuid !== session.puuid) return false;
-  const destination = target(session, channel);
-  const live = target(current.session, channel);
+  const destination = target(session, channel, env);
+  const live = target(current.session, channel, env);
   if (!destination || !live || destination.gen !== live.gen || destination.to !== live.to)
     return false;
   const acct = (await markOf(env, session.puuid)) ?? uid;
@@ -40,6 +40,7 @@ export async function post(
     env,
     id,
     await seal(env, id, CURRENT_KID, body, 'outbox:2'),
+    channel,
   );
   if (queued.state === 'done') return true;
   return queued.state === 'claimed' && dispatch(env, id, queued, budget);

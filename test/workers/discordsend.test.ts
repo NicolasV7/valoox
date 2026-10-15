@@ -33,7 +33,7 @@ test('email and Discord reserve independent deliveries for the same wishlist mat
   expect(fetcher).toHaveBeenCalledTimes(2);
   const call = fetcher.mock.calls.find(([url]) => url.includes('discord.com'));
   const body = JSON.parse(call?.[1].body);
-  expect(body.content).toContain('Wanted');
+  expect(body.embeds[0].description).toContain('Wanted');
   expect(body.allowed_mentions).toEqual({ parse: [] });
   expect(body.enforce_nonce).toBe(true);
   expect(JSON.stringify(body)).not.toContain(session.jar.ssid);

@@ -46,7 +46,7 @@ function read(): Set<string> {
  *  `worker-configuration.d.ts` is the thing this test refuses to trust. */
 function declared(): Set<string> {
   const types = readFileSync('src/types.ts', 'utf8');
-  const body = types.slice(types.indexOf('interface Env extends Cloudflare.Env {'));
+  const body = types.slice(types.indexOf('interface Env extends '));
   const out = new Set<string>();
   for (const m of code(body.slice(0, body.indexOf('\n}'))).matchAll(/^\s*(\w+)\s*[?:]/gm)) {
     out.add(m[1] as string);

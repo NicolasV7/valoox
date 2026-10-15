@@ -3,6 +3,7 @@ import { Back } from '../components/Back.tsx';
 import { FlowArt, FlowHeading, FlowInfo } from '../components/Flow.tsx';
 import { useAction } from '../data/action.ts';
 import * as api from '../data/api.ts';
+import { usePrefs } from '../data/channel.ts';
 import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
 import { go } from '../route.ts';
@@ -12,6 +13,7 @@ const ACCOUNT = { name: 'account' } as const;
 export function AccountLeave({ onGone }: { onGone: () => void }) {
   const s = t().account;
   const f = t().flows;
+  const prefs = usePrefs();
   const { busy, run } = useAction();
   const [failed, setFailed] = useState(false);
   return (
@@ -24,7 +26,7 @@ export function AccountLeave({ onGone }: { onGone: () => void }) {
       </div>
       <ul class="flow__removed">
         <li>{s.goesJar}</li>
-        <li>{s.goesMail}</li>
+        {prefs?.emailAvailable && <li>{s.goesMail}</li>}
         <li>{s.goesDiscord}</li>
         <li>{s.goesList}</li>
       </ul>

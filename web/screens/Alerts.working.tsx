@@ -36,7 +36,7 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
         </div>
       </FlowArt>
       <AlertsDestinations prefs={prefs} />
-      {!ok && <AlertsStandby starred={all.length} />}
+      {!ok && <AlertsStandby starred={all.length} emailAvailable={prefs.emailAvailable} />}
       <Group
         title={s.weapons}
         left={view.remaining}

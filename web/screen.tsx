@@ -15,11 +15,9 @@ import type { Route } from './route.ts';
 import { AccountKeep } from './screens/Account.keep.tsx';
 import { AccountLeave } from './screens/Account.leave.tsx';
 import { Account } from './screens/Account.tsx';
-import { AlertsChannel } from './screens/Alerts.channel.tsx';
-import { AlertsCode } from './screens/Alerts.code.tsx';
 import { AlertsDiscord } from './screens/Alerts.discord.tsx';
 import { AlertsLoading } from './screens/Alerts.loading.tsx';
-import { AlertsRemove } from './screens/Alerts.remove.tsx';
+import { AlertsMail } from './screens/Alerts.mail.tsx';
 import { AlertsSearch } from './screens/Alerts.search.tsx';
 import { Alerts } from './screens/Alerts.tsx';
 import { BuddiesLoading } from './screens/Buddies.loading.tsx';
@@ -73,10 +71,9 @@ export function Screen({
     return inv ? <Buddy id={route.id} inv={inv} /> : <BuddiesLoading />;
   }
   if (route.name === 'alerts') {
-    if (route.step === 'channel') return <AlertsChannel />;
-    if (route.step === 'code') return <AlertsCode />;
+    if (route.step === 'channel' || route.step === 'code' || route.step === 'remove')
+      return <AlertsMail step={route.step} />;
     if (route.step === 'discord') return <AlertsDiscord />;
-    if (route.step === 'remove') return <AlertsRemove />;
     if (route.step === 'add')
       return inv ? <AlertsSearch inv={inv} /> : <AlertsLoading step="add" />;
     return <Alerts view={view} />;

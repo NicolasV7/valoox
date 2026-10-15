@@ -9,7 +9,7 @@ import { AlertsDestinations } from './Alerts.destinations.tsx';
 export function AlertsFirst({ prefs }: { prefs: Prefs }) {
   const s = t().alerts;
   const f = t().flows;
-  const to = { name: 'alerts', step: 'channel' } as const;
+  const to = { name: 'alerts', step: prefs.emailAvailable ? 'channel' : 'discord' } as const;
   const add = { name: 'alerts', step: 'add' } as const;
   const ok = receiving(prefs);
   return (
@@ -18,22 +18,22 @@ export function AlertsFirst({ prefs }: { prefs: Prefs }) {
       <FlowArt art={FLOW.first}>
         <span class="label">{s.noneYet}</span>
       </FlowArt>
-      <FlowStep number={1} title={f.pickInbox}>
-        {f.inboxProof}
+      <FlowStep number={1} title={prefs.emailAvailable ? f.pickInbox : t().discord.connect}>
+        {prefs.emailAvailable ? f.inboxProof : t().discord.lead}
       </FlowStep>
       <AlertsDestinations prefs={prefs} />
       <FlowStep number={2} title={f.makeList}>
         {f.listKinds}
       </FlowStep>
       <a class="btn" href={href(ok ? add : to)} onClick={intercept(ok ? add : to)}>
-        {ok ? f.add : f.setUp}
+        {ok ? f.add : prefs.emailAvailable ? f.setUp : t().discord.connect}
       </a>
       {!ok && (
         <a class="btn btn--quiet" href={href(add)} onClick={intercept(add)}>
           {f.buildList}
         </a>
       )}
-      <p class="flow__note">{s.sameInbox}</p>
+      {prefs.emailAvailable && <p class="flow__note">{s.sameInbox}</p>}
     </main>
   );
 }

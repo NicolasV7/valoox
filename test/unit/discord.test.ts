@@ -27,11 +27,11 @@ test('Discord messages distinguish unavailable prices, free offers and accessory
     ],
     3600,
   );
-  expect(out.message.content).toContain('Price unavailable');
-  expect(out.message.content).toContain('0 VP');
-  expect(out.message.content).toContain('5,500 KC');
-  expect(out.message.content).not.toContain('private-credential');
-  expect(out.message.content).not.toContain('private-player-id');
+  expect(out.message.embeds?.[0]?.description).toContain('Price unavailable');
+  expect(out.message.embeds?.[0]?.description).toContain('0 VP');
+  expect(out.message.embeds?.[0]?.description).toContain('5,500 KC');
+  expect(JSON.stringify(out.message)).not.toContain('private-credential');
+  expect(JSON.stringify(out.message)).not.toContain('private-player-id');
 });
 
 test('large lists remain within Discord limits and escape message formatting', () => {
@@ -42,8 +42,9 @@ test('large lists remain within Discord limits and escape message formatting', (
   }));
   const out = build('owner', session, items, 3600);
   expect(out.message.content.length).toBeLessThanOrEqual(2000);
-  expect(out.message.content).toContain('more matches');
-  expect(out.message.content).not.toContain('**<@123456789012345678>**');
+  expect(out.message.embeds?.[0]?.description?.length).toBeLessThanOrEqual(4096);
+  expect(out.message.embeds?.[0]?.description).toContain('more matches');
+  expect(out.message.embeds?.[0]?.description).not.toContain('**<@123456789012345678>**');
 });
 
 test('a Discord alert expires within its rotation and uses the selected language', () => {
@@ -57,17 +58,15 @@ test('a Discord alert expires within its rotation and uses the selected language
   );
   expect(out.until).toBeLessThanOrEqual(Date.now() + 23 * 3600000);
   expect(out.until).toBeGreaterThanOrEqual(before);
-  expect(out.message.content).toContain('Algo de tu lista');
+  expect(out.message.embeds?.[0]?.title).toBe('Está en tu tienda.');
   expect(build('owner', session, [], -1).until).toBeLessThanOrEqual(Date.now());
 });
 
 test('weapon pictures use a pinned public CDN path without exposing credentials', () => {
   const id = '00000000-0000-4000-8000-000000000001';
   const out = build('owner', session, [{ id, name: 'Weapon', cost: 1775 }], 3600);
-  expect(out.message.embeds).toEqual([
-    {
-      image: { url: 'https://media.valorant-api.com/weaponskinlevels/' + id + '/displayicon.png' },
-    },
+  expect(out.message.embeds?.flatMap((embed) => (embed.image ? [embed.image.url] : []))).toEqual([
+    'https://media.valorant-api.com/weaponskinlevels/' + id + '/displayicon.png',
   ]);
   expect(JSON.stringify(out.message)).not.toContain('private-credential');
   expect(JSON.stringify(out.message)).not.toContain('private-player-id');
@@ -84,6 +83,6 @@ test('accessories and invalid identifiers never become weapon picture URLs', () 
     ],
     3600,
   );
-  expect(out.message.embeds).toEqual([]);
-  expect(out.message.content).toContain('Accessory');
+  expect(out.message.embeds?.every((embed) => !embed.image)).toBe(true);
+  expect(out.message.embeds?.[0]?.description).toContain('Accessory');
 });

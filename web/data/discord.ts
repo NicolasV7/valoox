@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { useLeft } from '../components/Countdown.tsx';
+import { locale } from '../i18n/index.ts';
 import { useAction } from './action.ts';
 import { post, reseeded } from './api.ts';
 import { held, reload, useWatch } from './channel.ts';
@@ -24,6 +25,17 @@ export function useDiscord(prefs: Prefs | null) {
   const [removed, setRemoved] = useState(false);
   const [cooldown, setCooldown] = useState<number | null>(null);
   const { busy, run } = useAction();
+  const lang = locale();
+  useEffect(() => {
+    if (!prefs?.discord?.ok || !prefs.discord.lang || prefs.discord.lang === lang) return;
+    void run(
+      async (active) => {
+        const result = await post<{ ok?: boolean }>('/api/discord', { action: 'language', lang });
+        if (active() && !reseeded(result)) await reload();
+      },
+      () => setProblem('network'),
+    );
+  }, [prefs?.discord?.ok, prefs?.discord?.lang, lang]);
   const wait = useLeft(cooldown);
   const pending = prefs?.discordLink;
   const until = code?.until ?? pending?.until ?? null;
@@ -59,7 +71,7 @@ export function useDiscord(prefs: Prefs | null) {
             error?: string;
             wait?: number;
             connected?: boolean;
-          }>('/api/discord', { action: 'start' });
+          }>('/api/discord', { action: 'start', lang: locale() });
           if (!active() || reseeded(result)) return;
           if (result.connected || result.error === 'checking') {
             setCode(null);

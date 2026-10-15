@@ -1,3 +1,4 @@
+import { emailEnabled } from '../app/features.ts';
 import { deliver } from '../discord/delivery.ts';
 import * as deliveries from '../storage/deliveries.ts';
 import * as messages from '../storage/messages.ts';
@@ -13,20 +14,25 @@ import { target } from './target.ts';
 export async function dispatch(
   env: Env,
   id: string,
-  queued: { owner: string; blob: string },
+  queued: { owner: string; blob: string; channel?: string | null },
   budget?: Budget,
 ): Promise<boolean> {
   let ok = false;
   let wait: number | undefined;
   try {
     const body = await open<Outbox>(env, id, CURRENT_KID, queued.blob, 'outbox:2');
+    if (body.channel === 'mail' || body.channel === 'discord') {
+      if (queued.channel !== body.channel)
+        await deliveries.classify(env, id, queued.owner, body.channel);
+      if (body.channel === 'mail' && !emailEnabled(env)) return false;
+    }
     const source = await readSession(env, body.uid);
-    const destination = source && target(source.session, body.channel);
+    const destination = source && target(source.session, body.channel, env);
     const consent =
       source &&
       (body.channel === 'mail' || body.channel === 'discord') &&
       !!body.gen &&
-      alerting(source.session) &&
+      alerting(source.session, env) &&
       body.until > Date.now() &&
       destination &&
       destination.gen === body.gen &&

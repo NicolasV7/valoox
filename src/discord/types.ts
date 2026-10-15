@@ -12,7 +12,13 @@ export interface Connection {
 
 export interface Message {
   content: string;
-  embeds?: Array<{ image: { url: string } }>;
+  embeds?: Array<{
+    title?: string;
+    description?: string;
+    color?: number;
+    footer?: { text: string };
+    image?: { url: string };
+  }>;
   components?: Array<{
     type: 1;
     components: Array<{ type: 2; style: 5; label: string; url: string }>;

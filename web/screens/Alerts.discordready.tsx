@@ -29,7 +29,7 @@ export function DiscordReady({ prefs, flow }: { prefs: Prefs; flow: DiscordFlow 
         {confirm ? (
           <div class="discord__confirm">
             <h2>{s.removeTitle}</h2>
-            <p class="flow__note">{s.removeWhy}</p>
+            <p class="flow__note">{prefs.emailAvailable ? s.removeWhy : s.removeWhyDiscord}</p>
             <button
               type="button"
               class="btn btn--gone"

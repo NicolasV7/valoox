@@ -16,6 +16,7 @@
 // told the address was wrong, and the whole point of the screen is to tell
 // them quickly.
 
+import { emailEnabled } from '../app/features.ts';
 import type { Env } from '../types.ts';
 import type { Budget } from './budget.ts';
 import { rf } from './http.ts';
@@ -122,6 +123,7 @@ export async function send(
   text: string,
   options: { id?: string; budget?: Budget } = {},
 ): Promise<Sent> {
+  if (!emailEnabled(env)) return { ok: false, status: 0, said: 'mail disabled' };
   if (!env.RESEND_KEY || !env.MAIL_FROM) {
     // Not configured is not the address's fault, and saying "refused" would
     // send somebody to check their spelling for our missing secret.

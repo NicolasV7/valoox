@@ -1,3 +1,4 @@
+import { receiving } from '../app/features.ts';
 import * as discord from '../storage/discord.ts';
 import * as flags from '../storage/flags.ts';
 import type { Env, Session } from '../types.ts';
@@ -15,8 +16,7 @@ export interface Held {
   seen?: number;
   wishlistVer?: number;
 }
-export const alerting = (s: Session) =>
-  !!s.wishlist?.length && (s.mail?.ok === true || s.discord?.ok === true);
+export const alerting = (s: Session, env: Env) => !!s.wishlist?.length && receiving(env, s);
 
 /** Drop obsolete notification preferences before returning or resealing a row. */
 function preferences(s: Session): Session {
@@ -42,9 +42,9 @@ export async function readSession(env: Env, uid: string): Promise<Held | null> {
       }
     }
     const acct = await markOf(env, session.puuid);
-    const receiving = session.mail?.ok === true || session.discord?.ok === true;
-    if (row.acct !== acct || row.receiving !== +receiving) {
-      await flags.sync(env, uid, row.ver, acct, receiving, alerting(session));
+    const active = receiving(env, session);
+    if (row.acct !== acct || row.receiving !== +active) {
+      await flags.sync(env, uid, row.ver, acct, active, alerting(session, env));
     }
     const shared = acct ? await load(env, uid, acct, session.wishlist ?? []) : null;
     if (shared && (session.wishlist !== undefined || shared.wishlist.length))
@@ -67,8 +67,8 @@ export async function encoded(env: Env, uid: string, s: Session) {
     kid: CURRENT_KID,
     blob,
     acct,
-    alerts: alerting(s),
-    receiving: s.mail?.ok === true || s.discord?.ok === true,
+    alerts: alerting(s, env),
+    receiving: receiving(env, s),
   };
 }
 

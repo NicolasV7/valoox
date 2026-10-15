@@ -30,12 +30,14 @@ export function AccountKeep() {
       <Fact title={f.watchlist} state={prefs ? f.favourites(prefs.wishlist.length) : undefined}>
         {s.keepListWhy}
       </Fact>
-      <Fact
-        title={f.emailAlerts}
-        state={prefs?.mail ? (prefs.mail.ok ? s.verified : s.notVerified) : undefined}
-      >
-        {s.keepMailWhy}
-      </Fact>
+      {prefs?.emailAvailable && (
+        <Fact
+          title={f.emailAlerts}
+          state={prefs?.mail ? (prefs.mail.ok ? s.verified : s.notVerified) : undefined}
+        >
+          {s.keepMailWhy}
+        </Fact>
+      )}
       <Fact title={f.cached} state={f.sealedFirst}>
         {f.cachedWhy}
       </Fact>
@@ -54,7 +56,7 @@ export function AccountKeep() {
         <li>{f.noRequests}</li>
       </ul>
       <p class="flow__note">{s.keepLede}</p>
-      <p class="flow__note">{s.alsoKv}</p>
+      <p class="flow__note">{prefs?.emailAvailable ? s.alsoKv : s.alsoKvDiscord}</p>
       <p class="flow__note">{f.retention}</p>
       <a class="btn btn--quiet" href={href(ACCOUNT)} onClick={intercept(ACCOUNT)}>
         {s.title}

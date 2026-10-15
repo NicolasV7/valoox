@@ -13,18 +13,20 @@ export function AlertsDestinations({ prefs, from }: { prefs: Prefs | null; from?
   const coded = waiting(prefs);
   return (
     <>
-      <FlowRow
-        to={{ name: 'alerts', step: coded ? 'code' : 'channel' }}
-        from={from}
-        label={t().flows.emailAlerts}
-        title={mail?.to || s.yourEmail}
-        loading={!prefs}
-        state={
-          <FlowState kind={bad ? 'bad' : mail?.ok ? 'ok' : 'wait'}>
-            {bad ? s.wasRefused : mail?.ok ? s.verified : coded ? s.oneIsOut : s.notVerified}
-          </FlowState>
-        }
-      />
+      {prefs?.emailAvailable && (
+        <FlowRow
+          to={{ name: 'alerts', step: coded ? 'code' : 'channel' }}
+          from={from}
+          label={t().flows.emailAlerts}
+          title={mail?.to || s.yourEmail}
+          loading={!prefs}
+          state={
+            <FlowState kind={bad ? 'bad' : mail?.ok ? 'ok' : 'wait'}>
+              {bad ? s.wasRefused : mail?.ok ? s.verified : coded ? s.oneIsOut : s.notVerified}
+            </FlowState>
+          }
+        />
+      )}
       <DiscordDestination prefs={prefs} from={from} />
     </>
   );

@@ -1,17 +1,25 @@
+import { emailEnabled } from '../app/features.ts';
 import type { Env } from '../types.ts';
 import { now } from './rows.ts';
 
-type Claim = { state: 'claimed'; owner: string; blob: string } | { state: 'done' | 'busy' };
-export async function claim(env: Env, key: string, blob: string): Promise<Claim> {
+type Claim =
+  | { state: 'claimed'; owner: string; blob: string; channel?: string | null }
+  | { state: 'done' | 'busy' };
+export async function claim(
+  env: Env,
+  key: string,
+  blob: string,
+  channel?: 'mail' | 'discord',
+): Promise<Claim> {
   const t = now();
   const owner = crypto.randomUUID();
   const row = await env.DB.prepare(
-    'INSERT INTO deliveries(key,state,lease,expires,owner,blob) VALUES (?,1,?,?,?,?) ' +
+    'INSERT INTO deliveries(key,state,lease,expires,owner,blob,channel) VALUES (?,1,?,?,?,?,?) ' +
       'ON CONFLICT(key) DO UPDATE SET state=1,lease=excluded.lease,owner=excluded.owner ' +
-      'WHERE deliveries.state IN (0,1) AND deliveries.lease<=? RETURNING owner,blob',
+      'WHERE deliveries.state IN (0,1) AND deliveries.lease<=? RETURNING owner,blob,channel',
   )
-    .bind(key, t + 900, t + 172800, owner, blob, t)
-    .first<{ owner: string; blob: string }>();
+    .bind(key, t + 900, t + 172800, owner, blob, channel ?? null, t)
+    .first<{ owner: string; blob: string; channel: string | null }>();
   if (row) return { state: 'claimed', ...row };
   const current = await env.DB.prepare('SELECT state FROM deliveries WHERE key=?')
     .bind(key)
@@ -33,9 +41,16 @@ export async function finish(
 export async function pending(env: Env): Promise<Array<{ key: string; blob: string }>> {
   return (
     await env.DB.prepare(
-      'SELECT key,blob FROM deliveries WHERE state IN (0,1) AND lease<=? AND expires>? ORDER BY lease,key LIMIT 6',
+      'SELECT key,blob FROM deliveries WHERE state IN (0,1) AND lease<=? AND expires>? ' +
+        "AND (?=1 OR channel IS NULL OR channel='discord') ORDER BY lease,key LIMIT 6",
     )
-      .bind(now(), now())
+      .bind(now(), now(), +emailEnabled(env))
       .all<{ key: string; blob: string }>()
   ).results;
+}
+
+export async function classify(env: Env, key: string, owner: string, channel: string) {
+  await env.DB.prepare('UPDATE deliveries SET channel=? WHERE key=? AND owner=? AND state=1')
+    .bind(channel, key, owner)
+    .run();
 }

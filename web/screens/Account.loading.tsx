@@ -13,7 +13,7 @@ export function AccountLoading() {
         <h2>{f.setup}</h2>
         <span class="label">{f.browser}</span>
       </div>
-      <FlowRow to={{ name: 'alerts', step: 'channel' }} label={f.alertEmail} title="" loading />
+      <FlowRow to={{ name: 'alerts', step: 'discord' }} label={t().discord.name} title="" loading />
       <FlowRow to={{ name: 'alerts' }} label={f.watchlist} title="" loading />
       <Privacy />
       <p class="flow__note" role="status">

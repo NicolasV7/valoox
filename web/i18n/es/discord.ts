@@ -22,8 +22,13 @@ export const discord = {
   stepConfirm: 'Listo',
   installHelp:
     'Elige Autorizar en la ventana de Discord y vuelve aquí. Tu comando de conexión estará listo.',
-  sendHelp:
-    'Copia el comando, abre el privado del bot, pégalo en el cuadro de mensajes y pulsa Enter.',
+  sendHelp: 'Primero copia el mensaje. Después abre el chat de Discord para enviarlo.',
+  copyStep: 'Copia el mensaje',
+  openStep: 'Abre el chat de Discord',
+  openHelp: 'El botón abre tu chat privado con el bot de valoox.',
+  sendStep: 'Pega y envía',
+  sendStepHelp:
+    'Toca el cuadro de mensajes de Discord, pega el mensaje completo y pulsa Enter. Después vuelve aquí.',
   automatic:
     'Esta página comprueba la conexión automáticamente. Vuelve aquí después de enviar el comando.',
   checkingHelp:
@@ -33,6 +38,10 @@ export const discord = {
   disconnected: 'Sin conectar',
   paused: 'Necesita atención',
   notReady: 'Discord todavía no está disponible. Las alertas por email siguen disponibles.',
+  notReadyDiscord:
+    'Discord no está disponible por el momento. Tu lista está guardada. Inténtalo más tarde.',
+  removedDiscord: 'Discord está desconectado aquí. Tu lista se conserva.',
+  removeWhyDiscord: 'Tu lista seguirá guardada. Puedes volver a conectar Discord cuando quieras.',
   install: 'Autorizar en Discord',
   open: 'Abrir el privado del bot',
   generate: 'Obtener un código de conexión',
@@ -68,18 +77,33 @@ export const discord = {
   describeCode: 'El código de un solo uso de las alertas de valoox',
   describeStatus: 'Comprueba tu conexión de alertas de valoox por Discord',
   describeStop: 'Detén las alertas por Discord en todos tus navegadores vinculados',
-  botReceived: 'Solicitud de conexión recibida. Vuelve a valoox para comprobar el resultado.',
-  botPrivate: 'Usa este comando en una conversación privada con el bot de valoox.',
-  botInvalid: 'Ese código no es válido o venció. Obtén uno nuevo en las alertas de valoox.',
-  botLimited: 'Espera antes de intentar otra conexión.',
+  messageFooter: 'valoox · alertas de favoritos',
+  backToApp: 'Volver a valoox',
+  botReceivedTitle: 'Una última comprobación.',
+  botPrivateTitle: 'Mejor en privado.',
+  botInvalidTitle: 'Probemos con un código nuevo.',
+  botLimitedTitle: 'Un momento de pausa.',
+  botTestTitle: 'Tu próximo hallazgo puede llegar aquí.',
+  botStoppedTitle: 'Alertas de Discord desactivadas.',
+  botActiveTitle: 'Tu lista tiene una línea directa.',
+  botInactiveTitle: 'Conectemos este chat.',
+  botUnknownTitle: 'Tus atajos.',
+  botReceived:
+    'Vuelve a valoox. Las alertas se activan después de comprobar que este chat puede recibir un mensaje privado.',
+  botPrivate: 'Abre tu chat privado con valoox y envía el comando allí.',
+  botInvalid:
+    'Obtén un código nuevo en Alertas de valoox. Después copia y envía aquí el mensaje completo.',
+  botLimited: 'Demasiados intentos. Espera antes de volver a probar.',
   botTest:
-    'Este es tu mensaje de prueba de valoox. Vuelve a valoox para confirmar la conexión. Puedes detener las alertas con /stop.',
+    'Los mensajes pueden llegar a este chat. Vuelve a valoox para terminar de conectar.\n\nPuedes detener las alertas cuando quieras con /stop.',
   botStopped:
-    'Las alertas por Discord se detuvieron en todos tus navegadores vinculados. Se conservan tu email y tus favoritos.',
-  botActive: 'Las alertas por Discord están conectadas. Usa /stop para detenerlas.',
-  botInactive: 'No hay una conexión activa de Discord. Conéctalo desde las alertas de valoox.',
-  botUnknown: 'Usa /connect, /status o /stop.',
-  alertTitle: 'Algo de tu lista está en tu tienda.',
+    'Las alertas de Discord están desactivadas en todos tus navegadores vinculados. Tus favoritos siguen guardados.',
+  botActive:
+    'Te escribiremos aquí cuando un favorito aparezca en tu tienda.\n\nUsa /stop para detener las alertas.',
+  botInactive: 'Conecta este chat desde Alertas de valoox. Tu lista seguirá guardada.',
+  botUnknown:
+    '`/connect` · Vincular tu lista\n`/status` · Ver tu conexión\n`/stop` · Detener las alertas de Discord',
+  alertTitle: 'Está en tu tienda.',
   preview: 'ALERTA DE PRUEBA · Un ejemplo con una de tus ofertas diarias actuales.',
   alertAccount: (name: string) => `Cuenta: ${name}`,
   alertCount: (n: number) => `Hay ${n} coincidencias más en valoox.`,

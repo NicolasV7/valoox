@@ -27,7 +27,7 @@ export function AlertsDiscord() {
       ) : prefs.discordApp ? (
         <DiscordSetup prefs={prefs} flow={flow} />
       ) : (
-        <p class="flow__note">{s.notReady}</p>
+        <p class="flow__note">{prefs.emailAvailable ? s.notReady : s.notReadyDiscord}</p>
       )}
       {(flow.problem || flow.wait > 0) && (
         <p class="flow__problem" role="alert">
@@ -40,14 +40,18 @@ export function AlertsDiscord() {
       )}
       {flow.removed && (
         <p class="flow__note" role="status">
-          {s.removed}
+          {prefs.emailAvailable ? s.removed : s.removedDiscord}
         </p>
       )}
-      <details class="discord__details">
-        <summary>{s.choose}</summary>
-        <FlowInfo title={s.choose}>{s.both}</FlowInfo>
+      {prefs.emailAvailable ? (
+        <details class="discord__details">
+          <summary>{s.choose}</summary>
+          <FlowInfo title={s.choose}>{s.both}</FlowInfo>
+          <p class="flow__note">{s.private}</p>
+        </details>
+      ) : (
         <p class="flow__note">{s.private}</p>
-      </details>
+      )}
     </main>
   );
 }

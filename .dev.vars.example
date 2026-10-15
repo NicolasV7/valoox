@@ -14,8 +14,11 @@
 # at once and everybody is signed out.
 JAR_KEY=
 
-# resend.com API key, for the six-digit code and the morning alert. Without it
-# the app works and the alerts tab says it has nowhere to send.
+# Retained email support is hidden and disabled. This plain flag is also set
+# to false in both wrangler environments. Only true deliberately enables it.
+EMAIL_ALERTS=false
+
+# resend.com API key, used only when the email feature is explicitly enabled.
 RESEND_KEY=
 
 # The signing secret of a Resend webhook (starts with whsec_), so a bounce or

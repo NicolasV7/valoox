@@ -1,5 +1,6 @@
 import type { Hit, Session } from '../types.ts';
 import { renderUrl } from '../vault/render.ts';
+import { ACCENT } from './message.ts';
 import type { DiscordOutbox } from './types.ts';
 import { words } from './words.ts';
 
@@ -11,18 +12,22 @@ const safe = (value: string) =>
 export function build(uid: string, s: Session, found: Hit[], left: number): DiscordOutbox {
   const w = words(s.discord?.lang);
   const until = Date.now() + Math.max(0, Math.min(left, 23 * 3600)) * 1000;
-  const lines = [w.alertTitle, s.name ? w.alertAccount(safe(s.name)) : '', ''];
+  const lines = [s.name ? w.alertAccount(safe(s.name)) : '', ''];
   let shown = 0;
   for (const item of found) {
     const coin = !item.type || item.type === LEVELS ? 'VP' : 'KC';
     const price = typeof item.cost === 'number' ? w.price(item.cost, coin) : w.unknownPrice;
-    const line = '• ' + safe(item.name) + ' · ' + price;
+    const line = '• **' + safe(item.name) + '** · **' + price + '**';
     if (lines.join('\n').length + line.length > 1500) break;
     lines.push(line);
     shown++;
   }
   if (shown < found.length) lines.push(w.alertCount(found.length - shown));
-  lines.push('', w.alertExpiry(Math.floor(until / 1000)), w.alertStop);
+  lines.push('', w.alertExpiry(Math.floor(until / 1000)));
+  const pictures = found
+    .filter((item) => (!item.type || item.type === LEVELS) && UUID.test(item.id))
+    .slice(0, 4);
+  const [first, ...rest] = pictures;
   return {
     uid,
     channel: 'discord',
@@ -31,11 +36,17 @@ export function build(uid: string, s: Session, found: Hit[], left: number): Disc
     gen: s.discord?.gen ?? '',
     until,
     message: {
-      content: lines.filter((line) => line !== undefined).join('\n'),
-      embeds: found
-        .filter((item) => (!item.type || item.type === LEVELS) && UUID.test(item.id))
-        .slice(0, 4)
-        .map((item) => ({ image: { url: renderUrl(item.id) } })),
+      content: '',
+      embeds: [
+        {
+          title: w.alertTitle,
+          description: lines.join('\n').trim(),
+          color: ACCENT,
+          footer: { text: w.alertStop },
+          ...(first ? { image: { url: renderUrl(first.id) } } : {}),
+        },
+        ...rest.map((item) => ({ image: { url: renderUrl(item.id) }, color: ACCENT })),
+      ],
       components: [
         {
           type: 1,

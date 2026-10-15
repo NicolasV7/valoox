@@ -6,6 +6,14 @@ export const read = (env: Env, uid: string) =>
     .bind(uid)
     .first<{ gen: string; state: string }>();
 
+/** Prefer the newest active link when a Discord user has several Riot accounts. */
+export const latest = (env: Env, recipient: string) =>
+  env.DB.prepare(
+    "SELECT uid FROM discord WHERE recipient=? ORDER BY (state='connected') DESC,since DESC,uid LIMIT 1",
+  )
+    .bind(recipient)
+    .first<{ uid: string }>();
+
 /** A Discord user can stop every linked browser without decrypting all sessions. */
 export async function stop(
   env: Env,

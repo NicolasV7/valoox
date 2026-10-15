@@ -16,6 +16,16 @@ equipping, queueing or chat. Authentication writes are intentional. Redirects
 cannot bypass the allowlist. Riot's undocumented storefront POST has not been
 independently proven idempotent; do not infer that property from its method.
 
+Email is retained but disabled by `EMAIL_ALERTS="false"` in both environments.
+Missing or unexpected values also disable it. Email actions fail before creating
+proofs; the final sending gateway refuses requests even if a higher layer is bypassed.
+API preferences omit email addresses and pending proofs. Browser routes and controls
+remain hidden. Historical signed provider events and unsubscribe links still process
+revocations without sending. Resend credentials and encrypted preferences are preserved.
+Paused mail outboxes retain their ciphertext and are excluded from retry selection;
+legacy unclassified rows are classified once. Email-only sessions are stopped before
+any Riot request. Discord retains the same 48-request invocation budget.
+
 The browser's 256-bit `__Host-val` secret is never persisted. D1 keys are keyed
 fingerprints, so a database or KV identifier cannot be replayed as the cookie.
 Approval rotates the secret. Secure, HttpOnly, host-only and SameSite=Strict
@@ -83,6 +93,10 @@ message. Codes contain over 120 random bits, expire after ten minutes, are store
 only as keyed digests, and can be claimed once. Session CAS, code consumption and
 the opt-in index commit together. The index stores keyed recipient fingerprints;
 Discord identities and conversation ids stay in the encrypted session and outbox.
+The valoox page's selected language is bound to its one-time connection code and
+sealed Discord consent. Signed commands select that language; Discord's locale
+does not override it. Existing links can update language under authenticated session
+CAS without minting a code or recreating consent. Unlinked commands default to English.
 Profile images use an authenticated same-origin proxy with opaque generation handles,
 bounded image bodies and a per-browser quota. Discord's bot token is never sent
 to its image CDN. Known profile metadata refreshes on demand after a day.

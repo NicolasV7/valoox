@@ -51,7 +51,8 @@ export async function freshDb(): Promise<Env> {
     const one = statement.replace(/\s+/g, ' ').trim();
     if (one) await env.DB.exec(one);
   }
-  return env as unknown as Env;
+  // Legacy email regressions opt in; feature-off tests override this explicitly.
+  return { ...env, EMAIL_ALERTS: 'true' } as unknown as Env;
 }
 
 /** A throwaway sealing key. Never the production one. */

@@ -1,4 +1,5 @@
 import { configured } from '../discord/config.ts';
+import { langOf } from '../discord/words.ts';
 import { readJson } from '../lib/body.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
@@ -8,7 +9,7 @@ import * as links from '../storage/links.ts';
 import { now } from '../storage/rows.ts';
 import { fingerprint } from '../vault/keys.ts';
 import { CURRENT_KID } from '../vault/seal.ts';
-import { encoded, readSession } from '../vault/session.ts';
+import { encoded, readSession, saveSession } from '../vault/session.ts';
 
 export async function setDiscord({ env, uid, req }: Ctx): Promise<Body> {
   const held = await readSession(env, uid);
@@ -16,6 +17,15 @@ export async function setDiscord({ env, uid, req }: Ctx): Promise<Body> {
   const body = await readJson(req, 1024);
   const pending = await links.pending(env, uid, CURRENT_KID);
   if (pending?.state === 'checking') return { error: 'checking' };
+  if (body.action === 'language') {
+    if (!held.session.discord?.ok) return { error: 'disconnected' };
+    const lang = langOf(body.lang);
+    if (held.session.discord.lang === lang) return { ok: true };
+    held.session.discord = { ...held.session.discord, lang };
+    return (await saveSession(env, uid, held.session, held.ver))
+      ? { ok: true }
+      : { error: 'conflict' };
+  }
   if (body.action === 'remove') {
     delete held.session.discord;
     const ok = await discord.remove(env, uid, held.ver, await encoded(env, uid, held.session));
@@ -41,6 +51,7 @@ export async function setDiscord({ env, uid, req }: Ctx): Promise<Body> {
       claim: null,
       recipient: null,
       state: 'waiting',
+      lang: langOf(body.lang),
     },
     held.ver,
   );

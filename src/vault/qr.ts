@@ -1,4 +1,5 @@
 import { mint } from '../app/cookie.ts';
+import { receiving } from '../app/features.ts';
 import * as scans from '../storage/scans.ts';
 import type { Env, Jar, Session } from '../types.ts';
 import { adopt } from './adopt.ts';
@@ -128,8 +129,8 @@ export async function poll(env: Env, uid: string): Promise<PollResult> {
         kid: CURRENT_KID,
         blob: await seal(env, next, CURRENT_KID, session),
         acct: await markOf(env, who.puuid),
-        alerts: alerting(session),
-        receiving: session.mail?.ok === true || session.discord?.ok === true,
+        alerts: alerting(session, env),
+        receiving: receiving(env, session),
         discordGen: session.discord?.ok ? session.discord.gen : undefined,
       },
       previous.legacy,

@@ -116,6 +116,9 @@ export const account = {
   twoLocks:
     'Dos cerraduras, no una: la base guarda texto cifrado y la clave se guarda en ' +
     'otro lado. Rotar esa clave retira todos los frascos a la vez.',
+  alsoKvDiscord:
+    'También guardamos vistas cifradas, comprobaciones temporales de ingreso y conexión, registros ' +
+    'de entrega y una cola cifrada de alertas. Los registros vencen; las copias de recuperación pueden conservar datos borrados.',
   alsoKv:
     'También guardamos cachés cifradas, QR pendientes por diez minutos, pruebas de ' +
     'correo por diez minutos y registros de mensajes por una semana. Hay límites ' +

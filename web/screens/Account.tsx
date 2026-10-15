@@ -16,7 +16,7 @@ const LEAVE: Route = { name: 'account', step: 'leave' };
 const COFFEE = 'https://buymeacoffee.com/termoo';
 
 // Checked against the actual allowlist by test/unit/upstream.test.ts.
-export const RULES = 19;
+export const RULES = 21;
 
 export function Account({ who }: { who: Who }) {
   const s = t().account;

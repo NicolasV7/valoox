@@ -1,4 +1,5 @@
 import { pending } from '../alerts/otp.ts';
+import { emailEnabled } from '../app/features.ts';
 import { preferences } from '../discord/prefs.ts';
 import { readJson } from '../lib/body.ts';
 import type { Body, Ctx } from '../lib/json.ts';
@@ -40,15 +41,17 @@ async function wishlist(env: Env, uid: string, body: unknown | null, retry = tru
   }
   return {
     ...(await preferences(env, uid, session)),
+    emailAvailable: emailEnabled(env),
     wishlist: session.wishlist ?? [],
     // The address itself, never a code and never a secret: the browser needs
     // it to show you what it is about to write to. `said` is the provider's
     // own last word, passed through unchanged so no screen can soften it.
-    mail: session.mail
-      ? { to: session.mail.to, ok: session.mail.ok, said: session.mail.said ?? '' }
-      : null,
+    mail:
+      emailEnabled(env) && session.mail
+        ? { to: session.mail.to, ok: session.mail.ok, said: session.mail.said ?? '' }
+        : null,
     // Whether six digits are already sitting in that mailbox. A screen that
     // did not know this offered to send a second one beside the first.
-    code: await pending(env, uid),
+    code: emailEnabled(env) ? await pending(env, uid) : null,
   };
 }

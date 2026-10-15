@@ -5,19 +5,27 @@ import { href, intercept, type Route } from '../route.ts';
 
 const CHANNEL: Route = { name: 'alerts', step: 'channel' };
 
-export function AlertsStandby({ starred }: { starred: number }) {
+export function AlertsStandby({
+  starred,
+  emailAvailable = false,
+}: {
+  starred: number;
+  emailAvailable?: boolean;
+}) {
   const s = t().alerts;
   return (
     <section class="flow__standby">
       <FlowArt art={FLOW.paused}>
         <div>
           <h2>{s.standby}</h2>
-          <p>{starred > 0 ? s.standbyKept(starred) : t().flows.noEmail}</p>
+          <p>{starred > 0 ? s.standbyKept(starred) : s.standbyNone}</p>
         </div>
       </FlowArt>
-      <a class="btn btn--quiet" href={href(CHANNEL)} onClick={intercept(CHANNEL)}>
-        {s.addAnAddress}
-      </a>
+      {emailAvailable && (
+        <a class="btn btn--quiet" href={href(CHANNEL)} onClick={intercept(CHANNEL)}>
+          {s.addAnAddress}
+        </a>
+      )}
       <a
         class="btn btn--quiet"
         href={href({ name: 'alerts', step: 'discord' })}

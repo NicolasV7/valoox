@@ -10,6 +10,7 @@ export interface Link {
   claim: string | null;
   recipient: string | null;
   state: string;
+  lang?: 'en' | 'es';
 }
 
 export const pending = (env: Env, uid: string, kid: number) =>
@@ -17,16 +18,32 @@ export const pending = (env: Env, uid: string, kid: number) =>
     .bind(uid, kid, now())
     .first<{ expires: number; state: string }>();
 
+export const locale = (env: Env, key: string, kid: number) =>
+  env.DB.prepare('SELECT lang FROM links WHERE key=? AND kid=?')
+    .bind(key, kid)
+    .first<{ lang: 'en' | 'es' }>();
+
 export async function reserve(env: Env, link: Link, ver: number): Promise<boolean> {
   const result = await env.DB.prepare(
-    'INSERT INTO links(uid,key,gen,kid,expires) SELECT ?,?,?,?,? ' +
+    'INSERT INTO links(uid,key,gen,kid,expires,lang) SELECT ?,?,?,?,?,? ' +
       'WHERE EXISTS(SELECT 1 FROM s WHERE uid=? AND ver=?) ' +
       "AND NOT EXISTS(SELECT 1 FROM discord WHERE uid=? AND state='connected') " +
       'ON CONFLICT(uid) DO UPDATE SET key=excluded.key,gen=excluded.gen,kid=excluded.kid,' +
-      "expires=excluded.expires,claim=NULL,recipient=NULL,state='waiting' " +
+      "expires=excluded.expires,lang=excluded.lang,claim=NULL,recipient=NULL,state='waiting' " +
       "WHERE links.state<>'checking' OR links.expires<=?",
   )
-    .bind(link.uid, link.key, link.gen, link.kid, link.expires, link.uid, ver, link.uid, now())
+    .bind(
+      link.uid,
+      link.key,
+      link.gen,
+      link.kid,
+      link.expires,
+      link.lang ?? 'en',
+      link.uid,
+      ver,
+      link.uid,
+      now(),
+    )
     .run();
   return result.meta.changes > 0;
 }

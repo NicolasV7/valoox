@@ -19,10 +19,11 @@ export async function recipients(env: Env, row: repo.Row): Promise<Recipient[]> 
   for (const member of rows) {
     if (member.kid !== CURRENT_KID) continue;
     const held = await readSession(env, member.uid);
-    if (!held || held.session.puuid !== owner.session.puuid || !alerting(held.session)) continue;
+    if (!held || held.session.puuid !== owner.session.puuid || !alerting(held.session, env))
+      continue;
     const s = held.session;
     for (const channel of channels) {
-      const destination = target(s, channel);
+      const destination = target(s, channel, env);
       if (!destination) continue;
       const key = channel + ':' + destination.to;
       let group = groups.get(key);

@@ -1,6 +1,7 @@
 import { tzOf } from '../alerts/mail/clock.ts';
 import { langOf } from '../alerts/mail/words.ts';
 import { check, left } from '../alerts/otp.ts';
+import { requireEmail } from '../app/features.ts';
 import { readJson } from '../lib/body.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
@@ -9,6 +10,7 @@ import { readSession } from '../vault/session.ts';
 import { mail } from './send.ts';
 
 export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
+  requireEmail(env);
   const held = await readSession(env, uid);
   if (!held) return RESEED;
   const body = await readJson(req, 4096);
@@ -22,6 +24,7 @@ export async function setChannel({ env, uid, req }: Ctx): Promise<Body> {
   return mail(env, uid, held, to, langOf(body.lang), new URL(req.url).origin, tzOf(body.tz));
 }
 export async function resend({ env, uid, req }: Ctx): Promise<Body> {
+  requireEmail(env);
   const held = await readSession(env, uid);
   if (!held) return RESEED;
   const was = held.session.mail;
@@ -41,6 +44,7 @@ export async function resend({ env, uid, req }: Ctx): Promise<Body> {
   );
 }
 export async function verify({ env, uid, req }: Ctx): Promise<Body> {
+  requireEmail(env);
   const held = await readSession(env, uid);
   if (!held) return RESEED;
   const to = held.session.mail?.to;

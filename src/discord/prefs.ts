@@ -12,6 +12,7 @@ export async function preferences(env: Env, uid: string, s: Session) {
           name: s.discord.name,
           ok: s.discord.ok,
           said: s.discord.said ?? '',
+          lang: s.discord.lang,
           avatar: s.discord.ok
             ? '/api/discord/avatar?v=' +
               (await fingerprint(env, 'discord-avatar', s.discord.gen)).slice(0, 24)

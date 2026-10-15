@@ -8,9 +8,11 @@ import { fingerprint } from '../vault/keys.ts';
 import { CURRENT_KID } from '../vault/seal.ts';
 import { snowflake } from './config.ts';
 import { connect } from './connect.ts';
+import { language } from './language.ts';
+import { message, type Reply } from './message.ts';
 import { verify } from './signature.ts';
 import type { Interaction } from './types.ts';
-import { words } from './words.ts';
+import { langOf } from './words.ts';
 
 export async function interaction(
   req: Request,
@@ -33,9 +35,20 @@ export async function interaction(
       return json({ error: 'application' }, headers, 401);
     }
     if (event.type === 1) return json({ type: 1 }, headers);
-    const s = words(event.locale);
-    const reply = (content: string) => json({ type: 4, data: { content, flags: 64 } }, headers);
-    if (event.type !== 2) return reply(s.botUnknown);
+    let lang: 'en' | 'es' = 'en';
+    const reply = (kind: Reply) =>
+      json(
+        {
+          type: 4,
+          data: {
+            ...message(lang, kind),
+            flags: 64,
+            allowed_mentions: { parse: [] },
+          },
+        },
+        headers,
+      );
+    if (event.type !== 2) return reply('botUnknown');
     if (
       event.context !== 1 ||
       event.guild_id ||
@@ -44,32 +57,37 @@ export async function interaction(
       !snowflake(event.id) ||
       event.user?.bot
     )
-      return reply(s.botPrivate);
-    // Signature freshness alone does not prevent replay after a later reconnect.
-    if (await take(env, 'discord-event:' + event.id, 1, 600)) return reply(s.botReceived);
+      return reply('botPrivate');
     const recipient = await fingerprint(env, 'discord-user', event.user.id);
+    const code =
+      event.data?.name === 'connect'
+        ? event.data.options?.find((option) => option.name === 'code')?.value
+        : undefined;
+    lang = await language(env, recipient, code);
+    // Signature freshness alone does not prevent replay after a later reconnect.
+    if (await take(env, 'discord-event:' + event.id, 1, 600)) return reply('botReceived');
     if (event.data?.name !== 'stop' && (await take(env, 'discord-commands:' + recipient, 30, 60))) {
-      return reply(s.botLimited);
+      return reply('botLimited');
     }
     if (event.data?.name === 'stop') {
       await discord.stop(env, recipient);
-      return reply(s.botStopped);
+      return reply('botStopped');
     }
     if (event.data?.name === 'status') {
-      return reply((await discord.connected(env, recipient)) ? s.botActive : s.botInactive);
+      return reply((await discord.connected(env, recipient)) ? 'botActive' : 'botInactive');
     }
-    if (event.data?.name !== 'connect') return reply(s.botUnknown);
-    const code = event.data.options?.find((option) => option.name === 'code')?.value;
-    if (typeof code !== 'string' || !/^[0-9a-f]{32}$/.test(code)) return reply(s.botInvalid);
-    if (await take(env, 'discord-connect:' + recipient, 5, 3600)) return reply(s.botLimited);
+    if (event.data?.name !== 'connect') return reply('botUnknown');
+    if (typeof code !== 'string' || !/^[0-9a-f]{32}$/.test(code)) return reply('botInvalid');
+    if (await take(env, 'discord-connect:' + recipient, 5, 3600)) return reply('botLimited');
     const key = await fingerprint(env, 'discord-link', code);
     const link = await links.claim(env, key, CURRENT_KID, event.id, recipient);
-    if (!link) return reply(s.botInvalid);
+    if (!link) return reply('botInvalid');
+    lang = langOf(link.lang);
     // Acknowledge before Discord's three-second deadline; no interaction token is stored.
     const task = connect(env, link, event);
     if (ctx) ctx.waitUntil(task);
     else await task;
-    return reply(s.botReceived);
+    return reply('botReceived');
   } catch (e) {
     return json(
       { error: e instanceof HttpError ? e.message : 'retry' },

@@ -7,6 +7,7 @@ export {useDiscord} from './web/data/discord.ts';
 export {tell,usePrefs} from './web/data/channel.ts';
 export {reset} from './web/data/private.ts';`;
 const prefs = () => ({
+  emailAvailable: true,
   wishlist: [{ id: 'saved', name: 'Saved' }],
   mail: { to: 'reader@example.invalid', ok: true, said: 'email.sent' },
   code: null,

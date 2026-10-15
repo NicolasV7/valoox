@@ -2,6 +2,7 @@ import { html, subject, text } from '../alerts/mail/code.ts';
 import type { Lang } from '../alerts/mail/words.ts';
 import { LIFE, mint } from '../alerts/otp.ts';
 import { hold } from '../alerts/wait.ts';
+import { requireEmail } from '../app/features.ts';
 import * as codes from '../storage/codes.ts';
 import * as messages from '../storage/messages.ts';
 import type { Env } from '../types.ts';
@@ -19,6 +20,7 @@ export async function mail(
   origin: string,
   tz?: number,
 ) {
+  requireEmail(env);
   const wait = await hold(env, uid, to, held.session.puuid);
   if (wait) return { error: 'wait', wait };
   const { code, until, held: otp } = await mint(env, uid, to);

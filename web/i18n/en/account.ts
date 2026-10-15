@@ -116,6 +116,9 @@ export const account = {
   twoLocks:
     'Two locks, not one: the database holds ciphertext and the key is held ' +
     'elsewhere. Rotating that key retires every stored jar at once.',
+  alsoKvDiscord:
+    'We also keep encrypted views, short-lived sign-in and connection checks, delivery records ' +
+    'and an encrypted alert queue. Records expire; database recovery copies may retain deleted data.',
   alsoKv:
     'We also keep encrypted caches, pending QR scans for ten minutes, mail proofs ' +
     'for ten minutes and message records for a week. There are sending limits, ' +

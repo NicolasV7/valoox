@@ -3,8 +3,9 @@ import type { Env } from '../types.ts';
 import { send } from '../vault/discord.ts';
 import { encoded, readSession } from '../vault/session.ts';
 import { avatarHash } from './config.ts';
+import { message } from './message.ts';
 import type { Interaction } from './types.ts';
-import { words } from './words.ts';
+import { langOf } from './words.ts';
 
 /** The provider test is sent once, then concurrent preference writes get a bounded CAS retry. */
 export async function connect(env: Env, link: links.Link, event: Interaction): Promise<void> {
@@ -14,9 +15,7 @@ export async function connect(env: Env, link: links.Link, event: Interaction): P
     const report = await send(
       env,
       event.channel_id as string,
-      {
-        content: words(event.locale).botTest,
-      },
+      message(langOf(link.lang), 'botTest'),
       link.gen,
     );
     if (!report.ok) {
@@ -41,7 +40,7 @@ export async function connect(env: Env, link: links.Link, event: Interaction): P
             : undefined,
         avatarAt:
           event.user?.avatar === null || avatarHash(event.user?.avatar) ? Date.now() : undefined,
-        lang: event.locale?.startsWith('es') ? 'es' : 'en',
+        lang: langOf(link.lang),
       };
       if (
         await links.complete(env, link, current.ver, await encoded(env, link.uid, current.session))

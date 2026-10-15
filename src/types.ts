@@ -77,7 +77,8 @@ export interface StoreView {
 }
 
 /** Secrets must be declared here: .dev.vars is absent in CI. */
-export interface Env extends Cloudflare.Env {
+export interface Env extends Omit<Cloudflare.Env, 'EMAIL_ALERTS'> {
+  EMAIL_ALERTS: string;
   JAR_KEY: string;
   RESEND_KEY: string;
   RESEND_HOOK: string;

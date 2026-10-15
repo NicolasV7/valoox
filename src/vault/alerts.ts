@@ -44,7 +44,7 @@ export async function runAlerts(
       const held = await readSession(env, row.uid);
       if (!held) continue;
       const s = held.session;
-      if (!alerting(s) || !s.puuid || !s.shard) {
+      if (!alerting(s, env) || !s.puuid || !s.shard) {
         await repo.setAlerts(env, row.uid, false, held.ver);
         continue;
       }

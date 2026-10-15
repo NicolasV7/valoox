@@ -60,17 +60,8 @@ export function DiscordSetup({ prefs, flow }: { prefs: Prefs; flow: DiscordFlow 
               code={flow.code.value}
               until={flow.code.until}
               enabled={flow.left > 0 && !failed && !flow.locked}
+              app={prefs.discordApp as string}
             />
-          )}
-          {!expired && !failed && flow.code && (
-            <a
-              class="btn"
-              href={'https://discord.com/users/' + prefs.discordApp}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {s.open}
-            </a>
           )}
           <p class="flow__note" role="status">
             {expired

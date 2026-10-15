@@ -25,7 +25,9 @@ test('/stop disables all linked browsers while preserving email and the saved li
     expect(s?.mail?.ok).toBe(true);
     expect(s?.wishlist).toHaveLength(1);
   }
-  expect(JSON.stringify(await (await command(env, 'status')).json())).toContain('No active');
+  expect(JSON.stringify(await (await command(env, 'status')).json())).toContain(
+    'Connect this chat',
+  );
 });
 
 test('browser disconnect removes only its Discord state and pending code', async () => {
