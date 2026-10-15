@@ -30,7 +30,7 @@
           "d1",
           "key"
         ],
-        "note": "Where the Riot session is stored encrypted and where it is opened."
+        "note": "Riot sessions and account wishlists have distinct encryption purposes and owners."
       },
       {
         "id": "catalogue",
@@ -47,7 +47,7 @@
       "url": "https://github.com/NicolasV7/valoox",
       "provider": "github",
       "link_mode": "web",
-      "revision": "a36a5512b34dd4fbde41d8480d868b20bf19cab6"
+      "revision": "64929aa41cfbc073dbb72ad49aaea869dfafd414"
     }
   },
   "components": [
@@ -156,6 +156,10 @@
         {
           "path": "src/vault/discord.ts",
           "label": "Opted-in bot DM"
+        },
+        {
+          "path": "src/discord/events.ts",
+          "label": "Signed app removal"
         }
       ]
     },
@@ -182,7 +186,7 @@
       "id": "allow",
       "type": "security",
       "label": "Egress allowlist",
-      "sublabel": "19 rules / one fetch()",
+      "sublabel": "21 rules / one fetch()",
       "pos": [
         700,
         270
@@ -215,7 +219,7 @@
       "id": "seal",
       "type": "security",
       "label": "Encryption",
-      "sublabel": "HKDF by purpose + browser",
+      "sublabel": "HKDF by purpose + owner",
       "pos": [
         320,
         430
@@ -248,7 +252,7 @@
       "id": "d1",
       "type": "database",
       "label": "D1  val-sessions",
-      "sublabel": "Session + atomic state",
+      "sublabel": "Sessions + shared wishlist",
       "pos": [
         320,
         580
@@ -260,6 +264,10 @@
       "sources": [
         {
           "path": "schema.sql"
+        },
+        {
+          "path": "src/storage/wishlists.ts",
+          "label": "Atomic device edits"
         }
       ]
     }
@@ -381,7 +389,7 @@
       "title": "What goes in and out",
       "items": [
         "QR approval rotates the cookie; D1 stores a keyed fingerprint",
-        "Private Discord commands verify a separate bot DM before activation",
+        "Private Discord commands prove DMs; signed app removal stops alerts",
         "Allowlist excludes Riot purchases, equipping and chat"
       ]
     },
@@ -389,7 +397,7 @@
       "dot": "amber",
       "title": "Session custody",
       "items": [
-        "Session, cache, QR, stop links and outbox use distinct encryption purposes",
+        "Session, cache, QR, wishlist, stop links and outbox have distinct purposes",
         "D1 decides revocation, OTP attempts and Discord opt-in",
         "Rotating JAR_KEY invalidates old credentials and ciphertext"
       ]
