@@ -65,7 +65,18 @@ export async function runAlerts(
           complete = false;
           break;
         }
-        if (await post(env, target.uid, target.session, found, view.remaining, budget, rotation))
+        if (
+          await post(
+            env,
+            target.uid,
+            target.session,
+            found,
+            view.remaining,
+            budget,
+            rotation,
+            target.channel,
+          )
+        )
           sent++;
         // Delivery failures are queued separately; do not re-poll Riot for them.
       }

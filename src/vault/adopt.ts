@@ -28,6 +28,8 @@ export async function adopt(env: Env, uid: string, puuid: string, legacy?: strin
     preferences: {
       wishlist: old.wishlist,
       mail: old.mail?.ok ? { ...old.mail, gen: crypto.randomUUID(), send: undefined } : undefined,
+      // Its authoritative opt-in index is copied only by the QR transaction.
+      discord: old.discord?.ok && !adopted ? old.discord : undefined,
     },
     legacy: adopted,
   };

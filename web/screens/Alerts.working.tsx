@@ -1,30 +1,27 @@
 import { Countdown } from '../components/Countdown.tsx';
-import { FlowArt, FlowHeading, FlowRow, FlowState } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading } from '../components/Flow.tsx';
 import { Watch } from '../components/Watch.tsx';
-import { waiting } from '../data/channel.ts';
+import { receiving } from '../data/destinations.ts';
 import { LEVELS, TITLES } from '../data/findable.ts';
 import { BITS, GUNS, useStars } from '../data/stars.ts';
 import type { Prefs, StoreView } from '../data/types.ts';
 import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept, type Route, type Whence } from '../route.ts';
+import { AlertsDestinations } from './Alerts.destinations.tsx';
 import { AlertsStandby } from './Alerts.standby.tsx';
 
-const CHANNEL: Route = { name: 'alerts', step: 'channel' };
-const CODE: Route = { name: 'alerts', step: 'code' };
 const ADD: Route = { name: 'alerts', step: 'add' };
 
 export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }) {
   const s = t().alerts;
   const f = t().flows;
-  const mail = prefs.mail;
   const { stars, on, shut, toggle } = useStars();
   const all = stars ?? [];
   const guns = all.filter((w) => (w.type ?? LEVELS) === LEVELS);
   const bits = all.filter((w) => (w.type ?? LEVELS) !== LEVELS);
   const wordy = bits.length > 0 && bits.every((w) => w.type === TITLES);
-  const ok = mail?.ok === true;
-  const to = waiting(prefs) && !ok ? CODE : CHANNEL;
+  const ok = receiving(prefs);
   const from: Whence = { to: { name: 'alerts' }, said: t().common.nav.alerts };
   return (
     <main class="screen flow">
@@ -38,16 +35,7 @@ export function AlertsWorking({ prefs, view }: { prefs: Prefs; view: StoreView }
           <span class="small">{f.listPromise}</span>
         </div>
       </FlowArt>
-      <FlowRow
-        to={to}
-        label={s.whereItGoes}
-        title={mail?.to || s.yourEmail}
-        state={
-          <FlowState kind={ok ? 'ok' : 'wait'}>
-            {ok ? s.verified : waiting(prefs) ? s.oneIsOut : s.notVerified}
-          </FlowState>
-        }
-      />
+      <AlertsDestinations prefs={prefs} />
       {!ok && <AlertsStandby starred={all.length} />}
       <Group
         title={s.weapons}

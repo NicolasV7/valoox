@@ -90,6 +90,17 @@ export function sessionShape(v: unknown): boolean {
     opt(text)(s.puuid) &&
     opt(text)(s.shard) &&
     opt(text)(s.name) &&
+    opt(
+      object({
+        user: text,
+        room: text,
+        name: text,
+        gen: text,
+        lang: text,
+        ok: bool,
+        said: opt(text),
+      }),
+    )(s.discord) &&
     (s.wishlist === undefined || Array.isArray(s.wishlist))
   );
 }

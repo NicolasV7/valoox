@@ -98,7 +98,7 @@ test('legacy preference input is ignored and cannot enable another transport', a
     env,
   );
   expect(res.status).toBe(200);
-  expect(await res.json()).not.toHaveProperty('discord');
+  expect(await res.json()).toHaveProperty('discord', null);
   expect((await readSession(env, uid))?.session).not.toHaveProperty('notify');
   expect(await env.DB.prepare('SELECT alerts FROM s WHERE uid=?').bind(uid).first()).toEqual({
     alerts: 0,

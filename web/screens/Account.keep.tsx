@@ -39,6 +39,12 @@ export function AccountKeep() {
       <Fact title={f.cached} state={f.sealedFirst}>
         {f.cachedWhy}
       </Fact>
+      <Fact
+        title={t().discord.keepTitle}
+        state={prefs?.discord?.ok ? t().discord.connected : undefined}
+      >
+        {t().discord.keepWhy}
+      </Fact>
       <div class="flow__band">
         <h2>{f.excluded}</h2>
       </div>

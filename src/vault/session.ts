@@ -1,3 +1,4 @@
+import * as discord from '../storage/discord.ts';
 import type { Env, Session } from '../types.ts';
 import { clearCache } from './evict.ts';
 import * as repo from './repo.ts';
@@ -11,7 +12,8 @@ export interface Held {
   kid: number;
   seen?: number;
 }
-export const alerting = (s: Session) => !!s.wishlist?.length && s.mail?.ok === true;
+export const alerting = (s: Session) =>
+  !!s.wishlist?.length && (s.mail?.ok === true || s.discord?.ok === true);
 
 /** Drop obsolete notification preferences before returning or resealing a row. */
 function preferences(s: Session): Session {
@@ -26,6 +28,16 @@ export async function readSession(env: Env, uid: string): Promise<Held | null> {
   try {
     const session = preferences(await open<Session>(env, uid, row.kid, row.blob));
     if (!sessionShape(session)) throw new SealBroken();
+    if (session.discord?.ok) {
+      const consent = await discord.read(env, uid);
+      if (consent?.gen !== session.discord.gen || consent.state !== 'connected') {
+        session.discord = {
+          ...session.discord,
+          ok: false,
+          said: consent?.gen === session.discord.gen ? consent.state : 'stopped',
+        };
+      }
+    }
     return { session, ver: row.ver, kid: row.kid, seen: row.last_used };
   } catch (e) {
     if (!(e instanceof SealBroken)) throw e;

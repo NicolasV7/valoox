@@ -5,18 +5,24 @@ import { t } from '../i18n/index.ts';
 import { ALERTS } from '../route.ts';
 
 /** Static copy stays readable while the saved settings or catalogue load. */
-export function AlertsLoading({ step = 'list' }: { step?: 'list' | 'channel' | 'code' | 'add' }) {
+export function AlertsLoading({
+  step = 'list',
+}: {
+  step?: 'list' | 'channel' | 'code' | 'add' | 'discord';
+}) {
   const s = t().alerts;
   const f = t().flows;
   const failed = usePrefsError();
   const heading =
-    step === 'channel'
-      ? { eyebrow: f.destination, title: s.whereItGoes, lead: f.inboxLead }
-      : step === 'code'
-        ? { eyebrow: f.finalStep, title: f.proofTitle }
-        : step === 'add'
-          ? { eyebrow: f.onRadar, title: s.addSomethingTitle, lead: f.searchLead }
-          : { eyebrow: f.radar, title: t().common.nav.alerts, lead: f.alertsLead };
+    step === 'discord'
+      ? { eyebrow: t().discord.name, title: t().discord.title, lead: t().discord.lead }
+      : step === 'channel'
+        ? { eyebrow: f.destination, title: s.whereItGoes, lead: f.inboxLead }
+        : step === 'code'
+          ? { eyebrow: f.finalStep, title: f.proofTitle }
+          : step === 'add'
+            ? { eyebrow: f.onRadar, title: s.addSomethingTitle, lead: f.searchLead }
+            : { eyebrow: f.radar, title: t().common.nav.alerts, lead: f.alertsLead };
   return (
     <main class="screen flow" aria-busy={!failed}>
       {step !== 'list' && <Back to={ALERTS} said={t().common.nav.alerts} />}

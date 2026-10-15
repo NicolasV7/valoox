@@ -32,6 +32,8 @@ export async function freshDb(): Promise<Env> {
     .join('\n');
 
   for (const table of [
+    'links',
+    'discord',
     'checks',
     'families',
     'messages',

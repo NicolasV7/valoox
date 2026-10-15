@@ -8,6 +8,7 @@ import { buddies } from './buddies.ts';
 import { cards } from './cards.ts';
 import { collection } from './collection.ts';
 import { common } from './common.ts';
+import { discord } from './discord.ts';
 import { flows } from './flows.ts';
 import { gate } from './gate.ts';
 import { piece } from './piece.ts';
@@ -20,6 +21,7 @@ import { weapon } from './weapon.ts';
 
 export const en = {
   common,
+  discord,
   gate,
   store,
   offer,

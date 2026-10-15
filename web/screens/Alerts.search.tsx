@@ -20,6 +20,7 @@ import { Search } from '../components/icons.tsx';
 import { More } from '../components/More.tsx';
 import { Watch } from '../components/Watch.tsx';
 import { reload, usePrefs, usePrefsError } from '../data/channel.ts';
+import { receiving } from '../data/destinations.ts';
 import { bits, guns, LEVELS, narrow, SPRAYS } from '../data/findable.ts';
 import { useKept } from '../data/kept.ts';
 import { useMore } from '../data/more.ts';
@@ -62,7 +63,7 @@ export function AlertsSearch({ inv }: { inv: Inventory }) {
   // them is a dead end. It is the same action the star is, and the star is a
   // control everywhere now — see components/StarMark.tsx. The card below
   // carries the part that is actually worth saying.
-  const held = usePrefs()?.mail?.ok !== true;
+  const held = !receiving(usePrefs());
   const failed = usePrefsError();
   // A result opens the thing it names, and the way back is this search — with
   // the query still in it, because the field is kept rather than stateful.

@@ -17,6 +17,7 @@ import { AccountLeave } from './screens/Account.leave.tsx';
 import { Account } from './screens/Account.tsx';
 import { AlertsChannel } from './screens/Alerts.channel.tsx';
 import { AlertsCode } from './screens/Alerts.code.tsx';
+import { AlertsDiscord } from './screens/Alerts.discord.tsx';
 import { AlertsLoading } from './screens/Alerts.loading.tsx';
 import { AlertsRemove } from './screens/Alerts.remove.tsx';
 import { AlertsSearch } from './screens/Alerts.search.tsx';
@@ -74,6 +75,7 @@ export function Screen({
   if (route.name === 'alerts') {
     if (route.step === 'channel') return <AlertsChannel />;
     if (route.step === 'code') return <AlertsCode />;
+    if (route.step === 'discord') return <AlertsDiscord />;
     if (route.step === 'remove') return <AlertsRemove />;
     if (route.step === 'add')
       return inv ? <AlertsSearch inv={inv} /> : <AlertsLoading step="add" />;

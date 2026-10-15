@@ -136,6 +136,7 @@ export async function prune(env: Env, olderThanDays = 10): Promise<number> {
     env.DB.prepare('DELETE FROM messages WHERE expires<=?').bind(t),
     env.DB.prepare('DELETE FROM otp WHERE expires<=?').bind(t),
     env.DB.prepare('DELETE FROM families WHERE expires<=?').bind(t),
+    env.DB.prepare('DELETE FROM links WHERE expires<=?').bind(t),
   ]);
   return out[0]?.meta.changes ?? 0;
 }

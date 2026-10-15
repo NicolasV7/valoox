@@ -1,10 +1,13 @@
+import type { DiscordOutbox } from '../discord/types.ts';
 import { stopLink } from '../routes/stop.ts';
 import type { Env, Hit, Session } from '../types.ts';
 import { mintStop } from '../vault/stop.ts';
 import { html, subject, text } from './mail/alert.ts';
 import { langOf } from './mail/words.ts';
 
-export interface Outbox {
+export type Outbox = MailOutbox | DiscordOutbox;
+
+export interface MailOutbox {
   uid: string;
   channel: 'mail';
   to: string;
@@ -20,7 +23,7 @@ export async function build(
   s: Session,
   found: Hit[],
   left: number,
-): Promise<Outbox> {
+): Promise<MailOutbox> {
   const lang = langOf(s.mail?.lang);
   const home = 'https://drop.valoox.store';
   const stop = stopLink(home, await mintStop(env, uid));

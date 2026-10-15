@@ -11,7 +11,7 @@ Please report privately first; there is no bounty.
 
 One Cloudflare Worker serves [drop.valoox.store](https://drop.valoox.store).
 The apex redirects there. Game access passes the
-[egress allowlist](src/vault/upstream.ts): eighteen rules and no purchases,
+[egress allowlist](src/vault/upstream.ts): nineteen rules and no purchases,
 equipping, queueing or chat. Authentication writes are intentional. Redirects
 cannot bypass the allowlist. Riot's undocumented storefront POST has not been
 independently proven idempotent; do not infer that property from its method.
@@ -70,11 +70,21 @@ A webhook racing the send response cannot be silently discarded or regress a
 later provider state. Unknown mappings are ignored; repeated CAS failures
 return a retryable response.
 
+Discord linking requires a signed private interaction and a separate successful bot
+message. Codes contain over 120 random bits, expire after ten minutes, are stored
+only as keyed digests, and can be claimed once. Session CAS, code consumption and
+the opt-in index commit together. The index stores keyed recipient fingerprints;
+Discord identities and conversation ids stay in the encrypted session and outbox.
+`/stop` atomically disables every indexed browser and cancels claimed pending links.
+Replayed interaction ids cannot undo a later reconnect or repeat a stop action.
+Signatures bind the original request body and timestamp; events outside five minutes
+are rejected. Discord events use their own signed endpoint, without a cookie-origin exemption elsewhere.
+
 Sessions are pruned after ten days without a session write. Background alert
 checks also write sessions, so closing the page does not start that deadline.
 Session-linked security state cascades on deletion. Expired scans, codes,
 limits, stop records, mappings and
-delivery records are pruned by the scheduled job. D1 Time Travel retains
+delivery records and Discord connection codes are pruned by the scheduled job. D1 Time Travel retains
 deleted ciphertext for the platform retention period; deletion is not physical
 erasure. Rotating `JAR_KEY` also orphans that old ciphertext.
 
@@ -103,6 +113,13 @@ per account/destination. An encrypted immutable outbox retries independently of
 Riot polling and stops at the payload's expiry, within the storefront rotation.
 Resend idempotency keys accompany identical retry bodies. An API
 acceptance or a provider event is not evidence someone received or read a mail.
+
+Discord sends through the same invocation budget. Retries reuse immutable content
+and a nonce, honor shared provider cooldowns, and stop after four HTTP attempts
+or payload expiry. A permanent private-message refusal pauses that Discord
+connection without disabling email. Discord's nonce deduplication covers only a
+few minutes, so an ambiguous timeout followed by a delayed retry may duplicate
+a message. An already in-flight send may complete after disconnection.
 
 ## Review regression evidence
 

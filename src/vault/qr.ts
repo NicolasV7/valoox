@@ -129,6 +129,7 @@ export async function poll(env: Env, uid: string): Promise<PollResult> {
         blob: await seal(env, next, CURRENT_KID, session),
         acct: await markOf(env, who.puuid),
         alerts: alerting(session),
+        discordGen: session.discord?.ok ? session.discord.gen : undefined,
       },
       previous.legacy,
     );

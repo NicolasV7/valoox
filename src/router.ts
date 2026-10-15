@@ -1,10 +1,12 @@
 import * as cookie from './app/cookie.ts';
+import { interaction } from './discord/interaction.ts';
 import { HttpError } from './lib/body.ts';
 import type { Body, Ctx } from './lib/json.ts';
 import { json } from './lib/json.ts';
 import { logout, pollScan, startScan } from './routes/auth.ts';
 import { resend, setChannel, verify } from './routes/channel.ts';
 import { collection } from './routes/collection.ts';
+import { setDiscord } from './routes/discord.ts';
 import { resendHook } from './routes/hook.ts';
 import { render } from './routes/render.ts';
 import { stopMail } from './routes/stop.ts';
@@ -23,12 +25,17 @@ const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
   '/api/channel': { POST: setChannel },
   '/api/channel/again': { POST: resend },
   '/api/channel/verify': { POST: verify },
+  '/api/discord': { POST: setDiscord },
   '/api/stop': { POST: stopMail },
   '/api/logout': { POST: logout },
 };
 const shell = (req: Request) => new Request(new URL('/', req.url), req);
 
-export async function route(req: Request, env: Env): Promise<Response> {
+export async function route(
+  req: Request,
+  env: Env,
+  ctx?: { waitUntil(task: Promise<unknown>): void },
+): Promise<Response> {
   const url = new URL(req.url);
   const { pathname } = url;
   if (['valoox.store', 'www.valoox.store'].includes(url.hostname)) {
@@ -37,6 +44,7 @@ export async function route(req: Request, env: Env): Promise<Response> {
   }
   const headers = new Headers();
   const method = req.method;
+  if (pathname === '/api/hook/discord') return interaction(req, env, ctx);
   if (pathname === '/api/hook/resend') {
     if (method !== 'POST') return json({ error: 'method' }, headers, 405);
     try {

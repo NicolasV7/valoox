@@ -1,22 +1,17 @@
-import { FlowArt, FlowHeading, FlowRow, FlowState, FlowStep } from '../components/Flow.tsx';
+import { FlowArt, FlowHeading, FlowStep } from '../components/Flow.tsx';
+import { receiving } from '../data/destinations.ts';
 import type { Prefs } from '../data/types.ts';
 import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
 import { href, intercept } from '../route.ts';
+import { AlertsDestinations } from './Alerts.destinations.tsx';
 
-export function AlertsFirst({
-  mail,
-  coded,
-}: {
-  mail: Prefs['mail'];
-  starred: number;
-  coded: boolean;
-}) {
+export function AlertsFirst({ prefs }: { prefs: Prefs }) {
   const s = t().alerts;
   const f = t().flows;
-  const to = { name: 'alerts', step: coded ? 'code' : 'channel' } as const;
+  const to = { name: 'alerts', step: 'channel' } as const;
   const add = { name: 'alerts', step: 'add' } as const;
-  const ok = mail?.ok === true;
+  const ok = receiving(prefs);
   return (
     <main class="screen flow">
       <FlowHeading eyebrow={f.startList} title={f.firstTitle} lead={f.firstLead} />
@@ -26,18 +21,7 @@ export function AlertsFirst({
       <FlowStep number={1} title={f.pickInbox}>
         {f.inboxProof}
       </FlowStep>
-      {mail && (
-        <FlowRow
-          to={to}
-          label={s.whereItGoes}
-          title={mail.to}
-          state={
-            <FlowState kind={ok ? 'ok' : 'wait'}>
-              {ok ? s.verified : coded ? s.oneIsOut : s.notVerified}
-            </FlowState>
-          }
-        />
-      )}
+      <AlertsDestinations prefs={prefs} />
       <FlowStep number={2} title={f.makeList}>
         {f.listKinds}
       </FlowStep>

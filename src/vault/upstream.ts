@@ -18,6 +18,8 @@
 // The four writes below are all authentication handshake steps. None of them
 // changes anything about the account or the game.
 
+import { notifications } from './notifications.ts';
+
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
 /** The shard hosts that resolve. latam and br have no DNS record at all. */
@@ -118,11 +120,7 @@ const ALLOW: Rule[] = [
   // request: the route validates and stores it first, and this sends to
   // whatever is stored. The body carries a number we generated and skin names
   // the user chose — no puuid, no jar, no Riot credential of any kind.
-  {
-    method: 'POST',
-    pattern: /^https:\/\/api\.resend\.com\/emails$/,
-    why: 'sends the six digits that prove an address, and the morning alert to it once proved',
-  },
+  ...notifications,
 
   // --- public, unauthenticated --------------------------------------------
   {

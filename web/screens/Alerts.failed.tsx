@@ -6,6 +6,7 @@ import { again, reload, usePrefs } from '../data/channel.ts';
 import { FLOW } from '../design/flows.ts';
 import { t } from '../i18n/index.ts';
 import { go, href, intercept } from '../route.ts';
+import { DiscordDestination } from './Alerts.destinations.tsx';
 
 const CHANNEL = { name: 'alerts', step: 'channel' } as const;
 
@@ -46,6 +47,7 @@ export function AlertsFailed() {
         </p>
       )}
       <p class="flow__note">{f.providerLimits}</p>
+      <DiscordDestination prefs={prefs} />
     </main>
   );
 

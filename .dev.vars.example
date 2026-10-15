@@ -27,3 +27,11 @@ RESEND_HOOK=
 # Already set as a plain var in wrangler.toml for this deployment; override it
 # here for your own.
 MAIL_FROM="valoox <alerts@example.com>"
+
+# Discord is independent of email. All three are required to enable linking.
+# Application ID and Public Key come from General Information in Developer Portal.
+# The Bot Token comes from the Bot page. Never share it or commit this filled file.
+# For live, put each value through `npx wrangler secret put <NAME> --env live`.
+DISCORD_APP_ID=
+DISCORD_PUBLIC_KEY=
+DISCORD_TOKEN=

@@ -63,6 +63,8 @@ requests, including retries and aborted calls. Process fair batches after
 00:30 UTC and continue every fifteen minutes. Combine browser lists per account
 and destination; reserve one delivery per daily rotation. Retries use an
 encrypted immutable outbox and Resend idempotency, without re-polling Riot.
+Discord uses the same budget, bounded retries and provider cooldowns. Its short
+nonce deduplication window is not an exactly-once guarantee.
 
 **The page builds DOM, never HTML from strings.** Community item names are
 untrusted. CSP is `default-src 'none'`, `script-src 'self'`, without

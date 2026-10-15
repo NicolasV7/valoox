@@ -1,3 +1,5 @@
+import type { Connection } from './discord/types.ts';
+
 /** Shared contracts. Private credentials remain inside sealed Session values. */
 export interface Jar {
   [name: string]: string;
@@ -13,6 +15,7 @@ export interface Session {
   shard?: string;
   name?: string;
   wishlist?: Starred[];
+  discord?: Connection;
   mail?: {
     to: string;
     lang?: 'es' | 'en';
@@ -78,6 +81,9 @@ export interface Env extends Cloudflare.Env {
   JAR_KEY: string;
   RESEND_KEY: string;
   RESEND_HOOK: string;
+  DISCORD_TOKEN: string;
+  DISCORD_APP_ID: string;
+  DISCORD_PUBLIC_KEY: string;
 }
 export interface Starred {
   id: string;

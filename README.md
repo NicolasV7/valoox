@@ -19,14 +19,17 @@ game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
 - Weapon skins, variants, sprays, buddies, cards and titles in your collection.
 - Known rewards are hidden from unowned catalogue lists; owned rewards remain visible.
 - Dark Alerts and Account screens, including email removal and disconnect confirmations.
-- Wishlist alerts by verified email. Batches run every fifteen
+- Wishlist alerts by verified email, Discord DM, or both. Each destination has
+  independent consent; Discord stays unavailable until the bot is configured.
+  Batches run every fifteen
   minutes outside the first half hour of each UTC day. Lists are grouped by
-  account and destination; email retries use Resend idempotency.
+  account and destination; email retries use Resend idempotency. Discord verifies
+  a separate bot DM and stops after four delivery attempts or payload expiry.
 
 One Cloudflare Worker serves a Preact app, with D1 for sessions and atomic state
 and KV for encrypted views. Riot sessions use purpose-bound AES-256-GCM keys;
 D1 checks authentication and revocation before private cache reads. Every
-outbound request passes the [18-rule allowlist](src/vault/upstream.ts), which
+outbound request passes the [19-rule allowlist](src/vault/upstream.ts), which
 excludes purchases, equipping and chat. The browser joins the community
 catalogue; code, fonts and fixed artwork are served from the app's own origin.
 Catalogue data, item artwork and clips use narrowly allowed external hosts.
@@ -42,12 +45,13 @@ flowchart LR
   C["Community catalogue<br/>valorant-api.com"]
   R["Riot<br/>QR sign-in + account reads"]
   N["Resend<br/>Verified email alerts"]
+  Q["Discord bot<br/>Opted-in private alerts"]
 
   subgraph CF["Cloudflare"]
     W["Worker<br/>API + scheduled jobs"]
     D[("D1<br/>Encrypted sessions + atomic state")]
     K[("KV<br/>Encrypted views")]
-    A["Egress allowlist<br/>18 rules"]
+    A["Egress allowlist<br/>19 rules"]
     T["Cron<br/>Every 15 minutes"]
   end
 
@@ -59,9 +63,11 @@ flowchart LR
   W -->|All outbound requests| A
   A -->|Authentication + reads| R
   A -->|Notifications| N
+  A -->|Bot messages| Q
+  Q -->|Signed private commands| W
 ```
 
-The diagram follows the email notification flow exposed by the app.
+Email and Discord connect independently; shared wishlist checks do not poll Riot twice.
 D1 authorizes private cache reads. Sessions and views are encrypted by the Worker
 with purpose-bound keys derived from `JAR_KEY`, which stays outside the databases.
 [Open the interactive architecture](docs/architecture.html) for source links
@@ -70,7 +76,7 @@ and the detailed session flow.
 ## Local development
 
 Use Node 24 or newer. Copy [.dev.vars.example](.dev.vars.example) to `.dev.vars`
-and fill in `JAR_KEY` with 32 random bytes encoded as base64. Email is optional.
+and fill in `JAR_KEY` with 32 random bytes encoded as base64. Both alert transports are optional.
 
 ```sh
 npm ci
@@ -119,6 +125,9 @@ corresponding account, bindings and secrets.
 | `RESEND_KEY` | Optional sending-only API key restricted to your verified sending domain. |
 | `RESEND_HOOK` | Webhook signing secret required to accept Resend delivery events. |
 | `MAIL_FROM` | Plain variable: a sender address on your verified domain. Change it for your own deployment. |
+| `DISCORD_APP_ID` | Optional Discord Application ID; stored as a Worker secret to preserve deployment settings. |
+| `DISCORD_PUBLIC_KEY` | Discord Ed25519 verification key, stored with Worker secrets. Public, but must match the application. |
+| `DISCORD_TOKEN` | Optional bot token; required with both settings above to enable Discord linking. |
 
 ### Email with Resend
 
@@ -134,6 +143,28 @@ corresponding account, bindings and secrets.
 Use `npx wrangler secret put <NAME>` for your own default deployment, or append
 `--env live` for this project's production environment. Worker secrets belong
 in Cloudflare; local equivalents belong in the ignored `.dev.vars` file.
+
+### Discord private alerts
+
+1. Create a bot application in [Discord Developer Portal](https://discord.com/developers/applications).
+   Enable User Install and Guild Install. For User Install, enable `applications.commands`;
+   for Guild Install, enable `bot` and `applications.commands`. No privileged intents are needed.
+2. Copy Application ID and Public Key from General Information and the token from Bot.
+   Save them as `DISCORD_APP_ID`, `DISCORD_PUBLIC_KEY` and `DISCORD_TOKEN` using
+   `npx wrangler secret put <NAME> --env live`. Keep local equivalents in `.dev.vars`.
+3. Set the Interactions Endpoint URL to `https://<your-app-host>/api/hook/discord`.
+   Run `npm run discord:check`, then `npm run discord:register` with matching local settings.
+4. In Alerts, choose Discord, install the app, open its DM and generate a code.
+   Send `/connect code:<code>` there within ten minutes. A separate bot message must
+   succeed before the connection becomes active. `/status` checks it; `/stop`
+   disables Discord alerts across all linked browsers. Browser removal affects only that browser.
+
+Only direct messages are supported; arbitrary Discord webhooks and server channels
+cannot be configured. Verify delayed proactive DMs with your installation before
+advertising a server-free flow. If Discord denies a DM, linking stays inactive;
+an existing connection is paused on a later permanent refusal. Email remains independent.
+Discord nonce deduplication lasts only a few minutes; after a lost HTTP response,
+a delayed retry can duplicate a message. We do not claim exactly-once delivery.
 
 ### GitHub Actions
 

@@ -18,6 +18,13 @@ export function AlertsStandby({ starred }: { starred: number }) {
       <a class="btn btn--quiet" href={href(CHANNEL)} onClick={intercept(CHANNEL)}>
         {s.addAnAddress}
       </a>
+      <a
+        class="btn btn--quiet"
+        href={href({ name: 'alerts', step: 'discord' })}
+        onClick={intercept({ name: 'alerts', step: 'discord' })}
+      >
+        {t().discord.connect}
+      </a>
     </section>
   );
 }

@@ -1,6 +1,6 @@
-import { FlowHeading, FlowRetry, FlowRow, FlowState } from '../components/Flow.tsx';
+import { FlowHeading, FlowRetry, FlowRow } from '../components/Flow.tsx';
 import { Chevron } from '../components/icons.tsx';
-import { refused, reload, usePrefs, usePrefsError } from '../data/channel.ts';
+import { reload, usePrefs, usePrefsError } from '../data/channel.ts';
 import { LEVELS } from '../data/findable.ts';
 import type { Account as Who } from '../data/types.ts';
 import { t } from '../i18n/index.ts';
@@ -9,14 +9,14 @@ import { AccountBuild } from './Account.build.tsx';
 import { Coffee } from './Account.coffee.tsx';
 import { Privacy } from './Account.privacy.tsx';
 import { Profile } from './Account.profile.tsx';
+import { AlertsDestinations } from './Alerts.destinations.tsx';
 
-const CHANNEL: Route = { name: 'alerts', step: 'channel' };
 const WATCHING: Route = { name: 'alerts' };
 const LEAVE: Route = { name: 'account', step: 'leave' };
 const COFFEE = 'https://buymeacoffee.com/termoo';
 
 // Checked against the actual allowlist by test/unit/upstream.test.ts.
-export const RULES = 18;
+export const RULES = 19;
 
 export function Account({ who }: { who: Who }) {
   const s = t().account;
@@ -24,8 +24,6 @@ export function Account({ who }: { who: Who }) {
   const prefs = usePrefs();
   const failed = usePrefsError();
   const from = { to: { name: 'account' } as const, said: s.title };
-  const bad = refused(prefs?.mail?.said);
-  const ok = prefs?.mail?.ok === true && !bad;
   const all = prefs?.wishlist ?? [];
   const guns = all.filter((w) => (w.type ?? LEVELS) === LEVELS).length;
   return (
@@ -36,20 +34,7 @@ export function Account({ who }: { who: Who }) {
         <h2>{f.setup}</h2>
         <span class="label">{f.browser}</span>
       </div>
-      <FlowRow
-        to={CHANNEL}
-        from={from}
-        label={f.alertEmail}
-        title={prefs?.mail?.to || s.noAddress}
-        loading={!prefs}
-        state={
-          prefs?.mail && (
-            <FlowState kind={bad ? 'bad' : ok ? 'ok' : 'wait'}>
-              {bad ? t().alerts.wasRefused : ok ? s.verified : s.notVerified}
-            </FlowState>
-          )
-        }
-      />
+      <AlertsDestinations prefs={prefs} from={from} />
       <FlowRow
         to={WATCHING}
         from={from}

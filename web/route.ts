@@ -33,9 +33,9 @@ export type Tab = 'weapons' | 'sprays' | 'buddies' | 'cards' | 'titles';
 
 /** The three screens inside the alerts tab that are their own place: setting
  *  an address, carrying its code back, and finding something to watch. */
-export type Step = 'channel' | 'code' | 'add' | 'remove';
+export type Step = 'channel' | 'code' | 'add' | 'remove' | 'discord';
 
-const STEPS: Step[] = ['channel', 'code', 'add', 'remove'];
+const STEPS: Step[] = ['channel', 'code', 'add', 'remove', 'discord'];
 
 /** The two screens inside the account tab. */
 export type Leaf = 'keep' | 'leave';

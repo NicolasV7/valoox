@@ -21,6 +21,8 @@
     "format": "biome check --write .",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "mail": "node scripts/mailpreview.mjs",
+    "discord:register": "node scripts/discord.mjs",
+    "discord:check": "node scripts/discord.mjs --check",
     "grid": "node scripts/grid.mjs",
     "copy": "node scripts/copy.mjs",
     "banner": "node scripts/banner.mjs",
@@ -60,13 +62,22 @@
         "description": "32 random bytes, base64. Every session is sealed under a key derived from this one. Rotating it signs everybody out immediately."
       },
       "RESEND_KEY": {
-        "description": "resend.com API key, for the six-digit code and the morning alert. Leave blank and the app runs without alerts."
+        "description": "resend.com API key for verification and email alerts. Optional; Discord connects separately."
       },
       "RESEND_HOOK": {
         "description": "The signing secret of a Resend webhook (whsec_…), so a bounce can be believed. Leave blank and the webhook route rejects everything, which is the correct failure."
       },
       "MAIL_FROM": {
         "description": "Who the mail comes from. Must be an address on a domain verified in Resend."
+      },
+      "DISCORD_TOKEN": {
+        "description": "Optional Discord bot token. Saved as a Worker secret, never sent to the browser."
+      },
+      "DISCORD_APP_ID": {
+        "description": "Discord Application ID. Store with Worker secrets so deployments preserve it."
+      },
+      "DISCORD_PUBLIC_KEY": {
+        "description": "Discord Ed25519 public key for verifying private command interactions."
       },
       "EDGE": {
         "description": "Coarse abuse protection before application work; D1 enforces atomic security limits."

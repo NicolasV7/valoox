@@ -1,4 +1,5 @@
 import { pending } from '../alerts/otp.ts';
+import { preferences } from '../discord/prefs.ts';
 import { readJson } from '../lib/body.ts';
 import type { Body, Ctx } from '../lib/json.ts';
 import { RESEED } from '../lib/json.ts';
@@ -112,6 +113,7 @@ async function wishlist(env: Env, uid: string, body: unknown | null, retry = tru
     }
   }
   return {
+    ...(await preferences(env, uid, session)),
     wishlist: session.wishlist ?? [],
     // The address itself, never a code and never a secret: the browser needs
     // it to show you what it is about to write to. `said` is the provider's

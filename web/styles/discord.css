@@ -1,0 +1,26 @@
+.discord__identity {
+  display: grid;
+  gap: 12px;
+  padding: 26px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: linear-gradient(130deg, var(--card), var(--sunk));
+}
+.discord__identity h2 { overflow-wrap: anywhere; }
+.discord__code {
+  width: 100%;
+  min-height: 112px;
+  padding: 14px;
+  color: var(--ink);
+  background: var(--sunk);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  font: 14px/1.7 var(--num);
+  overflow-wrap: anywhere;
+  resize: none;
+}
+.discord__command .flow__bounds { align-items: center; }
+.discord__command .btn { margin-top: 0; }
+@media (pointer: coarse) {
+  .discord__code { font-size: 16px; min-height: 120px; }
+}

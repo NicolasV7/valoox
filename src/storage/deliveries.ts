@@ -18,9 +18,15 @@ export async function claim(env: Env, key: string, blob: string): Promise<Claim>
     .first<{ state: number }>();
   return { state: current?.state === 2 ? 'done' : 'busy' };
 }
-export async function finish(env: Env, key: string, owner: string, ok: boolean): Promise<void> {
+export async function finish(
+  env: Env,
+  key: string,
+  owner: string,
+  ok: boolean,
+  wait = 840,
+): Promise<void> {
   await env.DB.prepare('UPDATE deliveries SET state=?,lease=? WHERE key=? AND owner=? AND state=1')
-    .bind(ok ? 2 : 0, ok ? 0 : now() + 840, key, owner)
+    .bind(ok ? 2 : 0, ok ? 0 : now() + Math.max(840, Math.ceil(wait)), key, owner)
     .run();
 }
 

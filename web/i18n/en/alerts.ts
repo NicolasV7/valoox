@@ -23,9 +23,8 @@ export const alerts = {
     'name it is about at the top.',
 
   searchASkin: 'Search a skin…',
-  // The gate is `mail.ok`, not an address being typed: AlertsFirst opens the
-  // search on `mail?.ok === true` and nothing else.
-  opensOnce: 'Opens once an address is verified.',
+  // Lists can be edited before either destination is connected.
+  opensOnce: 'Save your list, then connect a destination to receive matches.',
 
   // The row is the one `cleanWishlist` builds in `src/routes/wishlist.ts`, and
   // the same list `account.keepListWhy` spells out. Nothing that was not
@@ -60,10 +59,7 @@ export const alerts = {
   testIsProof:
     'That code is the verification: you type it back and the address is proved. ' +
     'Until then, nothing else is sent here.',
-  // A second channel doubles the ways a morning email goes missing and
-  // halves the attention paid to either.
-  oneChannel:
-    'One channel, not a menu of them: an inbox is the one place everybody already checks.',
+  oneChannel: 'Email and Discord connect independently. Choose either destination or both.',
   whyACode:
     'Why a code and not a link: a link in an email gets clicked by scanners ' +
     'before a person sees it, which would verify an address nobody read.',
@@ -85,9 +81,9 @@ export const alerts = {
   standby: 'Your list is on hold',
   standbyKept: (n: number) =>
     n === 1
-      ? 'The one thing you starred is still here. Nothing goes out until an address is verified.'
-      : `All ${n} things you starred are still here. Nothing goes out until an address is verified.`,
-  standbyNone: 'Starring something needs a verified address first.',
+      ? 'The one thing you starred is still here. Nothing goes out until a destination is connected.'
+      : `All ${n} things you starred are still here. Nothing goes out until a destination is connected.`,
+  standbyNone: 'Save your favourites and connect a destination when you are ready.',
   addAnAddress: 'Add an address',
 
   // --- the working list ----------------------------------------------------

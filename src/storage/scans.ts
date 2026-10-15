@@ -62,7 +62,14 @@ export async function cancel(env: Env, uid: string, id?: string): Promise<void> 
 export async function finish(
   env: Env,
   row: ScanRow,
-  next: { uid: string; kid: number; blob: string; acct: string | null; alerts: boolean },
+  next: {
+    uid: string;
+    kid: number;
+    blob: string;
+    acct: string | null;
+    alerts: boolean;
+    discordGen?: string;
+  },
   legacy?: string,
 ): Promise<boolean> {
   const t = now();
@@ -88,6 +95,10 @@ export async function finish(
     env.DB.prepare(
       'INSERT INTO families(uid,next,expires) SELECT ?,?,? WHERE EXISTS(SELECT 1 FROM s WHERE uid=?)',
     ).bind(row.uid, next.uid, t + 600, next.uid),
+    env.DB.prepare(
+      'INSERT INTO discord(uid,recipient,gen,state) SELECT ?,recipient,gen,state FROM discord ' +
+        "WHERE uid=? AND gen=? AND state='connected' AND EXISTS(SELECT 1 FROM s WHERE uid=?)",
+    ).bind(next.uid, row.uid, next.discordGen ?? '', next.uid),
     env.DB.prepare('DELETE FROM s WHERE uid IN (?,?) AND EXISTS(SELECT 1 FROM s WHERE uid=?)').bind(
       row.uid,
       legacy ?? row.uid,

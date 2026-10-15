@@ -90,6 +90,9 @@ export interface Prefs {
    *  Never the digits. Null when there is none, or when the last one has
    *  expired. */
   code: { until: number; tries: number } | null;
+  discord?: { name: string; ok: boolean; said: string } | null;
+  discordApp?: string | null;
+  discordLink?: { until: number; state: string } | null;
 }
 
 /** What `/api/qr` answers. `url` only on start; `shard` only once approved. */

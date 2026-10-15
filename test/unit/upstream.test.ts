@@ -57,7 +57,7 @@ test('no path traversal or host confusion sneaks past', () => {
   no('GET', 'https://pd.na.a.pvp.net/store/v1/wallet/not-a-uuid');
 });
 
-test('Discord and other push destinations are blocked, including valid webhooks', () => {
+test('arbitrary push destinations remain blocked, including Discord webhooks', () => {
   const HOOK = '123456789012345678/' + 'a'.repeat(68);
   no('POST', 'https://discord.com/api/webhooks/' + HOOK);
   no('POST', 'https://discord.com/api/webhooks/' + HOOK + '/extra');
@@ -97,9 +97,18 @@ test('the loadout is readable but not writable', () => {
 test('the list stays short enough to read in one sitting', () => {
   // If this fails, someone added an endpoint. That is allowed — but it should be
   // a deliberate edit to this number, with a look at what was added.
-  // Email is the only notification transport. Removing the push endpoint
-  // reduces nineteen rules to eighteen; Resend and the image proxy remain.
-  assert.equal(allowCount, 18);
+  // Discord adds only the bot message endpoint; arbitrary webhooks stay blocked.
+  assert.equal(allowCount, 19);
+});
+
+test('Discord can only post to a validated conversation through the bot API', () => {
+  const url = 'https://discord.com/api/v10/channels/123456789012345678/messages';
+  ok('POST', url);
+  for (const method of ['GET', 'PUT', 'PATCH', 'DELETE']) no(method, url);
+  for (const suffix of ['?x=1', '/extra', '/../../guilds']) no('POST', url + suffix);
+  no('POST', url.replace('discord.com', 'discord.com.evil.invalid'));
+  no('POST', url.replace('123456789012345678', 'not-an-id'));
+  no('POST', 'https://discord.com/api/v10/users/@me/channels');
 });
 
 // The two the file's own comment names as the clearest cases, and neither was
