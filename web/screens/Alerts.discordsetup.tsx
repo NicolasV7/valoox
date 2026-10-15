@@ -7,12 +7,12 @@ import { AlertsCommand } from './Alerts.command.tsx';
 import { DiscordSteps } from './Alerts.discordsteps.tsx';
 
 export function DiscordSetup({ prefs, flow }: { prefs: Prefs; flow: DiscordFlow }) {
-  const [added, setAdded] = useState(false);
+  const [started, setStarted] = useState(false);
   const s = t().discord;
   const pending = prefs.discordLink;
   const failed = pending?.state === 'blocked' || pending?.state === 'unavailable';
   const expired = !!flow.until && flow.left === 0;
-  const current = flow.checking ? 3 : flow.until || added ? 2 : 1;
+  const current = flow.checking ? 3 : flow.until || started ? 2 : 1;
   const install =
     'https://discord.com/oauth2/authorize?client_id=' +
     prefs.discordApp +
@@ -25,20 +25,23 @@ export function DiscordSetup({ prefs, flow }: { prefs: Prefs; flow: DiscordFlow 
           <FlowStep number={1} title={s.stepInstall}>
             {s.installHelp}
           </FlowStep>
-          <a class="btn" href={install} target="_blank" rel="noopener noreferrer">
-            {s.install}
-          </a>
-          <button
-            type="button"
-            class="btn btn--quiet"
-            disabled={flow.locked || flow.wait > 0}
-            onClick={() => {
-              setAdded(true);
+          <a
+            class="btn"
+            href={install}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-disabled={flow.locked || flow.wait > 0}
+            onClick={(event) => {
+              if (flow.locked || flow.wait > 0) {
+                event.preventDefault();
+                return;
+              }
+              setStarted(true);
               void flow.start();
             }}
           >
-            {s.installed}
-          </button>
+            {s.install}
+          </a>
         </section>
       ) : flow.checking ? (
         <section class="discord__stage" role="status" aria-busy="true">
@@ -78,7 +81,9 @@ export function DiscordSetup({ prefs, flow }: { prefs: Prefs; flow: DiscordFlow 
                   : s.unavailable
                 : flow.code
                   ? s.automatic
-                  : s.resume}
+                  : flow.busy
+                    ? t().common.loading
+                    : s.resume}
           </p>
           {(!flow.code || expired || failed) && (
             <button

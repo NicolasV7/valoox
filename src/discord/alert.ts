@@ -1,5 +1,5 @@
-import { renderAt } from '../routes/render.ts';
 import type { Hit, Session } from '../types.ts';
+import { renderUrl } from '../vault/render.ts';
 import type { DiscordOutbox } from './types.ts';
 import { words } from './words.ts';
 
@@ -35,7 +35,7 @@ export function build(uid: string, s: Session, found: Hit[], left: number): Disc
       embeds: found
         .filter((item) => (!item.type || item.type === LEVELS) && UUID.test(item.id))
         .slice(0, 4)
-        .map((item) => ({ image: { url: renderAt('https://drop.valoox.store', item.id) } })),
+        .map((item) => ({ image: { url: renderUrl(item.id) } })),
       components: [
         {
           type: 1,

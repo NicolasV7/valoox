@@ -20,8 +20,7 @@ export const discord = {
   stepSend: 'Send the command',
   stepConfirm: 'Ready',
   installHelp:
-    'Authorize valoox for your Discord account, then return here. If you already did this, continue below.',
-  installed: 'Already authorized · Continue',
+    'Choose Authorize in the Discord window, then return here. Your connection command will be ready.',
   sendHelp:
     'Copy the command below, open the bot’s DM, paste it in the message box and press Enter.',
   automatic: 'This page checks automatically. Return here after sending the command.',

@@ -162,8 +162,8 @@ in Cloudflare; local equivalents belong in the ignored `.dev.vars` file.
    Run `npm run discord:check`, then `npm run discord:register` with matching local settings.
    On Webhooks, set `https://<your-app-host>/api/hook/discord/events` and subscribe
    to Application Deauthorized so removing the app also stops its linked alerts.
-4. In Alerts, choose Discord and authorize the app once. Continue to get a code,
-   copy the command and open the bot's DM. Send `/connect code:<code>` there
+4. In Alerts, choose Discord and authorize the app once. Return to copy the
+   prepared command and open the bot's DM. Send `/connect code:<code>` there
    within ten minutes. A separate bot message must
    succeed before the connection becomes active. `/status` checks it; `/stop`
    disables Discord alerts across all linked browsers. Browser removal affects only that browser.

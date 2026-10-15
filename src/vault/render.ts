@@ -14,4 +14,6 @@ import { rf } from './http.ts';
 
 const CDN = 'https://media.valorant-api.com/weaponskinlevels/';
 
-export const fetchRender = (id: string): Promise<Response> => rf(CDN + id + '/displayicon.png');
+/** Public artwork only. Discord fetches it through its own image proxy. */
+export const renderUrl = (id: string): string => CDN + id + '/displayicon.png';
+export const fetchRender = (id: string): Promise<Response> => rf(renderUrl(id));

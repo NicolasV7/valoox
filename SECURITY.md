@@ -86,6 +86,8 @@ Discord identities and conversation ids stay in the encrypted session and outbox
 Profile images use an authenticated same-origin proxy with opaque generation handles,
 bounded image bodies and a per-browser quota. Discord's bot token is never sent
 to its image CDN. Known profile metadata refreshes on demand after a day.
+Discord's image proxy reads public weapon artwork URLs containing only validated
+item UUIDs; account identifiers and credentials never appear in those URLs.
 `/stop` atomically disables every indexed browser and cancels claimed pending links.
 Replayed interaction ids cannot undo a later reconnect or repeat a stop action.
 Signatures bind the original request body and timestamp; events outside five minutes

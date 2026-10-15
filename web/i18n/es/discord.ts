@@ -21,8 +21,7 @@ export const discord = {
   stepSend: 'Envía el comando',
   stepConfirm: 'Listo',
   installHelp:
-    'Autoriza valoox para tu cuenta de Discord y vuelve aquí. Si ya lo hiciste, continúa abajo.',
-  installed: 'Ya lo autoricé · Continuar',
+    'Elige Autorizar en la ventana de Discord y vuelve aquí. Tu comando de conexión estará listo.',
   sendHelp:
     'Copia el comando, abre el privado del bot, pégalo en el cuadro de mensajes y pulsa Enter.',
   automatic:
