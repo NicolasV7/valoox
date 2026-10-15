@@ -47,7 +47,7 @@
       "url": "https://github.com/NicolasV7/valoox",
       "provider": "github",
       "link_mode": "web",
-      "revision": "04254ee8b1ca61284f38a83d4bf9255534ba3bbf"
+      "revision": "a36a5512b34dd4fbde41d8480d868b20bf19cab6"
     }
   },
   "components": [
@@ -138,8 +138,8 @@
     {
       "id": "notify",
       "type": "external",
-      "label": "Resend",
-      "sublabel": "Verified email alerts",
+      "label": "Resend / Discord",
+      "sublabel": "Email + private bot DMs",
       "pos": [
         980,
         90
@@ -150,11 +150,12 @@
       ],
       "sources": [
         {
-          "path": "src/alerts/post.ts"
+          "path": "src/vault/mail.ts",
+          "label": "Verified email"
         },
         {
-          "path": "src/vault/mail.ts",
-          "label": "Email transport"
+          "path": "src/vault/discord.ts",
+          "label": "Opted-in bot DM"
         }
       ]
     },
@@ -162,7 +163,7 @@
       "id": "worker",
       "type": "backend",
       "label": "Worker  val",
-      "sublabel": "10 routes /api/*",
+      "sublabel": "API + signed interactions",
       "pos": [
         320,
         270
@@ -181,7 +182,7 @@
       "id": "allow",
       "type": "security",
       "label": "Egress allowlist",
-      "sublabel": "18 rules · one fetch()",
+      "sublabel": "19 rules / one fetch()",
       "pos": [
         700,
         270
@@ -368,7 +369,7 @@
       "id": "allow-notify",
       "from": "allow",
       "to": "notify",
-      "label": "Alert",
+      "label": "Opted-in alerts",
       "variant": "dashed",
       "fromSide": "top",
       "toSide": "bottom"
@@ -380,8 +381,8 @@
       "title": "What goes in and out",
       "items": [
         "QR approval rotates the cookie; D1 stores a keyed fingerprint",
-        "Encrypted QR expires in ten minutes and is cancelled on disconnect",
-        "Allowlist excludes purchases, equipping and chat"
+        "Private Discord commands verify a separate bot DM before activation",
+        "Allowlist excludes Riot purchases, equipping and chat"
       ]
     },
     {
@@ -389,7 +390,7 @@
       "title": "Session custody",
       "items": [
         "Session, cache, QR, stop links and outbox use distinct encryption purposes",
-        "D1 decides revocation, OTP attempts and link consumption",
+        "D1 decides revocation, OTP attempts and Discord opt-in",
         "Rotating JAR_KEY invalidates old credentials and ciphertext"
       ]
     }
