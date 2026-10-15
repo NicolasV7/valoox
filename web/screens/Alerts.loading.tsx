@@ -15,7 +15,7 @@ export function AlertsLoading({
   const failed = usePrefsError();
   const heading =
     step === 'discord'
-      ? { eyebrow: t().discord.name, title: t().discord.title, lead: t().discord.lead }
+      ? { eyebrow: t().discord.name, title: t().discord.title }
       : step === 'channel'
         ? { eyebrow: f.destination, title: s.whereItGoes, lead: f.inboxLead }
         : step === 'code'
@@ -24,7 +24,10 @@ export function AlertsLoading({
             ? { eyebrow: f.onRadar, title: s.addSomethingTitle, lead: f.searchLead }
             : { eyebrow: f.radar, title: t().common.nav.alerts, lead: f.alertsLead };
   return (
-    <main class="screen flow" aria-busy={!failed}>
+    <main
+      class={'screen flow' + (step === 'discord' ? ' discord discord--setup' : '')}
+      aria-busy={!failed}
+    >
       {step !== 'list' && <Back to={ALERTS} said={t().common.nav.alerts} />}
       <FlowHeading {...heading} />
       {step === 'list' ? (

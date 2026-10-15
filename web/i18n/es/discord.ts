@@ -1,7 +1,7 @@
 export const discord = {
   name: 'Discord',
-  title: 'Una línea directa a tu próximo hallazgo',
-  lead: 'Los hallazgos de tu lista, en un mensaje privado del bot de valoox.',
+  title: 'Conectar Discord',
+  lead: 'Alertas de favoritos, en un mensaje privado.',
   choose: 'Email, Discord o ambos',
   chooseWhy: 'Cada destino se conecta por separado. Tu lista guardada es compartida.',
   connect: 'Conectar Discord',
@@ -20,17 +20,12 @@ export const discord = {
   stepInstall: 'Autoriza valoox',
   stepSend: 'Envía el comando',
   stepConfirm: 'Listo',
-  installHelp:
-    'Elige Autorizar en la ventana de Discord y vuelve aquí. Tu comando de conexión estará listo.',
+  installHelp: 'Pulsa Autorizar en Discord y vuelve aquí.',
   sendHelp: 'Primero copia el mensaje. Después abre el chat de Discord para enviarlo.',
   copyStep: 'Copia el mensaje',
-  openStep: 'Abre el chat de Discord',
-  openHelp: 'El botón abre tu chat privado con el bot de valoox.',
-  sendStep: 'Pega y envía',
-  sendStepHelp:
-    'Toca el cuadro de mensajes de Discord, pega el mensaje completo y pulsa Enter. Después vuelve aquí.',
-  automatic:
-    'Esta página comprueba la conexión automáticamente. Vuelve aquí después de enviar el comando.',
+  openStep: 'Abre el chat del bot',
+  sendStepHelp: 'Pega el mensaje, envíalo y vuelve aquí.',
+  automatic: 'La conexión se confirmará aquí automáticamente.',
   checkingHelp:
     'Estamos confirmando que el bot puede escribirte. Tu conexión aparecerá aquí automáticamente.',
   resume: 'Este código se abrió en otra pestaña. Continúa allí u obtén uno nuevo aquí.',
@@ -43,7 +38,7 @@ export const discord = {
   removedDiscord: 'Discord está desconectado aquí. Tu lista se conserva.',
   removeWhyDiscord: 'Tu lista seguirá guardada. Puedes volver a conectar Discord cuando quieras.',
   install: 'Autorizar en Discord',
-  open: 'Abrir el privado del bot',
+  open: 'Abrir Discord',
   generate: 'Obtener un código de conexión',
   generateAgain: 'Obtener un nuevo código',
   codeLabel: 'Envía este comando en el privado del bot',

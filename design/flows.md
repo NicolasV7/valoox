@@ -8,6 +8,9 @@ No additional fonts, scripts, icon libraries or outbound hosts are introduced.
 The later visual revision restores the original compact Alerts rows and the
 Buy Me a Coffee button's own yellow, while keeping the surrounding design.
 Alerts and Account omit the valoox masthead, including loading and subpages.
+Discord setup uses a compact heading and two numbered actions: copy the message,
+then open the bot chat to paste and send it. Keep 44px action targets and allow
+error, recovery and enlarged-text states to scroll instead of clipping them.
 
 ## Alerts
 

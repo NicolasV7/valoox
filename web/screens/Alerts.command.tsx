@@ -27,22 +27,26 @@ export function AlertsCommand({
     }
   }
   return (
-    <ol class="discord__instructions">
+    <ol class="discord__instructions" aria-label={s.sendHelp}>
       <li class="discord__command">
-        <h3>{s.copyStep}</h3>
-        <label class="flow__field" for="discord-command">
-          <span class="label">{s.codeLabel}</span>
-          <textarea id="discord-command" class="discord__code" readOnly rows={3} value={command} />
-        </label>
-        <div class="flow__bounds">
-          <span>
-            {s.codeTime}
-            <Countdown from={until / 1000} since={0} />
-          </span>
+        <div class="discord__action">
+          <h3>{s.copyStep}</h3>
           <button type="button" class="btn btn--quiet" disabled={!enabled} onClick={copy}>
             {copied ? s.copied : s.copy}
           </button>
         </div>
+        <textarea
+          id="discord-command"
+          aria-label={s.codeLabel}
+          class="discord__code"
+          readOnly
+          rows={2}
+          value={command}
+        />
+        <p class="discord__expiry">
+          {s.codeTime}
+          <Countdown from={until / 1000} since={0} />
+        </p>
         {failed && (
           <p class="flow__note" role="status">
             {s.copyFailed}
@@ -50,10 +54,9 @@ export function AlertsCommand({
         )}
       </li>
       {enabled && (
-        <>
-          <li>
+        <li>
+          <div class="discord__action">
             <h3>{s.openStep}</h3>
-            <p>{s.openHelp}</p>
             <a
               class="btn"
               href={'https://discord.com/users/' + app}
@@ -62,12 +65,9 @@ export function AlertsCommand({
             >
               {s.open}
             </a>
-          </li>
-          <li>
-            <h3>{s.sendStep}</h3>
-            <p>{s.sendStepHelp}</p>
-          </li>
-        </>
+          </div>
+          <p>{s.sendStepHelp}</p>
+        </li>
       )}
     </ol>
   );

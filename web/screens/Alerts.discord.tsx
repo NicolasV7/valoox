@@ -15,12 +15,12 @@ export function AlertsDiscord() {
   if (!prefs) return <AlertsLoading step="discord" />;
   const connected = prefs.discord?.ok === true && !prefs.discordLink;
   return (
-    <main class="screen flow discord">
+    <main class={'screen flow discord' + (connected ? '' : ' discord--setup')}>
       <Back to={ALERTS} said={t().common.nav.alerts} />
       <FlowHeading
         eyebrow={s.name}
         title={connected ? s.readyTitle : s.title}
-        lead={connected ? (prefs.wishlist.length ? s.readyLead : s.readyEmpty) : s.lead}
+        lead={connected ? (prefs.wishlist.length ? s.readyLead : s.readyEmpty) : undefined}
       />
       {connected ? (
         <DiscordReady prefs={prefs} flow={flow} />
@@ -49,9 +49,9 @@ export function AlertsDiscord() {
           <FlowInfo title={s.choose}>{s.both}</FlowInfo>
           <p class="flow__note">{s.private}</p>
         </details>
-      ) : (
+      ) : connected || !prefs.discordApp ? (
         <p class="flow__note">{s.private}</p>
-      )}
+      ) : null}
     </main>
   );
 }

@@ -31,8 +31,8 @@ game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
   the list without polling Riot. The list is removed after the last session ends.
 - Guided Discord setup, profile pictures and weapon images in alert messages.
   Connected profiles hide setup controls; checking blocks conflicting actions.
-- Message cards use the language selected by the connecting valoox page. Copy,
-  open Discord, and paste/send are separate numbered instructions.
+- Message cards use the language selected by the connecting valoox page. Compact
+  setup instructions put copying first, then opening Discord to paste and send.
 
 One Cloudflare Worker serves a Preact app, with D1 for sessions and atomic state
 and KV for encrypted views. Riot sessions use purpose-bound AES-256-GCM keys;

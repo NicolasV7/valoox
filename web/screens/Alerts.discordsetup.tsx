@@ -51,9 +51,6 @@ export function DiscordSetup({ prefs, flow }: { prefs: Prefs; flow: DiscordFlow 
         </section>
       ) : (
         <section class="discord__stage">
-          <FlowStep number={2} title={s.stepSend}>
-            {s.sendHelp}
-          </FlowStep>
           {flow.code && (
             <AlertsCommand
               key={flow.code.value}
@@ -92,9 +89,11 @@ export function DiscordSetup({ prefs, flow }: { prefs: Prefs; flow: DiscordFlow 
             <a class="btn btn--quiet" href={install} target="_blank" rel="noopener noreferrer">
               {s.install}
             </a>
+            {!prefs.emailAvailable && <p class="flow__note">{s.private}</p>}
           </details>
         </section>
       )}
+      {current !== 2 && !prefs.emailAvailable && <p class="flow__note">{s.private}</p>}
     </>
   );
 }
