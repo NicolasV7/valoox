@@ -4,7 +4,14 @@ import { b64, bytes, dec, derive, enc } from './keys.ts';
 // Schema and purpose bind the key and authenticated data. Moving a session
 // into a cache, or a cache into a scan, must never open successfully.
 export const CURRENT_KID = 2;
-export type Purpose = 'session:2' | 'store:4' | 'inv:3' | 'scan:2' | 'stop:2' | 'outbox:2';
+export type Purpose =
+  | 'session:2'
+  | 'store:4'
+  | 'inv:3'
+  | 'scan:2'
+  | 'stop:2'
+  | 'outbox:2'
+  | 'wishlist:1';
 const aad = (uid: string, kid: number, purpose: Purpose) =>
   enc.encode(JSON.stringify([kid, purpose, uid]));
 const key = (env: Env, uid: string, kid: number, purpose: Purpose) =>

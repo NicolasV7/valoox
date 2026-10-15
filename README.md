@@ -25,12 +25,17 @@ game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
   minutes outside the first half hour of each UTC day. Lists are grouped by
   account and destination; email retries use Resend idempotency. Discord verifies
   a separate bot DM and stops after four delivery attempts or payload expiry.
+- One encrypted wishlist per verified Riot account, shared across devices.
+  Device edits merge their own additions and removals; returning to the app refreshes
+  the list without polling Riot. The list is removed after the last session ends.
+- Guided Discord setup, profile pictures and weapon images in alert messages.
+  Connected profiles hide setup controls; checking blocks conflicting actions.
 
 One Cloudflare Worker serves a Preact app, with D1 for sessions and atomic state
 and KV for encrypted views. Riot sessions use purpose-bound AES-256-GCM keys;
 D1 checks authentication and revocation before private cache reads. Every
-outbound request passes the [19-rule allowlist](src/vault/upstream.ts), which
-excludes purchases, equipping and chat. The browser joins the community
+outbound request passes the [21-rule allowlist](src/vault/upstream.ts), which
+excludes Riot purchases, equipping and chat. The browser joins the community
 catalogue; code, fonts and fixed artwork are served from the app's own origin.
 Catalogue data, item artwork and clips use narrowly allowed external hosts.
 
@@ -51,7 +56,7 @@ flowchart LR
     W["Worker<br/>API + scheduled jobs"]
     D[("D1<br/>Encrypted sessions + atomic state")]
     K[("KV<br/>Encrypted views")]
-    A["Egress allowlist<br/>19 rules"]
+    A["Egress allowlist<br/>21 rules"]
     T["Cron<br/>Every 15 minutes"]
   end
 
@@ -65,6 +70,7 @@ flowchart LR
   A -->|Notifications| N
   A -->|Bot messages| Q
   Q -->|Signed private commands| W
+  Q -->|Signed app removal| W
 ```
 
 Email and Discord connect independently; shared wishlist checks do not poll Riot twice.
@@ -154,8 +160,11 @@ in Cloudflare; local equivalents belong in the ignored `.dev.vars` file.
    `npx wrangler secret put <NAME> --env live`. Keep local equivalents in `.dev.vars`.
 3. Set the Interactions Endpoint URL to `https://<your-app-host>/api/hook/discord`.
    Run `npm run discord:check`, then `npm run discord:register` with matching local settings.
-4. In Alerts, choose Discord, install the app, open its DM and generate a code.
-   Send `/connect code:<code>` there within ten minutes. A separate bot message must
+   On Webhooks, set `https://<your-app-host>/api/hook/discord/events` and subscribe
+   to Application Deauthorized so removing the app also stops its linked alerts.
+4. In Alerts, choose Discord and authorize the app once. Continue to get a code,
+   copy the command and open the bot's DM. Send `/connect code:<code>` there
+   within ten minutes. A separate bot message must
    succeed before the connection becomes active. `/status` checks it; `/stop`
    disables Discord alerts across all linked browsers. Browser removal affects only that browser.
 

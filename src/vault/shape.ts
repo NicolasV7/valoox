@@ -99,6 +99,8 @@ export function sessionShape(v: unknown): boolean {
         lang: text,
         ok: bool,
         said: opt(text),
+        avatar: opt(nil(text)),
+        avatarAt: opt(num),
       }),
     )(s.discord) &&
     (s.wishlist === undefined || Array.isArray(s.wishlist))

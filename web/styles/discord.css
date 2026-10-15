@@ -21,6 +21,20 @@
 }
 .discord__command .flow__bounds { align-items: center; }
 .discord__command .btn { margin-top: 0; }
+.discord__steps { display: flex; gap: 12px; list-style: none; padding: 0; margin: 28px 0 12px; }
+.discord__steps li { flex: 1; min-width: 0; display: grid; gap: 8px; padding-top: 12px; border-top: 2px solid var(--rule); color: var(--ink-4); font-size: var(--t-floor); }
+.discord__steps li[aria-current='step'] { border-color: var(--ink); color: var(--ink); }
+.discord__steps .discord__step--done { border-color: var(--ok); color: var(--ok); }
+.discord__stage { padding-bottom: 12px; }
+.discord__stage .flow__step { border: 0; }
+.discord__identity--ready { border-color: var(--ok); }
+.discord__avatar { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--raised); overflow: hidden; font-size: var(--t-screen); }
+.discord__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.flow__row .discord__avatar { flex: none; width: 48px; height: 48px; font-size: var(--t-item); }
+.discord__details { margin-top: 24px; border-top: 1px solid var(--rule); padding-top: 18px; }
+.discord__details > summary { min-height: 28px; color: var(--ink-3); cursor: pointer; font-size: var(--t-small); }
+.discord__details .flow__info { margin-top: 0; padding-top: 14px; border: 0; }
+.discord__confirm { padding-top: 16px; }
 @media (pointer: coarse) {
   .discord__code { font-size: 16px; min-height: 120px; }
 }

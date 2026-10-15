@@ -88,7 +88,7 @@ export const flows = {
   keepLead: 'The state needed for this browser to read your store and send your alerts.',
   sealedFirst: 'Encrypted before storage',
   serverSide: 'The session stays server-side.',
-  stored: 'Stored for this browser',
+  stored: 'Stored for your connection',
   session: 'Riot session',
   cached: 'Store and inventory views',
   cachedWhy:
@@ -100,7 +100,8 @@ export const flows = {
     'Database recovery copies may retain deleted rows during their retention period. The deployment account holds the encryption key.',
   wayOut: 'Your way out',
   leaveTitle: 'Leave this browser?',
-  leaveLead: 'This removes the access and alert settings held for this browser.',
+  leaveLead:
+    'This removes this browser’s access and alert settings. Your wishlist stays on other connected devices.',
   removed: 'Removed here',
   riotSeparate: 'Riot’s session is separate.',
   separateWhy: 'Disconnecting removes this app’s access. Riot’s own session expires on its side.',

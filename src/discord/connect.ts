@@ -2,6 +2,7 @@ import * as links from '../storage/links.ts';
 import type { Env } from '../types.ts';
 import { send } from '../vault/discord.ts';
 import { encoded, readSession } from '../vault/session.ts';
+import { avatarHash } from './config.ts';
 import type { Interaction } from './types.ts';
 import { words } from './words.ts';
 
@@ -33,6 +34,13 @@ export async function connect(env: Env, link: links.Link, event: Interaction): P
           .slice(0, 80),
         gen: link.gen,
         ok: true,
+        avatar: avatarHash(event.user?.avatar)
+          ? event.user.avatar
+          : event.user?.avatar === null
+            ? null
+            : undefined,
+        avatarAt:
+          event.user?.avatar === null || avatarHash(event.user?.avatar) ? Date.now() : undefined,
         lang: event.locale?.startsWith('es') ? 'es' : 'en',
       };
       if (

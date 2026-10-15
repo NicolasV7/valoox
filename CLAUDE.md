@@ -35,6 +35,12 @@ link and outbox keys are distinct. Caches also validate their public DTO shape.
 identifiers and invalidates every old ciphertext. Cache derivations by the raw
 secret, never across a rotation.
 
+Account wishlists use `wishlist:1`, bound to the verified account fingerprint.
+Share only after decrypting an authenticated Riot identity. Merge device changes
+under CAS and update all browser job flags atomically; destinations retain their
+own consent. Remove the shared list after its last session ends. A stale session
+writer cannot replace the authoritative list or its consent-derived job flags.
+
 **D1 decides authentication and revocation.** Check it before returning a
 private KV view. A delayed KV deletion cannot undo logout. Disconnect atomically
 deletes the session and pending QR. Approval can commit only a live, exclusively

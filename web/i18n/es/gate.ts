@@ -13,17 +13,16 @@ export const gate = {
   facts: {
     password: 'Tu contraseña no llega aquí.',
     passwordWhy: 'Riot te hace entrar dentro de su propia app. Aquí no hay dónde escribirla.',
-    keep: 'Guardamos una sola cosa.',
+    keep: 'Tu sesión se guarda cifrada.',
     keepWhy: 'La sesión que Riot devuelve, cifrada, con la clave fuera de la base de datos.',
     read: 'Solo sabe leer.',
     readWhy:
       'Los endpoints que cambian algo —equipar, entrar a cola, comprar— no están ' +
       'en el código, y un test lo prueba.',
     leave: 'Te puedes ir.',
-    // `forget()` deletes our row and nothing else, so the subject of the first
-    // sentence is what we keep — never the session, which is Riot's to end.
+    // Disconnect removes this browser's access; other devices retain the shared list.
     leaveWhy:
-      'Desconectas y lo que guardamos se borra al instante. Del lado de Riot la sesión vence sola.',
+      'Desconecta para borrar el acceso y las alertas de este navegador. Tus favoritos siguen en otros dispositivos conectados. La sesión de Riot vence por su cuenta.',
   },
 
   show: 'Muéstrame el código',

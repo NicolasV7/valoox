@@ -6,10 +6,13 @@ export interface Connection {
   lang: 'en' | 'es';
   ok: boolean;
   said?: string;
+  avatar?: string | null;
+  avatarAt?: number;
 }
 
 export interface Message {
   content: string;
+  embeds?: Array<{ image: { url: string } }>;
   components?: Array<{
     type: 1;
     components: Array<{ type: 2; style: 5; label: string; url: string }>;
@@ -34,6 +37,12 @@ export interface Interaction {
   channel_id?: string;
   guild_id?: string;
   locale?: string;
-  user?: { id?: string; username?: string; global_name?: string; bot?: boolean };
+  user?: {
+    id?: string;
+    username?: string;
+    global_name?: string;
+    bot?: boolean;
+    avatar?: string | null;
+  };
   data?: { name?: string; options?: Array<{ name?: string; value?: unknown }> };
 }

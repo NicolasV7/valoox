@@ -13,17 +13,16 @@ export const gate = {
   facts: {
     password: 'Your password never comes here.',
     passwordWhy: 'Riot signs you in inside their own app. There is nowhere here to type it.',
-    keep: 'We keep one thing.',
+    keep: 'Your session stays encrypted.',
     keepWhy: 'The session Riot hands back, encrypted, with the key held outside the database.',
     read: 'It only knows how to read.',
     readWhy:
       'The endpoints that change something — equipping, queueing, buying — are ' +
       'not in the code, and a test proves it.',
     leave: 'You can leave.',
-    // `forget()` deletes our row and nothing else, so the subject of the first
-    // sentence is what we keep — never the session, which is Riot's to end.
+    // Disconnect removes this browser's access; other devices retain the shared list.
     leaveWhy:
-      'Disconnect and what we keep is deleted at once. On Riot’s side the session expires on its own.',
+      'Disconnect to delete this browser’s access and alerts. Your wishlist stays on other connected devices. Riot’s session expires independently.',
   },
 
   show: 'Show me the code',

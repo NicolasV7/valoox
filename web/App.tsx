@@ -14,6 +14,7 @@ import * as api from './data/api.ts';
 import { reseeded } from './data/api.ts';
 import * as privateState from './data/private.ts';
 import { useStore } from './data/store.ts';
+import { usePrefsSync } from './data/sync.ts';
 import type { Inventory } from './data/types.ts';
 import { useWishlistError } from './data/watchlist.ts';
 import { t } from './i18n/index.ts';
@@ -32,6 +33,7 @@ export function App() {
   const route = useRoute();
   const wishlistFailed = useWishlistError();
   const { state, setState, load, refresh } = useStore();
+  usePrefsSync(state.at === 'in');
 
   // Put the scroll back where this entry left it — see route.ts. Layout rather
   // than effect, so it happens before the frame paints and nobody sees the top

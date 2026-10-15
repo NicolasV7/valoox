@@ -18,11 +18,21 @@ export async function reserve(
   env: Env,
   uid: string,
   ver: number,
-  value: { kid: number; blob: string; acct: string | null; alerts: boolean },
+  value: { kid: number; blob: string; acct: string | null; alerts: boolean; receiving?: boolean },
   otp: Omit<Code, 'attempts' | 'used'>,
 ): Promise<boolean> {
   const r = await env.DB.batch([
-    change(env, uid, value.kid, value.blob, ver, value.acct, value.alerts),
+    change(
+      env,
+      uid,
+      value.kid,
+      value.blob,
+      ver,
+      value.acct,
+      value.alerts,
+      undefined,
+      value.receiving,
+    ),
     env.DB.prepare(
       'INSERT INTO otp(uid,id,recipient,hash,expires) ' +
         'SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM s WHERE uid=? AND ver=? AND blob=?) ' +

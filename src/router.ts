@@ -1,9 +1,11 @@
 import * as cookie from './app/cookie.ts';
+import { events } from './discord/events.ts';
 import { interaction } from './discord/interaction.ts';
 import { HttpError } from './lib/body.ts';
 import type { Body, Ctx } from './lib/json.ts';
 import { json } from './lib/json.ts';
 import { logout, pollScan, startScan } from './routes/auth.ts';
+import { avatar } from './routes/avatar.ts';
 import { resend, setChannel, verify } from './routes/channel.ts';
 import { collection } from './routes/collection.ts';
 import { setDiscord } from './routes/discord.ts';
@@ -16,7 +18,7 @@ import { take } from './storage/limits.ts';
 import type { Env } from './types.ts';
 import { browserId, fingerprint } from './vault/keys.ts';
 
-type Handler = (c: Ctx) => Promise<Body>;
+type Handler = (c: Ctx) => Promise<Body | Response>;
 const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
   '/api/store': { GET: store },
   '/api/inventory': { GET: collection },
@@ -26,6 +28,7 @@ const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
   '/api/channel/again': { POST: resend },
   '/api/channel/verify': { POST: verify },
   '/api/discord': { POST: setDiscord },
+  '/api/discord/avatar': { GET: avatar },
   '/api/stop': { POST: stopMail },
   '/api/logout': { POST: logout },
 };
@@ -45,6 +48,7 @@ export async function route(
   const headers = new Headers();
   const method = req.method;
   if (pathname === '/api/hook/discord') return interaction(req, env, ctx);
+  if (pathname === '/api/hook/discord/events') return events(req, env);
   if (pathname === '/api/hook/resend') {
     if (method !== 'POST') return json({ error: 'method' }, headers, 405);
     try {
@@ -58,7 +62,7 @@ export async function route(
     }
   }
   if (pathname.startsWith('/render/')) {
-    return method === 'GET' ? render(req) : json({ error: 'method' }, headers, 405);
+    return ['GET', 'HEAD'].includes(method) ? render(req) : json({ error: 'method' }, headers, 405);
   }
   if (!pathname.startsWith('/api/')) {
     return ['GET', 'HEAD'].includes(method)
@@ -102,7 +106,8 @@ export async function route(
       (await take(env, 'write:' + uid, 90, 60))
     )
       return limited(headers);
-    return json(await (routes[method] as Handler)({ env, uid, req, headers }), headers);
+    const body = await (routes[method] as Handler)({ env, uid, req, headers });
+    return body instanceof Response ? body : json(body, headers);
   } catch (e) {
     if (e instanceof HttpError) return json({ error: e.message }, headers, e.status);
     // Exception messages/stacks can contain upstream credential URLs.

@@ -25,6 +25,7 @@ export function AccountLeave({ onGone }: { onGone: () => void }) {
       <ul class="flow__removed">
         <li>{s.goesJar}</li>
         <li>{s.goesMail}</li>
+        <li>{s.goesDiscord}</li>
         <li>{s.goesList}</li>
       </ul>
       <FlowInfo title={f.riotSeparate}>{f.separateWhy}</FlowInfo>

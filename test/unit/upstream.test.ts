@@ -97,8 +97,8 @@ test('the loadout is readable but not writable', () => {
 test('the list stays short enough to read in one sitting', () => {
   // If this fails, someone added an endpoint. That is allowed — but it should be
   // a deliberate edit to this number, with a look at what was added.
-  // Discord adds only the bot message endpoint; arbitrary webhooks stay blocked.
-  assert.equal(allowCount, 19);
+  // Discord adds private messages and narrowly pinned public profile art.
+  assert.equal(allowCount, 21);
 });
 
 test('Discord can only post to a validated conversation through the bot API', () => {

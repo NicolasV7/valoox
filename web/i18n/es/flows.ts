@@ -88,7 +88,7 @@ export const flows = {
   keepLead: 'Los datos que necesita este navegador para leer tu tienda y enviar tus alertas.',
   sealedFirst: 'Cifrado antes de guardarse',
   serverSide: 'La sesión se queda en el servidor.',
-  stored: 'Guardado para este navegador',
+  stored: 'Guardado para tu conexión',
   session: 'Sesión de Riot',
   cached: 'Vistas de tienda e inventario',
   cachedWhy:
@@ -100,7 +100,8 @@ export const flows = {
     'Las copias de recuperación pueden conservar filas eliminadas durante su periodo de retención. La cuenta que despliega tiene la clave de cifrado.',
   wayOut: 'Tu salida',
   leaveTitle: '¿Salir de este navegador?',
-  leaveLead: 'Esto elimina el acceso y los ajustes de alertas guardados para este navegador.',
+  leaveLead:
+    'Esto elimina el acceso y las alertas de este navegador. Tu lista se conserva en otros dispositivos conectados.',
   removed: 'Se elimina aquí',
   riotSeparate: 'La sesión de Riot es independiente.',
   separateWhy: 'Desconectarte elimina el acceso de esta app. La sesión de Riot vence de su lado.',

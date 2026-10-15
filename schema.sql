@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS s (
   created_at INTEGER NOT NULL,
   last_used INTEGER NOT NULL,
   alerts INTEGER NOT NULL DEFAULT 0,
-  acct TEXT
+  acct TEXT,
+  receiving INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS s_alerts ON s(alerts) WHERE alerts=1;
 
@@ -50,7 +51,8 @@ UPDATE s SET alerts=0 WHERE kid<>2;
 -- Discord identities stay sealed; only keyed recipient fingerprints are indexed.
 CREATE TABLE discord (
   uid TEXT PRIMARY KEY REFERENCES s(uid) ON DELETE CASCADE,
-  recipient TEXT NOT NULL, gen TEXT NOT NULL, state TEXT NOT NULL
+  recipient TEXT NOT NULL, gen TEXT NOT NULL, state TEXT NOT NULL,
+  since INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX discord_recipient ON discord(recipient);
 CREATE TABLE links (
@@ -60,3 +62,8 @@ CREATE TABLE links (
   state TEXT NOT NULL DEFAULT 'waiting'
 );
 CREATE INDEX links_expiry ON links(expires);
+
+CREATE TABLE wishlists (
+  acct TEXT PRIMARY KEY, kid INTEGER NOT NULL, blob TEXT NOT NULL,
+  ver INTEGER NOT NULL DEFAULT 0, total INTEGER NOT NULL
+);

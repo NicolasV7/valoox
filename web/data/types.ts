@@ -73,7 +73,7 @@ export interface StoreView {
 }
 
 /** What `/api/prefs` answers: the skins you starred and where an alert would
- *  go. Both are ours — they live in our own row and come back with the page —
+ *  go. Both are ours — they come from our storage and back with the page —
  *  which is why neither waits on Riot or on the catalogue. A starred skin is
  *  an id and the name you saw when you starred it, and nothing else. */
 export interface Prefs {
@@ -90,7 +90,7 @@ export interface Prefs {
    *  Never the digits. Null when there is none, or when the last one has
    *  expired. */
   code: { until: number; tries: number } | null;
-  discord?: { name: string; ok: boolean; said: string } | null;
+  discord?: { name: string; ok: boolean; said: string; avatar?: string | null } | null;
   discordApp?: string | null;
   discordLink?: { until: number; state: string } | null;
 }

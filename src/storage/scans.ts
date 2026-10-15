@@ -1,4 +1,5 @@
 import type { Env } from '../types.ts';
+import { ACTIVE } from './flags.ts';
 import { now } from './rows.ts';
 
 export interface ScanRow {
@@ -68,6 +69,7 @@ export async function finish(
     blob: string;
     acct: string | null;
     alerts: boolean;
+    receiving?: boolean;
     discordGen?: string;
   },
   legacy?: string,
@@ -75,8 +77,10 @@ export async function finish(
   const t = now();
   const r = await env.DB.batch([
     env.DB.prepare(
-      'INSERT INTO s(uid,kid,blob,created_at,last_used,acct,alerts) ' +
-        'SELECT ?,?,?,?,?,?,? FROM scans WHERE uid=? AND id=? AND ver=? AND expires>? AND lease=? AND lease>?',
+      'INSERT INTO s(uid,kid,blob,created_at,last_used,acct,alerts,receiving) ' +
+        'SELECT ?,?,?,?,?,?,' +
+        ACTIVE +
+        ',? FROM scans WHERE uid=? AND id=? AND ver=? AND expires>? AND lease=? AND lease>?',
     ).bind(
       next.uid,
       next.kid,
@@ -84,7 +88,11 @@ export async function finish(
       t,
       t,
       next.acct,
+      next.acct,
+      +(next.receiving ?? next.alerts),
+      next.acct,
       +next.alerts,
+      +(next.receiving ?? next.alerts),
       row.uid,
       row.id,
       row.ver,
@@ -96,7 +104,7 @@ export async function finish(
       'INSERT INTO families(uid,next,expires) SELECT ?,?,? WHERE EXISTS(SELECT 1 FROM s WHERE uid=?)',
     ).bind(row.uid, next.uid, t + 600, next.uid),
     env.DB.prepare(
-      'INSERT INTO discord(uid,recipient,gen,state) SELECT ?,recipient,gen,state FROM discord ' +
+      'INSERT INTO discord(uid,recipient,gen,state,since) SELECT ?,recipient,gen,state,since FROM discord ' +
         "WHERE uid=? AND gen=? AND state='connected' AND EXISTS(SELECT 1 FROM s WHERE uid=?)",
     ).bind(next.uid, row.uid, next.discordGen ?? '', next.uid),
     env.DB.prepare('DELETE FROM s WHERE uid IN (?,?) AND EXISTS(SELECT 1 FROM s WHERE uid=?)').bind(
@@ -107,6 +115,9 @@ export async function finish(
     env.DB.prepare(
       'DELETE FROM scans WHERE uid=? AND id=? AND EXISTS(SELECT 1 FROM s WHERE uid=?)',
     ).bind(row.uid, row.id, next.uid),
+    env.DB.prepare(
+      'DELETE FROM wishlists WHERE NOT EXISTS(SELECT 1 FROM s WHERE s.acct=wishlists.acct)',
+    ),
   ]);
   return (r[0]?.meta.changes ?? 0) > 0;
 }

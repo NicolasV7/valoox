@@ -14,12 +14,15 @@ export async function setDiscord({ env, uid, req }: Ctx): Promise<Body> {
   const held = await readSession(env, uid);
   if (!held) return RESEED;
   const body = await readJson(req, 1024);
+  const pending = await links.pending(env, uid, CURRENT_KID);
+  if (pending?.state === 'checking') return { error: 'checking' };
   if (body.action === 'remove') {
     delete held.session.discord;
     const ok = await discord.remove(env, uid, held.ver, await encoded(env, uid, held.session));
     return ok ? { ok: true } : { error: 'conflict' };
   }
   if (body.action !== 'start') return { error: 'action' };
+  if (held.session.discord?.ok) return { connected: true };
   if (!configured(env)) return { error: 'unavailable' };
   const wait = await take(env, 'discord-link:' + uid, 1, 60);
   if (wait) return { error: 'wait', wait };

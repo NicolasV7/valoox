@@ -60,7 +60,7 @@ test('anonymous preference writes authenticate before reading a large body', asy
 test('authenticated bodies are bounded, including chunked requests', async () => {
   await createSession(env, await browserId(env, secret), session());
   const headers = { 'sec-fetch-site': 'same-origin', 'content-type': 'application/json' };
-  expect((await request('/api/prefs', 'POST', headers, 'x'.repeat(65537))).status).toBe(413);
+  expect((await request('/api/prefs', 'POST', headers, 'x'.repeat(98305))).status).toBe(413);
   expect((await request('/api/prefs', 'POST', headers, '{}')).status).toBe(200);
   expect(
     (await request('/api/prefs', 'POST', { ...headers, 'content-type': 'text/plain' }, '{}'))

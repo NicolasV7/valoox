@@ -94,8 +94,8 @@ export const account = {
   keepWhoWhy: 'Riot responde al id, no a un nombre. La región es de dónde sale tu tienda.',
   keepList: 'Tu lista',
   keepListWhy:
-    'Ids y los nombres que viste al marcarlos, más el tier, los niveles y el ' +
-    'color medido. Vive dentro de la misma fila sellada.',
+    'Los ids de tus favoritos y sus detalles del catálogo, cifrados para tu cuenta de Riot. ' +
+    'Se comparten entre dispositivos conectados y se eliminan al terminar la última sesión.',
   keepMail: 'Tu correo y su verificación',
   keepMailWhy:
     'La dirección que escribiste, si confirmaste el código, el idioma y la zona ' +
@@ -125,12 +125,13 @@ export const account = {
   // --- leaving -------------------------------------------------------------
   leaveTitle: 'Desconectar este navegador',
   leaveLede:
-    'Se borra una fila y esta app deja de poder alcanzar tu cuenta. Escanear un ' +
-    'código nuevo empieza de cero.',
+    'Se eliminan el acceso y las alertas de este navegador. Tu lista se conserva ' +
+    'mientras haya otro dispositivo conectado.',
   goes: 'Qué se va',
   goesJar: 'El frasco sellado — lo único aquí que puede leer tu cuenta',
   goesMail: 'Tu dirección de correo y su marca de verificada',
-  goesList: 'Tu lista de marcados, que vive dentro de la misma fila',
+  goesList: 'La lista compartida, si este es tu último dispositivo conectado',
+  goesDiscord: 'Las alertas por Discord activadas para este navegador',
   staysTitle: 'Qué sigue existiendo',
   staysRiot:
     'La sesión que aprobaste en tu teléfono. Sigue viva del lado de Riot hasta ' +

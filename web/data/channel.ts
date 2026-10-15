@@ -26,8 +26,8 @@ const failure = (value: boolean) => {
 };
 
 /** The copy every screen is rendering. Exposed because the wishlist writes
- *  through it: the stars and the address are one row and one fetch, and two
- *  copies of that row is how a screen ends up disagreeing with itself. */
+ *  through it: shared stars and this browser's destinations arrive in one
+ *  fetch, so every screen must render the same snapshot. */
 export const held = (): Prefs | null => kept;
 
 export function tell(next: Prefs | null) {
@@ -81,7 +81,7 @@ listen(() => {
  * is reused for a couple of seconds, which is shorter than the time it takes
  * to scroll to the next window and far shorter than anything that changes it.
  */
-function freshen(): void {
+export function freshen(): void {
   if (flight || Date.now() - last < 2000) return;
   const active = reload().finally(() => {
     if (flight === active) flight = null;

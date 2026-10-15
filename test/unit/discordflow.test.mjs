@@ -44,15 +44,15 @@ test('failed connection requests release the button and repeated taps make one r
   };
   const f = await fixture(entry, actor);
   f.app.tell(actor.prefs);
-  const render = () => f.render(() => f.app.AlertsDiscord());
-  const start = button(render(), 'Get a connection code');
-  const first = start.props.onClick();
-  await start.props.onClick();
+  const render = () => f.render(() => f.app.useDiscord(f.app.usePrefs()));
+  const first = render().start();
+  await render().start();
   expect(f.context.calls.filter((call) => call.path === '/api/discord')).toHaveLength(1);
   finish({ ok: false, status: 503 });
   await first;
-  expect(button(render(), 'Get a connection code').props.disabled).toBe(false);
-  expect(nodes(render()).some((node) => node.props.role === 'alert')).toBe(true);
+  expect(render().busy).toBe(false);
+  expect(render().problem).toBe('network');
+  f.dispose();
 });
 
 test('failed Discord removal keeps its connection and the verified email', async () => {
@@ -62,11 +62,12 @@ test('failed Discord removal keeps its connection and the verified email', async
   };
   const f = await fixture(entry, actor);
   f.app.tell(actor.prefs);
-  const render = () => f.render(() => f.app.AlertsDiscord());
-  await button(render(), 'Disconnect Discord').props.onClick();
-  expect(button(render(), 'Disconnect Discord')).toBeDefined();
+  const render = () => f.render(() => f.app.useDiscord(f.app.usePrefs()));
+  await render().remove();
+  expect(actor.prefs.discord.ok).toBe(true);
   expect(actor.prefs.mail.ok).toBe(true);
-  expect(nodes(render()).some((node) => node.props.role === 'alert')).toBe(true);
+  expect(render().problem).toBe('network');
+  f.dispose();
 });
 
 test('codes are cleared when another tab replaces the pending connection', async () => {

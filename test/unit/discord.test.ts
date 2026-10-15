@@ -60,3 +60,28 @@ test('a Discord alert expires within its rotation and uses the selected language
   expect(out.message.content).toContain('Algo de tu lista');
   expect(build('owner', session, [], -1).until).toBeLessThanOrEqual(Date.now());
 });
+
+test('weapon pictures use the same public render as email without exposing credentials', () => {
+  const id = '00000000-0000-4000-8000-000000000001';
+  const out = build('owner', session, [{ id, name: 'Weapon', cost: 1775 }], 3600);
+  expect(out.message.embeds).toEqual([
+    { image: { url: 'https://drop.valoox.store/render/' + id + '.png' } },
+  ]);
+  expect(JSON.stringify(out.message)).not.toContain('private-credential');
+  expect(JSON.stringify(out.message)).not.toContain('private-player-id');
+});
+
+test('accessories and invalid identifiers never become weapon picture URLs', () => {
+  const id = '00000000-0000-4000-8000-000000000001';
+  const out = build(
+    'owner',
+    session,
+    [
+      { id, name: 'Accessory', type: 'spray', cost: 1000 },
+      { id: 'https://example.invalid/picture.png', name: 'Invalid', cost: 1775 },
+    ],
+    3600,
+  );
+  expect(out.message.embeds).toEqual([]);
+  expect(out.message.content).toContain('Accessory');
+});

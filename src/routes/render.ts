@@ -5,9 +5,8 @@
 // hand every reader's mail client, and whatever scans it on the way, a
 // request to somebody else's host with our message's timing on it.
 //
-// So this fetches it once and hands it back. It is the only route in the app
-// that returns something other than JSON, and the only one whose answer is
-// the same for everybody, which is why it needs no session and can be cached
+// So this fetches it and hands it back. Unlike private profile pictures, its
+// answer is the same for everybody, which is why it needs no session and can be cached
 // for a year: a skin level's render is immutable — the uuid IS the version.
 //
 // Where the bytes come from is vault/render.ts, because that is where a Riot
@@ -32,7 +31,8 @@ export async function render(req: Request): Promise<Response> {
   // message asking for one of those should get a gap rather than an error.
   if (!res.ok) return new Response(null, { status: 404 });
 
-  return new Response(res.body, {
+  if (req.method === 'HEAD') await res.body?.cancel();
+  return new Response(req.method === 'HEAD' ? null : res.body, {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': CACHE,

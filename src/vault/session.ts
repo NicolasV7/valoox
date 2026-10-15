@@ -1,16 +1,19 @@
 import * as discord from '../storage/discord.ts';
+import * as flags from '../storage/flags.ts';
 import type { Env, Session } from '../types.ts';
 import { clearCache } from './evict.ts';
 import * as repo from './repo.ts';
 import { CURRENT_KID, open, SealBroken, seal } from './seal.ts';
 import { sessionShape } from './shape.ts';
 import { markOf } from './who.ts';
+import { load } from './wishlist.ts';
 
 export interface Held {
   session: Session;
   ver: number;
   kid: number;
   seen?: number;
+  wishlistVer?: number;
 }
 export const alerting = (s: Session) =>
   !!s.wishlist?.length && (s.mail?.ok === true || s.discord?.ok === true);
@@ -38,7 +41,15 @@ export async function readSession(env: Env, uid: string): Promise<Held | null> {
         };
       }
     }
-    return { session, ver: row.ver, kid: row.kid, seen: row.last_used };
+    const acct = await markOf(env, session.puuid);
+    const receiving = session.mail?.ok === true || session.discord?.ok === true;
+    if (row.acct !== acct || row.receiving !== +receiving) {
+      await flags.sync(env, uid, row.ver, acct, receiving, alerting(session));
+    }
+    const shared = acct ? await load(env, uid, acct, session.wishlist ?? []) : null;
+    if (shared && (session.wishlist !== undefined || shared.wishlist.length))
+      session.wishlist = shared.wishlist;
+    return { session, ver: row.ver, kid: row.kid, seen: row.last_used, wishlistVer: shared?.ver };
   } catch (e) {
     if (!(e instanceof SealBroken)) throw e;
     await forget(env, uid);
@@ -52,7 +63,13 @@ export async function encoded(env: Env, uid: string, s: Session) {
     seal(env, uid, CURRENT_KID, preferences(s)),
     markOf(env, s.puuid),
   ]);
-  return { kid: CURRENT_KID, blob, acct, alerts: alerting(s) };
+  return {
+    kid: CURRENT_KID,
+    blob,
+    acct,
+    alerts: alerting(s),
+    receiving: s.mail?.ok === true || s.discord?.ok === true,
+  };
 }
 
 export async function prepared(
@@ -63,12 +80,22 @@ export async function prepared(
   guard?: { sql: string; values: (string | number)[] },
 ) {
   const value = await encoded(env, uid, s);
-  return repo.change(env, uid, value.kid, value.blob, ver, value.acct, value.alerts, guard);
+  return repo.change(
+    env,
+    uid,
+    value.kid,
+    value.blob,
+    ver,
+    value.acct,
+    value.alerts,
+    guard,
+    value.receiving,
+  );
 }
 
 export async function createSession(env: Env, uid: string, s: Session): Promise<void> {
   const value = await encoded(env, uid, s);
-  await repo.upsert(env, uid, value.kid, value.blob, value.acct, value.alerts);
+  await repo.upsert(env, uid, value.kid, value.blob, value.acct, value.alerts, value.receiving);
 }
 
 export async function saveSession(

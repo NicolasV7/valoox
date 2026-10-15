@@ -1,11 +1,11 @@
 import { Back } from '../components/Back.tsx';
-import { FlowHeading, FlowInfo, FlowState } from '../components/Flow.tsx';
+import { FlowHeading, FlowInfo } from '../components/Flow.tsx';
 import { usePrefs } from '../data/channel.ts';
-import { connectionState } from '../data/destinations.ts';
 import { useDiscord } from '../data/discord.ts';
 import { t } from '../i18n/index.ts';
 import { ALERTS } from '../route.ts';
-import { AlertsCommand } from './Alerts.command.tsx';
+import { DiscordReady } from './Alerts.discordready.tsx';
+import { DiscordSetup } from './Alerts.discordsetup.tsx';
 import { AlertsLoading } from './Alerts.loading.tsx';
 
 export function AlertsDiscord() {
@@ -13,77 +13,22 @@ export function AlertsDiscord() {
   const flow = useDiscord(prefs);
   const s = t().discord;
   if (!prefs) return <AlertsLoading step="discord" />;
-  const app = prefs.discordApp;
-  const pending = prefs.discordLink;
-  const state = connectionState(prefs.discord);
-  const failed = pending?.state === 'blocked' || pending?.state === 'unavailable';
-  const expired = !!flow.until && flow.left === 0;
+  const connected = prefs.discord?.ok === true && !prefs.discordLink;
   return (
-    <main class="screen flow">
+    <main class="screen flow discord">
       <Back to={ALERTS} said={t().common.nav.alerts} />
-      <FlowHeading eyebrow={s.name} title={s.title} lead={s.lead} />
-      <section class="discord__identity" aria-live="polite">
-        <span class="label">{s.name}</span>
-        <h2>{prefs.discord?.name || s.connect}</h2>
-        <FlowState kind={state.kind}>{s[state.label]}</FlowState>
-      </section>
-      {!app ? (
-        <p class="flow__note">{s.notReady}</p>
+      <FlowHeading
+        eyebrow={s.name}
+        title={connected ? s.readyTitle : s.title}
+        lead={connected ? (prefs.wishlist.length ? s.readyLead : s.readyEmpty) : s.lead}
+      />
+      {connected ? (
+        <DiscordReady prefs={prefs} flow={flow} />
+      ) : prefs.discordApp ? (
+        <DiscordSetup prefs={prefs} flow={flow} />
       ) : (
-        <>
-          <p class="flow__note">{s.consent}</p>
-          <a
-            class="btn btn--quiet"
-            href={
-              'https://discord.com/oauth2/authorize?client_id=' +
-              app +
-              '&integration_type=1&scope=applications.commands'
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {s.install}
-          </a>
-          <a
-            class="btn btn--quiet"
-            href={'https://discord.com/users/' + app}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {s.open}
-          </a>
-          <button
-            type="button"
-            class="btn"
-            disabled={flow.busy || flow.wait > 0}
-            onClick={flow.start}
-          >
-            {flow.busy ? t().common.loading : flow.until ? s.generateAgain : s.generate}
-          </button>
-          {flow.code && (
-            <AlertsCommand
-              key={flow.code.value}
-              code={flow.code.value}
-              until={flow.code.until}
-              enabled={flow.left > 0 && !failed}
-            />
-          )}
-          {(flow.code || pending) && (
-            <p class="flow__note" role="status">
-              {expired
-                ? s.expired
-                : failed
-                  ? pending?.state === 'blocked'
-                    ? s.blocked
-                    : s.unavailable
-                  : pending?.state === 'checking'
-                    ? s.checking
-                    : s.waiting}
-            </p>
-          )}
-        </>
+        <p class="flow__note">{s.notReady}</p>
       )}
-      {prefs.discord?.said === 'blocked' && <p class="flow__problem">{s.blocked}</p>}
       {(flow.problem || flow.wait > 0) && (
         <p class="flow__problem" role="alert">
           {flow.wait > 0
@@ -98,18 +43,11 @@ export function AlertsDiscord() {
           {s.removed}
         </p>
       )}
-      <button type="button" class="btn btn--quiet" disabled={flow.busy} onClick={flow.refresh}>
-        {s.refresh}
-      </button>
-      {(prefs.discord || pending || flow.code) && (
-        <button type="button" class="btn btn--gone" disabled={flow.busy} onClick={flow.remove}>
-          {s.remove}
-        </button>
-      )}
-      <FlowInfo title={s.choose}>{s.both}</FlowInfo>
-      <p class="flow__note">{s.proof}</p>
-      <p class="flow__note">{s.permission}</p>
-      <p class="flow__note">{s.private}</p>
+      <details class="discord__details">
+        <summary>{s.choose}</summary>
+        <FlowInfo title={s.choose}>{s.both}</FlowInfo>
+        <p class="flow__note">{s.private}</p>
+      </details>
     </main>
   );
 }

@@ -83,6 +83,7 @@ export function FlowRow({
   title,
   detail,
   state,
+  avatar,
   loading = false,
 }: {
   to: Route;
@@ -91,10 +92,12 @@ export function FlowRow({
   title: string;
   detail?: string;
   state?: ComponentChildren;
+  avatar?: ComponentChildren;
   loading?: boolean;
 }) {
   const content = (
     <>
+      {avatar}
       <span class="flow__row-copy">
         <span class="label">{label}</span>
         {loading ? <span class="flow__pending flow__pending--line" /> : <strong>{title}</strong>}

@@ -11,7 +11,7 @@ Please report privately first; there is no bounty.
 
 One Cloudflare Worker serves [drop.valoox.store](https://drop.valoox.store).
 The apex redirects there. Game access passes the
-[egress allowlist](src/vault/upstream.ts): nineteen rules and no purchases,
+[egress allowlist](src/vault/upstream.ts): twenty-one rules and no Riot purchases,
 equipping, queueing or chat. Authentication writes are intentional. Redirects
 cannot bypass the allowlist. Riot's undocumented storefront POST has not been
 independently proven idempotent; do not infer that property from its method.
@@ -28,6 +28,14 @@ data. Sessions, QR scans, public store/inventory DTOs, stop links and outboxes
 have separate purposes. Cache reads also validate their shape. `JAR_KEY` stays
 outside D1 and KV. A storage dump reveals pseudonymous browser/account links
 and security metadata, plus ciphertext; it does not authenticate a browser.
+
+The account wishlist has its own `wishlist:1` encryption purpose, bound to the
+verified account's keyed fingerprint. Only an authenticated, decrypted Riot
+identity selects it. Legacy device lists merge once. New device edits apply
+their additions and removals to the current version under CAS, with every
+browser's consent-derived job flag updated in the same transaction. Notification
+destinations stay independent. The shared list is removed when its last session
+ends or is pruned. Preference writes have a 96 KiB streamed body ceiling.
 
 The Riot jar, puuid and bearer tokens never leave the vault in an API response.
 Request logging is disabled. Error messages and stacks are not logged, since
@@ -75,10 +83,18 @@ message. Codes contain over 120 random bits, expire after ten minutes, are store
 only as keyed digests, and can be claimed once. Session CAS, code consumption and
 the opt-in index commit together. The index stores keyed recipient fingerprints;
 Discord identities and conversation ids stay in the encrypted session and outbox.
+Profile images use an authenticated same-origin proxy with opaque generation handles,
+bounded image bodies and a per-browser quota. Discord's bot token is never sent
+to its image CDN. Known profile metadata refreshes on demand after a day.
 `/stop` atomically disables every indexed browser and cancels claimed pending links.
 Replayed interaction ids cannot undo a later reconnect or repeat a stop action.
 Signatures bind the original request body and timestamp; events outside five minutes
 are rejected. Discord events use their own signed endpoint, without a cookie-origin exemption elsewhere.
+An active connection cannot generate another code. Provider checking blocks
+conflicting browser mutations under SQL guards. `/stop` cancels claimed codes
+and waiting codes in linked browsers. Signed app deauthorization events apply
+only to consent established before their event timestamp; a delayed retry cannot
+disable a newer connection. An already in-flight provider send can still finish.
 
 Sessions are pruned after ten days without a session write. Background alert
 checks also write sessions, so closing the page does not start that deadline.
@@ -98,8 +114,9 @@ minutes and cannot restart after its component unmounts.
 
 A coarse edge limit runs before application work. Atomic D1 gates additionally
 bound QR starts by browser/IP and outgoing mail by account/recipient. Supported
-methods are explicit. JSON bodies are bounded at 64 KiB, with 4 KiB limits for
-mail and stop actions; webhook bodies are bounded before signature verification.
+methods are explicit. JSON bodies default to 64 KiB; account preference writes
+allow 96 KiB, while mail and stop actions allow 4 KiB. Webhook bodies are bounded
+before signature verification.
 Anonymous preference writes authenticate before parsing.
 
 After 00:30 UTC, cron runs fair batches every fifteen minutes. Invalid opt-in
@@ -136,6 +153,9 @@ The 2026-10-12 review added executable regressions rather than live attack traff
 | Cross-account UI caches, late responses, false logout confirmation | [component tests](test/unit/ui.test.mjs), [private state tests](test/unit/private.test.ts) |
 | Cron starvation, combined lists, retry budget and immutable payloads | [cron tests](test/workers/cron.test.ts) |
 | Old-schema upgrades and schema/migration equivalence | [migration tests](test/unit/migrations.test.ts) |
+| Cross-account lists, concurrent device edits and stale job flags | [wishlist tests](test/workers/wishlists.test.ts) |
+| Avatar URL tampering, oversized images and revocation while loading | [avatar tests](test/workers/avatars.test.ts) |
+| Code reuse while connected, checking locks and old app-removal events | [Discord lifecycle tests](test/workers/discordevents.test.ts) |
 
 No production Riot jar was decrypted for these tests; external calls are fixtures.
 

@@ -10,7 +10,13 @@ const tables = (db: DatabaseSync) =>
     .prepare(
       "SELECT name,sql FROM sqlite_master WHERE type IN ('table','index') AND name NOT LIKE 'sqlite_%' ORDER BY name",
     )
-    .all();
+    .all()
+    .map((row) => ({
+      ...row,
+      sql: String(row.sql)
+        .replace(/\s+/g, ' ')
+        .replace(/\s*([(),])\s*/g, '$1'),
+    }));
 test('the fresh schema is exactly the versioned migration sequence', () => {
   const fresh = new DatabaseSync(':memory:');
   const migrated = new DatabaseSync(':memory:');

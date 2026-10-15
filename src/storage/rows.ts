@@ -1,4 +1,5 @@
 import type { Env } from '../types.ts';
+import { ACTIVE } from './flags.ts';
 
 export interface Row {
   uid: string;
@@ -7,11 +8,12 @@ export interface Row {
   ver: number;
   last_used?: number;
   acct?: string | null;
+  receiving?: number;
 }
 export const now = () => Math.floor(Date.now() / 1000);
 
 export function get(env: Env, uid: string): Promise<Row | null> {
-  return env.DB.prepare('SELECT uid,kid,blob,ver,last_used,acct FROM s WHERE uid=?')
+  return env.DB.prepare('SELECT uid,kid,blob,ver,last_used,acct,receiving FROM s WHERE uid=?')
     .bind(uid)
     .first<Row>();
 }
@@ -23,14 +25,17 @@ export async function upsert(
   blob: string,
   acct: string | null,
   alerts = false,
+  receiving = alerts,
 ): Promise<void> {
   const t = now();
   await env.DB.prepare(
-    'INSERT INTO s (uid,kid,blob,created_at,last_used,acct,alerts) VALUES (?,?,?,?,?,?,?) ' +
+    'INSERT INTO s (uid,kid,blob,created_at,last_used,acct,alerts,receiving) VALUES (?,?,?,?,?,?,' +
+      ACTIVE +
+      ',?) ' +
       'ON CONFLICT(uid) DO UPDATE SET kid=excluded.kid,blob=excluded.blob,ver=s.ver+1,' +
-      'last_used=excluded.last_used,acct=excluded.acct,alerts=excluded.alerts',
+      'last_used=excluded.last_used,acct=excluded.acct,alerts=excluded.alerts,receiving=excluded.receiving',
   )
-    .bind(uid, kid, blob, t, t, acct, +alerts)
+    .bind(uid, kid, blob, t, t, acct, acct, +receiving, acct, +alerts, +receiving)
     .run();
 }
 
@@ -43,12 +48,28 @@ export function change(
   acct: string | null = null,
   alerts = false,
   guard?: { sql: string; values: (string | number)[] },
+  receiving = alerts,
 ): D1PreparedStatement {
   return env.DB.prepare(
-    'UPDATE s SET kid=?,blob=?,ver=ver+1,last_used=?,acct=COALESCE(?,acct),alerts=? ' +
+    'UPDATE s SET kid=?,blob=?,ver=ver+1,last_used=?,acct=COALESCE(?,acct),alerts=' +
+      ACTIVE +
+      ',receiving=? ' +
       'WHERE uid=? AND ver=?' +
       (guard ? ' AND ' + guard.sql : ''),
-  ).bind(kid, blob, now(), acct, +alerts, uid, ver, ...(guard?.values ?? []));
+  ).bind(
+    kid,
+    blob,
+    now(),
+    acct,
+    acct,
+    +receiving,
+    acct,
+    +alerts,
+    +receiving,
+    uid,
+    ver,
+    ...(guard?.values ?? []),
+  );
 }
 
 export async function update(
@@ -122,6 +143,9 @@ export async function remove(env: Env, uid: string): Promise<void> {
       targets +
         'DELETE FROM families WHERE uid IN (SELECT uid FROM targets) OR next IN (SELECT uid FROM targets)',
     ).bind(uid, t),
+    env.DB.prepare(
+      'DELETE FROM wishlists WHERE NOT EXISTS(SELECT 1 FROM s WHERE s.acct=wishlists.acct)',
+    ),
   ]);
 }
 
@@ -137,6 +161,9 @@ export async function prune(env: Env, olderThanDays = 10): Promise<number> {
     env.DB.prepare('DELETE FROM otp WHERE expires<=?').bind(t),
     env.DB.prepare('DELETE FROM families WHERE expires<=?').bind(t),
     env.DB.prepare('DELETE FROM links WHERE expires<=?').bind(t),
+    env.DB.prepare(
+      'DELETE FROM wishlists WHERE NOT EXISTS(SELECT 1 FROM s WHERE s.acct=wishlists.acct)',
+    ),
   ]);
   return out[0]?.meta.changes ?? 0;
 }

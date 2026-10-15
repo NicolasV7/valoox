@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { route } from '../../src/router.ts';
 import type { Env } from '../../src/types.ts';
-import { createSession, forget, readSession, saveSession } from '../../src/vault/session.ts';
+import { createSession, forget, readSession } from '../../src/vault/session.ts';
+import { markOf } from '../../src/vault/who.ts';
+import { save } from '../../src/vault/wishlist.ts';
 import { action, command, event, setup, signed, watching } from './discord.ts';
 import { UID } from './fixtures.ts';
 
@@ -99,7 +101,13 @@ test('concurrent wishlist edits survive a slow Discord connection', async () => 
   const held = await readSession(env, UID);
   if (!held) throw new Error('fixture');
   held.session.wishlist = [{ id: 'new-level', name: 'New favourite' }];
-  await saveSession(env, UID, held.session, held.ver);
+  await save(
+    env,
+    UID,
+    (await markOf(env, held.session.puuid)) as string,
+    held.wishlistVer as number,
+    held.session.wishlist,
+  );
   await pending.release();
   expect((await readSession(env, UID))?.session.wishlist).toEqual(held.session.wishlist);
   expect((await readSession(env, UID))?.session.discord?.ok).toBe(true);

@@ -38,7 +38,9 @@ export function saveWishlist(next: Star[]): Promise<void> {
   const work = tail
     .then(async () => {
       if (!current(generation)) return;
-      const got = await api.post<Prefs>('/api/prefs', { wishlist: next }).catch(() => null);
+      const got = await api
+        .post<Prefs>('/api/prefs', { wishlist: next, base: was.wishlist.map((item) => item.id) })
+        .catch(() => null);
       if (!current(generation)) return;
       if (got && !api.reseeded(got) && Array.isArray(got.wishlist)) {
         confirmed = got.wishlist;

@@ -21,10 +21,12 @@ export async function reserve(env: Env, link: Link, ver: number): Promise<boolea
   const result = await env.DB.prepare(
     'INSERT INTO links(uid,key,gen,kid,expires) SELECT ?,?,?,?,? ' +
       'WHERE EXISTS(SELECT 1 FROM s WHERE uid=? AND ver=?) ' +
+      "AND NOT EXISTS(SELECT 1 FROM discord WHERE uid=? AND state='connected') " +
       'ON CONFLICT(uid) DO UPDATE SET key=excluded.key,gen=excluded.gen,kid=excluded.kid,' +
-      "expires=excluded.expires,claim=NULL,recipient=NULL,state='waiting'",
+      "expires=excluded.expires,claim=NULL,recipient=NULL,state='waiting' " +
+      "WHERE links.state<>'checking' OR links.expires<=?",
   )
-    .bind(link.uid, link.key, link.gen, link.kid, link.expires, link.uid, ver)
+    .bind(link.uid, link.key, link.gen, link.kid, link.expires, link.uid, ver, link.uid, now())
     .run();
   return result.meta.changes > 0;
 }
@@ -32,7 +34,8 @@ export async function reserve(env: Env, link: Link, ver: number): Promise<boolea
 export function claim(env: Env, key: string, kid: number, id: string, recipient: string) {
   return env.DB.prepare(
     "UPDATE links SET claim=?,recipient=?,state='checking' " +
-      'WHERE key=? AND kid=? AND expires>? AND claim IS NULL RETURNING *',
+      "WHERE key=? AND kid=? AND expires>? AND claim IS NULL AND state='waiting' " +
+      "AND NOT EXISTS(SELECT 1 FROM discord WHERE discord.uid=links.uid AND state='connected') RETURNING *",
   )
     .bind(id, recipient, key, kid, now())
     .first<Link>();
@@ -49,21 +52,32 @@ export async function complete(
   env: Env,
   link: Link,
   ver: number,
-  value: { kid: number; blob: string; acct: string | null; alerts: boolean },
+  value: { kid: number; blob: string; acct: string | null; alerts: boolean; receiving?: boolean },
 ): Promise<boolean> {
-  const live = 'EXISTS(SELECT 1 FROM links WHERE key=? AND claim=? AND expires>?)';
+  const live =
+    "EXISTS(SELECT 1 FROM links WHERE key=? AND claim=? AND expires>? AND state='checking')";
   const changed = 'EXISTS(SELECT 1 FROM s WHERE uid=? AND ver=? AND blob=?)';
   const result = await env.DB.batch([
-    change(env, link.uid, value.kid, value.blob, ver, value.acct, value.alerts, {
-      sql: live,
-      values: [link.key, link.claim as string, now()],
-    }),
+    change(
+      env,
+      link.uid,
+      value.kid,
+      value.blob,
+      ver,
+      value.acct,
+      value.alerts,
+      {
+        sql: live,
+        values: [link.key, link.claim as string, now()],
+      },
+      value.receiving,
+    ),
     env.DB.prepare(
-      "INSERT INTO discord(uid,recipient,gen,state) SELECT uid,recipient,gen,'connected' " +
+      "INSERT INTO discord(uid,recipient,gen,state,since) SELECT uid,recipient,gen,'connected',? " +
         'FROM links WHERE key=? AND claim=? AND ' +
         changed +
-        ' ON CONFLICT(uid) DO UPDATE SET recipient=excluded.recipient,gen=excluded.gen,state=excluded.state',
-    ).bind(link.key, link.claim, link.uid, ver + 1, value.blob),
+        ' ON CONFLICT(uid) DO UPDATE SET recipient=excluded.recipient,gen=excluded.gen,state=excluded.state,since=excluded.since',
+    ).bind(Date.now(), link.key, link.claim, link.uid, ver + 1, value.blob),
     env.DB.prepare('DELETE FROM links WHERE key=? AND claim=? AND ' + changed).bind(
       link.key,
       link.claim,

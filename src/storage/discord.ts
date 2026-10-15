@@ -1,5 +1,5 @@
 import type { Env } from '../types.ts';
-import { change } from './rows.ts';
+import { change, now } from './rows.ts';
 
 export const read = (env: Env, uid: string) =>
   env.DB.prepare('SELECT gen,state FROM discord WHERE uid=?')
@@ -7,10 +7,20 @@ export const read = (env: Env, uid: string) =>
     .first<{ gen: string; state: string }>();
 
 /** A Discord user can stop every linked browser without decrypting all sessions. */
-export async function stop(env: Env, recipient: string): Promise<void> {
+export async function stop(
+  env: Env,
+  recipient: string,
+  before = Number.MAX_SAFE_INTEGER,
+): Promise<void> {
   await env.DB.batch([
-    env.DB.prepare('DELETE FROM links WHERE recipient=?').bind(recipient),
-    env.DB.prepare("UPDATE discord SET state='stopped' WHERE recipient=?").bind(recipient),
+    env.DB.prepare(
+      'DELETE FROM links WHERE (recipient=? OR uid IN ' +
+        '(SELECT uid FROM discord WHERE recipient=? AND since<=?)) AND (expires-600)*1000<=?',
+    ).bind(recipient, recipient, before, before),
+    env.DB.prepare("UPDATE discord SET state='stopped' WHERE recipient=? AND since<=?").bind(
+      recipient,
+      before,
+    ),
   ]);
 }
 
@@ -34,11 +44,24 @@ export async function remove(
   env: Env,
   uid: string,
   ver: number,
-  value: { kid: number; blob: string; acct: string | null; alerts: boolean },
+  value: { kid: number; blob: string; acct: string | null; alerts: boolean; receiving?: boolean },
 ): Promise<boolean> {
   const guard = ' AND EXISTS(SELECT 1 FROM s WHERE uid=? AND ver=? AND blob=?)';
   const result = await env.DB.batch([
-    change(env, uid, value.kid, value.blob, ver, value.acct, value.alerts),
+    change(
+      env,
+      uid,
+      value.kid,
+      value.blob,
+      ver,
+      value.acct,
+      value.alerts,
+      {
+        sql: "NOT EXISTS(SELECT 1 FROM links WHERE uid=? AND state='checking' AND expires>?)",
+        values: [uid, now()],
+      },
+      value.receiving,
+    ),
     env.DB.prepare('DELETE FROM discord WHERE uid=?' + guard).bind(uid, uid, ver + 1, value.blob),
     env.DB.prepare('DELETE FROM links WHERE uid=?' + guard).bind(uid, uid, ver + 1, value.blob),
   ]);

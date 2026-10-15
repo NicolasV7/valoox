@@ -1,3 +1,4 @@
+import { DiscordAvatar } from '../components/DiscordAvatar.tsx';
 import { FlowRow, FlowState } from '../components/Flow.tsx';
 import { refused, waiting } from '../data/channel.ts';
 import { connectionState } from '../data/destinations.ts';
@@ -39,6 +40,11 @@ export function DiscordDestination({ prefs, from }: { prefs: Prefs | null; from?
       from={from}
       label={d.name}
       title={discord?.name || d.connect}
+      avatar={
+        discord?.ok && discord.avatar ? (
+          <DiscordAvatar key={discord.avatar} name={discord.name} src={discord.avatar} />
+        ) : undefined
+      }
       loading={!prefs}
       state={<FlowState kind={state.kind}>{d[state.label]}</FlowState>}
     />
