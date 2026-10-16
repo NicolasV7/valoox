@@ -84,10 +84,10 @@ export function poster(
     contain(
       ctx,
       offer.image,
-      portrait ? x + 115 : x + 8,
-      y + 5,
-      portrait ? 198 : 140,
-      portrait ? 73 : 51,
+      portrait ? x + 157 : x + 8,
+      y + (portrait ? 10 : 5),
+      portrait ? 155 : 140,
+      portrait ? 64 : 51,
     );
     if (portrait) {
       ctx.save();
@@ -106,10 +106,11 @@ export function poster(
         18,
         false,
         theme.ink,
-        200,
+        132,
       );
-      if (at > 0) label(offer.name.slice(at + 1), x + 13, y + 43, 18, false, theme.ink, 205);
-      label(s.price(offer.cost), x + 13, y + 69, 14, true, theme.ink, 290);
+      // Keep all text left of the artwork, including long names and unknown prices.
+      if (at > 0) label(offer.name.slice(at + 1), x + 13, y + 43, 18, false, theme.ink, 132);
+      label(s.price(offer.cost), x + 13, y + 69, 14, true, theme.ink, 132);
     } else {
       label(offer.name, x + 10, y + 73, 13, false, theme.ink, 136);
       label(s.price(offer.cost), x + 10, y + 96, 14, true, theme.ink, 136);

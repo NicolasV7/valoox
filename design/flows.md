@@ -75,6 +75,11 @@ daily offers in portrait (1080×1920) or compact (1080×1350) PNG format. It kee
 the existing fonts and measured artwork colours, with `valoox.store` branding.
 A tag toggle removes the Riot ID tag from both the PNG and its accessible name.
 The date and fixed expiry use UTC so a saved image never shows a stale countdown.
+Portrait rows reserve separate text and artwork columns, so even a wide pistol
+cannot touch its name or price. Compact keeps its existing stacked tile layout.
+Format and tag changes briefly reveal the newly prepared preview; the checkbox
+also eases its checked state. Reduced-motion preferences flatten both effects.
+The modal initially focuses its heading, leaving Back's ring for keyboard use.
 
 Preparation shows a static grey skeleton at the final poster's aspect ratio,
 with banner, identity and four offer slots in the selected layout. Brand, labels

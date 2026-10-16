@@ -48,7 +48,7 @@ export function ShareLoading({ format }: { format: Format }) {
                 width={portrait ? 320 : 156}
                 height={portrait ? 84 : 108}
               />
-              {bar(x + (portrait ? 155 : 10), y + 12, portrait ? 150 : 136, portrait ? 46 : 39)}
+              {bar(x + (portrait ? 157 : 10), y + 12, portrait ? 155 : 136, portrait ? 46 : 39)}
               {bar(x + 13, y + (portrait ? 10 : 64), portrait ? 95 : 115, portrait ? 14 : 10)}
               {portrait && bar(x + 13, y + 31, 73, 14)}
               {bar(x + 13, y + (portrait ? 59 : 85), 60, 10)}

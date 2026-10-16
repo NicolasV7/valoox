@@ -10,5 +10,5 @@ export function Preview({ canvas }: { canvas: HTMLCanvasElement }) {
       container?.replaceChildren();
     };
   }, [canvas]);
-  return <div class="share__image" ref={node} />;
+  return <div class="share__image share__image--ready" ref={node} />;
 }

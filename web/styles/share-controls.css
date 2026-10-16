@@ -71,6 +71,40 @@
 }
 
 .share__tag input {
+  appearance: none;
+  display: grid;
+  place-content: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
   margin: 0;
-  accent-color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: calc(var(--r-sm) / 2);
+  background: var(--sunk);
+  cursor: pointer;
+}
+
+.share__tag input::before {
+  content: '';
+  width: 8px;
+  height: 5px;
+  border-left: 2px solid var(--ink-inverse);
+  border-bottom: 2px solid var(--ink-inverse);
+  opacity: 0;
+  transform: translateY(-1px) rotate(-45deg) scale(.5);
+}
+
+.share__tag input:checked {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.share__tag input:checked::before {
+  opacity: 1;
+  transform: translateY(-1px) rotate(-45deg) scale(1);
+}
+
+.share__tag input:disabled {
+  opacity: .5;
+  cursor: default;
 }

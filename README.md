@@ -22,13 +22,10 @@ game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
 - Weapon skins, variants, sprays, buddies, cards and titles in your collection.
 - Known rewards are hidden from unowned catalogue lists; owned rewards remain visible.
 - Dark Alerts and Account screens, with guided Discord linking and disconnect confirmations.
-- Wishlist alerts by Discord DM. Email code and settings are retained but hidden
-  and disabled by `EMAIL_ALERTS="false"`; existing email preferences are preserved.
-  Discord stays unavailable until the bot is configured.
-  Batches run every fifteen
-  minutes outside the first half hour of each UTC day. Lists are grouped by
-  account and destination. Discord verifies
-  a separate bot DM and stops after four delivery attempts or payload expiry.
+- Wishlist alerts by Discord DM, available once the bot is configured.
+  Batches run every fifteen minutes outside the first half hour of each UTC day.
+  Lists are grouped by account and destination. Discord verifies a separate bot
+  DM and stops after four delivery attempts or payload expiry.
 - One encrypted wishlist per verified Riot account, shared across devices.
   Device edits merge their own additions and removals; returning to the app refreshes
   the list without polling Riot. The list is removed after the last session ends.
@@ -56,7 +53,6 @@ flowchart LR
   B["Browser<br/>Preact + host-only cookie"]
   C["Community catalogue<br/>valorant-api.com"]
   R["Riot<br/>QR sign-in + account reads"]
-  N["Resend<br/>Retained, disabled"]
   Q["Discord bot<br/>Opted-in private alerts"]
 
   subgraph CF["Cloudflare"]
@@ -74,14 +70,12 @@ flowchart LR
   T -->|Alert batches| W
   W -->|All outbound requests| A
   A -->|Authentication + reads| R
-  A -.->|Disabled by EMAIL_ALERTS| N
   A -->|Bot messages| Q
   Q -->|Signed private commands| W
   Q -->|Signed app removal| W
 ```
 
-Discord is the active alert transport. Email sends and retries are disabled;
-the retained Resend integration can be explicitly enabled by the deployment operator.
+Wishlist notifications use the Discord bot's private messages.
 D1 authorizes private cache reads. Sessions and views are encrypted by the Worker
 with purpose-bound keys derived from `JAR_KEY`, which stays outside the databases.
 [Open the interactive architecture](docs/architecture.html) for source links
@@ -90,7 +84,8 @@ and the detailed session flow.
 ## Local development
 
 Use Node 24 or newer. Copy [.dev.vars.example](.dev.vars.example) to `.dev.vars`
-and fill in `JAR_KEY` with 32 random bytes encoded as base64. Both alert transports are optional.
+and fill in `JAR_KEY` with 32 random bytes encoded as base64. Discord alerts are
+optional; configure the bot settings below to enable them.
 
 ```sh
 npm ci
@@ -104,8 +99,7 @@ npm run dev
 Source contracts require fewer than 200 lines per authored file and reject runtime
 module cycles. Generated bundles, the Archify export/model and measured palette
 data are excluded. Application code, scripts, tests and configuration are covered.
-Email-code status checks stop at expiry and pause while hidden or offline. QR
-polling stops on approval, expiry, unmount, or ten minutes of unsuccessful reads.
+QR polling stops on approval, expiry, unmount, or ten minutes of unsuccessful reads.
 CI checks stop after ten minutes; deployments stop after twenty minutes.
 
 `npm run who` reads aggregate current-version session counts from live D1;
@@ -136,30 +130,9 @@ corresponding account, bindings and secrets.
 | Worker setting | Purpose |
 | --- | --- |
 | `JAR_KEY` | Required secret: 32 random bytes, base64. Rotation invalidates existing sessions and encrypted state. |
-| `RESEND_KEY` | Optional sending-only API key restricted to your verified sending domain. |
-| `EMAIL_ALERTS` | Plain variable, disabled by default. Only the exact string `true` enables retained email UI, verification, sends and retries. |
-| `RESEND_HOOK` | Webhook signing secret required to accept Resend delivery events. |
-| `MAIL_FROM` | Plain variable: a sender address on your verified domain. Change it for your own deployment. |
 | `DISCORD_APP_ID` | Optional Discord Application ID; stored as a Worker secret to preserve deployment settings. |
 | `DISCORD_PUBLIC_KEY` | Discord Ed25519 verification key, stored with Worker secrets. Public, but must match the application. |
 | `DISCORD_TOKEN` | Optional bot token; required with both settings above to enable Discord linking. |
-
-### Email with Resend
-
-Email is hidden and disabled in both default and live configuration. Its source,
-stored preferences and credentials are kept. To restore it deliberately, set
-`EMAIL_ALERTS="true"` in the target environment's vars and deploy, then use the
-setup below. Existing opt-ins retain their original consent; no new opt-in is created.
-Historical signed delivery events and unsubscribe links still work while sends are paused.
-
-1. [Verify your sending domain](https://resend.com/docs/dashboard/domains/introduction)
-   and set `MAIL_FROM` to an address on it.
-2. Create a [sending-only API key](https://resend.com/docs/api-reference/api-keys/create-api-key)
-   restricted to that domain; save it as the Worker's `RESEND_KEY` secret.
-3. Add `https://<your-app-host>/api/hook/resend` as a
-   [Resend webhook](https://resend.com/docs/webhooks/introduction). Subscribe to
-   email events and save its signing secret as `RESEND_HOOK`.
-4. In the app, open Alerts and verify the recipient address with the emailed code.
 
 Use `npx wrangler secret put <NAME>` for your own default deployment, or append
 `--env live` for this project's production environment. Worker secrets belong
@@ -186,7 +159,7 @@ in Cloudflare; local equivalents belong in the ignored `.dev.vars` file.
 Only direct messages are supported; arbitrary Discord webhooks and server channels
 cannot be configured. Verify delayed proactive DMs with your installation before
 advertising a server-free flow. If Discord denies a DM, linking stays inactive;
-an existing connection is paused on a later permanent refusal. Retained email settings stay independent.
+an existing connection is paused on a later permanent refusal.
 Discord nonce deduplication lasts only a few minutes; after a lost HTTP response,
 a delayed retry can duplicate a message. We do not claim exactly-once delivery.
 

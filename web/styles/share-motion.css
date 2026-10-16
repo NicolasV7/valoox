@@ -1,0 +1,20 @@
+/* Only the finished preview moves; pending artwork remains a static skeleton. */
+.share__image--ready .share__poster {
+  animation: share-reveal 180ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+@keyframes share-reveal {
+  from {
+    opacity: .55;
+    transform: translateY(3px) scale(.99);
+  }
+}
+
+.share__formats button,
+.share__tag input {
+  transition: background-color 140ms ease-out, border-color 140ms ease-out, color 140ms ease-out;
+}
+
+.share__tag input::before {
+  transition: opacity 140ms ease-out, transform 140ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}

@@ -45,6 +45,10 @@ html:has(.share__dialog[open]) {
   font-weight: 300;
 }
 
+.share__dialog h1:focus {
+  outline: none;
+}
+
 .share__stage {
   flex: 1;
   min-height: 180px;

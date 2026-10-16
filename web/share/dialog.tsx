@@ -9,6 +9,7 @@ import { usePoster } from './state.ts';
 export function ShareDialog({ source, onClose }: { source: Snapshot; onClose: () => void }) {
   const s = t().share;
   const dialog = useRef<HTMLDialogElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
   const [format, setFormat] = useState<Format>('portrait');
   const [tag, setTag] = useState(true);
   const [attempt, setAttempt] = useState(0);
@@ -19,6 +20,7 @@ export function ShareDialog({ source, onClose }: { source: Snapshot; onClose: ()
   useLayoutEffect(() => {
     const node = dialog.current;
     node?.showModal();
+    heading.current?.focus({ preventScroll: true });
     return () => {
       node?.close();
     };
@@ -40,7 +42,9 @@ export function ShareDialog({ source, onClose }: { source: Snapshot; onClose: ()
         </button>
         <span class="num share__dimensions">{s.dimensions(format === 'compact')}</span>
       </div>
-      <h1 id="share-title">{s.title}</h1>
+      <h1 id="share-title" ref={heading} tabIndex={-1}>
+        {s.title}
+      </h1>
       <div class="share__options">
         <fieldset class="share__formats" aria-label={s.formats}>
           {(['portrait', 'compact'] as const).map((value) => (
