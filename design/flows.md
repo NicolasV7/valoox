@@ -85,6 +85,9 @@ weapon area within a common artwork slot without stretching or cropping renders.
 Format and tag changes briefly reveal the newly prepared preview; the checkbox
 also eases its checked state. Reduced-motion preferences flatten both effects.
 The modal initially focuses its heading, leaving Back's ring for keyboard use.
+Opening reveals the panel with a 220ms fade and slight upward movement; its
+backdrop fades in over 180ms. Reduced motion disables both opening animations.
+The entry does not delay focus, interactions, image preparation or closing.
 
 Preparation shows a static grey skeleton at the final poster's aspect ratio,
 with banner, identity and four offer slots in the selected layout. Brand, labels
