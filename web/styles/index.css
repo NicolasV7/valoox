@@ -25,6 +25,7 @@
 @import './store.css';
 @import './share.css';
 @import './share-controls.css';
+@import './share-loading.css';
 @import './refresh.css';
 @import './bundle.css';
 @import './pick.css';

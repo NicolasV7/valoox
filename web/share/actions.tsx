@@ -83,7 +83,7 @@ export function ShareActions({
           {s.save}
         </button>
       )}
-      {file && <p class="small">{supported ? s.nativeHelp : s.saveHelp}</p>}
+      <p class="small share__help">{file ? (supported ? s.nativeHelp : s.saveHelp) : s.intro}</p>
     </div>
   );
 }

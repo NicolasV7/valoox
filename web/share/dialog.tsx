@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { t } from '../i18n/index.ts';
 import { ShareActions } from './actions.tsx';
+import { ShareLoading } from './loading.tsx';
 import type { Format, Snapshot } from './model.ts';
 import { Preview } from './preview.tsx';
 import { usePoster } from './state.ts';
@@ -67,10 +68,12 @@ export function ShareDialog({ source, onClose }: { source: Snapshot; onClose: ()
       <div class={'share__stage share__stage--' + format} aria-busy={state.at === 'loading'}>
         {ready ? (
           <Preview canvas={ready.canvas} />
+        ) : state.at === 'loading' ? (
+          <ShareLoading format={format} />
         ) : (
           <div class="share__placeholder">
-            <p class="small" role={state.at === 'loading' ? 'status' : 'alert'}>
-              {state.at === 'loading' ? s.pending : state.at === 'stale' ? s.stale : s.failed}
+            <p class="small" role="alert">
+              {state.at === 'stale' ? s.stale : s.failed}
             </p>
           </div>
         )}

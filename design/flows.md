@@ -76,6 +76,11 @@ the existing fonts and measured artwork colours, with `valoox.store` branding.
 A tag toggle removes the Riot ID tag from both the PNG and its accessible name.
 The date and fixed expiry use UTC so a saved image never shows a stale countdown.
 
+Preparation shows a static grey skeleton at the final poster's aspect ratio,
+with banner, identity and four offer slots in the selected layout. Brand, labels
+and actions stay visible. A localized status remains available to screen readers.
+The footer reserves its help-copy space so the preview keeps its size on completion.
+
 The browser prepares a file before the user taps Share image. The PNG has rounded
 corners from the existing radius tokens. Supported devices open their own native
 share menu with only that PNG attached, without a title, caption or URL; apps and
