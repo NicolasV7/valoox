@@ -14,6 +14,7 @@
 
 import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { pick, woff2 } from './fontsource.mjs';
 
 const OUT = 'public/fonts';
 
@@ -34,19 +35,12 @@ const UA =
 
 async function css(family) {
   const url = 'https://fonts.googleapis.com/css2?family=' + family + '&display=swap';
-  const res = await fetch(url, { headers: { 'User-Agent': UA } });
+  const res = await fetch(url, {
+    headers: { 'User-Agent': UA },
+    signal: AbortSignal.timeout(20000),
+  });
   if (!res.ok) throw new Error(family + ': ' + res.status + ' from Google Fonts');
   return res.text();
-}
-
-/** The @font-face block whose comment names the subset we want, then its url(). */
-function pick(sheet, subset) {
-  const blocks = sheet.split('/*').slice(1);
-  const want = blocks.find((b) => b.slice(0, b.indexOf('*/')).trim() === subset);
-  if (!want) throw new Error('no ' + subset + ' subset in the sheet Google returned');
-  const url = /src:\s*url\((https:\/\/[^)]+\.woff2)\)/.exec(want);
-  if (!url) throw new Error('no woff2 url in the ' + subset + ' block');
-  return url[1];
 }
 
 /**
@@ -70,9 +64,12 @@ async function main() {
   await mkdir(OUT, { recursive: true });
   for (const face of FACES) {
     const url = pick(await css(face.family), SUBSET);
-    const res = await fetch(url, { headers: { 'User-Agent': UA } });
+    const res = await fetch(url, {
+      headers: { 'User-Agent': UA },
+      signal: AbortSignal.timeout(20000),
+    });
     if (!res.ok) throw new Error(face.file + ': ' + res.status);
-    const bytes = Buffer.from(await res.arrayBuffer());
+    const bytes = woff2(Buffer.from(await res.arrayBuffer()));
     await writeFile(OUT + '/' + face.file, bytes);
     console.log(OUT + '/' + face.file + '  ' + (bytes.length / 1024).toFixed(1) + ' KB');
   }
