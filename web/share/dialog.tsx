@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { retrySharing, saveTag, useSharing } from '../data/sharing.ts';
 import { t } from '../i18n/index.ts';
 import { ShareActions } from './actions.tsx';
 import { ShareLoading } from './loading.tsx';
@@ -11,11 +12,12 @@ export function ShareDialog({ source, onClose }: { source: Snapshot; onClose: ()
   const dialog = useRef<HTMLDialogElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const [format, setFormat] = useState<Format>('portrait');
-  const [tag, setTag] = useState(true);
+  const preference = useSharing();
   const [attempt, setAttempt] = useState(0);
   const [busy, setBusy] = useState(false);
-  const { state, active } = usePoster(source, format, tag, attempt);
+  const { state, active } = usePoster(source, format, preference.tag, attempt);
   const ready = state.at === 'ready' && active() ? state.picture : null;
+  const readingFailed = preference.error === 'read';
 
   useLayoutEffect(() => {
     const node = dialog.current;
@@ -62,29 +64,37 @@ export function ShareDialog({ source, onClose }: { source: Snapshot; onClose: ()
         <label class="share__tag">
           <input
             type="checkbox"
-            checked={tag}
-            disabled={busy}
-            onChange={(event) => setTag(event.currentTarget.checked)}
+            checked={preference.tag ?? false}
+            disabled={busy || preference.tag === null || preference.at === 'saving'}
+            onChange={(event) => void saveTag(event.currentTarget.checked)}
           />
           {s.tag}
         </label>
       </div>
-      <div class={'share__stage share__stage--' + format} aria-busy={state.at === 'loading'}>
+      <div
+        class={'share__stage share__stage--' + format}
+        aria-busy={state.at === 'loading' && !readingFailed}
+      >
         {ready ? (
           <Preview canvas={ready.canvas} />
-        ) : state.at === 'loading' ? (
-          <ShareLoading format={format} />
+        ) : state.at === 'loading' && !readingFailed ? (
+          <ShareLoading format={format} tag={preference.tag !== false} />
         ) : (
           <div class="share__placeholder">
             <p class="small" role="alert">
-              {state.at === 'stale' ? s.stale : s.failed}
+              {readingFailed ? s.preferenceReadFailed : state.at === 'stale' ? s.stale : s.failed}
             </p>
           </div>
         )}
       </div>
       <footer class="share__foot">
-        {(state.at === 'failed' || ready?.partial) && (
+        {(preference.error || state.at === 'failed' || ready?.partial) && (
           <div class="share__recovery">
+            {preference.error === 'write' && (
+              <p class="small" role="alert">
+                {s.preferenceSaveFailed}
+              </p>
+            )}
             {ready?.partial && (
               <p class="small" role="status">
                 {s.partial}
@@ -94,13 +104,20 @@ export function ShareDialog({ source, onClose }: { source: Snapshot; onClose: ()
               type="button"
               class="share__back"
               disabled={busy}
-              onClick={() => setAttempt((n) => n + 1)}
+              onClick={() => {
+                if (preference.error) void retrySharing();
+                else setAttempt((n) => n + 1);
+              }}
             >
               {s.retry}
             </button>
           </div>
         )}
-        <ShareActions file={ready?.file ?? null} source={source} onBusy={setBusy} />
+        <ShareActions
+          file={preference.at === 'ready' ? (ready?.file ?? null) : null}
+          source={source}
+          onBusy={setBusy}
+        />
       </footer>
     </dialog>
   );

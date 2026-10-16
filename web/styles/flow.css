@@ -108,6 +108,3 @@
 .flow__pending { display: block; background: var(--raised); border-radius: var(--r-sm); }
 .flow__pending--line { width: 65%; height: 23px; }
 .flow__pending--small { width: 40%; height: 16px; }
-@media (pointer: coarse) {
-  .flow__field input { font-size: max(16px, var(--t-body)); }
-}

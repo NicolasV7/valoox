@@ -96,12 +96,6 @@
   font-size: var(--t-small);
 }
 
-@media (pointer: coarse) {
-  .bell__input {
-    font-size: 16px;
-  }
-}
-
 .bell__go {
   margin-top: 12px;
   padding: 12px;

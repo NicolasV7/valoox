@@ -40,6 +40,9 @@ Share only after decrypting an authenticated Riot identity. Merge device changes
 under CAS and update all browser job flags atomically; destinations retain their
 own consent. Remove the shared list after its last session ends. A stale session
 writer cannot replace the authoritative list or its consent-derived job flags.
+The account's image tag choice uses `sharing:1`, bound to the same verified
+account fingerprint. Never export an assumed visible tag before loading that
+choice. Remove it when the account's last session ends; it never changes consent.
 
 **D1 decides authentication and revocation.** Check it before returning a
 private KV view. A delayed KV deletion cannot undo logout. Disconnect atomically

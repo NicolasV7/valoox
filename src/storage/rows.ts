@@ -146,6 +146,9 @@ export async function remove(env: Env, uid: string): Promise<void> {
     env.DB.prepare(
       'DELETE FROM wishlists WHERE NOT EXISTS(SELECT 1 FROM s WHERE s.acct=wishlists.acct)',
     ),
+    env.DB.prepare(
+      'DELETE FROM sharing WHERE NOT EXISTS(SELECT 1 FROM s WHERE s.acct=sharing.acct)',
+    ),
   ]);
 }
 
@@ -163,6 +166,9 @@ export async function prune(env: Env, olderThanDays = 10): Promise<number> {
     env.DB.prepare('DELETE FROM links WHERE expires<=?').bind(t),
     env.DB.prepare(
       'DELETE FROM wishlists WHERE NOT EXISTS(SELECT 1 FROM s WHERE s.acct=wishlists.acct)',
+    ),
+    env.DB.prepare(
+      'DELETE FROM sharing WHERE NOT EXISTS(SELECT 1 FROM s WHERE s.acct=sharing.acct)',
     ),
   ]);
   return out[0]?.meta.changes ?? 0;

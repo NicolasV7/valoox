@@ -118,6 +118,9 @@ export async function finish(
     env.DB.prepare(
       'DELETE FROM wishlists WHERE NOT EXISTS(SELECT 1 FROM s WHERE s.acct=wishlists.acct)',
     ),
+    env.DB.prepare(
+      'DELETE FROM sharing WHERE NOT EXISTS(SELECT 1 FROM s WHERE s.acct=sharing.acct)',
+    ),
   ]);
   return (r[0]?.meta.changes ?? 0) > 0;
 }

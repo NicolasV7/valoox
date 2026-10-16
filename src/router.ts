@@ -11,6 +11,7 @@ import { collection } from './routes/collection.ts';
 import { setDiscord } from './routes/discord.ts';
 import { resendHook } from './routes/hook.ts';
 import { render } from './routes/render.ts';
+import { readSharing, writeSharing } from './routes/sharing.ts';
 import { stopMail } from './routes/stop.ts';
 import { store } from './routes/store.ts';
 import { readWishlist, writeWishlist } from './routes/wishlist.ts';
@@ -24,6 +25,7 @@ const ROUTES: Record<string, Partial<Record<'GET' | 'POST', Handler>>> = {
   '/api/inventory': { GET: collection },
   '/api/qr': { GET: pollScan, POST: startScan },
   '/api/prefs': { GET: readWishlist, POST: writeWishlist },
+  '/api/sharing': { GET: readSharing, POST: writeSharing },
   '/api/channel': { POST: setChannel },
   '/api/channel/again': { POST: resend },
   '/api/channel/verify': { POST: verify },

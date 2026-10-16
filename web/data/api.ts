@@ -67,6 +67,9 @@ export const inventory = () => call<Inventory>('/api/inventory');
  *  outside this origin. */
 export const prefs = () => call<Prefs>('/api/prefs');
 
+/** Account-wide image privacy choices, without an upstream Riot request. */
+export const sharing = () => call<{ tag: boolean }>('/api/sharing');
+
 /** Opens a scan and returns the URL the QR encodes. */
 export const startScan = () => call<Scan>('/api/qr', { method: 'POST' });
 

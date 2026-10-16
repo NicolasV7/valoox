@@ -51,7 +51,7 @@ export function poster(
   ctx.fillStyle = theme.stage;
   ctx.fillRect(20, 46, 320, bh);
   ctx.globalAlpha = 0.65;
-  contain(ctx, assets.banner, 20, 46, 320, bh, true);
+  contain(ctx, assets.banner, 20, 46, 320, bh, { cover: true });
   ctx.globalAlpha = 1;
   const mask = ctx.createLinearGradient(20, 46, 340, 46 + bh);
   mask.addColorStop(0, theme.page);
@@ -61,8 +61,8 @@ export function poster(
   ctx.fillRect(20, 46, 320, bh);
   ctx.globalAlpha = 1;
   const [name, suffix] = identity(source.name, tag);
-  label(name || s.myStore, 34, 46 + bh - 29, 28, false, theme.ink, 292);
-  label(suffix || s.myStore, 34, 46 + bh - 10, 13, true, theme.muted, 292);
+  label(name || s.myStore, 34, 46 + bh - (suffix ? 29 : 20), 28, false, theme.ink, 292);
+  if (suffix) label(suffix, 34, 46 + bh - 10, 13, true, theme.muted, 292);
   ctx.restore();
   const date = new Intl.DateTimeFormat(locale(), {
     month: 'short',
@@ -85,9 +85,11 @@ export function poster(
       ctx,
       offer.image,
       portrait ? x + 157 : x + 8,
-      y + (portrait ? 10 : 5),
+      y + (portrait ? 10 : 4),
       portrait ? 155 : 140,
-      portrait ? 64 : 51,
+      portrait ? 64 : 60,
+      // A shared area target balances wide pistols against taller melee silhouettes.
+      portrait ? {} : { area: 5040 },
     );
     if (portrait) {
       ctx.save();
@@ -112,8 +114,8 @@ export function poster(
       if (at > 0) label(offer.name.slice(at + 1), x + 13, y + 43, 18, false, theme.ink, 132);
       label(s.price(offer.cost), x + 13, y + 69, 14, true, theme.ink, 132);
     } else {
-      label(offer.name, x + 10, y + 73, 13, false, theme.ink, 136);
-      label(s.price(offer.cost), x + 10, y + 96, 14, true, theme.ink, 136);
+      label(offer.name, x + 10, y + 80, 13, false, theme.ink, 136);
+      label(s.price(offer.cost), x + 10, y + 99, 14, true, theme.ink, 136);
     }
     ctx.restore();
   });

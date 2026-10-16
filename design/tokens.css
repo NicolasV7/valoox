@@ -106,6 +106,7 @@
   --t-section: 28px; /* 300 */
   --t-item: 20px; /* 500 — the name of a thing */
   --t-body: 15px; /* 400 */
+  --t-input: 16px; /* Mobile text fields avoid automatic focus zoom. */
   --t-small: 13px; /* 400 */
   --t-label: 12px; /* 500 — tracked, uppercase */
   --t-floor: 11px; /* 400 — the hard floor. Nothing readable goes below */

@@ -1,0 +1,20 @@
+/* A single mobile floor, after component fonts and font shorthands. Keep pinch zoom. */
+@media (any-pointer: coarse), (max-width: 600px) {
+  #app :is(
+    input:where(:not(
+      [type='checkbox'],
+      [type='radio'],
+      [type='range'],
+      [type='color'],
+      [type='button'],
+      [type='submit'],
+      [type='reset'],
+      [type='hidden'],
+      [type='file']
+    )),
+    textarea,
+    select
+  ) {
+    font-size: max(var(--t-input), 1em);
+  }
+}

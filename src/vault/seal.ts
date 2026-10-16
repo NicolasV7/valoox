@@ -11,7 +11,8 @@ export type Purpose =
   | 'scan:2'
   | 'stop:2'
   | 'outbox:2'
-  | 'wishlist:1';
+  | 'wishlist:1'
+  | 'sharing:1';
 const aad = (uid: string, kid: number, purpose: Purpose) =>
   enc.encode(JSON.stringify([kid, purpose, uid]));
 const key = (env: Env, uid: string, kid: number, purpose: Purpose) =>

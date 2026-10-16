@@ -5,6 +5,8 @@ export const share = {
   send: 'Share image',
   save: 'Save image',
   pending: 'Preparing the image…',
+  preferenceReadFailed: 'Your saved tag setting could not load. Try again.',
+  preferenceSaveFailed: 'Your tag setting could not be saved across devices. Try again.',
   sending: 'Opening share menu…',
   failed: 'The image could not be prepared. Try again.',
   shareFailed: 'The share menu could not open. Try again or save the image.',

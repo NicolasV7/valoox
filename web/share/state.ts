@@ -7,7 +7,7 @@ type State =
   | { key: object; at: 'loading' | 'failed' | 'stale' }
   | { key: object; at: 'ready'; picture: Picture };
 
-export function usePoster(source: Snapshot, format: Format, tag: boolean, attempt: number) {
+export function usePoster(source: Snapshot, format: Format, tag: boolean | null, attempt: number) {
   const owner = useRef(epoch());
   const key = useMemo(() => ({ source, format, tag, attempt }), [source, format, tag, attempt]);
   const [state, setState] = useState<State>({ key, at: 'loading' });
@@ -35,7 +35,7 @@ export function usePoster(source: Snapshot, format: Format, tag: boolean, attemp
     document.addEventListener('visibilitychange', check);
     setState({ key, at: 'loading' });
     if (!active()) invalidate();
-    else
+    else if (tag !== null)
       void prepare(source, format, tag, controller.signal)
         .then((picture) => {
           if (!mounted || controller.signal.aborted || !active()) return clear(picture.canvas);

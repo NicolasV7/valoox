@@ -56,9 +56,6 @@
 .discord__details > summary { min-height: 28px; color: var(--ink-3); cursor: pointer; font-size: var(--t-small); }
 .discord__details .flow__info { margin-top: 0; padding-top: 14px; border: 0; }
 .discord__confirm { padding-top: 16px; }
-@media (pointer: coarse) {
-  .discord__code { font-size: max(16px, var(--t-body)); }
-}
 @media (max-width: 359px) {
   .discord__code { min-height: calc(4.5em + 18px); }
 }

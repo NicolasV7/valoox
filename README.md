@@ -13,6 +13,8 @@ game. Sign in with Riot Mobile's QR flow; the app never asks for your password.
 - Daily offers, night market, bundles and accessories, with owned items marked.
 - Share daily offers as a PNG with your equipped banner and Riot ID. Portrait and
   compact formats are generated in your browser, with an optional hidden tag.
+  The tag choice follows the verified Riot account across devices and is checked
+  each time sharing opens; it is removed after the last session ends.
   Supported phones open the native share menu; other browsers offer image download.
 - Store rotations refresh automatically when any countdown expires or when an
   expired tab becomes visible again. After eight unsuccessful automatic attempts,

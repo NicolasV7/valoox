@@ -61,3 +61,4 @@
 @import './pin.css';
 @import './stop.css';
 @import './fail.css';
+@import './inputs.css'; /* mobile text field floor, after component fonts */

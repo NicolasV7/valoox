@@ -39,6 +39,14 @@ have separate purposes. Cache reads also validate their shape. `JAR_KEY` stays
 outside D1 and KV. A storage dump reveals pseudonymous browser/account links
 and security metadata, plus ciphertext; it does not authenticate a browser.
 
+The image tag choice uses `sharing:1`, sealed to the verified account fingerprint.
+Only the requesting browser's decrypted Riot identity selects it. Writes are
+guarded by a live matching D1 session and never change notification consent.
+The browser waits for this choice before generating an image; failed reads or
+writes block sharing until retry. There is no polling or upstream request.
+The preference remains while another account session exists and is removed with
+the last session, including inactivity cleanup and switching accounts during QR sign-in.
+
 The account wishlist has its own `wishlist:1` encryption purpose, bound to the
 verified account's keyed fingerprint. Only an authenticated, decrypted Riot
 identity selects it. Legacy device lists merge once. New device edits apply

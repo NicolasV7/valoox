@@ -6,7 +6,7 @@ const bar = (x: number, y: number, width: number, height: number) => (
 );
 
 /** The same intrinsic dimensions and slots as the exported picture, without artwork. */
-export function ShareLoading({ format }: { format: Format }) {
+export function ShareLoading({ format, tag = true }: { format: Format; tag?: boolean }) {
   const s = t().share;
   const portrait = format === 'portrait';
   const height = portrait ? 640 : 450;
@@ -30,8 +30,8 @@ export function ShareLoading({ format }: { format: Format }) {
         </text>
         <rect class="share__skeleton-panel" x="20" y="46" width="320" height={banner} />
         {bar(175, 58, 150, banner - 24)}
-        {bar(34, 46 + banner - 49, 105, 20)}
-        {bar(34, 46 + banner - 21, 38, 10)}
+        {bar(34, 46 + banner - (tag ? 49 : 40), 105, 20)}
+        {tag && bar(34, 46 + banner - 21, 38, 10)}
         <text class="share__skeleton-label" x="20" y={heading}>
           {t().store.daily}
         </text>
@@ -48,10 +48,15 @@ export function ShareLoading({ format }: { format: Format }) {
                 width={portrait ? 320 : 156}
                 height={portrait ? 84 : 108}
               />
-              {bar(x + (portrait ? 157 : 10), y + 12, portrait ? 155 : 136, portrait ? 46 : 39)}
-              {bar(x + 13, y + (portrait ? 10 : 64), portrait ? 95 : 115, portrait ? 14 : 10)}
+              {bar(
+                x + (portrait ? 157 : 10),
+                y + (portrait ? 12 : 8),
+                portrait ? 155 : 136,
+                portrait ? 46 : 51,
+              )}
+              {bar(x + 13, y + (portrait ? 10 : 71), portrait ? 95 : 115, portrait ? 14 : 10)}
               {portrait && bar(x + 13, y + 31, 73, 14)}
-              {bar(x + 13, y + (portrait ? 59 : 85), 60, 10)}
+              {bar(x + 13, y + (portrait ? 59 : 88), 60, 10)}
             </g>
           );
         })}

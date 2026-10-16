@@ -92,9 +92,9 @@ export const account = {
     'opens nothing.',
   keepWho: 'Your account id and region',
   keepWhoWhy: 'Riot answers to the id, not to a name. The region is where your store comes from.',
-  keepList: 'Your list',
+  keepList: 'Your list and sharing choice',
   keepListWhy:
-    'Favourite ids and their catalogue details, encrypted for your Riot account. ' +
+    'Favourite ids, their catalogue details and your image tag choice, encrypted for your Riot account. ' +
     'Shared across signed-in devices and removed after the last session ends.',
   keepMail: 'Your email and its verification',
   keepMailWhy:
@@ -128,12 +128,12 @@ export const account = {
   // --- leaving -------------------------------------------------------------
   leaveTitle: 'Disconnect this browser',
   leaveLede:
-    'This browser’s access and alert settings are removed. Your wishlist stays ' +
+    'This browser’s access and alert settings are removed. Your wishlist and sharing choice stay ' +
     'while another device is connected.',
   goes: 'What goes',
   goesJar: 'The sealed jar — the only thing here that can read your account',
   goesMail: 'Your email address and its verified flag',
-  goesList: 'The shared wishlist, if this is your last connected device',
+  goesList: 'The shared wishlist and tag choice, if this is your last connected device',
   goesDiscord: 'Discord alerts enabled for this browser',
   staysTitle: 'What keeps existing',
   staysRiot:

@@ -20,10 +20,13 @@ export function contain(
   y: number,
   w: number,
   h: number,
-  cover = false,
+  options: { cover?: boolean; area?: number } = {},
 ): void {
   if (!img) return;
-  const scale = (cover ? Math.max : Math.min)(w / img.naturalWidth, h / img.naturalHeight);
+  const scale = Math.min(
+    (options.cover ? Math.max : Math.min)(w / img.naturalWidth, h / img.naturalHeight),
+    Math.sqrt((options.area ?? Number.POSITIVE_INFINITY) / (img.naturalWidth * img.naturalHeight)),
+  );
   const iw = img.naturalWidth * scale,
     ih = img.naturalHeight * scale;
   ctx.drawImage(img, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih);

@@ -50,6 +50,18 @@ test('logout aborts preparation and rejects late pictures from the old account',
   f.ui.dispose();
 });
 
+test('an unresolved account tag preference never prepares a default-visible image', async () => {
+  const f = await setup();
+  assert.equal(f.render('portrait', null).state.at, 'loading');
+  assert.equal(f.actor.requests.length, 0);
+  f.render('portrait', false);
+  assert.equal(f.actor.requests.length, 1);
+  assert.equal(f.actor.requests[0].tag, false);
+  await f.complete();
+  assert.equal(f.render('portrait', false).state.at, 'ready');
+  f.ui.dispose();
+});
+
 test('changing format or tag immediately hides the previous PNG while rebuilding', async () => {
   const f = await setup();
   f.render();

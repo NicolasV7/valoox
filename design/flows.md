@@ -74,9 +74,14 @@ The approved dark preview exports the equipped banner, Riot ID and up to four
 daily offers in portrait (1080×1920) or compact (1080×1350) PNG format. It keeps
 the existing fonts and measured artwork colours, with `valoox.store` branding.
 A tag toggle removes the Riot ID tag from both the PNG and its accessible name.
+Its encrypted account choice follows devices, loads on each opening and blocks
+sharing until confirmed. A failed load or save has an explicit retry. Closing
+the dialog still lets an intentional save finish; account changes discard old responses.
+Hiding the tag leaves only the player name in the banner, without a replacement subtitle.
 The date and fixed expiry use UTC so a saved image never shows a stale countdown.
 Portrait rows reserve separate text and artwork columns, so even a wide pistol
-cannot touch its name or price. Compact keeps its existing stacked tile layout.
+cannot touch its name or price. Compact keeps its stacked tile layout, balancing
+weapon area within a common artwork slot without stretching or cropping renders.
 Format and tag changes briefly reveal the newly prepared preview; the checkbox
 also eases its checked state. Reduced-motion preferences flatten both effects.
 The modal initially focuses its heading, leaving Back's ring for keyboard use.
@@ -101,3 +106,6 @@ clears generated canvases. Export artwork uses a stable anonymous cache variant
 so a normal image previously loaded without CORS cannot poison canvas readback.
 A known banner must load before a PNG is offered; missing item artwork has a
 labelled retry. Absent prices remain unavailable rather than being invented as zero.
+
+Mobile text fields use a shared 16px floor after component font declarations,
+including Alert search and the Discord command textarea. Manual zoom stays available.
