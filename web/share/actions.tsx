@@ -55,7 +55,7 @@ export function ShareActions({
     onBusy(true);
     setFailed(null);
     // Nothing is awaited before this call: the tap's activation is still live.
-    void share(file, s.title)
+    void share(file)
       .catch(() => {
         if (active()) setFailed('share');
       })

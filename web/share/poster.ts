@@ -1,7 +1,7 @@
 import { locale, t } from '../i18n/index.ts';
 import type { Assets } from './assets.ts';
 import { type Format, identity, type Snapshot } from './model.ts';
-import { contain, panel, text } from './paint.ts';
+import { clip, contain, panel, text } from './paint.ts';
 import type { Theme } from './theme.ts';
 
 export function poster(
@@ -29,6 +29,8 @@ export function poster(
     width = 320,
   ) => text(ctx, theme, value, x, y, size, numeric, colour, width);
   ctx.scale(3, 3);
+  ctx.save();
+  clip(ctx, 0, 0, 360, height, theme.outerRadius);
   ctx.fillStyle = theme.page;
   ctx.fillRect(0, 0, 360, height);
   ctx.strokeStyle = theme.hatch;
@@ -45,9 +47,7 @@ export function poster(
   ctx.textAlign = 'left';
   const bh = portrait ? 94 : 80;
   ctx.save();
-  ctx.beginPath();
-  ctx.roundRect(20, 46, 320, bh, 10);
-  ctx.clip();
+  clip(ctx, 20, 46, 320, bh, theme.radius);
   ctx.fillStyle = theme.stage;
   ctx.fillRect(20, 46, 320, bh);
   ctx.globalAlpha = 0.65;
@@ -78,6 +78,8 @@ export function poster(
     const y = portrait ? 184 + i * 92 : 166 + Math.floor(i / 2) * 116;
     const w = portrait ? 320 : 156,
       h = portrait ? 84 : 108;
+    ctx.save();
+    clip(ctx, x, y, w, h, theme.radius);
     panel(ctx, theme, x, y, w, h, offer.colour);
     contain(
       ctx,
@@ -112,6 +114,7 @@ export function poster(
       label(offer.name, x + 10, y + 73, 13, false, theme.ink, 136);
       label(s.price(offer.cost), x + 10, y + 96, 14, true, theme.ink, 136);
     }
+    ctx.restore();
   });
   const until = new Intl.DateTimeFormat(locale(), {
     month: 'short',
@@ -123,6 +126,7 @@ export function poster(
   }).format(source.until);
   label(s.until(until), 20, height - 43, 11, false, theme.muted);
   label(s.disclaimer, 20, height - 20, 11, false, theme.faint);
+  ctx.restore();
   canvas.className = 'share__poster';
   canvas.setAttribute('role', 'img');
   canvas.setAttribute(

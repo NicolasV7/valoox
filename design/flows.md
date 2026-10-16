@@ -76,9 +76,10 @@ the existing fonts and measured artwork colours, with `valoox.store` branding.
 A tag toggle removes the Riot ID tag from both the PNG and its accessible name.
 The date and fixed expiry use UTC so a saved image never shows a stale countdown.
 
-The browser prepares a file before the user taps Share image. Supported devices
-open their own native share menu with that PNG attached; apps and recipients
-belong to that menu. Cancellation returns to the preview. Unsupported browsers
+The browser prepares a file before the user taps Share image. The PNG has rounded
+corners from the existing radius tokens. Supported devices open their own native
+share menu with only that PNG attached, without a title, caption or URL; apps and
+recipients belong to that menu. Cancellation returns to the preview. Unsupported browsers
 offer Save image, and a failed native share offers an explicit save action.
 
 `web/share/` owns preparation, artwork, painting, account lifecycle and transport.
@@ -86,5 +87,7 @@ No upload, public image URL, server renderer or background job is introduced.
 Only anonymous catalogue/artwork requests use the existing allowlisted hosts.
 The preview uses a canvas without expanding the CSP. Wallet and session fields
 are excluded. Closing, rotation, logout or expiry invalidates pending work and
-clears generated canvases. Missing artwork has a labelled retry; absent prices
-remain unavailable rather than being invented as zero.
+clears generated canvases. Export artwork uses a stable anonymous cache variant
+so a normal image previously loaded without CORS cannot poison canvas readback.
+A known banner must load before a PNG is offered; missing item artwork has a
+labelled retry. Absent prices remain unavailable rather than being invented as zero.

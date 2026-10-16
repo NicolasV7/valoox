@@ -9,9 +9,9 @@ export function native(file: File): boolean {
 }
 
 /** Called directly in the click handler, with a File prepared before that tap. */
-export function share(file: File, title: string): Promise<'opened' | 'cancelled'> {
+export function share(file: File): Promise<'opened' | 'cancelled'> {
   try {
-    return navigator.share({ files: [file], title }).then(
+    return navigator.share({ files: [file] }).then(
       () => 'opened',
       (error: unknown) => {
         if (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError')

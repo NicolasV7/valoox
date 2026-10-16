@@ -29,7 +29,7 @@ export const share = {
   price: (value: number | null) =>
     value === null ? 'Precio no disponible' : `${value.toLocaleString('es-419')} VP`,
   until: (date: string) => `Ofertas hasta ${date} UTC`,
-  disclaimer: 'Proyecto de fans. Sin relación con Riot Games.',
+  disclaimer: 'Sin relación con Riot Games.',
   item: (name: string, price: string) => `${name}, ${price}`,
   description: (name: string, offers: string) => `${name} · Ofertas del día: ${offers}`,
 };

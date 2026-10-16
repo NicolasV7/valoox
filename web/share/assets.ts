@@ -24,6 +24,10 @@ export function image(url: string | null, signal: AbortSignal): Promise<HTMLImag
     const parsed = new URL(url);
     if (parsed.origin !== 'https://media.valorant-api.com' || parsed.username || parsed.password)
       return Promise.resolve(null);
+    // The header may have cached this URL without CORS. Keep one stable,
+    // anonymous export variant so that cached response cannot taint the canvas.
+    parsed.searchParams.set('valoox', 'share');
+    url = parsed.href;
   } catch {
     return Promise.resolve(null);
   }
@@ -89,5 +93,6 @@ export async function assets(source: Snapshot, signal: AbortSignal): Promise<Ass
       }),
     ),
   ]);
-  return { banner, offers, partial: (!!source.card && !banner) || offers.some((o) => !o.image) };
+  if (source.card && !banner) throw new Error('banner');
+  return { banner, offers, partial: offers.some((o) => !o.image) };
 }

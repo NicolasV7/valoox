@@ -9,7 +9,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test('native sharing receives one prepared PNG synchronously, without a URL', async () => {
+test('native sharing receives only the prepared PNG, without a caption, title or URL', async () => {
   const file = png();
   let call = null;
   vi.stubGlobal('navigator', {
@@ -20,9 +20,9 @@ test('native sharing receives one prepared PNG synchronously, without a URL', as
     },
   });
   assert.equal(native(file), true);
-  const pending = share(file, 'Store');
+  const pending = share(file);
   assert.equal(call.files[0], file);
-  assert.deepEqual(Object.keys(call).sort(), ['files', 'title']);
+  assert.deepEqual(Object.keys(call), ['files']);
   assert.equal(await pending, 'opened');
 });
 
@@ -49,7 +49,7 @@ test('cancelling native sharing does not start a download or report delivery', a
       assert.fail('unexpected download');
     },
   });
-  assert.equal(await share(png(), 'Store'), 'cancelled');
+  assert.equal(await share(png()), 'cancelled');
 });
 
 test('both synchronous and asynchronous native failures reach the recovery UI', async () => {
@@ -60,7 +60,7 @@ test('both synchronous and asynchronous native failures reach the recovery UI', 
     () => Promise.reject(new Error('policy')),
   ]) {
     vi.stubGlobal('navigator', { share: fn });
-    await assert.rejects(share(png(), 'Store'));
+    await assert.rejects(share(png()));
   }
 });
 

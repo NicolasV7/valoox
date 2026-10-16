@@ -1,5 +1,18 @@
 import type { Theme } from './theme.ts';
 
+export function clip(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  radius: number,
+): void {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, radius);
+  ctx.clip();
+}
+
 export function contain(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement | null,
@@ -49,9 +62,7 @@ export function panel(
   art: string,
 ): void {
   ctx.save();
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, 10);
-  ctx.clip();
+  clip(ctx, x, y, w, h, theme.radius);
   ctx.fillStyle = theme.stage;
   ctx.fillRect(x, y, w, h);
   const glow = ctx.createRadialGradient(

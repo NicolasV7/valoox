@@ -3,7 +3,13 @@ import { test } from 'vitest';
 import { fixture } from '../ui/bundle.mjs';
 
 async function setup() {
-  const actor = { requests: [], complete: true, width: 500, height: 200 };
+  const actor = {
+    requests: [],
+    complete: true,
+    width: 500,
+    height: 200,
+    cachedWithoutCors: new Set(),
+  };
   const timers = new Map();
   let next = 0;
   class Image {
@@ -13,22 +19,35 @@ async function setup() {
     }
     set src(url) {
       actor.requests.push({ url, image: this });
-      if (actor.complete) Promise.resolve().then(() => this.onload?.());
+      if (actor.complete)
+        Promise.resolve().then(() =>
+          actor.cachedWithoutCors.has(url) ? this.onerror?.() : this.onload?.(),
+        );
     }
     removeAttribute() {
       this.removed = true;
     }
   }
-  const ui = await fixture("export {image} from './web/share/assets.ts';", actor, {
-    URL,
-    Image,
-    setTimeout: (fn) => {
-      const id = ++next;
-      timers.set(id, fn);
-      return id;
+  const ui = await fixture(
+    "export {image,assets} from './web/share/assets.ts';",
+    actor,
+    {
+      URL,
+      Image,
+      setTimeout: (fn) => {
+        const id = ++next;
+        timers.set(id, fn);
+        return id;
+      },
+      clearTimeout: (id) => timers.delete(id),
     },
-    clearTimeout: (id) => timers.delete(id),
-  });
+    {
+      'web/data/catalogue.ts': `
+      export const piece=async(type,id)=>({wide:'https://media.valorant-api.com/playercards/'+id+'/wideart.png'});
+      export const skin=async()=>null;
+    `,
+    },
+  );
   return { ...ui, actor, timers };
 }
 
@@ -59,6 +78,31 @@ test('public artwork is loaded anonymously without a referring page', async () =
   assert.equal(image.crossOrigin, 'anonymous');
   assert.equal(image.referrerPolicy, 'no-referrer');
   assert.equal(f.timers.size, 0);
+  f.dispose();
+});
+
+test('an image cached by the normal header cannot poison repeated anonymous exports', async () => {
+  const f = await setup();
+  const header = 'https://media.valorant-api.com/playercards/equipped/wideart.png';
+  f.actor.cachedWithoutCors.add(header);
+  for (let i = 0; i < 2; i++) assert.ok(await f.app.image(header, new AbortController().signal));
+  const [first, second] = f.actor.requests;
+  assert.notEqual(first.url, header);
+  assert.equal(first.url, second.url);
+  assert.equal(new URL(first.url).origin, new URL(header).origin);
+  f.dispose();
+});
+
+test('a failed equipped banner stops export instead of silently omitting the player artwork', async () => {
+  const f = await setup();
+  f.actor.complete = false;
+  const failed = assert.rejects(
+    f.app.assets({ card: 'equipped', offers: [] }, new AbortController().signal),
+    /banner/,
+  );
+  await f.settle();
+  [...f.timers.values()][0]();
+  await failed;
   f.dispose();
 });
 

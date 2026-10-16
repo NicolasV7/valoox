@@ -28,7 +28,7 @@ export const share = {
   price: (value: number | null) =>
     value === null ? 'Price unavailable' : `${value.toLocaleString('en-US')} VP`,
   until: (date: string) => `Offers until ${date} UTC`,
-  disclaimer: 'Fan-made. Not affiliated with Riot Games.',
+  disclaimer: 'Not affiliated with Riot Games.',
   item: (name: string, price: string) => `${name}, ${price}`,
   description: (name: string, offers: string) => `${name} · Daily offers: ${offers}`,
 };

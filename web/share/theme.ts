@@ -7,6 +7,8 @@ export interface Theme {
   hatch: string;
   ui: string;
   num: string;
+  radius: number;
+  outerRadius: number;
 }
 
 /** Canvas receives the same resolved tokens as the dark application chrome. */
@@ -29,6 +31,8 @@ export function theme(): Theme {
       hatch: colour('hatch'),
       ui: root.getPropertyValue('--ui').trim(),
       num: root.getPropertyValue('--num').trim(),
+      radius: Number.parseFloat(root.getPropertyValue('--r')),
+      outerRadius: Number.parseFloat(root.getPropertyValue('--r-lg')),
     };
   } finally {
     probe.remove();
