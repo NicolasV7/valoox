@@ -12,6 +12,7 @@ import { discord } from './discord.ts';
 import { flows } from './flows.ts';
 import { gate } from './gate.ts';
 import { piece } from './piece.ts';
+import { share } from './share.ts';
 import { skin } from './skin.ts';
 import { sprays } from './sprays.ts';
 import { stopped } from './stopped.ts';
@@ -21,6 +22,7 @@ import { weapon } from './weapon.ts';
 
 export const en = {
   common,
+  share,
   discord,
   gate,
   store,

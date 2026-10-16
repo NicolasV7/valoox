@@ -1,0 +1,76 @@
+/* Text actions and two choices, using the application's existing type scale. */
+.store__share,
+.share__back,
+.share__formats button {
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-family: inherit;
+  font-size: var(--t-small);
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.store__share {
+  padding: 0 0 0 12px;
+  margin-left: auto;
+}
+
+.store__share:disabled,
+.share__back:disabled,
+.share__formats button:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
+.store__daily {
+  min-height: 44px;
+  margin-block: -11px;
+}
+
+.share__back {
+  padding: 8px 0;
+  text-align: left;
+}
+
+.share__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.share__formats {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.share__formats button {
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+}
+
+.share__formats button[aria-pressed='true'] {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+.share__tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: var(--t-small);
+  color: var(--ink-3);
+}
+
+.share__tag input {
+  margin: 0;
+  accent-color: var(--ink);
+}

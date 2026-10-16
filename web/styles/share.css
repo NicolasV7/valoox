@@ -1,0 +1,112 @@
+/* The approved poster preview, contained in the native modal top layer. */
+html:has(.share__dialog[open]) {
+  overflow: hidden;
+}
+
+.share__dialog {
+  color-scheme: dark;
+  width: min(100%, 440px);
+  max-width: none;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: auto;
+  padding: max(10px, env(safe-area-inset-top)) var(--gut) max(20px, env(safe-area-inset-bottom));
+  border: 1px solid var(--rule);
+  background: var(--ground);
+  color: var(--ink);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.share__dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.share__dialog::backdrop {
+  background: var(--page);
+  opacity: .8;
+}
+
+.share__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.share__dimensions {
+  font-size: var(--t-floor);
+  color: var(--ink-3);
+}
+
+.share__dialog h1 {
+  font-size: var(--t-section);
+  font-weight: 300;
+}
+
+.share__stage {
+  flex: 1;
+  min-height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.share__image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.share__poster {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--r-sm);
+}
+
+.share__placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  padding: var(--gut);
+  border-radius: var(--r-sm);
+  background: var(--skel);
+}
+
+.share__foot {
+  flex: none;
+}
+
+.share__actions {
+  display: grid;
+  gap: 10px;
+}
+
+.share__recovery {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.share__recovery .share__back {
+  flex: none;
+  margin-left: auto;
+}
+
+@media (min-width: 600px) and (min-height: 720px) {
+  .share__dialog {
+    height: min(940px, 96dvh);
+    border-radius: var(--r-lg);
+  }
+}

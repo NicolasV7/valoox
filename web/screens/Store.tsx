@@ -11,6 +11,7 @@ import type { Offer as OfferData, StoreView } from '../data/types.ts';
 import { useSkin } from '../data/usePiece.ts';
 import { t } from '../i18n/index.ts';
 import { intercept } from '../route.ts';
+import { StoreShare } from '../share/entry.tsx';
 import { Accessories } from './Store.accessories.tsx';
 import { BundleCard } from './Store.bundle.tsx';
 import { StoreHeader } from './Store.header.tsx';
@@ -28,7 +29,10 @@ export function Store({ view }: { view: StoreView }) {
       />
 
       <section class="store__block">
-        <h2 class="label">{s.daily}</h2>
+        <div class="store__head store__daily">
+          <h2 class="label">{s.daily}</h2>
+          <StoreShare view={view} />
+        </div>
         <div class="store__rows">
           {view.offers.map((o) => (
             <Daily key={o.id} offer={o} />

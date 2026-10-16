@@ -67,3 +67,24 @@ precedes search, counts and pagination; it does not delete existing favourites.
 This evidence cannot predict when an eligible item will appear. If a catalogue
 source fails, known flags still apply and the app remains browsable with the
 evidence it has. These rules override the earlier disabled-star presentation.
+
+## Daily store sharing
+
+The approved dark preview exports the equipped banner, Riot ID and up to four
+daily offers in portrait (1080×1920) or compact (1080×1350) PNG format. It keeps
+the existing fonts and measured artwork colours, with `valoox.store` branding.
+A tag toggle removes the Riot ID tag from both the PNG and its accessible name.
+The date and fixed expiry use UTC so a saved image never shows a stale countdown.
+
+The browser prepares a file before the user taps Share image. Supported devices
+open their own native share menu with that PNG attached; apps and recipients
+belong to that menu. Cancellation returns to the preview. Unsupported browsers
+offer Save image, and a failed native share offers an explicit save action.
+
+`web/share/` owns preparation, artwork, painting, account lifecycle and transport.
+No upload, public image URL, server renderer or background job is introduced.
+Only anonymous catalogue/artwork requests use the existing allowlisted hosts.
+The preview uses a canvas without expanding the CSP. Wallet and session fields
+are excluded. Closing, rotation, logout or expiry invalidates pending work and
+clears generated canvases. Missing artwork has a labelled retry; absent prices
+remain unavailable rather than being invented as zero.

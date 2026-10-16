@@ -23,6 +23,8 @@
 @import './scan.css';
 @import './head.css';
 @import './store.css';
+@import './share.css';
+@import './share-controls.css';
 @import './refresh.css';
 @import './bundle.css';
 @import './pick.css';
