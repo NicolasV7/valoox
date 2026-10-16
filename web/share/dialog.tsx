@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { retrySharing, saveTag, useSharing } from '../data/sharing.ts';
 import { t } from '../i18n/index.ts';
 import { ShareActions } from './actions.tsx';
+import { useDismiss } from './dismiss.ts';
 import { ShareLoading } from './loading.tsx';
 import type { Format, Snapshot } from './model.ts';
 import { Preview } from './preview.tsx';
@@ -10,6 +11,7 @@ import { usePoster } from './state.ts';
 export function ShareDialog({ source, onClose }: { source: Snapshot; onClose: () => void }) {
   const s = t().share;
   const dialog = useRef<HTMLDialogElement>(null);
+  const { closing, dismiss } = useDismiss(dialog, onClose);
   const heading = useRef<HTMLHeadingElement>(null);
   const [format, setFormat] = useState<Format>('portrait');
   const preference = useSharing();
@@ -32,14 +34,15 @@ export function ShareDialog({ source, onClose }: { source: Snapshot; onClose: ()
     <dialog
       class="share__dialog"
       ref={dialog}
+      inert={closing}
       aria-labelledby="share-title"
       onCancel={(event) => {
         event.preventDefault();
-        if (!busy) onClose();
+        if (!busy) dismiss();
       }}
     >
       <div class="share__top">
-        <button type="button" class="share__back" disabled={busy} onClick={onClose}>
+        <button type="button" class="share__back" disabled={busy} onClick={dismiss}>
           {s.back}
         </button>
         <span class="num share__dimensions">{s.dimensions(format === 'compact')}</span>

@@ -87,7 +87,10 @@ also eases its checked state. Reduced-motion preferences flatten both effects.
 The modal initially focuses its heading, leaving Back's ring for keyboard use.
 Opening reveals the panel with a 220ms fade and slight upward movement; its
 backdrop fades in over 180ms. Reduced motion disables both opening animations.
-The entry does not delay focus, interactions, image preparation or closing.
+Back and Escape reverse the actual entry progress for a brief, continuous exit.
+Controls become inert until the native dialog closes and restores focus. Reduced
+motion closes immediately; cancelled effects, hidden tabs and a bounded fallback
+prevent a stuck overlay. Forced unmounts clear private work immediately.
 
 Preparation shows a static grey skeleton at the final poster's aspect ratio,
 with banner, identity and four offer slots in the selected layout. Brand, labels
